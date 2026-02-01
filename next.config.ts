@@ -23,5 +23,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-// enable OpenNext Cloudflare dev context (getCloudflareContext()) in `next dev`
-initOpenNextCloudflareForDev();
+// Only run OpenNext Cloudflare dev init when in dev (avoid breaking Webflow Cloud / plain next build)
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}
