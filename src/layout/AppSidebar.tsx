@@ -5,10 +5,13 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
+  ArrowRightIcon,
   BoxCubeIcon,
+  BoxIcon,
   CalenderIcon,
   ChevronDownIcon,
   GridIcon,
+  GroupIcon,
   HorizontaLDots,
   ListIcon,
   PageIcon,
@@ -24,6 +27,39 @@ type NavItem = {
   icon: React.ReactNode;
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+};
+
+type NavLink = { name: string; path: string; pro?: boolean; new?: boolean };
+
+const neighborsGroup = {
+  title: "Neighbors",
+  icon: <GroupIcon />,
+  items: [
+    { name: "All Neighbors", path: "/neighbors/all", pro: false },
+    { name: "Members", path: "/neighbors/members", pro: false },
+    { name: "Duplicate members", path: "/neighbors/duplicate-memberships", pro: false },
+  ] as NavLink[],
+};
+
+const routesGroup = {
+  title: "Routes",
+  icon: <ArrowRightIcon />,
+  items: [
+    { name: "All routes", path: "/routes/all", pro: false },
+    { name: "Claimed routes", path: "/routes/claimed", pro: false },
+    { name: "Deliverers", path: "/routes/deliverers", pro: false },
+    { name: "Open routes", path: "/routes/open", pro: false },
+  ] as NavLink[],
+};
+
+const businessGroup = {
+  title: "Business",
+  icon: <BoxIcon />,
+  items: [
+    { name: "All Businesses", path: "/businesses/all", pro: false },
+    { name: "Members", path: "/businesses/members", pro: false },
+    { name: "Sponsors", path: "/businesses/sponsors", pro: false },
+  ] as NavLink[],
 };
 
 const navItems: NavItem[] = [
@@ -42,7 +78,6 @@ const navItems: NavItem[] = [
     name: "User Profile",
     path: "/profile",
   },
-
   {
     name: "Forms",
     icon: <ListIcon />,
@@ -98,12 +133,50 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
 
+  const renderLinkGroup = (
+    group: { title: string; icon: React.ReactNode; items: NavLink[] }
+  ) => (
+    <div key={group.title} className="mb-6">
+      <h2
+        className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+          !isExpanded && !isHovered
+            ? "lg:justify-center"
+            : "justify-start"
+        }`}
+      >
+        {isExpanded || isHovered || isMobileOpen ? (
+          group.title
+        ) : (
+          <span className="flex justify-center w-full">{group.icon}</span>
+        )}
+      </h2>
+      {(isExpanded || isHovered || isMobileOpen) && (
+        <ul className="space-y-1 ml-0">
+          {group.items.map((item) => (
+            <li key={item.name}>
+              <Link
+                href={item.path}
+                className={`menu-dropdown-item block ${
+                  isActive(item.path)
+                    ? "menu-dropdown-item-active"
+                    : "menu-dropdown-item-inactive"
+                }`}
+              >
+                {item.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
   const renderMenuItems = (
-    navItems: NavItem[],
+    items: NavItem[],
     menuType: "main" | "others"
   ) => (
     <ul className="flex flex-col gap-4">
-      {navItems.map((nav, index) => (
+      {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
             <button
@@ -239,7 +312,7 @@ const AppSidebar: React.FC = () => {
   useEffect(() => {
     // Check if the current path matches any submenu item
     let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
+    (["main", "others"] as const).forEach((menuType) => {
       const items = menuType === "main" ? navItems : othersItems;
       items.forEach((nav, index) => {
         if (nav.subItems) {
@@ -339,6 +412,9 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
+            {renderLinkGroup(neighborsGroup)}
+            {renderLinkGroup(routesGroup)}
+            {renderLinkGroup(businessGroup)}
             <div>
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
