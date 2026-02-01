@@ -1,0 +1,131 @@
+.next-zoningmeeting_card {
+  display: grid;
+  max-width: 400px;
+  padding: 8px;
+  grid-auto-columns: 1fr;
+  grid-column-gap: 16px;
+  grid-row-gap: 16px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto;
+  aspect-ratio: 3/1;
+
+  border-radius: 8px;
+
+  background-color: var(--color-scheme-1--background);
+
+  color: var(--color-scheme-1--text);
+}
+
+.next-zoningmeeting_card.dark {
+  background-color: var(--_primitives---opacity--brand--puget-night);
+  color: var(--_primitives---opacity--brand--fog-mist);
+  text-decoration: none;
+}
+
+.image-fill {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 3/2;
+  object-fit: cover;
+}
+
+.image-fill.rounded {
+  border-radius: 4px;
+}
+
+.nextmeetingcard-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+.text-size-tiny {
+  font-size: 0.75rem;
+}
+
+.text-size-tiny.light {
+  font-family: '42 Dot Sans';
+  font-weight: 400;
+}
+
+.text-size-tiny.light.faded {
+  opacity: 0.5;
+}
+
+.text-size-tiny.bold {
+  font-family: '42 Dot Sans';
+  font-weight: 800;
+}
+
+.text-size-medium {
+  flex: 0 0 auto;
+  font-size: 1.125rem;
+}
+
+@media screen and (max-width: 767px) {
+  .text-size-medium {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .text-size-medium.text-weight-bold {
+    overflow-wrap: normal;
+  }
+}
+
+.text-weight-bold {
+  font-weight: 700;
+}
+
+@media screen and (max-width: 479px) {
+  .text-size-medium.text-weight-bold.wrap {
+    word-break: normal;
+  }
+}
+
+.text-weight-semibold {
+  font-weight: 600;
+}
+
+.text-size-small {
+  font-size: 0.875rem;
+}
+
+@media screen and (max-width: 767px) {
+  .hide-mobile-landscape {
+    display: none;
+  }
+}
+
+.text-size-small.link-underline {
+  text-decoration: underline;
+}
+
+.text-size-small.faded {
+  color: var(--_primitives---opacity--neutral-darkest-40);
+  font-size: 0.75rem;
+}
+
+.text-size-small.alt {
+  font-family: '42 Dot Sans';
+  font-size: 1rem;
+}
+
+.text-weight-light {
+  font-weight: 300;
+}
+
+#w-node-_916da588-c181-caa4-a4c2-73b4fcd01c9e-fcd01c9d {
+  grid-row-start: span 1;
+  grid-row-end: span 1;
+  grid-column-start: span 1;
+  grid-column-end: span 1;
+}
+#w-node-_916da588-c181-caa4-a4c2-73b4fcd01ca0-fcd01c9d {
+  grid-row-start: span 1;
+  grid-row-end: span 1;
+  grid-column-start: span 2;
+  grid-column-end: span 2;
+}

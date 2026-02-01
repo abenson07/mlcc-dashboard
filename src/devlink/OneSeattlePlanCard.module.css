@@ -1,0 +1,248 @@
+.plan-card {
+  display: flex;
+  width: 100%;
+  min-height: 50px;
+  padding: 32px;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  aspect-ratio: 2/3;
+
+  border-radius: 8px;
+
+  background-color: var(--_primitives---opacity--brand--driftwood-gray);
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.3),rgba(0, 0, 0, 0.3)), url("https://d3e54v103j8qbb.cloudfront.net/img/background-image.svg");
+  background-position: 0px 0px, 50% 50%;
+  background-size: auto, cover;
+
+  object-fit: cover;
+}
+
+@media screen and (max-width: 767px) {
+  .plan-card {
+    aspect-ratio: 16/9;
+  }
+}
+
+.plan-card.hover {
+  width: 150%;
+  aspect-ratio: 2/3;
+  object-fit: fill;
+}
+
+.plan-card.tree {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4),rgba(0, 0, 0, 0.4)), url("https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/68ffc5e088b7cb6d778300b1_IMG_9176.jpg");
+  color: var(--_primitives---opacity--brand--fog-mist);
+}
+
+.plan-card.development {
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4),rgba(0, 0, 0, 0.4)), url("https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/68ffd7e99f59393d947343f5_Maple%20Leaf%20Neighborhood%20Center%20tall.png");
+  color: var(--_primitives---opacity--brand--fog-mist);
+}
+
+.plan-card.commercial {
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4),rgba(0, 0, 0, 0.4)), url("https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/68ffc6e13cb50c59ba03fd72_IMG_1651(2).JPEG");
+  color: var(--_primitives---opacity--brand--fog-mist);
+}
+
+.card-title {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  grid-column-gap: 0.5rem;
+  grid-row-gap: 0.5rem;
+}
+
+.sub-label {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  grid-column-gap: 0.5em;
+  grid-row-gap: 0.5em;
+
+  font-family: '42 Dot Sans';
+  font-weight: 300;
+}
+
+.label-dot {
+  box-sizing: border-box;
+
+  width: 10px;
+  height: 10px;
+  aspect-ratio: 1/1;
+
+  border-radius: 100%;
+
+  background-color: var(--_primitives---opacity--brand--mossy-gold);
+
+  object-fit: cover;
+}
+
+.text-size-tiny {
+  font-size: 0.75rem;
+}
+
+.text-size-tiny.light {
+  font-family: '42 Dot Sans';
+  font-weight: 400;
+}
+
+.text-size-tiny.light.faded {
+  opacity: 0.5;
+}
+
+.text-size-tiny.bold {
+  font-family: '42 Dot Sans';
+  font-weight: 800;
+}
+
+.header-style-h5 {
+  font-family: '42 Dot Sans';
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.card-bottom {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+@media screen and (max-width: 991px) {
+  .card-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .card-bottom {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .card-bottom.stack-tablet {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+}
+
+.update-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  grid-column-gap: 0.25rem;
+  grid-row-gap: 0.25rem;
+}
+
+.learn-more-arrow-wrapper {
+  display: flex;
+  width: 3rem;
+  height: 3rem;
+  justify-content: center;
+  align-items: center;
+
+  border: 1px solid var(--_primitives---opacity--brand--fog-mist);
+  border-radius: 100%;
+
+  color: var(--_primitives---opacity--brand--fog-mist);
+}
+
+.learn-more-arrow-wrapper.is-bottom-previous {
+  left: auto;
+  top: auto;
+  right: 4rem;
+  bottom: 0%;
+}
+
+.learn-more-arrow-wrapper.is-bottom-next {
+  left: auto;
+  top: auto;
+  right: 0%;
+  bottom: 0%;
+}
+
+.learn-more-arrow-wrapper.is-centre-previous {
+  bottom: 4rem;
+}
+
+.learn-more-arrow-wrapper.is-centre-next {
+  bottom: 4rem;
+}
+
+.learn-more-arrow-wrapper.dark {
+  color: var(--_primitives---opacity--brand--puget-night);
+}
+
+.learn-more-arrow {
+  display: flex;
+  width: 1rem;
+  height: 1rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  transform: rotate(-45deg);
+}
+
+.div-block {
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: 0%;
+  z-index: 1;
+}
+
+.image-screen {
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: 0%;
+  z-index: 2;
+
+  background-color: var(--_primitives---opacity--neutral-darkest-40);
+}
+
+.plan-card-image {
+  position: relative;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: 0%;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+#w-node-_4cd937a7-9f12-42bb-a318-f59c38f38aa6-38f38aa6 {
+}
+#w-node-_4cd937a7-9f12-42bb-a318-f59c38f38aaa-38f38aa6 {
+}
+#w-node-_4cd937a7-9f12-42bb-a318-f59c38f38aac-38f38aa6 {
+}
+#w-node-_4cd937a7-9f12-42bb-a318-f59c38f38aaf-38f38aa6 {
+}
+#w-node-_4cd937a7-9f12-42bb-a318-f59c38f38ab0-38f38aa6 {
+}
+#w-node-_4cd937a7-9f12-42bb-a318-f59c38f38ab2-38f38aa6 {
+}
+#w-node-_4cd937a7-9f12-42bb-a318-f59c38f38ab4-38f38aa6 {
+}
