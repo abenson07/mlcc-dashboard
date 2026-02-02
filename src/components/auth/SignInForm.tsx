@@ -5,11 +5,29 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useActionState, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { signIn } from "@/app/(full-width-pages)/(auth)/signin/actions";
+
+function SignInButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button
+      className="w-full"
+      size="sm"
+      type="submit"
+      disabled={pending}
+    >
+      {pending ? "Signing in..." : "Sign in"}
+    </Button>
+  );
+}
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [state, formAction] = useActionState(signIn, null);
+
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
       <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
@@ -84,13 +102,21 @@ export default function SignInForm() {
                 </span>
               </div>
             </div>
-            <form>
+            <form action={formAction}>
               <div className="space-y-6">
+                {state?.error && (
+                  <p className="text-sm text-error-500">{state.error}</p>
+                )}
                 <div>
                   <Label>
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input placeholder="info@gmail.com" type="email" />
+                  <Input
+                    name="email"
+                    placeholder="info@gmail.com"
+                    type="email"
+                    required
+                  />
                 </div>
                 <div>
                   <Label>
@@ -98,8 +124,10 @@ export default function SignInForm() {
                   </Label>
                   <div className="relative">
                     <Input
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
+                      required
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -128,9 +156,7 @@ export default function SignInForm() {
                   </Link>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm">
-                    Sign in
-                  </Button>
+                  <SignInButton />
                 </div>
               </div>
             </form>
