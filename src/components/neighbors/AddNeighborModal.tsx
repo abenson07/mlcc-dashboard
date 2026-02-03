@@ -5,43 +5,43 @@ import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
-import TextArea from "@/components/form/input/TextArea";
-import { useBusinesses } from "hooks";
-import type { BusinessesInsert } from "@/types/database";
+import { usePeople } from "hooks";
+import type { PeopleInsert } from "@/types/database";
 import { validateEmail, validatePhone } from "@/lib/validation";
 
-const initialForm: BusinessesInsert = {
-  business_name: null,
-  contact_name: null,
+const initialForm: PeopleInsert = {
+  full_name: "",
   email: null,
   phone: null,
   address: null,
-  membership_id: null,
-  notes: null,
 };
 
-interface AddBusinessModalProps {
+interface AddNeighborModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated?: () => void;
 }
 
-export default function AddBusinessModal({
+export default function AddNeighborModal({
   isOpen,
   onClose,
   onCreated,
-}: AddBusinessModalProps) {
-  const { create } = useBusinesses({ autoFetch: false });
-  const [form, setForm] = useState<BusinessesInsert>(initialForm);
+}: AddNeighborModalProps) {
+  const { create } = usePeople({ autoFetch: false });
+  const [form, setForm] = useState<PeopleInsert>(initialForm);
   const [formKey, setFormKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    full_name?: string;
+    email?: string;
+    phone?: string;
+  }>({});
 
-  const update = (field: keyof BusinessesInsert, value: string | null) => {
-    setForm((prev) => ({ ...prev, [field]: value || null }));
+  const update = (field: keyof PeopleInsert, value: string | null) => {
+    setForm((prev) => ({ ...prev, [field]: value ?? (field === "full_name" ? "" : null) }));
     setError(null);
-    if (field === "email" || field === "phone") {
+    if (field === "full_name" || field === "email" || field === "phone") {
       setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
@@ -60,6 +60,11 @@ export default function AddBusinessModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const fullNameTrimmed = (form.full_name ?? "").trim();
+    if (!fullNameTrimmed) {
+      setFieldErrors((prev) => ({ ...prev, full_name: "Name is required." }));
+      return;
+    }
     const emailError = validateEmail(form.email ?? "");
     const phoneError = validatePhone(form.phone ?? "");
     if (emailError || phoneError) {
@@ -73,14 +78,11 @@ export default function AddBusinessModal({
     setSubmitting(true);
     setError(null);
     try {
-      const payload: BusinessesInsert = {
-        business_name: form.business_name ?? null,
-        contact_name: form.contact_name ?? null,
-        email: form.email ?? null,
-        phone: form.phone ?? null,
-        address: form.address ?? null,
-        membership_id: form.membership_id ?? null,
-        notes: form.notes ?? null,
+      const payload: PeopleInsert = {
+        full_name: fullNameTrimmed,
+        email: (form.email ?? "").trim() || null,
+        phone: (form.phone ?? "").trim() || null,
+        address: (form.address ?? "").trim() || null,
       };
       const created = await create(payload);
       if (created) {
@@ -88,10 +90,10 @@ export default function AddBusinessModal({
         onClose();
         onCreated?.();
       } else {
-        setError("Failed to create business. Please try again.");
+        setError("Failed to add neighbor. Please try again.");
       }
     } catch {
-      setError("Failed to create business. Please try again.");
+      setError("Failed to add neighbor. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -105,7 +107,7 @@ export default function AddBusinessModal({
     >
       <form key={formKey} onSubmit={handleSubmit}>
         <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
-          Add New Business
+          Add New Neighbor
         </h4>
 
         {error && (
@@ -114,22 +116,14 @@ export default function AddBusinessModal({
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
           <div className="col-span-1 sm:col-span-2">
-            <Label>Business Name</Label>
+            <Label>Full Name</Label>
             <Input
               type="text"
-              placeholder="Business name"
-              defaultValue={form.business_name ?? ""}
-              onChange={(e) => update("business_name", e.target.value)}
-            />
-          </div>
-
-          <div className="col-span-1">
-            <Label>Contact Name</Label>
-            <Input
-              type="text"
-              placeholder="Contact name"
-              defaultValue={form.contact_name ?? ""}
-              onChange={(e) => update("contact_name", e.target.value)}
+              placeholder="Full name"
+              defaultValue={form.full_name ?? ""}
+              onChange={(e) => update("full_name", e.target.value)}
+              error={!!fieldErrors.full_name}
+              hint={fieldErrors.full_name}
             />
           </div>
 
@@ -166,16 +160,6 @@ export default function AddBusinessModal({
               onChange={(e) => update("address", e.target.value)}
             />
           </div>
-
-          <div className="col-span-1 sm:col-span-2">
-            <Label>Notes</Label>
-            <TextArea
-              placeholder="Notes"
-              rows={3}
-              value={form.notes ?? ""}
-              onChange={(value) => update("notes", value)}
-            />
-          </div>
         </div>
 
         <div className="mt-6 flex w-full items-center justify-end gap-3">
@@ -183,7 +167,7 @@ export default function AddBusinessModal({
             Cancel
           </Button>
           <Button size="sm" type="submit" disabled={submitting}>
-            {submitting ? "Saving…" : "Add Business"}
+            {submitting ? "Saving…" : "Add Neighbor"}
           </Button>
         </div>
       </form>

@@ -1,6 +1,5 @@
-import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import AllNeighborsTable from "@/components/tables/AllNeighborsTable";
+import AllNeighborsContent from "@/components/neighbors/AllNeighborsContent";
 import { Metadata } from "next";
 import React from "react";
 
@@ -14,9 +13,7 @@ export default function AllNeighborsPage() {
     <div>
       <PageBreadcrumb pageTitle="All Neighbors" />
       <div className="space-y-6">
-        <ComponentCard title="All Neighbors">
-          <AllNeighborsTable />
-        </ComponentCard>
+        <AllNeighborsContent />
       </div>
     </div>
   );
