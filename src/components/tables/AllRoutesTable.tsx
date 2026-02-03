@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Badge from "@/components/ui/badge/Badge";
+import { CopyableEmail } from "@/components/common/CopyableEmail";
 import { useRoutes } from "hooks";
 import type { RouteWithDeliverer } from "hooks";
 
@@ -61,13 +62,13 @@ export default function AllRoutesTable() {
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  User
+                  Route
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Project Name
+                  Leaflet count
                 </TableCell>
                 <TableCell
                   isHeader
@@ -128,7 +129,7 @@ export default function AllRoutesTable() {
                               {deliverer.name}
                             </span>
                             <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                              {deliverer.email ?? "—"}
+                              <CopyableEmail email={deliverer.email} />
                             </span>
                           </div>
                         ) : (

@@ -1,6 +1,7 @@
 import { Outfit } from 'next/font/google';
 import './globals.css';
 import "flatpickr/dist/flatpickr.css";
+import { Toaster } from "sonner";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -16,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${outfit.className} dark:bg-gray-900`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${outfit.className} dark:bg-gray-900`} suppressHydrationWarning>
         <QueryProvider>
           <ThemeProvider>
             <DevLinkProvider>
@@ -25,6 +26,7 @@ export default function RootLayout({
             </DevLinkProvider>
           </ThemeProvider>
         </QueryProvider>
+        <Toaster richColors position="bottom-right" />
       </body>
     </html>
   );

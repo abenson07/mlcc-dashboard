@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CopyableEmail } from "@/components/common/CopyableEmail";
 import { usePeople } from "hooks";
 
 function formatCreatedAt(dateString: string | null): string {
@@ -54,7 +55,7 @@ export default function AllNeighborsTable() {
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  User
+                  Neighbor
                 </TableCell>
                 <TableCell
                   isHeader
@@ -90,7 +91,7 @@ export default function AllNeighborsTable() {
                           {person.full_name}
                         </span>
                         <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                          {person.email ?? "—"}
+                          <CopyableEmail email={person.email} />
                         </span>
                       </div>
                     </TableCell>

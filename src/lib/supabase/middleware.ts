@@ -1,17 +1,27 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  "";
 
-const authRoutes = ["/signin", "/signup", "/reset-password"];
+const authRoutes = [
+  "/dashboard/login",
+  "/signup",
+  "/reset-password",
+  "/auth/callback",
+];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
   });
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return response;
+  }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -26,18 +36,22 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
+    const { pathname } = request.nextUrl;
 
-  if (user && authRoutes.some((route) => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL("/neighbors/all", request.url));
-  }
+    if (user && authRoutes.some((route) => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL("/neighbors/all", request.url));
+    }
 
-  if (!user && !authRoutes.some((route) => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL("/signin", request.url));
+    if (!user && !authRoutes.some((route) => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL("/dashboard/login", request.url));
+    }
+  } catch {
+    return response;
   }
 
   return response;

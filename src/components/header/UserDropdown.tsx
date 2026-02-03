@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import { CopyableEmail } from "@/components/common/CopyableEmail";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 
@@ -36,7 +37,7 @@ export default function UserDropdown() {
     const supabase = createClient();
     await supabase.auth.signOut();
     closeDropdown();
-    router.push("/signin");
+    router.push("/dashboard/login");
     router.refresh();
   }
   return (
@@ -84,7 +85,7 @@ export default function UserDropdown() {
               "User"}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {user?.email ?? ""}
+            <CopyableEmail email={user?.email ?? null} fallback="" />
           </span>
         </div>
 

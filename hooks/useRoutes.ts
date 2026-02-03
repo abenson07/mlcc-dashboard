@@ -68,8 +68,9 @@ async function fetchRoutesData(filters: UseRoutesOptions["filters"] = {}) {
   }
 
   if (filters?.openOnly) {
+    // Truly open (no primary, no secondary) OR skipped with primary but no secondary
     query = query.or(
-      "and(primary_deliverer_id.is.null,secondary_deliverer_id.is.null),is_skipped.eq.true"
+      "and(primary_deliverer_id.is.null,secondary_deliverer_id.is.null),and(is_skipped.eq.true,primary_deliverer_id.not.is.null,secondary_deliverer_id.is.null)"
     );
   }
 

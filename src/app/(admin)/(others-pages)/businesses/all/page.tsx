@@ -1,6 +1,5 @@
-import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import BasicTableOne from "@/components/tables/BasicTableOne";
+import AllBusinessesContent from "@/components/businesses/AllBusinessesContent";
 import { Metadata } from "next";
 import React from "react";
 
@@ -14,9 +13,7 @@ export default function AllBusinessesPage() {
     <div>
       <PageBreadcrumb pageTitle="All Businesses" />
       <div className="space-y-6">
-        <ComponentCard title="All Businesses">
-          <BasicTableOne />
-        </ComponentCard>
+        <AllBusinessesContent />
       </div>
     </div>
   );
