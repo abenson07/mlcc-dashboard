@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  basePath: "/dashboard",
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

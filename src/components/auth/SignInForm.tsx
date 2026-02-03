@@ -7,7 +7,7 @@ import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { signIn } from "@/app/(full-width-pages)/(auth)/dashboard/login/actions";
+import { signIn } from "@/app/(full-width-pages)/(auth)/login/actions";
 
 function SignInButton() {
   const { pending } = useFormStatus();

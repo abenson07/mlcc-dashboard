@@ -37,7 +37,7 @@ export default function UserDropdown() {
     const supabase = createClient();
     await supabase.auth.signOut();
     closeDropdown();
-    router.push("/dashboard/login");
+    router.push("/login");
     router.refresh();
   }
   return (
