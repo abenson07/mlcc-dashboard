@@ -43,10 +43,9 @@ export async function updateSession(request: NextRequest) {
 
     const { pathname } = request.nextUrl;
 
-    if (user && authRoutes.some((route) => pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL("/neighbors/all", request.url));
-    }
-
+    // Only redirect unauthenticated users to login. Do NOT redirect authenticated
+    // users away from auth routes here — let the auth pages do that. This avoids
+    // ERR_TOO_MANY_REDIRECTS when edge middleware and server/client disagree on session.
     if (!user && !authRoutes.some((route) => pathname.startsWith(route))) {
       return NextResponse.redirect(new URL("/dashboard/login", request.url));
     }
