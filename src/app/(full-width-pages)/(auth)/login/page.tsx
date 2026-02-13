@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: "This is Next.js Signin Page TailAdmin Dashboard Template",
 };
 
+// Force dynamic rendering since we use cookies()
+export const dynamic = "force-dynamic";
+
 export default async function SignIn() {
   // #region agent log
   log("login/page.tsx:SignIn", "page render entry", {}, "H4");
