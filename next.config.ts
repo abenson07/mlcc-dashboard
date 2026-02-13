@@ -6,8 +6,9 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: [
-        "mapleleafcommunity.webflow.io",
         "www.mapleleafcommunity.org",
+        "mapleleafcommunity.org",
+        "mapleleafcommunity.webflow.io",
         "*.wf-app-prod.cosmic.webflow.services",
       ],
     },
@@ -19,7 +20,7 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
-    
+
     turbopack: {
       rules: {
         '*.svg': {
@@ -28,7 +29,7 @@ const nextConfig: NextConfig = {
         },
       },
     },
-  
+
 };
 
 export default nextConfig;
