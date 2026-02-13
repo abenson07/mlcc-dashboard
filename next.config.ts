@@ -3,6 +3,15 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
   basePath: "/dashboard",
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "mapleleafcommunity.webflow.io",
+        "www.mapleleafcommunity.org",
+        "*.wf-app-prod.cosmic.webflow.services",
+      ],
+    },
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
