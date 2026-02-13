@@ -6,10 +6,10 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: [
-        "www.mapleleafcommunity.org",
-        "mapleleafcommunity.org",
-        "mapleleafcommunity.webflow.io",
-        "*.wf-app-prod.cosmic.webflow.services",
+        "https://www.mapleleafcommunity.org",
+        "https://mapleleafcommunity.org",
+        "https://mapleleafcommunity.webflow.io",
+        "https://*.wf-app-prod.cosmic.webflow.services",
       ],
     },
   },
