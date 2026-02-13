@@ -18,6 +18,18 @@ export async function signIn(
     return { error: "Email and password are required" };
   }
 
+  // Check if Supabase is configured
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    // #region agent log
+    log("login/actions.ts:signIn", "missing supabase env", { hasUrl: !!supabaseUrl, hasKey: !!supabaseKey }, "H1");
+    console.error("[login action] Supabase not configured");
+    // #endregion
+    return { error: "Authentication service is not configured. Please contact support." };
+  }
+
   let supabase;
   try {
     supabase = await createClient();
@@ -29,7 +41,7 @@ export async function signIn(
     log("login/actions.ts:signIn", "createClient throw", { err: String(e), name: (e as Error)?.name }, "H1");
     console.error("[login action] createClient threw", e);
     // #endregion
-    throw e;
+    return { error: "Failed to initialize authentication. Please try again." };
   }
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });

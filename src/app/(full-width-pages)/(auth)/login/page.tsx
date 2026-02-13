@@ -13,6 +13,20 @@ export default async function SignIn() {
   // #region agent log
   log("login/page.tsx:SignIn", "page render entry", {}, "H4");
   // #endregion
+
+  // Check if Supabase is configured
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    // #region agent log
+    log("login/page.tsx:SignIn", "missing supabase env", { hasUrl: !!supabaseUrl, hasKey: !!supabaseKey }, "H4");
+    console.error("[login page] Supabase not configured - environment variables missing");
+    // #endregion
+    // Return login form without auth check if Supabase isn't configured
+    return <SignInForm />;
+  }
+
   let supabase;
   try {
     supabase = await createClient();
@@ -24,16 +38,27 @@ export default async function SignIn() {
     log("login/page.tsx:SignIn", "createClient throw", { err: String(e), name: (e as Error)?.name }, "H4");
     console.error("[login page] createClient threw", e);
     // #endregion
-    throw e;
+    // Return login form if client creation fails instead of crashing
+    return <SignInForm />;
   }
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  // #region agent log
-  log("login/page.tsx:SignIn", "getUser result", { hasUser: !!user }, "H4");
-  // #endregion
-  if (user) {
-    redirect("/neighbors/all");
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    // #region agent log
+    log("login/page.tsx:SignIn", "getUser result", { hasUser: !!user }, "H4");
+    // #endregion
+    if (user) {
+      redirect("/neighbors/all");
+    }
+  } catch (e) {
+    // #region agent log
+    log("login/page.tsx:SignIn", "getUser throw", { err: String(e), name: (e as Error)?.name }, "H4");
+    console.error("[login page] getUser threw", e);
+    // #endregion
+    // Continue to show login form if auth check fails
   }
+
   return <SignInForm />;
 }

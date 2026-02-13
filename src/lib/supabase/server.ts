@@ -20,13 +20,26 @@ export async function createClient() {
     throw e;
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
   // #region agent log
   log("server.ts:createClient", "env before create", { hasUrl: !!supabaseUrl, hasKey: !!supabaseAnonKey }, "H1");
   // #endregion
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    const error = new Error("Missing Supabase environment variables");
+    // #region agent log
+    log("server.ts:createClient", "missing env vars", { hasUrl: !!supabaseUrl, hasKey: !!supabaseAnonKey }, "H1");
+    console.error("[supabase server] Missing required environment variables:", {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey,
+    });
+    // #endregion
+    throw error;
+  }
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
