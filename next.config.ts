@@ -3,6 +3,16 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
   basePath: "/dashboard",
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "www.mapleleafcommunity.org",
+        "mapleleafcommunity.org",
+        "mapleleafcommunity.webflow.io",
+        "*.wf-app-prod.cosmic.webflow.services",
+      ],
+    },
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -10,7 +20,7 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
-    
+
     turbopack: {
       rules: {
         '*.svg': {
@@ -19,7 +29,7 @@ const nextConfig: NextConfig = {
         },
       },
     },
-  
+
 };
 
 export default nextConfig;
