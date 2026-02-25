@@ -41,7 +41,7 @@ export async function createClient() {
     throw error;
   }
 
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
+  const client = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -60,4 +60,6 @@ export async function createClient() {
       },
     },
   });
+  log("server.ts:createClient", "client created", {}, "H1");
+  return client;
 }

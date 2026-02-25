@@ -44,14 +44,18 @@ export async function signIn(
     return { error: "Failed to initialize authentication. Please try again." };
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   // #region agent log
   log("login/actions.ts:signIn", "signInWithPassword result", { hasError: !!error, errorMessage: error?.message ?? null }, "H2");
   // #endregion
 
   if (error) {
+    log("login/actions.ts:signIn", "signInWithPassword error full", { code: error.code, message: error.message }, "H2");
+    console.error("[login action] signInWithPassword error", { code: error.code, message: error.message });
     return { error: error.message };
   }
+
+  log("login/actions.ts:signIn", "signIn success", { userId: data.user?.id ?? null, email: data.user?.email ?? null }, "H2");
 
   // #region agent log
   log("login/actions.ts:signIn", "before redirect", { target: "/neighbors/all" }, "H3");

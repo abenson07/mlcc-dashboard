@@ -5,7 +5,7 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import React, { useActionState, useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { signIn } from "@/app/(full-width-pages)/(auth)/login/actions";
 
@@ -27,6 +27,22 @@ export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [state, formAction] = useActionState(signIn, null);
+
+  useEffect(() => {
+    if (state !== null) {
+      if (state.error) {
+        console.log("[login] action result", { error: state.error });
+      } else {
+        console.log("[login] action result", "success");
+      }
+    }
+  }, [state]);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    console.log("[login] form submit", { emailPresent: !!fd.get("email"), passwordPresent: !!fd.get("password") });
+  }
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
@@ -65,7 +81,7 @@ export default function SignInForm() {
                 <span className="p-2 text-gray-400 bg-white dark:bg-gray-900 sm:px-5 sm:py-2">Or</span>
               </div>
             </div> */}
-            <form action={formAction}>
+            <form action={formAction} onSubmit={handleSubmit}>
               <div className="space-y-6">
                 {state?.error && (
                   <p className="text-sm text-error-500">{state.error}</p>
