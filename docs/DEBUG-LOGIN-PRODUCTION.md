@@ -17,6 +17,14 @@ So we have a **server-side 500** (and/or a Server Component throwing) plus a **c
 
 ---
 
+## Root cause (from production logs)
+
+**Invalid Server Actions request:** Next.js aborts the login Server Action because `x-forwarded-host` (e.g. `7e43fb51-...wf-app-prod.cosmic.webflow.services`) does not match the `origin` header (`mapleleafcommunity.webflow.io`) when the request is forwarded by Webflow/Cosmic. The 500 is from this security check, not from Supabase or redirect logic.
+
+**Fix applied:** `next.config.ts` `serverActions.allowedOrigins` was extended with host-only forms (`mapleleafcommunity.webflow.io`, `*.wf-app-prod.cosmic.webflow.services`) and optional `SERVER_ACTIONS_ALLOWED_ORIGIN` env var so both the public domain and the internal proxy host are allowed. If the error persists, the proxy may need to send `x-forwarded-host: mapleleafcommunity.webflow.io` to match the browser origin.
+
+---
+
 ## Hypotheses (and how logs map to them)
 
 | ID   | Hypothesis | What would confirm it |
