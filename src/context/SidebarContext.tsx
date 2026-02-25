@@ -7,6 +7,8 @@ type SidebarContextType = {
   isHovered: boolean;
   activeItem: string | null;
   openSubmenu: string | null;
+  hideSidebarMenuSections: boolean;
+  toggleSidebarMenuSections: () => void;
   toggleSidebar: () => void;
   toggleMobileSidebar: () => void;
   setIsHovered: (isHovered: boolean) => void;
@@ -33,6 +35,10 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [hideSidebarMenuSections, setHideSidebarMenuSections] = useState(true);
+
+  const toggleSidebarMenuSections = () =>
+    setHideSidebarMenuSections((prev) => !prev);
 
   useEffect(() => {
     const handleResize = () => {
@@ -71,6 +77,8 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
         isHovered,
         activeItem,
         openSubmenu,
+        hideSidebarMenuSections,
+        toggleSidebarMenuSections,
         toggleSidebar,
         toggleMobileSidebar,
         setIsHovered,

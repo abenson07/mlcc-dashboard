@@ -1,4 +1,5 @@
 "use client";
+import { DataToggleButton } from "@/components/common/DataToggleButton";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import { RefreshButton } from "@/components/common/RefreshButton";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
@@ -11,7 +12,13 @@ import React, { useState ,useEffect,useRef} from "react";
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
-  const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const {
+    isMobileOpen,
+    toggleSidebar,
+    toggleMobileSidebar,
+    hideSidebarMenuSections,
+    toggleSidebarMenuSections,
+  } = useSidebar();
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -164,6 +171,10 @@ const AppHeader: React.FC = () => {
           <div className="flex items-center gap-2 2xsm:gap-3">
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
+            <DataToggleButton
+              onClick={toggleSidebarMenuSections}
+              isActive={hideSidebarMenuSections}
+            />
             <RefreshButton />
             {/* <!-- Dark Mode Toggler --> */}
 
