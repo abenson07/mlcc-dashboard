@@ -1,5 +1,6 @@
 "use server";
 
+import { debugLog } from "@/lib/debug-session";
 import { log } from "@/lib/debug-log";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -8,6 +9,10 @@ export async function signIn(
   _prevState: { error?: string } | null,
   formData: FormData
 ) {
+  // #region agent log
+  debugLog("login/actions.ts:signIn", "action entry", { hasEmail: !!formData.get("email"), hasPassword: !!formData.get("password") }, "H-A");
+  // #endregion
+  try {
   // #region agent log
   log("login/actions.ts:signIn", "action entry", { hasEmail: !!formData.get("email"), hasPassword: !!formData.get("password") }, "H1");
   // #endregion
@@ -38,11 +43,15 @@ export async function signIn(
     // #endregion
   } catch (e) {
     // #region agent log
+    debugLog("login/actions.ts:signIn", "createClient throw", { err: String(e), name: (e as Error)?.name }, "H-B");
     log("login/actions.ts:signIn", "createClient throw", { err: String(e), name: (e as Error)?.name }, "H1");
     console.error("[login action] createClient threw", e);
     // #endregion
     return { error: "Failed to initialize authentication. Please try again." };
   }
+  // #region agent log
+  debugLog("login/actions.ts:signIn", "createClient ok", { hasClient: !!supabase }, "H-B");
+  // #endregion
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   // #region agent log
@@ -56,6 +65,9 @@ export async function signIn(
   }
 
   log("login/actions.ts:signIn", "signIn success", { userId: data.user?.id ?? null, email: data.user?.email ?? null }, "H2");
+  // #region agent log
+  debugLog("login/actions.ts:signIn", "before redirect", { target: "/neighbors/all" }, "H-D");
+  // #endregion
 
   // #region agent log
   log("login/actions.ts:signIn", "before redirect", { target: "/neighbors/all" }, "H3");
@@ -64,9 +76,16 @@ export async function signIn(
     redirect("/neighbors/all");
   } catch (e) {
     // #region agent log
+    debugLog("login/actions.ts:signIn", "redirect throw", { err: String(e), name: (e as Error)?.name }, "H-D");
     log("login/actions.ts:signIn", "redirect throw", { err: String(e), name: (e as Error)?.name }, "H3");
     console.error("[login action] redirect() threw", e);
     // #endregion
     throw e;
+  }
+  } catch (topLevel) {
+    // #region agent log
+    debugLog("login/actions.ts:signIn", "uncaught", { err: String(topLevel), name: (topLevel as Error)?.name }, "H-A");
+    // #endregion
+    throw topLevel;
   }
 }

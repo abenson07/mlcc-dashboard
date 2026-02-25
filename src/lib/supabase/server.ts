@@ -1,9 +1,11 @@
+import { debugLog } from "@/lib/debug-session";
 import { log } from "@/lib/debug-log";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function createClient() {
   // #region agent log
+  debugLog("server.ts:createClient", "entry", {}, "H-B");
   log("server.ts:createClient", "entry", {}, "H1");
   // #endregion
   let cookieStore;
@@ -14,6 +16,7 @@ export async function createClient() {
     // #endregion
   } catch (e) {
     // #region agent log
+    debugLog("server.ts:createClient", "cookies() throw", { err: String(e), name: (e as Error)?.name }, "H-B");
     log("server.ts:createClient", "cookies() throw", { err: String(e), name: (e as Error)?.name }, "H1");
     console.error("[supabase server] cookies() threw", e);
     // #endregion
@@ -60,6 +63,9 @@ export async function createClient() {
       },
     },
   });
+  // #region agent log
+  debugLog("server.ts:createClient", "client created", {}, "H-B");
   log("server.ts:createClient", "client created", {}, "H1");
+  // #endregion
   return client;
 }
