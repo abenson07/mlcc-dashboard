@@ -30,7 +30,7 @@ export default async function AdminLayout({
     return <AdminLayoutClient>{children}</AdminLayoutClient>;
   } catch (e) {
     // #region agent log
-    debugLog("admin/layout.tsx", "layout throw", { err: String(e), name: (e as Error)?.name }, "H-C");
+    debugLog("admin/layout.tsx", "layout throw", { err: String(e), name: (e as Error)?.name, digest: (e as { digest?: string })?.digest }, "H-C");
     // #endregion
     throw e;
   }

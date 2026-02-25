@@ -1,9 +1,9 @@
 /**
- * Debug session instrumentation (session 42f575).
+ * Debug session instrumentation (session 6da16b).
  * Sends to ingest and console so deployed logs (e.g. Vercel) capture evidence.
  */
 const INGEST = "http://127.0.0.1:7247/ingest/76125a6a-3356-4cbf-a4b0-cc4deff06696";
-const SESSION_ID = "42f575";
+const SESSION_ID = "6da16b";
 
 function payload(location: string, message: string, data: Record<string, unknown>, hypothesisId: string) {
   return {
@@ -30,5 +30,5 @@ export function debugLog(
       body: JSON.stringify(p),
     }).catch(() => {});
   } catch (_) {}
-  console.error("[debug-42f575]", JSON.stringify(p));
+  console.error("[debug-6da16b]", JSON.stringify(p));
 }

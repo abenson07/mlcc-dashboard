@@ -43,7 +43,7 @@ export async function signIn(
     // #endregion
   } catch (e) {
     // #region agent log
-    debugLog("login/actions.ts:signIn", "createClient throw", { err: String(e), name: (e as Error)?.name }, "H-B");
+    debugLog("login/actions.ts:signIn", "createClient throw", { err: String(e), name: (e as Error)?.name, digest: (e as { digest?: string })?.digest }, "H-B");
     log("login/actions.ts:signIn", "createClient throw", { err: String(e), name: (e as Error)?.name }, "H1");
     console.error("[login action] createClient threw", e);
     // #endregion
@@ -76,7 +76,7 @@ export async function signIn(
     redirect("/neighbors/all");
   } catch (e) {
     // #region agent log
-    debugLog("login/actions.ts:signIn", "redirect throw", { err: String(e), name: (e as Error)?.name }, "H-D");
+    debugLog("login/actions.ts:signIn", "redirect throw", { err: String(e), name: (e as Error)?.name, digest: (e as { digest?: string })?.digest }, "H-D");
     log("login/actions.ts:signIn", "redirect throw", { err: String(e), name: (e as Error)?.name }, "H3");
     console.error("[login action] redirect() threw", e);
     // #endregion
@@ -84,7 +84,7 @@ export async function signIn(
   }
   } catch (topLevel) {
     // #region agent log
-    debugLog("login/actions.ts:signIn", "uncaught", { err: String(topLevel), name: (topLevel as Error)?.name }, "H-A");
+    debugLog("login/actions.ts:signIn", "uncaught", { err: String(topLevel), name: (topLevel as Error)?.name, digest: (topLevel as { digest?: string })?.digest }, "H-A");
     // #endregion
     throw topLevel;
   }
