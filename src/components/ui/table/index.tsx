@@ -62,7 +62,7 @@ const TableCell: React.FC<TableCellProps> = ({
   const CellTag = isHeader ? "th" : "td";
   return (
     <CellTag
-      className={` ${className}`}
+      className={`bg-transparent ${className}`}
       {...(colSpan !== undefined && { colSpan })}
     >
       {children}

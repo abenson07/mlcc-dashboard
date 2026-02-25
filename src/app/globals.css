@@ -279,7 +279,15 @@
   background-color: #344054;
 }
 
-
+/* Table body row hover: clear and distinct; cells stay transparent so row hover shows through */
+@layer components {
+  tbody tr {
+    @apply transition-colors duration-150;
+  }
+  tbody tr:hover {
+    @apply bg-gray-50 dark:bg-white/[0.06];
+  }
+}
 
 @layer utilities {
   /* For Remove Date Icon */
