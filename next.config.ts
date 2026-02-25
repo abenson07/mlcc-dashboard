@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
-  basePath: "/dashboard",
+  // basePath removed so app is reachable at / (was "/dashboard" causing 404 when visiting /)
   experimental: {
     serverActions: {
       allowedOrigins: [
