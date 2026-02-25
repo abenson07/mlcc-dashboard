@@ -118,13 +118,13 @@ export default function ClaimedRoutesTable() {
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Leaflet count
+                  Deliverer
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
                 >
-                  Deliverer
+                  Leaflet count
                 </TableCell>
                 <TableCell
                   isHeader
@@ -201,9 +201,6 @@ export default function ClaimedRoutesTable() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {route.leaflet_count ?? "—"}
-                      </TableCell>
                       <TableCell className="px-4 py-3 text-start">
                         <div className="flex flex-col gap-0.5">
                           {route.primary_deliverer && (
@@ -227,6 +224,9 @@ export default function ClaimedRoutesTable() {
                             <span className="text-gray-500 dark:text-gray-400">—</span>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
+                        {route.leaflet_count ?? "—"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-end">
                         <div className="flex items-center justify-end gap-2">

@@ -113,18 +113,18 @@ export default function OpenRoutesTable() {
                   >
                     Route
                   </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                  >
-                    Leaflet count
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                  >
-                    Deliverer
-                  </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Deliverer
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
+                >
+                  Leaflet count
+                </TableCell>
                   <TableCell
                     isHeader
                     className="px-5 py-3 font-medium text-gray-500 text-end text-theme-xs dark:text-gray-400"
@@ -163,9 +163,6 @@ export default function OpenRoutesTable() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                          {route.leaflet_count ?? "—"}
-                        </TableCell>
                         <TableCell className="px-4 py-3 text-start">
                           {deliverer ? (
                             <div className="flex flex-col">
@@ -181,6 +178,9 @@ export default function OpenRoutesTable() {
                               —
                             </span>
                           )}
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
+                          {route.leaflet_count ?? "—"}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-end">
                           <div className="flex items-center justify-end gap-2">

@@ -68,6 +68,12 @@ export default function AllRoutesTable() {
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
+                  Deliverer
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
+                >
                   Leaflet count
                 </TableCell>
                 <TableCell
@@ -75,12 +81,6 @@ export default function AllRoutesTable() {
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
                   Status
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Deliverer
                 </TableCell>
               </TableRow>
             </TableHeader>
@@ -111,17 +111,6 @@ export default function AllRoutesTable() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {route.leaflet_count ?? "—"}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        <Badge
-                          size="sm"
-                          color={covered ? "success" : "warning"}
-                        >
-                          {covered ? "Covered" : "Uncovered"}
-                        </Badge>
-                      </TableCell>
                       <TableCell className="px-4 py-3 text-start">
                         {deliverer ? (
                           <div className="flex flex-col">
@@ -137,6 +126,17 @@ export default function AllRoutesTable() {
                             —
                           </span>
                         )}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
+                        {route.leaflet_count ?? "—"}
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                        <Badge
+                          size="sm"
+                          color={covered ? "success" : "warning"}
+                        >
+                          {covered ? "Covered" : "Uncovered"}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   );

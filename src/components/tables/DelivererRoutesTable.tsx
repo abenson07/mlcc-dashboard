@@ -39,7 +39,7 @@ export default function DelivererRoutesTable({ routes }: DelivererRoutesTablePro
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
                 >
                   Leaflet count
                 </TableCell>
@@ -103,7 +103,7 @@ export default function DelivererRoutesTable({ routes }: DelivererRoutesTablePro
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
                         {route.leaflet_count ?? "—"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-end">
