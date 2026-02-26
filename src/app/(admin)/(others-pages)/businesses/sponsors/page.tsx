@@ -1,6 +1,5 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import BasicTableOne from "@/components/tables/BasicTableOne";
 import { Metadata } from "next";
 import React from "react";
 
@@ -15,7 +14,9 @@ export default function SponsorsPage() {
       <PageBreadcrumb pageTitle="Businesses - Sponsors" />
       <div className="space-y-6">
         <ComponentCard title="Businesses - Sponsors">
-          <BasicTableOne />
+          <p className="text-center text-gray-500 dark:text-gray-400 py-12">
+            Coming Soon
+          </p>
         </ComponentCard>
       </div>
     </div>

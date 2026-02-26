@@ -1,25 +1,12 @@
-import { debugLog } from "@/lib/debug-session";
-import { log } from "@/lib/debug-log";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function createClient() {
-  // #region agent log
-  debugLog("server.ts:createClient", "entry", {}, "H-B");
-  log("server.ts:createClient", "entry", {}, "H1");
-  // #endregion
   let cookieStore;
   try {
     cookieStore = await cookies();
-    // #region agent log
-    log("server.ts:createClient", "cookies() ok", {}, "H1");
-    // #endregion
   } catch (e) {
-    // #region agent log
-    debugLog("server.ts:createClient", "cookies() throw", { err: String(e), name: (e as Error)?.name }, "H-B");
-    log("server.ts:createClient", "cookies() throw", { err: String(e), name: (e as Error)?.name }, "H1");
     console.error("[supabase server] cookies() threw", e);
-    // #endregion
     throw e;
   }
 
@@ -28,20 +15,12 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  // #region agent log
-  log("server.ts:createClient", "env before create", { hasUrl: !!supabaseUrl, hasKey: !!supabaseAnonKey }, "H1");
-  // #endregion
-
   if (!supabaseUrl || !supabaseAnonKey) {
-    const error = new Error("Missing Supabase environment variables");
-    // #region agent log
-    log("server.ts:createClient", "missing env vars", { hasUrl: !!supabaseUrl, hasKey: !!supabaseAnonKey }, "H1");
     console.error("[supabase server] Missing required environment variables:", {
       hasUrl: !!supabaseUrl,
       hasKey: !!supabaseAnonKey,
     });
-    // #endregion
-    throw error;
+    throw new Error("Missing Supabase environment variables");
   }
 
   const client = createServerClient(supabaseUrl, supabaseAnonKey, {
@@ -54,18 +33,12 @@ export async function createClient() {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options)
           );
-        } catch (e) {
-          // #region agent log
-          log("server.ts:setAll", "setAll catch", { err: String(e) }, "H5");
-          // #endregion
+        } catch {
           // Called from Server Component - middleware will refresh sessions
         }
       },
     },
   });
-  // #region agent log
-  debugLog("server.ts:createClient", "client created", {}, "H-B");
-  log("server.ts:createClient", "client created", {}, "H1");
-  // #endregion
+
   return client;
 }

@@ -1,6 +1,5 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import BusinessMembersTable from "@/components/tables/BusinessMembersTable";
 import { Metadata } from "next";
 import React from "react";
 
@@ -15,7 +14,9 @@ export default function BusinessesMembersPage() {
       <PageBreadcrumb pageTitle="Businesses - Members" />
       <div className="space-y-6">
         <ComponentCard title="Businesses - Members">
-          <BusinessMembersTable />
+          <p className="text-center text-gray-500 dark:text-gray-400 py-12">
+            Coming Soon
+          </p>
         </ComponentCard>
       </div>
     </div>
