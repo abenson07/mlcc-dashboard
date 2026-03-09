@@ -12,7 +12,7 @@ export const DataToggleButton: React.FC<DataToggleButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      aria-label={isActive ? "Show sidebar menu sections" : "Hide sidebar menu sections"}
+      aria-label={isActive ? "Show menu sections, notifications, and profile links" : "Hide menu sections, notifications, and profile links"}
       className={`relative flex items-center justify-center h-11 w-11 rounded-full border transition-colors ${
         isActive
           ? "text-gray-500 bg-white border-gray-200 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"

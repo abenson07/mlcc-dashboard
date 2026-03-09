@@ -11,7 +11,7 @@ const _interactionsData = JSON.parse(
 
 export function NewNavigation({
   as: _Component = _Builtin.Block,
-  image = "https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/684642f8153a9f3137bc5066_logo-white.svg",
+  image = "/images/mlcc-logo.jpg",
   _395D79B6B2E1712554F1F82426E73880 = true,
   e00B2B75Bba1Ea0503Ec04B568Bc598F = true,
   _0Bfd48C3E4C93C22925FCb5Dd9F217B3 = true,
@@ -91,7 +91,7 @@ export function NewNavigation({
                 height="auto"
                 loading="eager"
                 alt=""
-                src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f5db9022d8739bdc18b08b_mlcc-logo.svg"
+                src="/images/mlcc-logo.jpg"
               />
             </_Builtin.NavbarBrand>
             <_Builtin.NavbarLink

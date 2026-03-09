@@ -121,7 +121,7 @@ export function Navigation({ as: _Component = _Builtin.NavbarWrapper }) {
             height="auto"
             loading="lazy"
             alt=""
-            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/68450b81848622d3f9fe509b_logo.png"
+            src="/images/mlcc-logo.jpg"
           />
         </_Builtin.NavbarBrand>
         <_Builtin.Block

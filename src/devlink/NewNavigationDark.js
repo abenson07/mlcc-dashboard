@@ -93,7 +93,7 @@ export function NewNavigationDark({
                 height="auto"
                 loading="eager"
                 alt=""
-                src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f474d94f5d5f791e219a67_Logo-wide.svg"
+                src="/images/mlcc-logo.jpg"
               />
             </_Builtin.NavbarBrand>
             <_Builtin.NavbarLink
@@ -155,7 +155,7 @@ export function NewNavigationDark({
               height="auto"
               loading="lazy"
               alt=""
-              src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/6846488bcc9d24d7fc69e96d_logo-black.svg"
+              src="/images/mlcc-logo.jpg"
             />
           </_Builtin.NavbarBrand>
           <_Builtin.Block

@@ -121,7 +121,7 @@ export function Footer({
                 width="auto"
                 height="auto"
                 alt=""
-                src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f5db9022d8739bdc18b08b_mlcc-logo.svg"
+                src="/images/mlcc-logo.jpg"
               />
               <_Builtin.Block
                 className={_utils.cx(_styles, "footer-contact_info-wrapper")}

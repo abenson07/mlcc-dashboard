@@ -6,6 +6,7 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { DevLinkProvider } from '@/devlink/DevLinkProvider';
+import FeedbackFab from '@/components/feedback/FeedbackFab';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({
           </ThemeProvider>
         </QueryProvider>
         <Toaster richColors position="bottom-right" />
+        <FeedbackFab />
       </body>
     </html>
   );
