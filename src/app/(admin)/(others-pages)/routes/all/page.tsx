@@ -1,6 +1,5 @@
-import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import AllRoutesTable from "@/components/tables/AllRoutesTable";
+import AllRoutesContent from "@/components/routes/AllRoutesContent";
 import { Metadata } from "next";
 import React from "react";
 
@@ -14,9 +13,7 @@ export default function AllRoutesPage() {
     <div>
       <PageBreadcrumb pageTitle="All Routes" />
       <div className="space-y-6">
-        <ComponentCard title="All Routes">
-          <AllRoutesTable />
-        </ComponentCard>
+        <AllRoutesContent />
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ interface TableBodyProps {
 interface TableRowProps {
   children: ReactNode; // Cells (th or td)
   className?: string; // Optional className for styling
+  onClick?: () => void; // Optional click handler for data rows
 }
 
 // Props for TableCell
@@ -48,8 +49,19 @@ const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
 };
 
 // TableRow Component
-const TableRow: React.FC<TableRowProps> = ({ children, className }) => {
-  return <tr className={className}>{children}</tr>;
+const TableRow: React.FC<TableRowProps> = ({ children, className, onClick }) => {
+  const isClickable = !!onClick;
+  const rowClassName = [
+    className,
+    isClickable && "cursor-pointer hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-colors",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return (
+    <tr className={rowClassName} onClick={onClick} role={isClickable ? "button" : undefined}>
+      {children}
+    </tr>
+  );
 };
 
 // TableCell Component

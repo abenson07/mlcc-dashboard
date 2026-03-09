@@ -1,8 +1,5 @@
-import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import ClaimedRoutesTable, {
-  ClaimedRoutesHeaderAction,
-} from "@/components/tables/ClaimedRoutesTable";
+import ClaimedRoutesContent from "@/components/routes/ClaimedRoutesContent";
 import { Metadata } from "next";
 import React from "react";
 
@@ -16,12 +13,7 @@ export default function ClaimedRoutesPage() {
     <div>
       <PageBreadcrumb pageTitle="Claimed Routes" />
       <div className="space-y-6">
-        <ComponentCard
-          title="Claimed Routes"
-          action={<ClaimedRoutesHeaderAction />}
-        >
-          <ClaimedRoutesTable />
-        </ComponentCard>
+        <ClaimedRoutesContent />
       </div>
     </div>
   );

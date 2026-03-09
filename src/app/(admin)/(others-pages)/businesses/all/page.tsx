@@ -1,5 +1,5 @@
-import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import AllBusinessesContent from "@/components/businesses/AllBusinessesContent";
 import { Metadata } from "next";
 import React from "react";
 
@@ -13,11 +13,7 @@ export default function AllBusinessesPage() {
     <div>
       <PageBreadcrumb pageTitle="All Businesses" />
       <div className="space-y-6">
-        <ComponentCard title="All Businesses">
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12">
-            Coming Soon
-          </p>
-        </ComponentCard>
+        <AllBusinessesContent />
       </div>
     </div>
   );

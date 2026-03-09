@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { CopyableEmail } from "@/components/common/CopyableEmail";
 import { usePeople } from "hooks";
+import type { PersonWithMembership } from "hooks";
 
 function formatDate(dateString: string | null): string {
   if (!dateString) return "—";
@@ -25,7 +26,11 @@ function formatDate(dateString: string | null): string {
   }
 }
 
-export default function NeighborsMembersTable() {
+interface NeighborsMembersTableProps {
+  onRowClick?: (person: PersonWithMembership) => void;
+}
+
+export default function NeighborsMembersTable({ onRowClick }: NeighborsMembersTableProps) {
   const { people, loading, error } = usePeople({
     autoFetch: true,
     filters: { hasMembership: true, membershipStatus: "active" },
@@ -93,7 +98,10 @@ export default function NeighborsMembersTable() {
                 </TableRow>
               ) : (
                 people.map((person) => (
-                  <TableRow key={person.id}>
+                  <TableRow
+                    key={person.id}
+                    onClick={onRowClick ? () => onRowClick(person) : undefined}
+                  >
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex flex-col">
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
