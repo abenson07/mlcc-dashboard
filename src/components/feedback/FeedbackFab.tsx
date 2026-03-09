@@ -64,7 +64,7 @@ export default function FeedbackFab() {
             ...(errorLog ? { errorLog } : {}),
           }),
         });
-        const data = await res.json().catch(() => ({}));
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
         if (!res.ok) {
           toast.error(data.error ?? "Failed to submit.");
           return;
@@ -101,7 +101,7 @@ export default function FeedbackFab() {
             details,
           }),
         });
-        const data = await res.json().catch(() => ({}));
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
         if (!res.ok) {
           toast.error(data.error ?? "Failed to submit.");
           return;
