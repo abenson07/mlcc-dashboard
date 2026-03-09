@@ -13,7 +13,11 @@ import { CopyableEmail } from "@/components/common/CopyableEmail";
 import { useBusinesses } from "hooks";
 import type { BusinessWithDetails } from "hooks";
 
-export default function AllBusinessesTable() {
+export interface AllBusinessesTableProps {
+  onRowClick?: (business: BusinessWithDetails) => void;
+}
+
+export default function AllBusinessesTable({ onRowClick }: AllBusinessesTableProps) {
   const { businesses, loading, error } = useBusinesses({ autoFetch: true });
 
   if (loading) {
@@ -96,7 +100,10 @@ export default function AllBusinessesTable() {
                 </TableRow>
               ) : (
                 businesses.map((business: BusinessWithDetails) => (
-                  <TableRow key={business.id}>
+                  <TableRow
+                    key={business.id}
+                    onClick={onRowClick ? () => onRowClick(business) : undefined}
+                  >
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <span className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                         {business.business_name ?? "—"}

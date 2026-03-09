@@ -32,7 +32,11 @@ function isCovered(route: RouteWithDeliverer): boolean {
   return !!(route.primary_deliverer_id || route.secondary_deliverer_id);
 }
 
-export default function AllRoutesTable() {
+export interface AllRoutesTableProps {
+  onRowClick?: (route: RouteWithDeliverer) => void;
+}
+
+export default function AllRoutesTable({ onRowClick }: AllRoutesTableProps) {
   const { routes, loading, error } = useRoutes({ autoFetch: true });
 
   if (loading) {
@@ -100,7 +104,10 @@ export default function AllRoutesTable() {
                   const deliverer = getDelivererDisplay(route);
                   const covered = isCovered(route);
                   return (
-                    <TableRow key={route.id}>
+                    <TableRow
+                      key={route.id}
+                      onClick={onRowClick ? () => onRowClick(route) : undefined}
+                    >
                       <TableCell className="px-5 py-4 sm:px-6 text-start">
                         <div className="flex flex-col">
                           <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">

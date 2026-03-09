@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/table";
 import { CopyableEmail } from "@/components/common/CopyableEmail";
 import { usePeople } from "hooks";
+import type { PersonWithMembership } from "hooks";
+
+export interface AllNeighborsTableProps {
+  onRowClick?: (person: PersonWithMembership) => void;
+}
 
 function formatCreatedAt(dateString: string | null): string {
   if (!dateString) return "—";
@@ -25,7 +30,7 @@ function formatCreatedAt(dateString: string | null): string {
   }
 }
 
-export default function AllNeighborsTable() {
+export default function AllNeighborsTable({ onRowClick }: AllNeighborsTableProps) {
   const { people, loading, error } = usePeople({ autoFetch: true });
 
   if (loading) {
@@ -84,7 +89,10 @@ export default function AllNeighborsTable() {
                 </TableRow>
               ) : (
                 people.map((person) => (
-                  <TableRow key={person.id}>
+                  <TableRow
+                    key={person.id}
+                    onClick={onRowClick ? () => onRowClick(person) : undefined}
+                  >
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex flex-col">
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">

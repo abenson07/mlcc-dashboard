@@ -1,6 +1,5 @@
-import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import OpenRoutesTable from "@/components/tables/OpenRoutesTable";
+import OpenRoutesContent from "@/components/routes/OpenRoutesContent";
 import { Metadata } from "next";
 import React from "react";
 
@@ -14,9 +13,7 @@ export default function OpenRoutesPage() {
     <div>
       <PageBreadcrumb pageTitle="Open Routes" />
       <div className="space-y-6">
-        <ComponentCard title="Open Routes">
-          <OpenRoutesTable />
-        </ComponentCard>
+        <OpenRoutesContent />
       </div>
     </div>
   );

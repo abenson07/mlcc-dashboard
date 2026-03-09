@@ -5,24 +5,44 @@ import ComponentCard from "@/components/common/ComponentCard";
 import AllNeighborsTable from "@/components/tables/AllNeighborsTable";
 import AddNeighborModal from "./AddNeighborModal";
 import Button from "@/components/ui/button/Button";
+import TableWithDetailSidebar from "@/components/detail-sidebar/TableWithDetailSidebar";
+import NeighborDetailSidebar from "@/components/detail-sidebar/NeighborDetailSidebar";
 import { usePeople } from "hooks";
+import type { PersonWithMembership } from "hooks";
 
 export default function AllNeighborsContent() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState<PersonWithMembership | null>(null);
   const { refetch } = usePeople({ autoFetch: true });
 
   return (
     <>
-      <ComponentCard
-        title="All Neighbors"
-        action={
-          <Button size="sm" onClick={() => setModalOpen(true)}>
-            Add Neighbor
-          </Button>
-        }
+      <TableWithDetailSidebar
+        selectedItem={selectedPerson}
+        onClose={() => setSelectedPerson(null)}
+        sidebarTitle="Neighbor details"
+        renderSidebar={(item) => (
+          <NeighborDetailSidebar
+            item={item}
+            onClose={() => setSelectedPerson(null)}
+            onSaved={(updated) => {
+              setSelectedPerson(updated);
+              refetch();
+            }}
+          />
+        )}
       >
-        <AllNeighborsTable />
-      </ComponentCard>
+        <ComponentCard
+          title="All Neighbors"
+          action={
+            <Button size="sm" onClick={() => setModalOpen(true)}>
+              Add Neighbor
+            </Button>
+          }
+        >
+          <AllNeighborsTable onRowClick={setSelectedPerson} />
+        </ComponentCard>
+      </TableWithDetailSidebar>
       <AddNeighborModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

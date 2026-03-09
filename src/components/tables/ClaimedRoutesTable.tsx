@@ -78,7 +78,11 @@ export function ClaimedRoutesHeaderAction() {
   );
 }
 
-export default function ClaimedRoutesTable() {
+export interface ClaimedRoutesTableProps {
+  onRowClick?: (route: RouteWithDeliverer) => void;
+}
+
+export default function ClaimedRoutesTable({ onRowClick }: ClaimedRoutesTableProps) {
   const { routes, loading, error, update } = useRoutes({
     autoFetch: true,
     filters: { claimedOnly: true },
@@ -185,7 +189,10 @@ export default function ClaimedRoutesTable() {
                     }
                   };
                   return (
-                    <TableRow key={route.id}>
+                    <TableRow
+                      key={route.id}
+                      onClick={onRowClick ? () => onRowClick(route) : undefined}
+                    >
                       <TableCell className="px-5 py-4 sm:px-6 text-start">
                         <div className="flex flex-col gap-0.5">
                           <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -229,7 +236,10 @@ export default function ClaimedRoutesTable() {
                         {route.leaflet_count ?? "—"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-end">
-                        <div className="flex items-center justify-end gap-2">
+                        <div
+                          className="flex items-center justify-end gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Button
                             variant="outline"
                             size="sm"
