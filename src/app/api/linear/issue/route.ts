@@ -21,6 +21,11 @@ function sanitize(str: string, maxLen: number): string {
   return String(str).slice(0, maxLen).trim();
 }
 
+interface LinearGraphQLResponse<T> {
+  data?: T;
+  errors?: Array<{ message?: string }>;
+}
+
 async function linearGraphQL<T>(
   apiKey: string,
   query: string,
@@ -38,9 +43,9 @@ async function linearGraphQL<T>(
     const text = await res.text();
     throw new Error(`Linear API error ${res.status}: ${text}`);
   }
-  const json = await res.json();
+  const json = (await res.json()) as LinearGraphQLResponse<T>;
   if (json.errors?.length) {
-    throw new Error(json.errors.map((e: { message?: string }) => e.message).join("; "));
+    throw new Error(json.errors.map((e) => e.message).join("; "));
   }
   return json.data as T;
 }
