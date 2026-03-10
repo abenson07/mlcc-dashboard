@@ -38,14 +38,20 @@ async function fetchAllActiveSubscriptions(stripe: Stripe): Promise<Stripe.Subsc
   return subscriptions;
 }
 
-function getCustomerEmail(customer: Stripe.Customer | string): string | null {
+function getCustomerEmail(
+  customer: Stripe.Customer | Stripe.DeletedCustomer | string
+): string | null {
   if (typeof customer === "string") return null;
+  if ("deleted" in customer && customer.deleted) return null;
   const email = customer.email?.trim();
   return email ?? null;
 }
 
-function getCustomerName(customer: Stripe.Customer | string): string {
+function getCustomerName(
+  customer: Stripe.Customer | Stripe.DeletedCustomer | string
+): string {
   if (typeof customer === "string") return "—";
+  if ("deleted" in customer && customer.deleted) return "—";
   const name = customer.name?.trim();
   return name ?? "—";
 }
@@ -112,13 +118,17 @@ export async function GET() {
               ? String((product as { name?: string }).name ?? "—")
               : "—";
           const extra = items.length > 1 ? ` (+${items.length - 1} more)` : "";
+          const subWithPeriod = sub as Stripe.Subscription & {
+            current_period_start?: number;
+            current_period_end?: number;
+          };
           return {
             id: sub.id,
             status: sub.status ?? "—",
             productName: productName + extra,
             priceId: price?.id ?? "—",
-            currentPeriodStart: sub.current_period_start,
-            currentPeriodEnd: sub.current_period_end,
+            currentPeriodStart: subWithPeriod.current_period_start ?? 0,
+            currentPeriodEnd: subWithPeriod.current_period_end ?? 0,
           };
         }),
       });

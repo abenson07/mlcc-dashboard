@@ -20,10 +20,10 @@ export default function DuplicateMembersContent() {
       try {
         const res = await fetch("/api/stripe/duplicate-members");
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
           throw new Error(data.error ?? `Request failed: ${res.status}`);
         }
-        const data = await res.json();
+        const data = (await res.json()) as { duplicateMembers?: DuplicateMember[] };
         if (!cancelled) {
           setDuplicateMembers(data.duplicateMembers ?? []);
         }

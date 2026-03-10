@@ -15,7 +15,7 @@ async function fetchProjectIssues(projectId: string) {
     `/api/linear/project-issues?projectId=${encodeURIComponent(projectId)}`
   );
   if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(data.error || `Failed to fetch issues (${res.status})`);
   }
   return res.json() as Promise<Array<{
@@ -111,7 +111,7 @@ export default function FeaturesContent({ surface }: FeaturesContentProps) {
           }),
         });
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
           throw new Error(data.error || "Vote failed");
         }
         setLastUpvoteAt((prev) => ({ ...prev, [item.id]: Date.now() }));
