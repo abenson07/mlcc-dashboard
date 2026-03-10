@@ -18,6 +18,7 @@ import {
   PieChartIcon,
   PlugInIcon,
   TableIcon,
+  TaskIcon,
   UserCircleIcon,
 } from "../icons/index";
 
@@ -58,6 +59,15 @@ const businessGroup = {
     { name: "All Businesses", path: "/businesses/all", pro: false },
     { name: "Members", path: "/businesses/members", pro: false },
     { name: "Sponsors", path: "/businesses/sponsors", pro: false },
+  ] as NavLink[],
+};
+
+const featuresGroup = {
+  title: "Features",
+  icon: <TaskIcon />,
+  items: [
+    { name: "Dashboard", path: "/features/dashboard", pro: false },
+    { name: "Website", path: "/features/website", pro: false },
   ] as NavLink[],
 };
 
@@ -420,6 +430,7 @@ const AppSidebar: React.FC = () => {
             {renderLinkGroup(neighborsGroup)}
             {renderLinkGroup(routesGroup)}
             {renderLinkGroup(businessGroup)}
+            {renderLinkGroup(featuresGroup)}
             {!hideSidebarMenuSections && (
               <>
                 <div>
