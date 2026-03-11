@@ -5,6 +5,7 @@ import ComponentCard from "@/components/common/ComponentCard";
 import { CopyableEmail } from "@/components/common/CopyableEmail";
 import DuplicateMemberSubscriptionsTable from "@/components/tables/DuplicateMemberSubscriptionsTable";
 import type { DuplicateMember } from "@/app/api/stripe/duplicate-members/route";
+import { getApiBase } from "@/lib/apiBase";
 
 export default function DuplicateMembersContent() {
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ export default function DuplicateMembersContent() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/stripe/duplicate-members");
+        const res = await fetch(`${getApiBase()}/api/stripe/duplicate-members`);
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as { error?: string };
           throw new Error(data.error ?? `Request failed: ${res.status}`);

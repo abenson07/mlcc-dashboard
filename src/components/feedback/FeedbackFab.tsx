@@ -8,6 +8,7 @@ import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import TextArea from "@/components/form/input/TextArea";
 import { useModal } from "@/hooks/useModal";
+import { getApiBase } from "@/lib/apiBase";
 import { installConsoleBuffer, getConsoleSnapshot } from "./consoleBuffer";
 
 type FeedbackType = "bug" | "feature";
@@ -54,7 +55,7 @@ export default function FeedbackFab() {
         } catch {
           // never fail submission if console capture is missing or throws
         }
-        const res = await fetch("/api/linear/issue", {
+        const res = await fetch(`${getApiBase()}/api/linear/issue`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -92,7 +93,7 @@ export default function FeedbackFab() {
       setSubmitting(true);
       try {
         const details = `**What feature do you want?**\n${feature}\n\n**Submitted by:** ${name}`;
-        const res = await fetch("/api/linear/issue", {
+        const res = await fetch(`${getApiBase()}/api/linear/issue`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

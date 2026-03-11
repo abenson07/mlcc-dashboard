@@ -2,12 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { DashboardData, ChartDataPoint, TableRow } from "@/data/dashboard";
+import { getApiBase } from "@/lib/apiBase";
 
-const basePath = "/dashboard";
 const apiUrl =
   typeof window !== "undefined" && window.location.origin
-    ? `${window.location.origin}${basePath}/api/dashboard/membership-metrics`
-    : `${basePath}/api/dashboard/membership-metrics`;
+    ? `${window.location.origin}${getApiBase()}/api/dashboard/membership-metrics`
+    : `${getApiBase()}/api/dashboard/membership-metrics`;
 
 async function fetchDashboardData(): Promise<DashboardData> {
   const response = await fetch(apiUrl);

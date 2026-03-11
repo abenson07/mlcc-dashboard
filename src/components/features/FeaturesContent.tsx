@@ -8,11 +8,13 @@ import FeaturesTable from "@/components/features/FeaturesTable";
 import FeatureDetailSidebar from "@/components/features/FeatureDetailSidebar";
 import type { FeatureItem, FeatureSurface } from "@/components/features/features-types";
 import { PROJECT_IDS } from "@/components/features/features-types";
+import { getApiBase } from "@/lib/apiBase";
 import { supabaseClient } from "@/lib/supabaseClient";
 
 async function fetchProjectIssues(projectId: string) {
+  const base = getApiBase();
   const res = await fetch(
-    `/api/linear/project-issues?projectId=${encodeURIComponent(projectId)}`
+    `${base}/api/linear/project-issues?projectId=${encodeURIComponent(projectId)}`
   );
   if (!res.ok) {
     const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -102,7 +104,7 @@ export default function FeaturesContent({ surface }: FeaturesContentProps) {
     async (item: FeatureItem) => {
       setVotingId(item.id);
       try {
-        const res = await fetch("/api/features/vote", {
+        const res = await fetch(`${getApiBase()}/api/features/vote`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
