@@ -14,7 +14,7 @@ When logging in on the **deployed** app:
 4. **Next:** “An error occurred in the Server Components render…” (message omitted in production).
 
 So we have a **server-side 500** (and/or a Server Component throwing) plus a **client-side hydration error** (#418). The 500 may be the cause; the hydration error may be a consequence or a separate issue.
-
+c
 ---
 
 ## Root cause (from production logs)

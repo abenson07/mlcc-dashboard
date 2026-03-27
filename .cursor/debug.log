@@ -1,0 +1,210 @@
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510840,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /routes/claimed couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510843,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510894,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /bar-chart couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510897,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510917,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /alerts couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510917,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510918,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /form-elements couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510918,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510924,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /avatars couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510925,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510928,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /line-chart couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510928,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510930,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /routes/open couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510931,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510936,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /routes/deliverers couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510936,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510937,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /basic-tables couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510937,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510941,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /badge couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510942,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1770991510942,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() throw","data":{"err":"Error: Dynamic server usage: Route /blank couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error","name":"Error"},"timestamp":1770991510942,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1771274682602,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1771274682615,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1771274682616,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1771274682602,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1771274682615,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1771274682616,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026359240,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026359259,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026359260,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026359264,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026535092,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026535201,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026535202,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026535204,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"action entry","data":{"hasEmail":true,"hasPassword":true},"timestamp":1772026548343,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026548343,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026548347,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026548347,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026548348,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"createClient ok","data":{"hasClient":true},"timestamp":1772026548349,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"signInWithPassword result","data":{"hasError":false,"errorMessage":null},"timestamp":1772026548680,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"login/actions.ts:signIn","message":"signIn success","data":{"userId":"209e8a62-3093-4a9d-a66c-fafa61939907","email":"alexbensonux@gmail.com"},"timestamp":1772026548680,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"login/actions.ts:signIn","message":"before redirect","data":{"target":"/neighbors/all"},"timestamp":1772026548681,"sessionId":"debug-session","hypothesisId":"H3"}
+{"location":"login/actions.ts:signIn","message":"redirect throw","data":{"err":"Error: NEXT_REDIRECT","name":"Error"},"timestamp":1772026548681,"sessionId":"debug-session","hypothesisId":"H3"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026548990,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026549001,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026549002,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026549005,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"action entry","data":{"hasEmail":true,"hasPassword":true},"timestamp":1772026578757,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026578758,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026578762,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026578763,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026578764,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"createClient ok","data":{"hasClient":true},"timestamp":1772026578765,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"signInWithPassword result","data":{"hasError":false,"errorMessage":null},"timestamp":1772026579058,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"login/actions.ts:signIn","message":"signIn success","data":{"userId":"209e8a62-3093-4a9d-a66c-fafa61939907","email":"alexbensonux@gmail.com"},"timestamp":1772026579059,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"login/actions.ts:signIn","message":"before redirect","data":{"target":"/neighbors/all"},"timestamp":1772026579059,"sessionId":"debug-session","hypothesisId":"H3"}
+{"location":"login/actions.ts:signIn","message":"redirect throw","data":{"err":"Error: NEXT_REDIRECT","name":"Error"},"timestamp":1772026579060,"sessionId":"debug-session","hypothesisId":"H3"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026579325,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026579346,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026579347,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026579351,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026589103,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026589122,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026589122,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026589124,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"action entry","data":{"hasEmail":true,"hasPassword":true},"timestamp":1772026594730,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026594730,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026594732,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026594732,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026594733,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"createClient ok","data":{"hasClient":true},"timestamp":1772026594733,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"login/actions.ts:signIn","message":"signInWithPassword result","data":{"hasError":false,"errorMessage":null},"timestamp":1772026595021,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"login/actions.ts:signIn","message":"signIn success","data":{"userId":"209e8a62-3093-4a9d-a66c-fafa61939907","email":"alexbensonux@gmail.com"},"timestamp":1772026595022,"sessionId":"debug-session","hypothesisId":"H2"}
+{"location":"login/actions.ts:signIn","message":"before redirect","data":{"target":"/neighbors/all"},"timestamp":1772026595022,"sessionId":"debug-session","hypothesisId":"H3"}
+{"location":"login/actions.ts:signIn","message":"redirect throw","data":{"err":"Error: NEXT_REDIRECT","name":"Error"},"timestamp":1772026595023,"sessionId":"debug-session","hypothesisId":"H3"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772026595265,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772026595279,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772026595281,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772026595282,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027126465,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027126518,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027126519,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027126522,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027126465,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027126518,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027126519,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027126522,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027134164,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027134192,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027134193,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027134197,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027134164,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027134192,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027134193,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027134197,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027134324,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027134324,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027134335,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027134337,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027134339,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027134335,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027134337,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027134339,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027135928,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027135928,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027136008,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027136008,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027136012,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027136008,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027136008,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027136012,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027136058,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027136058,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027136079,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027136080,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027136081,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027136079,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027136080,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027136081,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027137421,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027137421,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027137441,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027137442,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027137445,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027137441,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027137442,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027137445,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027137477,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027137477,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027137494,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027137495,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027137498,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027137494,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027137495,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027137498,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027143062,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027143175,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027143180,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027143196,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027143062,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027143175,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027143180,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027143196,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027556151,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027556195,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027556195,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027556201,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027556151,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027556195,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027556195,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027556201,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027556308,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027556308,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027556337,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027556338,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027556340,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027556337,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027556338,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027556340,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027558042,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027558042,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027558062,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027558062,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027558064,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027558062,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027558062,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027558064,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027559975,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027559975,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027560017,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027560018,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027560024,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027560017,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027560018,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027560024,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027562082,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027562082,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027562100,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027562101,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027562104,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027562100,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027562101,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027562104,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027564213,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027564213,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027564236,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027564236,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027564243,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027564236,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027564236,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027564243,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027787603,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027787762,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027787763,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027787767,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027787603,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027787762,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027787763,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027787767,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027800225,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027800379,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027800379,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027800383,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027800225,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"cookies() ok","data":{},"timestamp":1772027800379,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"env before create","data":{"hasUrl":true,"hasKey":true},"timestamp":1772027800379,"sessionId":"debug-session","hypothesisId":"H1"}
+{"location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027800383,"sessionId":"debug-session","hypothesisId":"H1"}

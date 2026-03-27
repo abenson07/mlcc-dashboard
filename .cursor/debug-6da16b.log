@@ -1,0 +1,8 @@
+{"sessionId":"6da16b","location":"admin/layout.tsx","message":"entry","data":{},"timestamp":1772027787599,"hypothesisId":"H-C"}
+{"sessionId":"6da16b","location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027787602,"hypothesisId":"H-B"}
+{"sessionId":"6da16b","location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027787766,"hypothesisId":"H-B"}
+{"sessionId":"6da16b","location":"admin/layout.tsx","message":"getUser done","data":{"hasUser":true},"timestamp":1772027788355,"hypothesisId":"H-C"}
+{"sessionId":"6da16b","location":"admin/layout.tsx","message":"entry","data":{},"timestamp":1772027800220,"hypothesisId":"H-C"}
+{"sessionId":"6da16b","location":"server.ts:createClient","message":"entry","data":{},"timestamp":1772027800225,"hypothesisId":"H-B"}
+{"sessionId":"6da16b","location":"server.ts:createClient","message":"client created","data":{},"timestamp":1772027800383,"hypothesisId":"H-B"}
+{"sessionId":"6da16b","location":"admin/layout.tsx","message":"getUser done","data":{"hasUser":true},"timestamp":1772027800613,"hypothesisId":"H-C"}

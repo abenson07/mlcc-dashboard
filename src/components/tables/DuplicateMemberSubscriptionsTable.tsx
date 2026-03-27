@@ -98,8 +98,9 @@ export default function DuplicateMemberSubscriptionsTable({
                       </span>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-end text-gray-500 text-theme-sm dark:text-gray-400">
-                      {formatTimestamp(sub.currentPeriodStart)} –{" "}
-                      {formatTimestamp(sub.currentPeriodEnd)}
+                      {sub.currentPeriodStart != null && sub.currentPeriodEnd != null
+                        ? `${formatTimestamp(sub.currentPeriodStart)} – ${formatTimestamp(sub.currentPeriodEnd)}`
+                        : "—"}
                     </TableCell>
                   </TableRow>
                 ))

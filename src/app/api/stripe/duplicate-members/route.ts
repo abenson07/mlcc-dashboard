@@ -6,8 +6,8 @@ export interface DuplicateMemberSubscription {
   status: string;
   productName: string;
   priceId: string;
-  currentPeriodStart: number;
-  currentPeriodEnd: number;
+  currentPeriodStart: number | null;
+  currentPeriodEnd: number | null;
 }
 
 export interface DuplicateMember {
@@ -27,7 +27,7 @@ async function fetchAllActiveSubscriptions(stripe: Stripe): Promise<Stripe.Subsc
       status: "active",
       limit,
       ...(startingAfter ? { starting_after: startingAfter } : {}),
-      expand: ["data.customer", "data.items.data.price.product"],
+      expand: ["data.customer", "data.items.data.price", "data.latest_invoice"],
     });
 
     subscriptions.push(...response.data);
@@ -112,23 +112,36 @@ export async function GET() {
           const items = sub.items.data;
           const first = items[0];
           const price = first?.price;
-          const product = price && typeof price.product !== "string" ? price.product : null;
+          // Product is not expanded (Stripe allows max 4 levels); use price nickname or id for display
           const productName =
-            product && typeof product === "object" && "name" in product
-              ? String((product as { name?: string }).name ?? "—")
-              : "—";
+            price && typeof price === "object" && "nickname" in price && price.nickname
+              ? String(price.nickname)
+              : price?.id ?? "—";
           const extra = items.length > 1 ? ` (+${items.length - 1} more)` : "";
-          const subWithPeriod = sub as Stripe.Subscription & {
-            current_period_start?: number;
-            current_period_end?: number;
-          };
+          // Use subscription's current_period_* (the period you're in right now). Fall back to
+          // latest invoice period only when subscription period is missing (e.g. list API quirk).
+          const subStart = (sub as Record<string, unknown>).current_period_start as number | undefined;
+          const subEnd = (sub as Record<string, unknown>).current_period_end as number | undefined;
+          const inv = sub.latest_invoice;
+          const invStart =
+            typeof inv === "object" && inv !== null && "period_start" in inv
+              ? Number((inv as { period_start: number }).period_start)
+              : undefined;
+          const invEnd =
+            typeof inv === "object" && inv !== null && "period_end" in inv
+              ? Number((inv as { period_end: number }).period_end)
+              : undefined;
+          const periodStart = typeof subStart === "number" && subStart > 0 ? subStart : invStart;
+          const periodEnd = typeof subEnd === "number" && subEnd > 0 ? subEnd : invEnd;
+          const validStart = typeof periodStart === "number" && !Number.isNaN(periodStart) && periodStart > 0;
+          const validEnd = typeof periodEnd === "number" && !Number.isNaN(periodEnd) && periodEnd > 0;
           return {
             id: sub.id,
             status: sub.status ?? "—",
             productName: productName + extra,
             priceId: price?.id ?? "—",
-            currentPeriodStart: subWithPeriod.current_period_start ?? 0,
-            currentPeriodEnd: subWithPeriod.current_period_end ?? 0,
+            currentPeriodStart: validStart ? periodStart : null,
+            currentPeriodEnd: validEnd ? periodEnd : null,
           };
         }),
       });

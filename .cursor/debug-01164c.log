@@ -1,0 +1,50 @@
+{"sessionId":"01164c","location":"layout.tsx:entry","message":"AdminLayout start","timestamp":1773110287363,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"dashboard/page.tsx:entry","message":"DashboardFeaturesPage render","timestamp":1773110287366,"hypothesisId":"B"}
+{"sessionId":"01164c","location":"layout.tsx:afterCreateClient","message":"createClient ok","timestamp":1773110287527,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"layout.tsx:afterGetUser","message":"getUser ok","data":{"hasUser":true},"timestamp":1773110288140,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"layout.tsx:beforeReturn","message":"AdminLayout returning children","timestamp":1773110288140,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288190,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288571,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288574,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288560,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288571,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288558,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288574,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288950,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110288951,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110289131,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110289131,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313265,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313266,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313276,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313276,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313468,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313468,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313532,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"website"},"timestamp":1773110313533,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"dashboard/page.tsx:entry","message":"DashboardFeaturesPage render","timestamp":1773110314114,"hypothesisId":"B"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110314129,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110314129,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110314134,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110314134,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"layout.tsx:entry","message":"AdminLayout start","timestamp":1773110324885,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"dashboard/page.tsx:entry","message":"DashboardFeaturesPage render","timestamp":1773110324888,"hypothesisId":"B"}
+{"sessionId":"01164c","location":"layout.tsx:afterCreateClient","message":"createClient ok","timestamp":1773110325038,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"layout.tsx:afterGetUser","message":"getUser ok","data":{"hasUser":true},"timestamp":1773110325127,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"layout.tsx:beforeReturn","message":"AdminLayout returning children","timestamp":1773110325127,"hypothesisId":"A"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325159,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325432,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325433,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325489,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325489,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325506,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325507,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325658,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110325658,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110326417,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110326417,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"dashboard/page.tsx:entry","message":"DashboardFeaturesPage render","timestamp":1773110359392,"hypothesisId":"B"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110359427,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110359427,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110363188,"hypothesisId":"C"}
+{"sessionId":"01164c","location":"FeaturesContent.tsx:entry","message":"FeaturesContent first line","data":{"surface":"dashboard"},"timestamp":1773110363188,"hypothesisId":"C"}

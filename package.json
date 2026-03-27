@@ -64,6 +64,7 @@
     "@react-jvectormap/world": {
       "react": "^16.8.0 || ^17 || ^18 || ^19",
       "react-dom": "^16.8.0 || ^17 || ^18 || ^19"
-    }
+    },
+    "@smithy/service-error-classification": "4.2.9"
   }
 }
