@@ -13,3 +13,4 @@ export * from "./events";
 export * from "./event_volunteers";
 export * from "./payments";
 export * from "./sponsorships";
+export * from "./membership_thank_you_email_logs";
