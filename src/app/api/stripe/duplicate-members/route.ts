@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+export type DuplicateMatchType = "email" | "address";
+
 export interface DuplicateMemberSubscription {
+  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  normalizedAddress: string | null;
   id: string;
   status: string;
+  productId: string;
   productName: string;
   priceId: string;
   currentPeriodStart: number | null;
@@ -11,9 +18,11 @@ export interface DuplicateMemberSubscription {
 }
 
 export interface DuplicateMember {
-  customerId: string;
-  name: string;
-  email: string;
+  id: string;
+  matchType: DuplicateMatchType;
+  matchValue: string;
+  productId: string;
+  productName: string;
   subscriptions: DuplicateMemberSubscription[];
 }
 
@@ -27,7 +36,7 @@ async function fetchAllActiveSubscriptions(stripe: Stripe): Promise<Stripe.Subsc
       status: "active",
       limit,
       ...(startingAfter ? { starting_after: startingAfter } : {}),
-      expand: ["data.customer", "data.items.data.price", "data.latest_invoice"],
+      expand: ["data.customer", "data.items.data.price", "data.items.data.price.product", "data.latest_invoice"],
     });
 
     subscriptions.push(...response.data);
@@ -56,6 +65,45 @@ function getCustomerName(
   return name ?? "—";
 }
 
+function normalizeEmail(value: string | null): string | null {
+  if (!value) return null;
+  const normalized = value.trim().toLowerCase();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function normalizeAddress(
+  customer: Stripe.Customer | Stripe.DeletedCustomer | string
+): string | null {
+  if (typeof customer === "string") return null;
+  if ("deleted" in customer && customer.deleted) return null;
+  const address = customer.address;
+  if (!address) return null;
+
+  const parts = [
+    address.line1,
+    address.line2,
+    address.city,
+    address.state,
+    address.postal_code,
+    address.country,
+  ]
+    .map((part) => String(part ?? "").trim().toLowerCase())
+    .filter(Boolean);
+
+  if (parts.length === 0) return null;
+  return parts.join("|");
+}
+
+function getMembershipProductIds(): Set<string> {
+  const raw = process.env.STRIPE_MEMBERSHIP_PRODUCT_IDS ?? process.env.MEMBERSHIP_PRODUCT_IDS ?? "";
+  return new Set(
+    raw
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean)
+  );
+}
+
 export async function GET() {
   const secret = process.env.STRIPE_SECRET_KEY;
   if (!secret) {
@@ -65,90 +113,142 @@ export async function GET() {
     );
   }
 
+  const membershipProductIds = getMembershipProductIds();
+  if (membershipProductIds.size === 0) {
+    return NextResponse.json(
+      {
+        error:
+          "Membership product IDs are not configured. Set STRIPE_MEMBERSHIP_PRODUCT_IDS as a comma-separated list.",
+      },
+      { status: 500 }
+    );
+  }
+
   const stripe = new Stripe(secret);
 
   try {
     const subscriptions = await fetchAllActiveSubscriptions(stripe);
 
-    // Group by customer email (lowercase). Each group keeps full subscription list per customer.
-    type Group = { customerId: string; name: string; email: string; subscriptions: Stripe.Subscription[] };
-    const byEmail = new Map<string, Group>();
+    type Group = {
+      id: string;
+      matchType: DuplicateMatchType;
+      matchValue: string;
+      productId: string;
+      productName: string;
+      subscriptions: DuplicateMemberSubscription[];
+    };
+
+    type Candidate = {
+      key: string;
+      matchType: DuplicateMatchType;
+      matchValue: string;
+      productId: string;
+      productName: string;
+      subscription: DuplicateMemberSubscription;
+    };
+
+    const candidates: Candidate[] = [];
 
     for (const sub of subscriptions) {
       const customer = sub.customer;
-      const email = getCustomerEmail(customer);
-      const emailKey = (email ?? "").toLowerCase();
-      if (!emailKey) continue;
-
-      const name = getCustomerName(customer);
+      const customerEmail = getCustomerEmail(customer) ?? "—";
+      const normalizedEmail = normalizeEmail(customerEmail);
+      const normalizedAddr = normalizeAddress(customer);
+      const customerName = getCustomerName(customer);
       const customerId = typeof customer === "string" ? customer : customer.id;
 
-      const existing = byEmail.get(emailKey);
-      if (existing) {
-        // Same email can be different Stripe customer IDs (duplicate accounts)
-        // We want to group by email and show all subscriptions for that email.
-        existing.subscriptions.push(sub);
-        // Prefer a name if we have one
-        if (name !== "—") existing.name = name;
-      } else {
-        byEmail.set(emailKey, {
+      const subStart = (sub as Record<string, unknown>).current_period_start as number | undefined;
+      const subEnd = (sub as Record<string, unknown>).current_period_end as number | undefined;
+      const inv = sub.latest_invoice;
+      const invStart =
+        typeof inv === "object" && inv !== null && "period_start" in inv
+          ? Number((inv as { period_start: number }).period_start)
+          : undefined;
+      const invEnd =
+        typeof inv === "object" && inv !== null && "period_end" in inv
+          ? Number((inv as { period_end: number }).period_end)
+          : undefined;
+      const periodStart = typeof subStart === "number" && subStart > 0 ? subStart : invStart;
+      const periodEnd = typeof subEnd === "number" && subEnd > 0 ? subEnd : invEnd;
+      const validStart = typeof periodStart === "number" && !Number.isNaN(periodStart) && periodStart > 0;
+      const validEnd = typeof periodEnd === "number" && !Number.isNaN(periodEnd) && periodEnd > 0;
+
+      for (const item of sub.items.data) {
+        const price = item.price;
+        const productId =
+          typeof price?.product === "string"
+            ? price.product
+            : (price?.product?.id ?? null);
+        if (!productId || !membershipProductIds.has(productId)) continue;
+
+        const priceProduct =
+          typeof price?.product === "string" ? null : (price?.product ?? null);
+        const productName =
+          priceProduct?.name ??
+          price?.nickname ??
+          productId;
+
+        const subscription: DuplicateMemberSubscription = {
           customerId,
-          name,
-          email: email!,
-          subscriptions: [sub],
-        });
+          customerName,
+          customerEmail,
+          normalizedAddress: normalizedAddr,
+          id: sub.id,
+          status: sub.status ?? "—",
+          productId,
+          productName,
+          priceId: price?.id ?? "—",
+          currentPeriodStart: validStart ? periodStart : null,
+          currentPeriodEnd: validEnd ? periodEnd : null,
+        };
+
+        if (normalizedEmail) {
+          candidates.push({
+            key: `email:${productId}:${normalizedEmail}`,
+            matchType: "email",
+            matchValue: normalizedEmail,
+            productId,
+            productName,
+            subscription,
+          });
+        }
+        if (normalizedAddr) {
+          candidates.push({
+            key: `address:${productId}:${normalizedAddr}`,
+            matchType: "address",
+            matchValue: normalizedAddr,
+            productId,
+            productName,
+            subscription,
+          });
+        }
       }
     }
 
-    // Only keep emails with 2+ active subscriptions
-    const duplicateMembers: DuplicateMember[] = [];
-    for (const [, group] of byEmail) {
-      if (group.subscriptions.length < 2) continue;
-      duplicateMembers.push({
-        customerId: group.customerId,
-        name: group.name,
-        email: group.email,
-        subscriptions: group.subscriptions.map((sub) => {
-          const items = sub.items.data;
-          const first = items[0];
-          const price = first?.price;
-          // Product is not expanded (Stripe allows max 4 levels); use price nickname or id for display
-          const productName =
-            price && typeof price === "object" && "nickname" in price && price.nickname
-              ? String(price.nickname)
-              : price?.id ?? "—";
-          const extra = items.length > 1 ? ` (+${items.length - 1} more)` : "";
-          // Use subscription's current_period_* (the period you're in right now). Fall back to
-          // latest invoice period only when subscription period is missing (e.g. list API quirk).
-          const subStart = (sub as Record<string, unknown>).current_period_start as number | undefined;
-          const subEnd = (sub as Record<string, unknown>).current_period_end as number | undefined;
-          const inv = sub.latest_invoice;
-          const invStart =
-            typeof inv === "object" && inv !== null && "period_start" in inv
-              ? Number((inv as { period_start: number }).period_start)
-              : undefined;
-          const invEnd =
-            typeof inv === "object" && inv !== null && "period_end" in inv
-              ? Number((inv as { period_end: number }).period_end)
-              : undefined;
-          const periodStart = typeof subStart === "number" && subStart > 0 ? subStart : invStart;
-          const periodEnd = typeof subEnd === "number" && subEnd > 0 ? subEnd : invEnd;
-          const validStart = typeof periodStart === "number" && !Number.isNaN(periodStart) && periodStart > 0;
-          const validEnd = typeof periodEnd === "number" && !Number.isNaN(periodEnd) && periodEnd > 0;
-          return {
-            id: sub.id,
-            status: sub.status ?? "—",
-            productName: productName + extra,
-            priceId: price?.id ?? "—",
-            currentPeriodStart: validStart ? periodStart : null,
-            currentPeriodEnd: validEnd ? periodEnd : null,
-          };
-        }),
-      });
+    const grouped = new Map<string, Group>();
+    for (const candidate of candidates) {
+      const existing = grouped.get(candidate.key);
+      if (!existing) {
+        grouped.set(candidate.key, {
+          id: candidate.key,
+          matchType: candidate.matchType,
+          matchValue: candidate.matchValue,
+          productId: candidate.productId,
+          productName: candidate.productName,
+          subscriptions: [candidate.subscription],
+        });
+      } else if (!existing.subscriptions.some((sub) => sub.id === candidate.subscription.id)) {
+        existing.subscriptions.push(candidate.subscription);
+      }
     }
 
-    // Sort by email
-    duplicateMembers.sort((a, b) => a.email.localeCompare(b.email));
+    const duplicateMembers = [...grouped.values()]
+      .filter((group) => group.subscriptions.length >= 2)
+      .sort((a, b) => {
+        const product = a.productName.localeCompare(b.productName);
+        if (product !== 0) return product;
+        return a.matchValue.localeCompare(b.matchValue);
+      });
 
     return NextResponse.json({ duplicateMembers });
   } catch (err) {

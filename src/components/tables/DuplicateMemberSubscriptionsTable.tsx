@@ -41,6 +41,12 @@ export default function DuplicateMemberSubscriptionsTable({
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
+                  Customer
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                   Subscription
                 </TableCell>
                 <TableCell
@@ -68,7 +74,7 @@ export default function DuplicateMemberSubscriptionsTable({
               {subscriptions.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={4}
+                    colSpan={5}
                     className="px-5 py-8 text-center text-gray-500 dark:text-gray-400"
                   >
                     No subscriptions.
@@ -77,6 +83,16 @@ export default function DuplicateMemberSubscriptionsTable({
               ) : (
                 subscriptions.map((sub) => (
                   <TableRow key={sub.id}>
+                    <TableCell className="px-5 py-4 text-start">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                          {sub.customerName}
+                        </span>
+                        <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
+                          {sub.customerEmail}
+                        </span>
+                      </div>
+                    </TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex flex-col gap-0.5">
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90 font-mono">
@@ -90,7 +106,12 @@ export default function DuplicateMemberSubscriptionsTable({
                       </div>
                     </TableCell>
                     <TableCell className="px-5 py-4 text-start text-theme-sm text-gray-800 dark:text-white/90">
-                      {sub.productName}
+                      <div className="flex flex-col gap-0.5">
+                        <span>{sub.productName}</span>
+                        <span className="block text-gray-500 text-theme-xs dark:text-gray-400 font-mono">
+                          {sub.productId}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-center">
                       <span className="inline-flex rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800 dark:bg-green-900/30 dark:text-green-200">

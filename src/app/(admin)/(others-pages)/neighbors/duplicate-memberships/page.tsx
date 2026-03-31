@@ -5,7 +5,8 @@ import React from "react";
 
 export const metadata: Metadata = {
   title: "Duplicate Members",
-  description: "Customers with the same email and two or more active subscriptions in Stripe",
+  description:
+    "Duplicate membership monitor by product, email, and normalized mailing address from active Stripe subscriptions",
 };
 
 export default function DuplicateMembershipsPage() {
