@@ -1,6 +1,7 @@
 /**
  * Events Schema
- * Based on Supabase schema
+ * Based on Supabase schema (for relational tables such as event_volunteers).
+ * Calendar UI reads/writes the Webflow Events CMS collection only.
  */
 
 export interface Events {

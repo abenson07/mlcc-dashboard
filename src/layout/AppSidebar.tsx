@@ -8,7 +8,6 @@ import {
   ArrowRightIcon,
   BoxCubeIcon,
   BoxIcon,
-  CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   GroupIcon,
@@ -68,6 +67,9 @@ const featuresGroup = {
   items: [
     { name: "Dashboard", path: "/features/dashboard", pro: false },
     { name: "Website", path: "/features/website", pro: false },
+    { name: "Banners", path: "/features/banners", pro: false },
+    { name: "Calendar", path: "/calendar", pro: false },
+    { name: "Upcoming events", path: "/events", pro: false },
   ] as NavLink[],
 };
 
@@ -76,11 +78,6 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
   },
   {
     icon: <UserCircleIcon />,

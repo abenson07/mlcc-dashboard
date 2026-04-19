@@ -19,4 +19,7 @@ export type {
   RoutesInsert,
   RoutesUpdate,
   Sponsorships,
+  Events,
+  EventsInsert,
+  EventsUpdate,
 } from "../../schemas";

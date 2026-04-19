@@ -120,8 +120,9 @@ export async function GET() {
           const extra = items.length > 1 ? ` (+${items.length - 1} more)` : "";
           // Use subscription's current_period_* (the period you're in right now). Fall back to
           // latest invoice period only when subscription period is missing (e.g. list API quirk).
-          const subStart = (sub as Record<string, unknown>).current_period_start as number | undefined;
-          const subEnd = (sub as Record<string, unknown>).current_period_end as number | undefined;
+          const subRec = sub as unknown as Record<string, unknown>;
+          const subStart = subRec.current_period_start as number | undefined;
+          const subEnd = subRec.current_period_end as number | undefined;
           const inv = sub.latest_invoice;
           const invStart =
             typeof inv === "object" && inv !== null && "period_start" in inv
