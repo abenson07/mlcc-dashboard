@@ -5,6 +5,10 @@ import { MoreDotIcon } from "@/icons";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
+import {
+  chartFontFamily,
+  mercuryChartPrimary,
+} from "@/lib/theme/chartDefaults";
 
 // Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
@@ -13,9 +17,9 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 
 export default function MonthlySalesChart() {
   const options: ApexOptions = {
-    colors: ["#16a34a"],
+    colors: [mercuryChartPrimary],
     chart: {
-      fontFamily: "Outfit, sans-serif",
+      fontFamily: chartFontFamily,
       type: "bar",
       height: 180,
       toolbar: {
@@ -64,7 +68,7 @@ export default function MonthlySalesChart() {
       show: true,
       position: "top",
       horizontalAlign: "left",
-      fontFamily: "Outfit",
+      fontFamily: chartFontFamily,
     },
     yaxis: {
       title: {

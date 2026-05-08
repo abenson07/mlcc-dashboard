@@ -4,6 +4,11 @@ import React from "react";
 import { ApexOptions } from "apexcharts";
 
 import dynamic from "next/dynamic";
+import {
+  chartFontFamily,
+  mercuryChartPrimary,
+  mercuryChartSecondary,
+} from "@/lib/theme/chartDefaults";
 // Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -16,9 +21,9 @@ export default function LineChartOne() {
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#16a34a", "#86efac"], // Define line colors
+    colors: [mercuryChartPrimary, mercuryChartSecondary],
     chart: {
-      fontFamily: "Outfit, sans-serif",
+      fontFamily: chartFontFamily,
       height: 310,
       type: "line", // Set the chart type to 'line'
       toolbar: {

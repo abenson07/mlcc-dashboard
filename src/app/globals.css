@@ -4,7 +4,11 @@
 
 @theme {
   --font-*: initial;
+  /* Fallback name for legacy utilities; real stacks come from next/font on <html>. */
   --font-outfit: Outfit, sans-serif;
+  --font-mercury-text: var(--font-mercury-body-stack), ui-sans-serif, system-ui, sans-serif;
+  --font-mercury-display: var(--font-mercury-heading-stack), ui-sans-serif, system-ui,
+    sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -15,6 +19,28 @@
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
+
+  /* Mercury type scale (see design system) */
+  --text-mercury-display: 28px;
+  --text-mercury-display--line-height: 36px;
+  --text-mercury-h1: 24px;
+  --text-mercury-h1--line-height: 32px;
+  --text-mercury-h2: 20.44px;
+  --text-mercury-h2--line-height: 28px;
+  --text-mercury-h3: 20px;
+  --text-mercury-h3--line-height: 28px;
+  --text-mercury-h4: 19px;
+  --text-mercury-h4--line-height: 26px;
+  --text-mercury-body-lg: 17px;
+  --text-mercury-body-lg--line-height: 28px;
+  --text-mercury-body: 16.6667px;
+  --text-mercury-body--line-height: 26px;
+  --text-mercury-small: 16px;
+  --text-mercury-small--line-height: 24px;
+  --text-mercury-xs: 15px;
+  --text-mercury-xs--line-height: 22px;
+  --text-mercury-caption: 14px;
+  --text-mercury-caption--line-height: 20px;
 
   --text-title-2xl: 72px;
   --text-title-2xl--line-height: 90px;
@@ -38,18 +64,35 @@
   --color-white: #ffffff;
   --color-black: #101828;
 
-  --color-brand-25: #f0fdf4;
-  --color-brand-50: #dcfce7;
-  --color-brand-100: #bbf7d0;
-  --color-brand-200: #86efac;
-  --color-brand-300: #4ade80;
-  --color-brand-400: #22c55e;
-  --color-brand-500: #16a34a;
-  --color-brand-600: #15803d;
-  --color-brand-700: #166534;
-  --color-brand-800: #14532d;
-  --color-brand-900: #14532d;
-  --color-brand-950: #052e16;
+  /* Mercury semantic palette */
+  --color-mercury-bg: #ffffff;
+  --color-mercury-sidebar-canvas: #fafafa;
+  --color-mercury-surface: #ffffff;
+  --color-mercury-surface-inverse: #363644;
+  --color-mercury-ink: #1e1e2a;
+  --color-mercury-muted: #707393;
+  --color-mercury-border-hairline: #fbfcfd;
+  --color-mercury-line: color-mix(in srgb, #b4b7c8 28%, #ffffff 72%);
+  --color-mercury-primary: #9fe870;
+  --color-mercury-primary-hover: #054d28;
+  --color-mercury-palette-muted: #b4b7c8;
+  --color-mercury-badge-tint: #b0e57a;
+  /* Dark text on light Wise green (#9fe870); use white when bg is #054d28 or darker */
+  --color-mercury-on-accent: #163300;
+
+  /* Brand ramp — Wise-inspired green (see docs/DESIGN.md) */
+  --color-brand-25: #fcfefa;
+  --color-brand-50: #f3fbeb;
+  --color-brand-100: #e4f7d4;
+  --color-brand-200: #cbeea8;
+  --color-brand-300: #b0e57a;
+  --color-brand-400: #a8e578;
+  --color-brand-500: #9fe870;
+  --color-brand-600: #054d28;
+  --color-brand-700: #043d20;
+  --color-brand-800: #032c18;
+  --color-brand-900: #021d10;
+  --color-brand-950: #011409;
 
   --color-blue-light-25: #f5fbff;
   --color-blue-light-50: #f0f9ff;
@@ -134,21 +177,21 @@
 
   --color-theme-purple-500: #7a5af8;
 
+  /* Chromatic (tinted) elevation — Mercury */
+  --shadow-mercury-low:
+    rgba(175, 178, 206, 0.56) 0px 0px 2px 0px, rgba(4, 4, 52, 0.1) 0px 1px 4px 0px;
+  --shadow-mercury-high: rgba(112, 115, 147, 0.1) 0px 0px 20px 0px;
+  --shadow-mercury-ambient-low:
+    rgba(183, 187, 219, 0.14) 0px 1px 4px 0px, rgba(175, 178, 206, 0.9) 0px 0px 1px 0px;
+
   --shadow-theme-md:
-    0px 4px 8px -2px rgba(16, 24, 40, 0.1),
-    0px 2px 4px -2px rgba(16, 24, 40, 0.06);
-  --shadow-theme-lg:
-    0px 12px 16px -4px rgba(16, 24, 40, 0.08),
-    0px 4px 6px -2px rgba(16, 24, 40, 0.03);
-  --shadow-theme-sm:
-    0px 1px 3px 0px rgba(16, 24, 40, 0.1),
-    0px 1px 2px 0px rgba(16, 24, 40, 0.06);
-  --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
-  --shadow-theme-xl:
-    0px 20px 24px -4px rgba(16, 24, 40, 0.08),
-    0px 8px 8px -4px rgba(16, 24, 40, 0.03);
-  --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
-  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+    rgba(175, 178, 206, 0.45) 0px 0px 2px 0px, rgba(4, 4, 52, 0.09) 0px 4px 8px 0px;
+  --shadow-theme-lg: var(--shadow-mercury-high);
+  --shadow-theme-sm: var(--shadow-mercury-low);
+  --shadow-theme-xs: var(--shadow-mercury-ambient-low);
+  --shadow-theme-xl: var(--shadow-mercury-high);
+  --shadow-datepicker: -5px 0 0 #363644, 5px 0 0 #363644;
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(159, 232, 112, 0.28);
   --shadow-slider-navigation:
     0px 1px 2px 0px rgba(16, 24, 40, 0.1), 0px 1px 3px 0px rgba(16, 24, 40, 0.1);
   --shadow-tooltip:
@@ -165,6 +208,12 @@
   --z-index-9999: 9999;
   --z-index-99999: 99999;
   --z-index-999999: 999999;
+
+  --radius-mercury-subtle: 4px;
+  --radius-mercury-button: 8px;
+  --radius-mercury-card: 12px;
+  --radius-mercury-button-lg: 16px;
+  --radius-mercury-pill: 100px;
 }
 
 /*
@@ -181,39 +230,65 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-mercury-line);
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply relative z-1 bg-mercury-bg font-mercury-text text-mercury-body-lg font-normal text-mercury-ink antialiased;
+  }
+  h1 {
+    @apply font-mercury-display text-mercury-display font-[450] tracking-normal text-mercury-ink;
+  }
+  h2 {
+    @apply font-mercury-display text-mercury-h1 font-[450] tracking-normal text-mercury-ink;
+  }
+  h3 {
+    @apply font-mercury-display text-mercury-h2 antialiased font-[450] tracking-normal text-mercury-ink;
+  }
+  h4 {
+    @apply font-mercury-display text-mercury-h3 font-[450] tracking-normal text-mercury-ink;
+  }
+  h5 {
+    @apply font-mercury-display text-mercury-h4 font-[450] tracking-normal text-mercury-ink;
+  }
+  h6 {
+    @apply font-mercury-display text-mercury-caption font-medium tracking-normal text-mercury-ink;
+  }
+
+  .dark body {
+    @apply bg-mercury-surface-inverse text-white/90;
+  }
+  .dark,
+  .dark * {
+    --color-mercury-line: rgba(255, 255, 255, 0.1);
   }
 }
 
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+  @apply relative flex items-center w-full gap-3 rounded-mercury-button px-3 py-2 font-medium text-mercury-xs;
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300;
 }
 
 @utility menu-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+  @apply text-mercury-ink hover:bg-gray-50 group-hover:text-mercury-ink dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white/90;
 }
 
 @utility menu-item-icon {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
+  @apply text-mercury-muted group-hover:text-mercury-ink dark:text-white/45 dark:group-hover:text-white/80;
 }
 
 @utility menu-item-icon-active {
-  @apply text-brand-500 dark:text-brand-400;
+  @apply text-brand-600 dark:text-brand-300;
 }
 
 @utility menu-item-icon-inactive {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-mercury-muted group-hover:text-mercury-ink dark:text-white/45 dark:group-hover:text-white/80;
 }
 
 @utility menu-item-arrow {
@@ -221,35 +296,35 @@
 }
 
 @utility menu-item-arrow-active {
-  @apply rotate-180 text-brand-500 dark:text-brand-400;
+  @apply rotate-180 text-brand-600 dark:text-brand-300;
 }
 
 @utility menu-item-arrow-inactive {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-mercury-muted group-hover:text-mercury-ink dark:text-white/45 dark:group-hover:text-white/80;
 }
 
 @utility menu-dropdown-item {
-  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
+  @apply relative flex items-center gap-3 rounded-mercury-button px-3 py-2.5 font-medium text-mercury-caption;
 }
 
 @utility menu-dropdown-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300;
 }
 
 @utility menu-dropdown-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5;
+  @apply text-mercury-ink hover:bg-gray-50 dark:text-white/80 dark:hover:bg-white/5;
 }
 
 @utility menu-dropdown-badge {
-  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-brand-500 dark:text-brand-400;
+  @apply block rounded-mercury-pill px-2.5 py-0.5 text-xs font-medium uppercase text-brand-600 dark:text-brand-300;
 }
 
 @utility menu-dropdown-badge-active {
-  @apply bg-brand-100 dark:bg-brand-500/20;
+  @apply bg-brand-100 dark:bg-brand-500/25;
 }
 
 @utility menu-dropdown-badge-inactive {
-  @apply bg-brand-50 group-hover:bg-brand-100 dark:bg-brand-500/15 dark:group-hover:bg-brand-500/20;
+  @apply bg-brand-50 group-hover:bg-brand-100 dark:bg-brand-500/15 dark:group-hover:bg-brand-500/25;
 }
 
 @utility no-scrollbar {
@@ -455,7 +530,7 @@ span.flatpickr-weekday,
 .flatpickr-day.startRange,
 .flatpickr-day.selected,
 .flatpickr-day.endRange {
-  @apply !text-white dark:!text-white;
+  @apply !text-mercury-on-accent dark:!text-mercury-on-accent;
 }
 .flatpickr-day.selected,
 .flatpickr-day.startRange,
@@ -475,13 +550,13 @@ span.flatpickr-weekday,
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-  background: #16a34a;
-  @apply !border-brand-500 !bg-brand-500 hover:!border-brand-50 hover:!bg-brand-500;
+  background: var(--color-brand-500);
+  @apply !border-brand-500 !bg-brand-500 hover:!border-brand-50 hover:!bg-brand-600 hover:!text-white dark:hover:!text-white;
 }
 .flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
-  box-shadow: -10px 0 0 #16a34a;
+  box-shadow: -10px 0 0 var(--color-brand-500);
 }
 
 .flatpickr-months .flatpickr-prev-month svg,
@@ -540,7 +615,7 @@ span.flatpickr-weekday,
   @apply hidden;
 }
 .fc-addEventButton-button {
-  @apply !rounded-lg !border-0 !bg-brand-500 !px-4 !py-2.5 !text-sm !font-medium hover:!bg-brand-600 focus:!shadow-none;
+  @apply !rounded-lg !border-0 !bg-brand-500 !px-4 !py-2.5 !text-sm !font-medium !text-mercury-on-accent hover:!bg-brand-600 hover:!text-white focus:!shadow-none;
 }
 .fc-toolbar-title {
   @apply !text-lg !font-medium text-gray-800 dark:text-white/90;

@@ -10,14 +10,27 @@ function startFallback(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function readEndIso(fd: Record<string, unknown>, endFieldSlug: string | null | undefined): string | undefined {
+  if (!endFieldSlug) return undefined;
+  const raw = fd[endFieldSlug];
+  const str = typeof raw === "string" ? raw : raw != null ? String(raw) : "";
+  if (!str.trim()) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str.trim())) return `${str.trim()}T23:59:59`;
+  const d = new Date(str);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return d.toISOString();
+}
+
 export function webflowItemToEventInput(
   item: WebflowEventItemDTO,
   titleFieldSlug: string,
-  calendarFieldSlug: string | null
+  calendarFieldSlug: string | null,
+  endFieldSlug?: string | null
 ): EventInput {
   const fd = item.fieldData ?? {};
   const title = String(fd[titleFieldSlug] ?? fd.name ?? "Untitled");
   const color = "Primary";
+  const endIso = readEndIso(fd, endFieldSlug);
 
   if (!calendarFieldSlug) {
     return {
@@ -25,6 +38,7 @@ export function webflowItemToEventInput(
       title,
       allDay: true,
       start: startFallback(),
+      ...(endIso ? { end: endIso } : {}),
       extendedProps: { calendar: color, itemId: item.id } satisfies WebflowCalendarExtras,
     };
   }
@@ -37,6 +51,7 @@ export function webflowItemToEventInput(
       title,
       allDay: true,
       start: startFallback(),
+      ...(endIso ? { end: endIso } : {}),
       extendedProps: { calendar: color, itemId: item.id } satisfies WebflowCalendarExtras,
     };
   }
@@ -47,6 +62,7 @@ export function webflowItemToEventInput(
       title,
       allDay: true,
       start: str.trim(),
+      ...(endIso ? { end: endIso } : {}),
       extendedProps: { calendar: color, itemId: item.id } satisfies WebflowCalendarExtras,
     };
   }
@@ -58,6 +74,7 @@ export function webflowItemToEventInput(
       title,
       allDay: true,
       start: startFallback(),
+      ...(endIso ? { end: endIso } : {}),
       extendedProps: { calendar: color, itemId: item.id } satisfies WebflowCalendarExtras,
     };
   }
@@ -67,6 +84,7 @@ export function webflowItemToEventInput(
     title,
     allDay: false,
     start: d.toISOString(),
+    ...(endIso ? { end: endIso } : {}),
     extendedProps: { calendar: color, itemId: item.id } satisfies WebflowCalendarExtras,
   };
 }

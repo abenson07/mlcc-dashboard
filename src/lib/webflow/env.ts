@@ -42,6 +42,14 @@ export function getWebflowBannersCollectionId(): string | undefined {
   return (process.env.WEBFLOW_BANNERS_COLLECTION_ID ?? disk.WEBFLOW_BANNERS_COLLECTION_ID)?.trim();
 }
 
+/** Committees CMS collection (events Reference field target). */
+export function getWebflowCommitteesCollectionId(): string | undefined {
+  const disk = getDiskEnv();
+  return (
+    process.env.WEBFLOW_COMMITTEES_COLLECTION_ID ?? disk.WEBFLOW_COMMITTEES_COLLECTION_ID
+  )?.trim();
+}
+
 /** Same site id as `webflow:setup-banners --list-sites`. Required for CMS publish on localized Webflow sites. */
 export function getWebflowSiteId(): string | undefined {
   const disk = getDiskEnv();

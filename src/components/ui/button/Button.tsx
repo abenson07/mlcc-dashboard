@@ -1,15 +1,15 @@
 import React, { ReactNode } from "react";
 
 interface ButtonProps {
-  children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline"; // Button variant
-  type?: "button" | "submit" | "reset"; // Button type
-  startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
-  onClick?: React.MouseEventHandler<HTMLButtonElement>; // Click handler
-  disabled?: boolean; // Disabled state
-  className?: string; // Disabled state
+  children: ReactNode;
+  size?: "sm" | "md";
+  variant?: "primary" | "outline" | "ghost" | "ghostInverse";
+  type?: "button" | "submit" | "reset";
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
+  className?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,24 +23,26 @@ const Button: React.FC<ButtonProps> = ({
   className = "",
   disabled = false,
 }) => {
-  // Size Classes
   const sizeClasses = {
-    sm: "px-4 py-3 text-sm",
-    md: "px-5 py-3.5 text-sm",
+    sm: "min-h-11 px-4 py-2.5 text-mercury-xs font-[450] sm:min-h-0",
+    md: "min-h-11 px-4 py-2.5 text-mercury-small font-[450] sm:px-4 sm:py-2 sm:min-h-10 md:min-h-11 md:py-3",
   };
 
-  // Variant Classes
   const variantClasses = {
     primary:
-      "bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300",
+      "rounded-mercury-button-lg bg-brand-500 text-mercury-on-accent shadow-mercury-low hover:bg-brand-600 hover:text-white disabled:bg-brand-300 font-[360]",
     outline:
-      "bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300",
+      "rounded-mercury-button-lg bg-white text-mercury-ink ring-1 ring-inset ring-mercury-line hover:bg-gray-50 font-[360] dark:bg-white/[0.04] dark:text-white/85 dark:ring-white/10 dark:hover:bg-white/[0.08]",
+    ghost:
+      "rounded-mercury-button bg-transparent px-2 text-mercury-ink hover:bg-gray-50 font-[360] dark:text-white/85 dark:hover:bg-white/5",
+    ghostInverse:
+      "rounded-mercury-button-lg bg-transparent px-3 text-mercury-muted hover:bg-gray-50 font-[360] dark:text-white/55 dark:hover:bg-white/5",
   };
 
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center font-medium gap-2 rounded-lg transition ${className} ${
+      className={`inline-flex items-center justify-center gap-2 transition ${className} ${
         sizeClasses[size]
       } ${variantClasses[variant]} ${
         disabled ? "cursor-not-allowed opacity-50" : ""

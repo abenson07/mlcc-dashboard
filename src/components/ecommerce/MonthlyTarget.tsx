@@ -7,6 +7,10 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { MoreDotIcon } from "@/icons";
 import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import {
+  chartFontFamily,
+  mercuryChartPrimary,
+} from "@/lib/theme/chartDefaults";
 // Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -15,9 +19,9 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 export default function MonthlyTarget() {
   const series = [75.55];
   const options: ApexOptions = {
-    colors: ["#16a34a"],
+    colors: [mercuryChartPrimary],
     chart: {
-      fontFamily: "Outfit, sans-serif",
+      fontFamily: chartFontFamily,
       type: "radialBar",
       height: 330,
       sparkline: {
@@ -54,7 +58,7 @@ export default function MonthlyTarget() {
     },
     fill: {
       type: "solid",
-      colors: ["#16a34a"],
+      colors: [mercuryChartPrimary],
     },
     stroke: {
       lineCap: "round",

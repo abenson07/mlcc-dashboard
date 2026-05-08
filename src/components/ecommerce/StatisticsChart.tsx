@@ -5,6 +5,11 @@ import { ApexOptions } from "apexcharts";
 import flatpickr from "flatpickr";
 import ChartTab from "../common/ChartTab";
 import { CalenderIcon } from "../../icons";
+import {
+  chartFontFamily,
+  mercuryChartPrimary,
+  mercuryChartSecondary,
+} from "@/lib/theme/chartDefaults";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -44,9 +49,9 @@ export default function StatisticsChart() {
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#16a34a", "#86efac"], // Define line colors
+    colors: [mercuryChartPrimary, mercuryChartSecondary],
     chart: {
-      fontFamily: "Outfit, sans-serif",
+      fontFamily: chartFontFamily,
       height: 310,
       type: "line", // Set the chart type to 'line'
       toolbar: {

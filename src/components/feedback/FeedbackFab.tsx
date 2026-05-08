@@ -124,7 +124,7 @@ export default function FeedbackFab() {
       <button
         type="button"
         onClick={handleOpen}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-mercury-on-accent shadow-lg transition hover:bg-brand-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
         aria-label="Submit bug report or feature request"
       >
         <svg

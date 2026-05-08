@@ -21,6 +21,8 @@ import {
 import { webflowItemToEventInput, type WebflowCalendarExtras } from "./eventMapping";
 import { slugifyFromEventName } from "@/lib/webflow/slugifyEvent";
 import { toast } from "sonner";
+import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/lib/webflow/datetimeLocal";
+import Link from "next/link";
 
 interface CalendarEvent extends EventInput {
   extendedProps: WebflowCalendarExtras;
@@ -119,21 +121,6 @@ function isHiddenEventField(f: WebflowCollectionFieldDTO): boolean {
   const label = f.displayName.trim().toLowerCase();
   if (label === "committee reference" || label === "committee sponsor") return true;
   return false;
-}
-
-function toDatetimeLocalValue(raw: unknown): string {
-  if (typeof raw !== "string" || !raw) return "";
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function fromDatetimeLocalValue(v: string): string {
-  if (!v) return "";
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString();
 }
 
 function initFormFromFieldData(
@@ -356,7 +343,7 @@ function invalidInputClass(show: boolean): string {
     : "border-gray-300 dark:border-gray-700";
 }
 
-const Calendar: React.FC = () => {
+const Calendar: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const { data, isLoading, error, refetch, invalidate } = useWebflowEvents();
   const calendarRef = useRef<FullCalendar>(null);
   const { isOpen, openModal, closeModal } = useModal();
@@ -382,11 +369,15 @@ const Calendar: React.FC = () => {
   );
   const titleSlug = data?.titleFieldSlug ?? "name";
   const calendarSlug = data?.calendarFieldSlug ?? null;
+  const endFieldSlug = data?.endFieldSlug ?? null;
 
   const fcEvents = useMemo(
     () =>
-      items.map((row) => webflowItemToEventInput(row, titleSlug, calendarSlug) as CalendarEvent),
-    [items, titleSlug, calendarSlug]
+      items.map(
+        (row) =>
+          webflowItemToEventInput(row, titleSlug, calendarSlug, endFieldSlug) as CalendarEvent
+      ),
+    [items, titleSlug, calendarSlug, endFieldSlug]
   );
 
   const resetModal = () => {
@@ -596,7 +587,7 @@ const Calendar: React.FC = () => {
               disabled={uploadingImageSlug === f.slug}
               onChange={(e) => void handleImageUpload(f.slug, e)}
               aria-invalid={highlight}
-              className="dark:bg-dark-900 block w-full cursor-pointer text-sm text-gray-800 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-brand-600 dark:text-white/90"
+              className="dark:bg-dark-900 block w-full cursor-pointer text-sm text-gray-800 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-medium file:text-mercury-on-accent hover:file:bg-brand-600 hover:file:text-white dark:text-white/90"
             />
           </div>
           {uploadingImageSlug === f.slug ? (
@@ -813,7 +804,13 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+    <div
+      className={
+        embedded
+          ? ""
+          : "rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+      }
+    >
       {error ? (
         <p className="p-4 text-sm text-red-600 dark:text-red-400">
           {(error as Error).message}
@@ -868,6 +865,17 @@ const Calendar: React.FC = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Fields come from your Webflow Events collection (
               {data?.collection.displayName ?? "…"}). Saves go directly to Webflow.
+              {editingId ? (
+                <>
+                  {" "}
+                  <Link
+                    href={`/events/edit/${encodeURIComponent(editingId)}`}
+                    className="font-medium text-brand-600 hover:underline dark:text-brand-400"
+                  >
+                    Open full editor
+                  </Link>
+                </>
+              ) : null}
             </p>
           </div>
           {externalOrganizerSlug ? (
@@ -890,7 +898,7 @@ const Calendar: React.FC = () => {
                   }}
                   className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     eventOrganizerKind === "mlcc"
-                      ? "bg-brand-500 text-white shadow-sm"
+                      ? "bg-brand-500 text-mercury-on-accent shadow-sm"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                   }`}
                 >
@@ -903,7 +911,7 @@ const Calendar: React.FC = () => {
                   onClick={() => setEventOrganizerKind("non-mlcc")}
                   className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     eventOrganizerKind === "non-mlcc"
-                      ? "bg-brand-500 text-white shadow-sm"
+                      ? "bg-brand-500 text-mercury-on-accent shadow-sm"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                   }`}
                 >
@@ -947,7 +955,7 @@ const Calendar: React.FC = () => {
               type="button"
               onClick={handleSave}
               disabled={uploadingImageSlug !== null}
-              className="flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              className="flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-mercury-on-accent hover:bg-brand-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               {editingId ? "Save changes" : "Create in Webflow"}
             </button>

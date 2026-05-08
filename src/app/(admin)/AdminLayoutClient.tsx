@@ -16,7 +16,7 @@ export default function AdminLayoutClient({
   const mainContentMargin = isMobileOpen
     ? "ml-0"
     : isExpanded || isHovered
-    ? "lg:ml-[290px]"
+    ? "lg:ml-[199px]"
     : "lg:ml-[90px]";
 
   return (

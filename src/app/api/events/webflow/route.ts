@@ -5,8 +5,10 @@ import {
   getEventsEnv,
   listAllEventItems,
   pickCalendarFieldSlug,
+  pickEndFieldSlug,
   pickTitleFieldSlug,
 } from "@/lib/webflow/eventsWorkspace";
+import { getEventFieldSlugs } from "@/lib/webflow/event-field-slugs";
 import { slugifyFromEventName } from "@/lib/webflow/slugifyEvent";
 import { webflowJson, WebflowRequestError } from "@/lib/webflow/client";
 import { publishCollectionItemIds } from "@/lib/webflow/publishItems";
@@ -35,17 +37,21 @@ export async function GET() {
     const { token, collectionId } = env;
 
     const calendarFieldOverride = process.env.WEBFLOW_EVENT_CALENDAR_FIELD_SLUG?.trim() || null;
+    const endFieldOverride = process.env.WEBFLOW_EVENT_END_FIELD_SLUG?.trim() || null;
 
     const collection = await fetchEventsCollection(token, collectionId);
     const items = await listAllEventItems(token, collectionId);
     const calendarFieldSlug = pickCalendarFieldSlug(collection.fields, calendarFieldOverride);
+    const endFieldSlug = pickEndFieldSlug(collection.fields, endFieldOverride);
     const titleFieldSlug = pickTitleFieldSlug(collection.fields);
 
     return NextResponse.json({
       collection,
       items,
       calendarFieldSlug,
+      endFieldSlug,
       titleFieldSlug,
+      eventFieldSlugs: getEventFieldSlugs(),
     });
   } catch (e) {
     if (e instanceof WebflowRequestError) {

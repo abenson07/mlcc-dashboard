@@ -274,7 +274,7 @@ export default function BannersManager() {
             <button
               type="button"
               onClick={() => openCreate()}
-              className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+              className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-mercury-on-accent hover:bg-brand-600 hover:text-white"
             >
               New banner
             </button>
@@ -531,7 +531,7 @@ export default function BannersManager() {
               <button
                 type="button"
                 onClick={() => void onSave()}
-                className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+                className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-mercury-on-accent hover:bg-brand-600 hover:text-white"
               >
                 Save
               </button>

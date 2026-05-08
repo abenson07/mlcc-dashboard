@@ -1,4 +1,5 @@
 import { getWebflowApiToken, getWebflowEventsCollectionId } from "@/lib/webflow/env";
+import { getEventFieldSlugs } from "@/lib/webflow/event-field-slugs";
 import { webflowJson } from "@/lib/webflow/client";
 
 export type WebflowOptionChoice = { id: string; name: string };
@@ -55,7 +56,7 @@ export async function fetchEventsCollection(
   };
 }
 
-export async function listAllEventItems(
+export async function listAllCollectionItems(
   token: string,
   collectionId: string
 ): Promise<WebflowEventItem[]> {
@@ -78,13 +79,34 @@ export async function listAllEventItems(
   return all;
 }
 
+export async function listAllEventItems(
+  token: string,
+  collectionId: string
+): Promise<WebflowEventItem[]> {
+  return listAllCollectionItems(token, collectionId);
+}
+
+/** Primary calendar DateTime (start). */
 export function pickCalendarFieldSlug(
   fields: WebflowCollectionField[],
   override?: string | null
 ): string | null {
-  if (override?.trim()) return override.trim();
+  const preferred = (override?.trim() || getEventFieldSlugs().startsAt).trim();
+  const bySlug = fields.find((f) => f.slug === preferred && f.type === "DateTime");
+  if (bySlug) return bySlug.slug;
   const dt = fields.find((f) => f.type === "DateTime");
   return dt?.slug ?? null;
+}
+
+/** Optional end DateTime (same collection). */
+export function pickEndFieldSlug(
+  fields: WebflowCollectionField[],
+  override?: string | null
+): string | null {
+  const preferred = (override?.trim() || getEventFieldSlugs().endsAt).trim();
+  const bySlug = fields.find((f) => f.slug === preferred && f.type === "DateTime");
+  if (bySlug) return bySlug.slug;
+  return null;
 }
 
 export function pickTitleFieldSlug(fields: WebflowCollectionField[]): string {

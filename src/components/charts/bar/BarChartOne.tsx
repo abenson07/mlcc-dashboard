@@ -4,6 +4,10 @@ import React from "react";
 import { ApexOptions } from "apexcharts";
 
 import dynamic from "next/dynamic";
+import {
+  chartFontFamily,
+  mercuryChartPrimary,
+} from "@/lib/theme/chartDefaults";
 // Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -11,9 +15,9 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 
 export default function BarChartOne() {
   const options: ApexOptions = {
-    colors: ["#16a34a"],
+    colors: [mercuryChartPrimary],
     chart: {
-      fontFamily: "Outfit, sans-serif",
+      fontFamily: chartFontFamily,
       type: "bar",
       height: 180,
       toolbar: {
@@ -62,7 +66,7 @@ export default function BarChartOne() {
       show: true,
       position: "top",
       horizontalAlign: "left",
-      fontFamily: "Outfit",
+      fontFamily: chartFontFamily,
     },
     yaxis: {
       title: {

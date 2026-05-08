@@ -1,6 +1,8 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { EventFieldSlugs } from "@/lib/webflow/event-field-slugs";
+import { DEFAULT_EVENT_FIELD_SLUGS } from "@/lib/webflow/event-field-slugs";
 
 export const WEBFLOW_EVENTS_QUERY_KEY = ["webflow-events"] as const;
 
@@ -33,7 +35,9 @@ export type WebflowEventsPayload = {
   };
   items: WebflowEventItemDTO[];
   calendarFieldSlug: string | null;
+  endFieldSlug: string | null;
   titleFieldSlug: string;
+  eventFieldSlugs: EventFieldSlugs;
 };
 
 export function useWebflowEvents() {
@@ -46,7 +50,10 @@ export function useWebflowEvents() {
       if (!res.ok) {
         throw new Error(json.error || "Failed to load Webflow events");
       }
-      return json;
+      return {
+        ...json,
+        eventFieldSlugs: json.eventFieldSlugs ?? DEFAULT_EVENT_FIELD_SLUGS,
+      };
     },
   });
 
