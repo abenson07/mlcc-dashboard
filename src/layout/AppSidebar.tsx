@@ -270,12 +270,12 @@ const AppSidebar: React.FC = () => {
     string | null
   >(activeMainSectionId);
 
-  const routeKey = `${pathname}?${searchParams.toString()}`;
+  const searchKey = searchParams.toString();
   useEffect(() => {
     setExpandedMainSectionId(
       sectionIdForLocation(pathname, searchParams, mainNavSections),
     );
-  }, [routeKey]);
+  }, [pathname, searchKey]);
 
   const isActive = useCallback(
     (item: NavLink) => linkMatches(pathname, searchParams, item),
