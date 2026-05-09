@@ -4,47 +4,48 @@ import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import ComponentCard from "@/components/common/ComponentCard";
 import TableWithDetailSidebar from "@/components/detail-sidebar/TableWithDetailSidebar";
-import RouteDetailSidebar from "@/components/detail-sidebar/RouteDetailSidebar";
+import BusinessDetailSidebar from "@/components/detail-sidebar/BusinessDetailSidebar";
 import { MercuryVariantTable } from "@/components/table/mercury-demo/mercuryVariantTable";
 import { useMercuryPlaygroundData } from "@/components/table/mercury-demo/useMercuryPlaygroundData";
-import type { RouteWithDeliverer } from "hooks";
+import type { BusinessWithDetails } from "hooks";
 
-export default function OpenRoutesContent() {
+export default function BusinessesMembersContent() {
   const queryClient = useQueryClient();
-  const mercury = useMercuryPlaygroundData("routes-open");
-  const [selectedRoute, setSelectedRoute] = useState<RouteWithDeliverer | null>(null);
+  const mercury = useMercuryPlaygroundData("businesses-members");
+  const [selectedBusiness, setSelectedBusiness] = useState<BusinessWithDetails | null>(null);
 
-  const selectedKey = selectedRoute?.id ?? null;
+  const selectedKey = selectedBusiness?.id ?? null;
   const onSelectKey = (key: string | null) => {
     if (key == null) {
-      setSelectedRoute(null);
+      setSelectedBusiness(null);
       return;
     }
-    const route = mercury.routesOpenList.find((r) => r.id === key);
-    if (route) setSelectedRoute(route);
+    const row = mercury.businessesMembersList.find((b) => b.id === key);
+    if (row) setSelectedBusiness(row);
   };
 
   return (
     <TableWithDetailSidebar
-      selectedItem={selectedRoute}
-      onClose={() => setSelectedRoute(null)}
-      sidebarTitle="Route details"
+      selectedItem={selectedBusiness}
+      onClose={() => setSelectedBusiness(null)}
+      sidebarTitle="Business details"
       asideWidthClass="w-full max-w-[420px]"
       dashboardTable={{ showSelectColumn: true, showMenuColumn: true }}
       renderSidebar={(item) => (
-        <RouteDetailSidebar
+        <BusinessDetailSidebar
           item={item}
-          onClose={() => setSelectedRoute(null)}
+          onClose={() => setSelectedBusiness(null)}
+          showRemove={false}
           onSaved={(updated) => {
-            setSelectedRoute(updated);
-            void queryClient.invalidateQueries({ queryKey: ["routes"] });
+            setSelectedBusiness(updated);
+            void queryClient.invalidateQueries({ queryKey: ["businesses"] });
           }}
         />
       )}
     >
-      <ComponentCard title="Open Routes">
+      <ComponentCard title="Businesses — Members">
         <MercuryVariantTable
-          variant="routes-open"
+          variant="businesses-members"
           mercury={mercury}
           selectedKey={selectedKey}
           onSelectKey={onSelectKey}

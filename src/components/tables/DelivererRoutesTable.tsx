@@ -89,8 +89,11 @@ export default function DelivererRoutesTable({ routes }: DelivererRoutesTablePro
                   return (
                     <TableRow key={route.id}>
                       <TableCell className="px-5 py-4 sm:px-6 text-start">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                        <div className="flex min-w-0 flex-col gap-0.5">
+                          <span
+                            className="block max-w-[50ch] truncate font-medium text-gray-800 text-theme-sm dark:text-white/90"
+                            title={route.route_name?.trim() ? route.route_name : undefined}
+                          >
                             {route.route_name}
                           </span>
                           <span className="block text-gray-500 text-theme-xs dark:text-gray-400">

@@ -66,6 +66,47 @@ export function NameEmailHoverCell({ name, email }: { name: string; email: strin
   );
 }
 
+/**
+ * Neighbors-all mercury table: name (and optional phone when condensed); address on hover.
+ * Parent `<td>` should include `group/name`.
+ */
+export function NeighborNameAddressHoverCell({
+  name,
+  address,
+  phoneCondensed,
+}: {
+  name: string;
+  address: string;
+  phoneCondensed?: string;
+}) {
+  const addrTrim = address.trim();
+  const phoneTrim = phoneCondensed?.trim() ?? "";
+  const hoverLineClass =
+    "max-h-0 overflow-hidden text-theme-xs text-gray-500 opacity-0 transition-[max-height,opacity] duration-150 group-hover/name:max-h-24 group-hover/name:opacity-100 dark:text-gray-400";
+
+  const addressHover =
+    addrTrim.length > 0 ? <span className={hoverLineClass}>{addrTrim}</span> : null;
+
+  if (phoneCondensed !== undefined) {
+    return (
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <div className="truncate text-theme-sm font-medium text-gray-800 dark:text-white/90">{name}</div>
+        {phoneTrim.length > 0 ? (
+          <div className="truncate text-theme-xs text-gray-500 dark:text-gray-400">{phoneTrim}</div>
+        ) : null}
+        {addressHover}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-w-0 flex-col gap-0">
+      <span className="truncate text-theme-sm font-medium text-gray-800 dark:text-white/90">{name}</span>
+      {addressHover}
+    </div>
+  );
+}
+
 /** Contact: email + phone on hover. Parent `<td>` must include `group/contact`. */
 export function ContactEmailPhoneHover({
   email,
@@ -149,18 +190,24 @@ export function MembershipStatusRenewalHover({
   );
 }
 
-/** Coverage label with deliverer names on hover. Parent `<td>` must include `group/coverage`. */
+/** Coverage status as tag + deliverer names on hover. Parent `<td>` must include `group/coverage`. */
 export function CoverageDeliverersHover({
   label,
   deliverers,
+  color,
 }: {
   label: string;
   deliverers: string[];
+  color: "success" | "warning" | "light" | "info";
 }) {
   const detail = deliverers.length ? deliverers.join(", ") : "No deliverers assigned";
   return (
     <div className="relative min-w-0">
-      <span className="text-theme-sm font-medium text-gray-800 dark:text-white/90">{label}</span>
+      <div className="flex min-w-0 max-w-full items-start">
+        <Badge variant="light" color={color} size="sm">
+          {label}
+        </Badge>
+      </div>
       <div className="pointer-events-none absolute left-0 top-full z-10 mt-1 hidden max-w-xs rounded-md border border-gray-200 bg-white px-2 py-1.5 text-theme-xs text-gray-600 shadow-md group-hover/coverage:block dark:border-white/[0.08] dark:bg-gray-900 dark:text-gray-300">
         {detail}
       </div>

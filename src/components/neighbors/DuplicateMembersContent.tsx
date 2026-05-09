@@ -1,90 +1,77 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
-import { CopyableEmail } from "@/components/common/CopyableEmail";
-import DuplicateMemberSubscriptionsTable from "@/components/tables/DuplicateMemberSubscriptionsTable";
+import TableWithDetailSidebar from "@/components/detail-sidebar/TableWithDetailSidebar";
 import type { DuplicateMember } from "@/app/api/stripe/duplicate-members/route";
-import { getApiBase } from "@/lib/apiBase";
+import {
+  MercuryVariantTable,
+  mercuryReadOnlySidebarTitle,
+  renderMercuryReadOnlySidebar,
+  resolveMercurySelectedItem,
+} from "@/components/table/mercury-demo/mercuryVariantTable";
+import { useMercuryPlaygroundData } from "@/components/table/mercury-demo/useMercuryPlaygroundData";
 
 export default function DuplicateMembersContent() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [duplicateMembers, setDuplicateMembers] = useState<DuplicateMember[]>([]);
+  const mercury = useMercuryPlaygroundData("neighbors-duplicate-memberships");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const selected = useMemo(
+    () => resolveMercurySelectedItem("neighbors-duplicate-memberships", mercury, selectedId) as DuplicateMember | null,
+    [mercury, selectedId],
+  );
 
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`${getApiBase()}/api/stripe/duplicate-members`);
-        if (!res.ok) {
-          const data = (await res.json().catch(() => ({}))) as { error?: string };
-          throw new Error(data.error ?? `Request failed: ${res.status}`);
-        }
-        const data = (await res.json()) as { duplicateMembers?: DuplicateMember[] };
-        if (!cancelled) {
-          setDuplicateMembers(data.duplicateMembers ?? []);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Failed to load duplicate members");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
+  const sidebarTitle = useMemo(
+    () => mercuryReadOnlySidebarTitle("neighbors-duplicate-memberships", selected),
+    [selected],
+  );
 
-    fetchData();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (loading) {
+  if (mercury.activeLoading) {
     return (
       <ComponentCard title="Duplicate Members">
-        <p className="text-gray-500 dark:text-gray-400">Loading duplicate members...</p>
+        <p className="text-gray-500 dark:text-gray-400">Loading duplicate members…</p>
       </ComponentCard>
     );
   }
 
-  if (error) {
+  if (mercury.activeError) {
     return (
       <ComponentCard title="Duplicate Members">
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-red-600 dark:text-red-400">{mercury.activeError}</p>
       </ComponentCard>
     );
   }
 
-  if (duplicateMembers.length === 0) {
+  if (mercury.duplicateMembers.length === 0) {
     return (
       <ComponentCard title="Duplicate Members">
         <p className="text-gray-500 dark:text-gray-400">
-          No duplicate members found. Duplicate members are customers who have the same email and two or more active subscriptions in Stripe.
+          No duplicate members found. Duplicate members are customers who have the same email and two
+          or more active subscriptions in Stripe.
         </p>
       </ComponentCard>
     );
   }
 
   return (
-    <>
-      {duplicateMembers.map((member) => (
-        <ComponentCard
-          key={member.email}
-          title={member.name}
-          desc={
-            <CopyableEmail
-              email={member.email}
-              className="text-sm text-gray-500 dark:text-gray-400"
-            />
-          }
-        >
-          <DuplicateMemberSubscriptionsTable subscriptions={member.subscriptions} />
-        </ComponentCard>
-      ))}
-    </>
+    <TableWithDetailSidebar
+      selectedItem={selected}
+      onClose={() => setSelectedId(null)}
+      sidebarTitle={sidebarTitle}
+      asideWidthClass="w-full max-w-[420px]"
+      dashboardTable={{ showSelectColumn: true, showMenuColumn: true }}
+      renderSidebar={(item) =>
+        item ? renderMercuryReadOnlySidebar("neighbors-duplicate-memberships", item) : null
+      }
+    >
+      <ComponentCard title="Duplicate Members">
+        <MercuryVariantTable
+          variant="neighbors-duplicate-memberships"
+          mercury={mercury}
+          selectedKey={selectedId}
+          onSelectKey={setSelectedId}
+        />
+      </ComponentCard>
+    </TableWithDetailSidebar>
   );
 }

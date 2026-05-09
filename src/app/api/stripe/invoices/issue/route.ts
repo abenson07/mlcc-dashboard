@@ -1,4 +1,10 @@
 import { requireSession } from "@/lib/auth/require-session";
+import {
+  categorySlugToLabel,
+  DASHBOARD_CREATED_VALUE,
+  METADATA_KEYS,
+  type InvoiceCategorySlug,
+} from "@/lib/stripe/invoiceDashboardMetadata";
 import { getStripe } from "@/lib/stripe/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -10,6 +16,8 @@ type ParsedIssue = {
   name?: string;
   lineItems: LineItem[];
   dueDate: string | null;
+  categorySlug: InvoiceCategorySlug;
+  memo?: string;
 };
 
 const USD = "usd" as const;
@@ -27,6 +35,17 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
 
   if (!email) {
     return { ok: false, error: "email is required." };
+  }
+
+  const rawCat = o.category;
+  let categorySlug: InvoiceCategorySlug | null = null;
+  if (rawCat === "event" || rawCat === "leaflet") {
+    categorySlug = rawCat;
+  } else {
+    return {
+      ok: false,
+      error: 'category is required: use "event" or "leaflet".',
+    };
   }
 
   const rawItems = o.lineItems;
@@ -70,6 +89,9 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
     }
   }
 
+  const memo =
+    typeof o.memo === "string" && o.memo.trim() ? o.memo.trim() : undefined;
+
   return {
     ok: true,
     data: {
@@ -77,6 +99,8 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
       name,
       lineItems,
       dueDate,
+      categorySlug,
+      memo,
     },
   };
 }
@@ -152,6 +176,12 @@ export async function POST(req: Request) {
       customer: customerId,
       collection_method: "send_invoice",
       currency: USD,
+      ...(input.memo ? { description: input.memo } : {}),
+      metadata: {
+        [METADATA_KEYS.category]: categorySlugToLabel(input.categorySlug),
+        [METADATA_KEYS.created]: DASHBOARD_CREATED_VALUE,
+        [METADATA_KEYS.createdBy]: auth.user.displayName,
+      },
       ...(input.dueDate
         ? { due_date: dueDateToUnixEndOfDayUtc(input.dueDate) }
         : { days_until_due: 30 }),

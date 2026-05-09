@@ -7,8 +7,12 @@ import {
   isOpenPastDue,
 } from "@/components/billing/invoiceUtils";
 import ComponentCard from "@/components/common/ComponentCard";
+import TableViewTabs from "@/components/common/TableViewTabs";
+import {
+  INVOICE_CATEGORY_LABEL,
+} from "@/lib/stripe/invoiceDashboardMetadata";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export type StripeInvoiceTableRow = {
@@ -21,7 +25,12 @@ export type StripeInvoiceTableRow = {
   created: number;
   hosted_invoice_url: string | null;
   catalog_product_ids: string[];
+  sponsorship_category: string | null;
+  created_by_name: string | null;
 };
+
+type InvoiceStatusTab = "all" | "overdue" | "paid";
+type CategoryQuickFilter = "all" | "event" | "leaflet";
 
 const thClass =
   "px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500 dark:text-gray-400";
@@ -30,6 +39,9 @@ export default function InvoicesListTable() {
   const [invoices, setInvoices] = useState<StripeInvoiceTableRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [remindingId, setRemindingId] = useState<string | null>(null);
+  const [statusTab, setStatusTab] = useState<InvoiceStatusTab>("all");
+  const [categoryFilter, setCategoryFilter] =
+    useState<CategoryQuickFilter>("all");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -44,6 +56,8 @@ export default function InvoicesListTable() {
         (data.invoices ?? []).map((row) => ({
           ...row,
           catalog_product_ids: row.catalog_product_ids ?? [],
+          sponsorship_category: row.sponsorship_category ?? null,
+          created_by_name: row.created_by_name ?? null,
         }))
       );
     } catch (e) {
@@ -57,6 +71,27 @@ export default function InvoicesListTable() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const visibleInvoices = useMemo(() => {
+    let rows = invoices;
+    if (categoryFilter === "event") {
+      rows = rows.filter(
+        (r) => r.sponsorship_category === INVOICE_CATEGORY_LABEL.EVENT
+      );
+    } else if (categoryFilter === "leaflet") {
+      rows = rows.filter(
+        (r) => r.sponsorship_category === INVOICE_CATEGORY_LABEL.LEAFLET
+      );
+    }
+    if (statusTab === "overdue") {
+      rows = rows.filter((r) => isOpenPastDue(r));
+    } else if (statusTab === "paid") {
+      rows = rows.filter(
+        (r) => (r.status ?? "").toLowerCase() === "paid"
+      );
+    }
+    return rows;
+  }, [invoices, categoryFilter, statusTab]);
 
   const copyProductIds = async (inv: StripeInvoiceTableRow) => {
     const text = inv.catalog_product_ids.join(", ");
@@ -108,12 +143,53 @@ export default function InvoicesListTable() {
         </Link>
       }
     >
-      <div className="overflow-x-auto rounded-b-xl">
+      <TableViewTabs<InvoiceStatusTab>
+        aria-label="Invoice payment status"
+        value={statusTab}
+        onChange={setStatusTab}
+        tabs={[
+          { value: "all", label: "All" },
+          { value: "overdue", label: "Overdue" },
+          { value: "paid", label: "Paid" },
+        ]}
+      />
+      <div className="flex flex-wrap items-center gap-2 pt-2">
+        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          Category
+        </span>
+        {(
+          [
+            { value: "all" as const, label: "All" },
+            { value: "event" as const, label: "Event" },
+            { value: "leaflet" as const, label: "Leaflet" },
+          ] as const
+        ).map(({ value, label }) => {
+          const selected = categoryFilter === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setCategoryFilter(value)}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                selected
+                  ? "border-transparent bg-violet-100 text-gray-900 dark:bg-blue-light-500/25 dark:text-white"
+                  : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="overflow-x-auto rounded-b-xl pt-2">
         <table className="min-w-full border-collapse border-t border-gray-100 dark:border-gray-800">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-800">
               <th className={thClass}>Invoice</th>
               <th className={thClass}>Recipient</th>
+              <th className={thClass}>Category</th>
+              <th className={thClass}>Created by</th>
               <th className={thClass}>Issued</th>
               <th className={thClass}>Due</th>
               <th className={thClass}>Amount</th>
@@ -126,7 +202,7 @@ export default function InvoicesListTable() {
               <tr>
                 <td
                   className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
-                  colSpan={7}
+                  colSpan={9}
                 >
                   Loading invoices…
                 </td>
@@ -136,20 +212,33 @@ export default function InvoicesListTable() {
               <tr>
                 <td
                   className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
-                  colSpan={7}
+                  colSpan={9}
                 >
-                  No invoices yet.{" "}
+                  No sponsorship invoices from this dashboard yet. Create one
+                  with category tags{" "}
                   <Link
                     href="/billing/invoices/new"
                     className="font-medium text-brand-600 underline dark:text-brand-400"
                   >
-                    Create one
+                    here
                   </Link>
                   .
                 </td>
               </tr>
             ) : null}
-            {invoices.map((inv) => {
+            {!loading &&
+            invoices.length > 0 &&
+            visibleInvoices.length === 0 ? (
+              <tr>
+                <td
+                  className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
+                  colSpan={9}
+                >
+                  No invoices match these filters.
+                </td>
+              </tr>
+            ) : null}
+            {visibleInvoices.map((inv) => {
               const overdue = isOpenPastDue(inv);
               return (
                 <tr
@@ -166,6 +255,12 @@ export default function InvoicesListTable() {
                   </td>
                   <td className="max-w-[200px] truncate px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                     {inv.customer_email ?? "—"}
+                  </td>
+                  <td className="max-w-[140px] px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    {inv.sponsorship_category ?? "—"}
+                  </td>
+                  <td className="max-w-[120px] truncate px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    {inv.created_by_name ?? "—"}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                     {formatDueDate(inv.created)}

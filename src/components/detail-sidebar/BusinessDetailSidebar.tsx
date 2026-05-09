@@ -37,13 +37,23 @@ export interface BusinessDetailSidebarProps {
   item: BusinessWithDetails;
   onClose?: () => void;
   onSaved?: (updated: BusinessWithDetails) => void;
+  /** Hide “Remove” for contexts where soft-removing a row is inappropriate (e.g. members list). */
+  showRemove?: boolean;
+  /** Called after the row is marked hidden and queries should refresh; typically closes the sidebar. */
+  onRemoved?: () => void;
 }
 
-export default function BusinessDetailSidebar({ item, onSaved }: BusinessDetailSidebarProps) {
+export default function BusinessDetailSidebar({
+  item,
+  onSaved,
+  showRemove = true,
+  onRemoved,
+}: BusinessDetailSidebarProps) {
   const { update } = useBusinesses({ autoFetch: false });
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<BusinessesUpdate>(() => toForm(item));
   const [saving, setSaving] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,6 +93,30 @@ export default function BusinessDetailSidebar({ item, onSaved }: BusinessDetailS
       setSaveError("Failed to save. Please try again.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (
+      !window.confirm(
+        "Remove this business from the list? It will be hidden from the table but not deleted."
+      )
+    ) {
+      return;
+    }
+    setSaveError(null);
+    setRemoving(true);
+    try {
+      const updated = await update(item.id, { hidden: true });
+      if (updated) {
+        onRemoved?.();
+      } else {
+        setSaveError("Could not remove. Check your connection or try again.");
+      }
+    } catch {
+      setSaveError("Could not remove. Check your connection or try again.");
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -216,10 +250,24 @@ export default function BusinessDetailSidebar({ item, onSaved }: BusinessDetailS
           </div>
         )}
       </dl>
-      <div className="pt-2">
+      {saveError && (
+        <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+      )}
+      <div className="flex flex-wrap gap-2 pt-2">
         <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
           Edit
         </Button>
+        {showRemove && !item.hidden && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={removing}
+            className="text-red-600 ring-red-200 hover:bg-red-50 dark:text-red-400 dark:ring-red-900/40 dark:hover:bg-red-950/30"
+            onClick={() => void handleRemove()}
+          >
+            {removing ? "Removing…" : "Remove"}
+          </Button>
+        )}
       </div>
     </div>
   );

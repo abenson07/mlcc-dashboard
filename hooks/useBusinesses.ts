@@ -21,6 +21,8 @@ interface UseBusinessesOptions {
     search?: string;
     membershipId?: string;
     status?: "active" | "past" | "yet-to-support";
+    /** When true, include rows with hidden = true (default lists omit them). */
+    includeHidden?: boolean;
   };
 }
 
@@ -40,10 +42,14 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
   }
   let query = supabaseClient.from("businesses").select("*");
 
+  if (!filters?.includeHidden) {
+    query = query.eq("hidden", false);
+  }
+
   if (filters?.search) {
     const searchTerm = filters.search.toLowerCase();
     query = query.or(
-      `business_name.ilike.%${searchTerm}%,contact_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`
+      `business_name.ilike.%${searchTerm}%,contact_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,website.ilike.%${searchTerm}%`
     );
   }
 
@@ -138,7 +144,7 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
 export function useBusinesses(options: UseBusinessesOptions = {}): UseBusinessesReturn {
   const { autoFetch = true, filters = {} } = options;
   const queryClient = useQueryClient();
-  const queryKey = ["businesses", filters.search, filters.membershipId, filters.status];
+  const queryKey = ["businesses", filters.search, filters.membershipId, filters.status, filters.includeHidden];
 
   const { data: businesses = [], isLoading, error, refetch } = useQuery({
     queryKey,

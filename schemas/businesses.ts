@@ -10,6 +10,10 @@ export interface Businesses {
   email: string | null; // text
   phone: string | null; // text
   address: string | null; // text
+  website: string | null; // text
+  google_place_id: string | null; // text — optional unique id from Google Places (New)
+  contacted: boolean; // outreach tracking
+  hidden: boolean; // hide from default lists in the dashboard
   membership_id: string | null; // uuid (references business_memberships)
   notes: string | null; // text
 }
@@ -20,6 +24,10 @@ export interface BusinessesInsert {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  website?: string | null;
+  google_place_id?: string | null;
+  contacted?: boolean;
+  hidden?: boolean;
   membership_id?: string | null;
   notes?: string | null;
 }
@@ -30,6 +38,10 @@ export interface BusinessesUpdate {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  website?: string | null;
+  google_place_id?: string | null;
+  contacted?: boolean;
+  hidden?: boolean;
   membership_id?: string | null;
   notes?: string | null;
 }

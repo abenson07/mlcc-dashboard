@@ -1,5 +1,9 @@
 import { requireSession } from "@/lib/auth/require-session";
 import {
+  invoiceHasDashboardTags,
+  METADATA_KEYS,
+} from "@/lib/stripe/invoiceDashboardMetadata";
+import {
   catalogProductIdsForInvoice,
   expandIdSetToProductIds,
   invoiceMatchesProductFilterAsync,
@@ -22,6 +26,10 @@ type StripeInvoiceListRow = {
   hosted_invoice_url: string | null;
   /** Unique `prod_…` ids from invoice lines (for env filters). */
   catalog_product_ids: string[];
+  /** `invoice.metadata.category` — Event vs Leaflet sponsorship. */
+  sponsorship_category: string | null;
+  /** `invoice.metadata.created_by` — dashboard user display name. */
+  created_by_name: string | null;
 };
 
 function customerEmail(inv: Stripe.Invoice): string | null {
@@ -92,6 +100,7 @@ export async function GET() {
 
     const filtered: Stripe.Invoice[] = [];
     for (const inv of res.data) {
+      if (!invoiceHasDashboardTags(inv.metadata)) continue;
       if (
         await invoiceMatchesProductFilterAsync(
           stripe,
@@ -119,6 +128,10 @@ export async function GET() {
           inv,
           lineCaches
         ),
+        sponsorship_category:
+          inv.metadata?.[METADATA_KEYS.category]?.trim() ?? null,
+        created_by_name:
+          inv.metadata?.[METADATA_KEYS.createdBy]?.trim() ?? null,
       }))
     );
 
