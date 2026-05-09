@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getApiBase } from "@/lib/apiBase";
 import type { EventFieldSlugs } from "@/lib/webflow/event-field-slugs";
 import { DEFAULT_EVENT_FIELD_SLUGS } from "@/lib/webflow/event-field-slugs";
 
@@ -45,7 +46,7 @@ export function useWebflowEvents() {
   const query = useQuery({
     queryKey: WEBFLOW_EVENTS_QUERY_KEY,
     queryFn: async (): Promise<WebflowEventsPayload> => {
-      const res = await fetch("/api/events/webflow");
+      const res = await fetch(`${getApiBase()}/api/events/webflow`);
       const json = (await res.json()) as WebflowEventsPayload & { error?: string };
       if (!res.ok) {
         throw new Error(json.error || "Failed to load Webflow events");

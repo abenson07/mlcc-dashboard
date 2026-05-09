@@ -4,13 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { DashboardData, ChartDataPoint, TableRow } from "@/data/dashboard";
 import { getApiBase } from "@/lib/apiBase";
 
-const apiUrl =
-  typeof window !== "undefined" && window.location.origin
-    ? `${window.location.origin}${getApiBase()}/api/dashboard/membership-metrics`
-    : `${getApiBase()}/api/dashboard/membership-metrics`;
-
 async function fetchDashboardData(): Promise<DashboardData> {
-  const response = await fetch(apiUrl);
+  const response = await fetch(`${getApiBase()}/api/dashboard/membership-metrics`);
   if (!response.ok) {
     throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
   }

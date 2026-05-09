@@ -1,83 +1,19 @@
-import React, { ReactNode } from "react";
-
-// Props for Table
-interface TableProps {
-  children: ReactNode; // Table content (thead, tbody, etc.)
-  className?: string; // Optional className for styling
-}
-
-// Props for TableHeader
-interface TableHeaderProps {
-  children: ReactNode; // Header row(s)
-  className?: string; // Optional className for styling
-}
-
-// Props for TableBody
-interface TableBodyProps {
-  children: ReactNode; // Body row(s)
-  className?: string; // Optional className for styling
-}
-
-// Props for TableRow
-interface TableRowProps {
-  children: ReactNode; // Cells (th or td)
-  className?: string; // Optional className for styling
-  onClick?: () => void; // Optional click handler; when set, row is clickable
-}
-
-// Props for TableCell
-interface TableCellProps {
-  children: ReactNode; // Cell content
-  isHeader?: boolean; // If true, renders as <th>, otherwise <td>
-  className?: string; // Optional className for styling
-  colSpan?: number; // Number of columns to span
-}
-
-// Table Component
-const Table: React.FC<TableProps> = ({ children, className }) => {
-  return <table className={`min-w-full  ${className}`}>{children}</table>;
-};
-
-// TableHeader Component
-const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
-  return <thead className={className}>{children}</thead>;
-};
-
-// TableBody Component
-const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
-  return <tbody className={className}>{children}</tbody>;
-};
-
-// TableRow Component
-const TableRow: React.FC<TableRowProps> = ({ children, className, onClick }) => {
-  const isClickable = typeof onClick === "function";
-  return (
-    <tr
-      className={`${className ?? ""} ${isClickable ? "cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]" : ""}`.trim()}
-      onClick={onClick}
-      role={isClickable ? "button" : undefined}
-    >
-      {children}
-    </tr>
-  );
-};
-
-// TableCell Component
-const TableCell: React.FC<TableCellProps> = ({
-  children,
-  isHeader = false,
-  className,
-  colSpan,
-}) => {
-  const CellTag = isHeader ? "th" : "td";
-  return (
-    <CellTag
-      className={`bg-transparent ${className}`}
-      {...(colSpan !== undefined && { colSpan })}
-    >
-      {children}
-    </CellTag>
-  );
-};
-
-export { Table, TableHeader, TableBody, TableRow, TableCell };
+export { Table, TableHeader, TableBody, TableRow, TableCell } from "./table-elements";
+export { DashboardTableProvider, useDashboardTable } from "./dashboard-table-context";
+export {
+  DashboardTableDataCell,
+  StackedCellContent,
+  StatusCellContent,
+  NormalCellContent,
+  CurrencyCellContent,
+  ActionCellContent,
+  ActionLink,
+  type DashboardCellAlign,
+  type DashboardTableDataCellProps,
+} from "./table-cell-variants";
+export {
+  DashboardTableRow,
+  DashboardTableSelectHeader,
+  DashboardTableMenuHeader,
+  type DashboardTableRowProps,
+} from "./DashboardTableRow";

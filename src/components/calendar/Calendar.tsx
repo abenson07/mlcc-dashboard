@@ -23,6 +23,7 @@ import { slugifyFromEventName } from "@/lib/webflow/slugifyEvent";
 import { toast } from "sonner";
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/lib/webflow/datetimeLocal";
 import Link from "next/link";
+import { getApiBase } from "@/lib/apiBase";
 
 interface CalendarEvent extends EventInput {
   extendedProps: WebflowCalendarExtras;
@@ -448,7 +449,7 @@ const Calendar: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
     }
     try {
       if (editingId) {
-        const res = await fetch(`/api/events/webflow/${encodeURIComponent(editingId)}`, {
+        const res = await fetch(`${getApiBase()}/api/events/webflow/${encodeURIComponent(editingId)}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fieldData: fd }),
@@ -461,7 +462,7 @@ const Calendar: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
         if (json.warning) toast.info(json.warning, { duration: 10000 });
         toast.success("Event updated in Webflow.");
       } else {
-        const res = await fetch("/api/events/webflow", {
+        const res = await fetch(`${getApiBase()}/api/events/webflow`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fieldData: fd }),
@@ -486,7 +487,7 @@ const Calendar: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
     if (!editingId) return;
     if (!window.confirm("Delete this event from Webflow?")) return;
     try {
-      const res = await fetch(`/api/events/webflow/${encodeURIComponent(editingId)}`, {
+      const res = await fetch(`${getApiBase()}/api/events/webflow/${encodeURIComponent(editingId)}`, {
         method: "DELETE",
       });
       const json = (await res.json().catch(() => ({}))) as { error?: string };
@@ -522,7 +523,7 @@ const Calendar: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/events/webflow/upload-image", {
+      const res = await fetch(`${getApiBase()}/api/events/webflow/upload-image`, {
         method: "POST",
         body: fd,
         credentials: "include",

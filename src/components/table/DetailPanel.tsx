@@ -6,6 +6,8 @@ import StatusBadge from "./StatusBadge";
 interface Props {
   invoice: Invoice;
   onClose: () => void;
+  /** Hide duplicate header when rendered inside TableWithDetailSidebar (parent supplies title + close). */
+  showOuterHeader?: boolean;
 }
 
 const metaFields = [
@@ -16,7 +18,7 @@ const metaFields = [
   { key: "recurring",      label: "Recurring" },
 ] as const;
 
-export default function DetailPanel({ invoice, onClose }: Props) {
+export default function DetailPanel({ invoice, onClose, showOuterHeader = true }: Props) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -24,9 +26,23 @@ export default function DetailPanel({ invoice, onClose }: Props) {
   }, []);
 
   const handleClose = () => {
+    if (!showOuterHeader) {
+      onClose();
+      return;
+    }
     setVisible(false);
     setTimeout(onClose, 220);
   };
+
+  if (!showOuterHeader) {
+    return (
+      <div className="flex w-full min-w-0 flex-col">
+        <div className="flex-1 space-y-6">
+          <PanelBody invoice={invoice} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -56,7 +72,16 @@ export default function DetailPanel({ invoice, onClose }: Props) {
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-5">
-        <StatusBadge status={invoice.status} />
+        <PanelBody invoice={invoice} />
+      </div>
+    </div>
+  );
+}
+
+function PanelBody({ invoice }: { invoice: Invoice }) {
+  return (
+    <>
+      <StatusBadge status={invoice.status} />
 
         {/* Amount */}
         <div className="mt-3 mb-5">
@@ -142,7 +167,6 @@ export default function DetailPanel({ invoice, onClose }: Props) {
             </div>
           ))}
         </div>
-      </div>
-    </div>
+    </>
   );
 }

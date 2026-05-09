@@ -1,138 +1,174 @@
 "use client";
-import React, { useState } from "react";
-import { Invoice } from "./types";
-import StatusBadge from "./StatusBadge";
+import React, { useMemo, useState } from "react";
+import { Invoice, InvoiceStatus } from "./types";
 import DetailPanel from "./DetailPanel";
+import TableWithDetailSidebar from "@/components/detail-sidebar/TableWithDetailSidebar";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  DashboardTableDataCell,
+  StackedCellContent,
+  StatusCellContent,
+  NormalCellContent,
+  CurrencyCellContent,
+  DashboardTableRow,
+  DashboardTableSelectHeader,
+  DashboardTableMenuHeader,
+} from "@/components/ui/table";
 
 interface Props {
   invoices: Invoice[];
 }
 
-function Checkbox({ checked, onChange }: { checked: boolean; onChange: () => void }) {
-  return (
-    <div
-      onClick={(e) => { e.stopPropagation(); onChange(); }}
-      className="w-4 h-4 rounded-[3px] border-[1.5px] border-gray-300 shrink-0 flex items-center justify-center cursor-pointer transition-colors"
-      style={{ background: checked ? "#111" : "#fff", borderColor: checked ? "#111" : undefined }}
-    >
-      {checked && (
-        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-          <path d="M1 4l3 3 5-6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )}
-    </div>
-  );
-}
+const headerCell =
+  "border-b border-gray-200 px-3 py-2.5 text-left text-xs font-medium text-gray-500 dark:border-white/[0.05] dark:text-gray-400";
 
-const thClass = "text-xs text-gray-500 font-medium px-3 py-2.5 text-left whitespace-nowrap select-none";
+function statusColor(status: InvoiceStatus): "warning" | "info" | "success" {
+  if (status === "Overdue") return "warning";
+  if (status === "Paid") return "success";
+  return "info";
+}
 
 export default function DataTable({ invoices }: Props) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [checked, setChecked] = useState<Record<number, boolean>>({});
   const [allChecked, setAllChecked] = useState(false);
 
-  const panelOpen = selectedId !== null;
   const selected = invoices.find((i) => i.id === selectedId) ?? null;
 
   const toggleRow = (id: number) => setSelectedId((prev) => (prev === id ? null : id));
-  const toggleCheck = (id: number) =>
-    setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleCheck = (id: number) => setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const checkedCount = useMemo(() => {
+    const fromMap = invoices.filter((i) => checked[i.id]).length;
+    if (allChecked) return invoices.length;
+    return fromMap;
+  }, [allChecked, checked, invoices]);
+
+  const allSelected = checkedCount === invoices.length && invoices.length > 0;
+  const indeterminate = !allSelected && checkedCount > 0;
+
+  const handleSelectAll = () => {
+    if (allSelected || allChecked) {
+      setAllChecked(false);
+      setChecked({});
+    } else {
+      setAllChecked(true);
+      setChecked({});
+    }
+  };
 
   return (
-    <div className="flex gap-[10px] items-start">
-      {/* Table */}
-      <div className="flex-1 min-w-0 overflow-hidden">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className={`${thClass} w-10 pr-3 pl-1`}>
-                <Checkbox
-                  checked={allChecked}
-                  onChange={() => setAllChecked((p) => !p)}
-                />
-              </th>
-              <th className={thClass}>Due date</th>
-              <th className={thClass}>
-                <span className="flex items-center gap-1">
-                  Status
-                  <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                    <path d="M5.5 2v7M2.5 6l3 3 3-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              </th>
-              <th className={thClass}>Customer</th>
-              <th className={`${thClass} text-right`}>Amount</th>
-              {!panelOpen && (
-                <>
-                  <th className={thClass}>Invoice no.</th>
-                  <th className={thClass}>Invoice date</th>
-                  <th className={thClass}>Type</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.map((inv) => {
-              const isSelected = selectedId === inv.id;
-              return (
-                <tr
-                  key={inv.id}
-                  onClick={() => toggleRow(inv.id)}
-                  className="border-b border-gray-100 cursor-pointer transition-colors"
-                  style={{ background: isSelected ? "#f0f4ff" : undefined }}
-                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "#fafafa"; }}
-                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = ""; }}
-                >
-                  <td className="py-3.5 px-3 pl-1 w-10">
-                    <Checkbox
-                      checked={!!checked[inv.id] || allChecked}
-                      onChange={() => toggleCheck(inv.id)}
-                    />
-                  </td>
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <div className="text-[13px] font-medium text-gray-900">{inv.dueDate}</div>
-                    {inv.dueRel && (
-                      <div className="text-xs text-gray-400 mt-0.5">{inv.dueRel}</div>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <StatusBadge status={inv.status} />
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <div className="text-[13px] font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
-                      {inv.customer}
-                    </div>
-                    <div className="text-xs text-gray-400 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
-                      {inv.email}
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-3 text-right whitespace-nowrap">
-                    <span className="text-[13px] font-medium text-gray-900">
-                      {inv.amount}
-                      <sup className="text-[10px] font-semibold align-super leading-none">{inv.cents}</sup>
-                    </span>
-                  </td>
-                  {!panelOpen && (
-                    <>
-                      <td className="py-3.5 px-3 text-[13px] text-gray-700">{inv.invoiceNo}</td>
-                      <td className="py-3.5 px-3 text-[13px] text-gray-700">{inv.invoiceDate}</td>
-                      <td className="py-3.5 px-3 text-[13px] text-gray-700">{inv.type}</td>
-                    </>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Detail panel */}
-      {selected && (
-        <DetailPanel
-          invoice={selected}
-          onClose={() => setSelectedId(null)}
-        />
+    <TableWithDetailSidebar
+      selectedItem={selected}
+      onClose={() => setSelectedId(null)}
+      sidebarTitle={selected ? `Invoice to ${selected.customer}` : "Details"}
+      asideWidthClass="w-full max-w-[420px]"
+      dashboardTable={{ showSelectColumn: true, showMenuColumn: true }}
+      renderSidebar={(inv) => (
+        <DetailPanel invoice={inv} onClose={() => setSelectedId(null)} showOuterHeader={false} />
       )}
-    </div>
+    >
+      <div className="overflow-hidden bg-white dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <Table className="w-full border-collapse">
+            <TableHeader>
+              <tr className="border-b border-gray-200 dark:border-white/[0.05]">
+                <DashboardTableSelectHeader
+                  checked={allSelected || allChecked}
+                  indeterminate={indeterminate}
+                  onChange={handleSelectAll}
+                />
+                <DashboardTableDataCell isHeader align="start" className={headerCell}>
+                  Due date
+                </DashboardTableDataCell>
+                <DashboardTableDataCell isHeader align="start" className={headerCell}>
+                  <span className="inline-flex items-center gap-1">
+                    Status
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden>
+                      <path
+                        d="M5.5 2v7M2.5 6l3 3 3-3"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </DashboardTableDataCell>
+                <DashboardTableDataCell isHeader align="start" className={headerCell}>
+                  Customer
+                </DashboardTableDataCell>
+                <DashboardTableDataCell isHeader align="end" className={`${headerCell} text-right`}>
+                  Amount
+                </DashboardTableDataCell>
+                <DashboardTableDataCell
+                  isHeader
+                  align="start"
+                  collapsible
+                  className={headerCell}
+                >
+                  Invoice no.
+                </DashboardTableDataCell>
+                <DashboardTableDataCell
+                  isHeader
+                  align="start"
+                  collapsible
+                  className={headerCell}
+                >
+                  Invoice date
+                </DashboardTableDataCell>
+                <DashboardTableDataCell isHeader align="start" className={headerCell}>
+                  Type
+                </DashboardTableDataCell>
+                <DashboardTableMenuHeader />
+              </tr>
+            </TableHeader>
+            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+              {invoices.map((inv) => {
+                const isSelected = selectedId === inv.id;
+                const rowChecked = !!checked[inv.id] || allChecked;
+                return (
+                  <DashboardTableRow
+                    key={inv.id}
+                    onClick={() => toggleRow(inv.id)}
+                    selected={isSelected}
+                    checked={rowChecked}
+                    onCheckChange={() => toggleCheck(inv.id)}
+                    menuItems={[
+                      { label: "Mark as paid", onClick: () => undefined },
+                      { label: "View details", onClick: () => setSelectedId(inv.id) },
+                    ]}
+                  >
+                    <DashboardTableDataCell align="start" className="py-3.5">
+                      <StackedCellContent primary={inv.dueDate} secondary={inv.dueRel} />
+                    </DashboardTableDataCell>
+                    <DashboardTableDataCell align="start" className="py-3.5">
+                      <StatusCellContent label={inv.status} color={statusColor(inv.status)} />
+                    </DashboardTableDataCell>
+                    <DashboardTableDataCell align="start" className="max-w-[200px] py-3.5">
+                      <StackedCellContent primary={inv.customer} secondary={inv.email} />
+                    </DashboardTableDataCell>
+                    <DashboardTableDataCell align="end" className="py-3.5">
+                      <CurrencyCellContent dollars={inv.amount} cents={inv.cents} align="end" />
+                    </DashboardTableDataCell>
+                    <DashboardTableDataCell align="start" collapsible className="py-3.5">
+                      <NormalCellContent>{inv.invoiceNo}</NormalCellContent>
+                    </DashboardTableDataCell>
+                    <DashboardTableDataCell align="start" collapsible className="py-3.5">
+                      <NormalCellContent>{inv.invoiceDate}</NormalCellContent>
+                    </DashboardTableDataCell>
+                    <DashboardTableDataCell align="start" className="py-3.5">
+                      <NormalCellContent>{inv.type}</NormalCellContent>
+                    </DashboardTableDataCell>
+                  </DashboardTableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </TableWithDetailSidebar>
   );
 }

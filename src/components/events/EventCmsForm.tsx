@@ -18,6 +18,7 @@ import {
   DEFAULT_EVENT_FIELD_SLUGS,
   type EventFieldSlugs,
 } from "@/lib/webflow/event-field-slugs";
+import { getApiBase } from "@/lib/apiBase";
 import { slugifyFromEventName } from "@/lib/webflow/slugifyEvent";
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/lib/webflow/datetimeLocal";
 import { toast } from "sonner";
@@ -184,7 +185,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
     enabled: Boolean(itemId),
     queryFn: async () => {
       const res = await fetch(
-        `/api/events/webflow/${encodeURIComponent(itemId!)}`
+        `${getApiBase()}/api/events/webflow/${encodeURIComponent(itemId!)}`
       );
       const json = (await res.json()) as {
         error?: string;
@@ -198,7 +199,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
   const { data: committeesPayload } = useQuery({
     queryKey: ["webflow-committee-items"],
     queryFn: async () => {
-      const res = await fetch("/api/webflow/committee-items");
+      const res = await fetch(`${getApiBase()}/api/webflow/committee-items`);
       const json = (await res.json()) as { error?: string; items?: CommitteeRow[] };
       if (!res.ok) return [];
       return json.items ?? [];
@@ -264,7 +265,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
       return;
     }
     try {
-      const res = await fetch("/api/places/autocomplete", {
+      const res = await fetch(`${getApiBase()}/api/places/autocomplete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -291,7 +292,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
 
   const pickSuggestion = async (s: PlaceSuggest) => {
     try {
-      const res = await fetch("/api/places/details", {
+      const res = await fetch(`${getApiBase()}/api/places/details`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -336,7 +337,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/events/webflow/upload-image", {
+      const res = await fetch(`${getApiBase()}/api/events/webflow/upload-image`, {
         method: "POST",
         body: fd,
         credentials: "include",
@@ -364,7 +365,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
     }
     setComposeBusy(true);
     try {
-      const res = await fetch("/api/marketing/events/compose", {
+      const res = await fetch(`${getApiBase()}/api/marketing/events/compose`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -439,7 +440,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
     try {
       if (itemId) {
         const res = await fetch(
-          `/api/events/webflow/${encodeURIComponent(itemId)}`,
+          `${getApiBase()}/api/events/webflow/${encodeURIComponent(itemId)}`,
           {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -451,7 +452,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
         if (json.warning) toast.info(json.warning, { duration: 10000 });
         toast.success("Event saved to Webflow.");
       } else {
-        const res = await fetch("/api/events/webflow", {
+        const res = await fetch(`${getApiBase()}/api/events/webflow`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fieldData: fd }),
