@@ -116,10 +116,9 @@ const mainNavSections: NavSection[] = [
     id: "neighbors",
     title: "Neighbors",
     icon: <GroupIcon />,
-    rootPath: "/neighbors/all",
+    rootPath: "/neighbors",
     pathPrefixes: ["/neighbors"],
     items: [
-      { name: "Members", path: "/neighbors/members", pro: false },
       {
         name: "Duplicate members",
         path: "/neighbors/duplicate-memberships",
@@ -207,6 +206,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Basic Tables", path: "/basic-tables", pro: false },
       { name: "Mercury-style table", path: "/mercury-table", pro: false },
+      { name: "Table widgets", path: "/table-widgets", pro: false },
     ],
   },
   {

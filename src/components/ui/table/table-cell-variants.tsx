@@ -80,7 +80,7 @@ export interface StatusCellContentProps {
 
 export function StatusCellContent({ label, color = "warning", align = "start" }: StatusCellContentProps) {
   return (
-    <div className={`flex min-w-0 ${alignInnerClass[align]}`}>
+    <div className={`flex min-w-0 max-w-full ${alignInnerClass[align]}`}>
       <Badge variant="light" color={color} size="sm">
         {label}
       </Badge>
