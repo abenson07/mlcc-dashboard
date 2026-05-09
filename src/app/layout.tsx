@@ -1,4 +1,4 @@
-import { Outfit } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 import "flatpickr/dist/flatpickr.css";
 import { Toaster } from "sonner";
@@ -9,21 +9,15 @@ import { DevLinkProvider } from "@/devlink/DevLinkProvider";
 import FeedbackFab from "@/components/feedback/FeedbackFab";
 
 /**
- * Interim stacks: Arcadia Display / Arcadia Text are not on Google Fonts.
- * When licensed WOFF2 files are available, load via `next/font/local` with
- * the same CSS variable names: `--font-mercury-body-stack`, `--font-mercury-heading-stack`.
+ * Display/body stacks both use Noto Sans until Arcadia fonts ship; then load
+ * via `next/font/local` with `--font-mercury-body-stack` and
+ * `--font-mercury-heading-stack` again if body and headings diverge.
  */
-const mercuryBody = Outfit({
+const notoSans = Noto_Sans({
   subsets: ["latin"],
   variable: "--font-mercury-body-stack",
   display: "swap",
-});
-
-const mercuryHeading = Outfit({
-  subsets: ["latin"],
-  variable: "--font-mercury-heading-stack",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
+  style: ["normal", "italic"],
 });
 
 export default function RootLayout({
@@ -35,10 +29,10 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${mercuryBody.variable} ${mercuryHeading.variable}`}
+      className={notoSans.variable}
     >
       <body
-        className={`${mercuryBody.className} dark:bg-mercury-surface-inverse`}
+        className={`${notoSans.className} dark:bg-mercury-surface-inverse`}
         suppressHydrationWarning
       >
         <QueryProvider>

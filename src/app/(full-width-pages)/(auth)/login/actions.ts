@@ -44,7 +44,7 @@ export async function signIn(
   }
 
   try {
-    redirect("/neighbors/all");
+    redirect("/neighbors");
   } catch (e) {
     console.error("[login action] redirect() threw", e);
     throw e;

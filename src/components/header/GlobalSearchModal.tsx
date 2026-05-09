@@ -10,7 +10,7 @@ type GlobalSearchModalProps = {
 };
 
 const QUICK_LINKS: { label: string; href: string }[] = [
-  { label: "All Neighbors", href: "/neighbors/all" },
+  { label: "Neighbors", href: "/neighbors" },
   { label: "All routes", href: "/routes/all" },
   { label: "Invoices", href: "/billing/invoices" },
   { label: "Upcoming events", href: "/events" },

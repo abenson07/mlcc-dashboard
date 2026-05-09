@@ -1,0 +1,67 @@
+"use client";
+
+import React from "react";
+
+export type TableViewTabItem<T extends string = string> = {
+  value: T;
+  label: string;
+  disabled?: boolean;
+};
+
+export type TableViewTabsProps<T extends string> = {
+  tabs: TableViewTabItem<T>[];
+  value: T;
+  onChange: (value: T) => void;
+  className?: string;
+  "aria-label"?: string;
+};
+
+/**
+ * Underlined tab row for switching table views (content sits directly below).
+ */
+export default function TableViewTabs<T extends string>({
+  tabs,
+  value,
+  onChange,
+  className = "",
+  "aria-label": ariaLabel = "Table view",
+}: TableViewTabsProps<T>) {
+  return (
+    <div
+      className={`border-b border-mercury-line dark:border-white/10 ${className}`}
+      role="tablist"
+      aria-label={ariaLabel}
+    >
+      <div className="-mb-px flex flex-wrap gap-6">
+        {tabs.map((tab) => {
+          const selected = tab.value === value;
+          const disabled = tab.disabled ?? false;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              aria-disabled={disabled}
+              disabled={disabled}
+              onClick={() => !disabled && onChange(tab.value)}
+              className={`relative border-none bg-transparent px-0 pb-3 text-mercury-body font-medium transition-colors outline-offset-2 ${
+                selected
+                  ? "text-mercury-ink dark:text-white"
+                  : "text-mercury-muted hover:text-mercury-ink dark:hover:text-white/80"
+              } ${disabled ? "cursor-not-allowed opacity-45" : "cursor-pointer"}`}
+            >
+              {tab.label}
+              {selected ? (
+                <span
+                  className="absolute right-0 bottom-0 left-0 h-0.5 rounded-full bg-blue-light-600 dark:bg-blue-light-400"
+                  aria-hidden
+                />
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

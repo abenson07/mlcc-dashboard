@@ -9,25 +9,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CopyableEmail } from "@/components/common/CopyableEmail";
+import { StackedCellContent } from "@/components/ui/table";
+import { formatStackedRelativePast } from "@/lib/formatRelativeTime";
 import { usePeople } from "hooks";
 import type { PersonWithMembership } from "hooks";
 
 export interface AllNeighborsTableProps {
   onRowClick?: (person: PersonWithMembership) => void;
-}
-
-function formatCreatedAt(dateString: string | null): string {
-  if (!dateString) return "—";
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "—";
-  }
 }
 
 export default function AllNeighborsTable({ onRowClick }: AllNeighborsTableProps) {
@@ -88,7 +76,11 @@ export default function AllNeighborsTable({ onRowClick }: AllNeighborsTableProps
                   </TableCell>
                 </TableRow>
               ) : (
-                people.map((person) => (
+                people.map((person) => {
+                  const createdStack = person.created_at
+                    ? formatStackedRelativePast(person.created_at)
+                    : null;
+                  return (
                   <TableRow
                     key={person.id}
                     onClick={onRowClick ? () => onRowClick(person) : undefined}
@@ -106,11 +98,19 @@ export default function AllNeighborsTable({ onRowClick }: AllNeighborsTableProps
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       {person.address ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {formatCreatedAt(person.created_at)}
+                    <TableCell className="px-4 py-3 text-start text-theme-sm text-gray-800 dark:text-white/90">
+                      {createdStack ? (
+                            <StackedCellContent
+                              primary={createdStack.primary}
+                              secondary={createdStack.secondary}
+                            />
+                      ) : (
+                        <span className="text-gray-500 dark:text-gray-400">—</span>
+                      )}
                     </TableCell>
                   </TableRow>
-                ))
+                );
+                })
               )}
             </TableBody>
           </Table>

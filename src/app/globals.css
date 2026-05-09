@@ -5,10 +5,9 @@
 @theme {
   --font-*: initial;
   /* Fallback name for legacy utilities; real stacks come from next/font on <html>. */
-  --font-outfit: Outfit, sans-serif;
+  --font-noto-sans: "Noto Sans", sans-serif;
   --font-mercury-text: var(--font-mercury-body-stack), ui-sans-serif, system-ui, sans-serif;
-  --font-mercury-display: var(--font-mercury-heading-stack), ui-sans-serif, system-ui,
-    sans-serif;
+  --font-mercury-display: var(--font-mercury-body-stack), ui-sans-serif, system-ui, sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -237,6 +236,8 @@
     cursor: pointer;
   }
   body {
+    font-optical-sizing: auto;
+    font-variation-settings: "wdth" 100;
     @apply relative z-1 bg-mercury-bg font-mercury-text text-mercury-body-lg font-normal text-mercury-ink antialiased;
   }
   h1 {
