@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 const MODEL =
-  process.env.ANTHROPIC_MODEL?.trim() || "claude-3-5-sonnet-latest";
+  process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6";
 
 export type ComposedEmail = { subject: string; html: string };
 

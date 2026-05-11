@@ -1,0 +1,16 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//MLCC//Spring Community Meeting//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:mlcc-spring-2026-wed@mapleleafcommunity.org
+DTSTAMP:20260210T000000Z
+SUMMARY:MLCC Spring Community Meeting
+DESCRIPTION:Spring community meeting — Maple Leaf Community Council.\nAll neighbors welcome\; no RSVP required.\n\nIn person: Olympic View Elementary School\, Seattle.\n\nLive stream:\nhttps://www.youtube.com/live/oUPuhBI3wQc
+DTSTART:20260514T010000Z
+DTEND:20260514T023000Z
+LOCATION:Olympic View Elementary School\, Seattle\, WA
+URL:https://www.youtube.com/live/oUPuhBI3wQc
+END:VEVENT
+END:VCALENDAR

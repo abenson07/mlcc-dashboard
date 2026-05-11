@@ -14,6 +14,11 @@
     "webflow:setup-banners": "node scripts/setup-webflow-banners-collection.mjs",
     "webflow:list-sites": "node scripts/setup-webflow-banners-collection.mjs --list-sites",
     "webflow:verify-banners": "node scripts/setup-webflow-banners-collection.mjs --verify",
+    "webflow:create-events-collection": "node scripts/create-webflow-events-collection.mjs",
+    "webflow:verify-events": "node scripts/setup-webflow-events-fields.mjs --verify",
+    "webflow:bulk-silent-book-2026": "node scripts/bulk-silent-book-club-2026.mjs",
+    "webflow:migrate-body-to-long-description": "node scripts/migrate-event-body-to-long-description.mjs",
+    "webflow:rewrite-event-short-descriptions": "tsx scripts/rewrite-event-short-descriptions.ts",
     "seed:businesses": "tsx scripts/seed-businesses-from-places.ts",
     "seed:businesses:sql": "tsx scripts/seed-businesses-from-places.ts --emit-sql",
     "migrate:businesses": "tsx scripts/apply-businesses-migration.ts"

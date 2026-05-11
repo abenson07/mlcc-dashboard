@@ -22,6 +22,10 @@ import { webflowItemToEventInput, type WebflowCalendarExtras } from "./eventMapp
 import { slugifyFromEventName } from "@/lib/webflow/slugifyEvent";
 import { toast } from "sonner";
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/lib/webflow/datetimeLocal";
+import {
+  plainTextToEventRichTextHtml,
+  richTextValueToPlain,
+} from "@/lib/webflow/richTextPlain";
 import Link from "next/link";
 import { getApiBase } from "@/lib/apiBase";
 
@@ -166,6 +170,8 @@ function initFormFromFieldData(
       form[f.slug] = toDatetimeLocalValue(raw);
     } else if (f.type === "Switch") {
       form[f.slug] = raw === true || raw === "true" ? "true" : "false";
+    } else if (f.type === "RichText") {
+      form[f.slug] = richTextValueToPlain(raw);
     } else {
       form[f.slug] = String(raw);
     }
@@ -211,6 +217,11 @@ function buildFieldDataFromForm(
       case "DateTime":
         out[f.slug] = v === "" ? null : fromDatetimeLocalValue(v);
         break;
+      case "RichText": {
+        const text = (v ?? "").trim();
+        out[f.slug] = text ? plainTextToEventRichTextHtml(v) : null;
+        break;
+      }
       default:
         out[f.slug] = v;
     }

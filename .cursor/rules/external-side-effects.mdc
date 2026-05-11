@@ -1,0 +1,24 @@
+---
+description: Confirm before live Webflow/Stripe/DB/email writes; always flag data deletion; assume user wants work done when they ask.
+alwaysApply: true
+---
+
+# External APIs and side effects
+
+The user expects agents to **run real integration commands** (Webflow, Stripe, MCP, scripts that use `.env`, etc.) so they don’t have to micromanage. **Do not** refuse or hand-wave with “you run it” when they’ve asked you to do the task.
+
+## Before mutating live data
+
+When the user’s request clearly means hitting a **real** API or running a **write** (create / update / publish / migrate / setup scripts), **assume they want it**, but **confirm once** in plain language before you run—for example: *“This will create CMS fields on your Webflow collection — OK to run?”* If they already said “run it” / “do it” / “execute”, that counts as confirmation; a one-line recap of impact is still required.
+
+**Deletion / destructive operations:** If anything you’re about to do could **delete or irreversibly remove data** (drop migrations, delete CMS items/collections, wipe tables, destructive Stripe ops, etc.), **say so explicitly** before running (`This will delete …` / `This is destructive because …`). Never bury that in jargon.
+
+## During / after
+
+- Summarize **what changed** (created id, updated resource, command that ran).
+- Don’t treat “smoke test” or “verify the script” as a reason to run **mutating** commands **the user didn’t ask for**. If you only needed to prove syntax, read the file or use read-only flags (`--verify`, dry-run) when available.
+
+## Examples (this repo)
+
+- **Mutating:** `webflow:create-events-collection`, `webflow:setup-events-fields` (default), seeds, DB migrations that apply changes, publish flows.
+- **Usually read-only:** `webflow:verify-events`, `webflow:verify-banners` (still uses live API; mention if hitting production).

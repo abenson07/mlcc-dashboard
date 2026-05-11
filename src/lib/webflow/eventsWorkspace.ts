@@ -40,6 +40,31 @@ export function getEventsEnv(): { token: string; collectionId: string } | null {
   return { token, collectionId };
 }
 
+function slugifyFieldDisplayName(displayName: string): string {
+  const s = displayName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return s || "field";
+}
+
+/**
+ * Webflow sometimes omits `slug` on field objects; derive from displayName so the
+ * dashboard can match fields to CMS keys.
+ */
+export function normalizeCollectionFields(
+  fields: WebflowCollectionField[]
+): WebflowCollectionField[] {
+  return fields.map((f) => {
+    const slug =
+      typeof f.slug === "string" && f.slug.trim()
+        ? f.slug.trim()
+        : slugifyFieldDisplayName(f.displayName);
+    return { ...f, slug };
+  });
+}
+
 export async function fetchEventsCollection(
   token: string,
   collectionId: string
@@ -52,7 +77,7 @@ export async function fetchEventsCollection(
   return {
     id: raw.id,
     displayName: raw.displayName,
-    fields: raw.fields ?? [],
+    fields: normalizeCollectionFields(raw.fields ?? []),
   };
 }
 
