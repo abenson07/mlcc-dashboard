@@ -1,47 +1,83 @@
 "use client";
-import Checkbox from "@/components/form/input/Checkbox";
+
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
+import { ChevronLeftIcon } from "@/icons";
 import Link from "next/link";
-import React, { useActionState, useEffect, useState } from "react";
+import React, { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { signIn } from "@/app/(full-width-pages)/(auth)/login/actions";
+import {
+  sendLoginCode,
+  verifyLoginCode,
+  type SendLoginCodeState,
+  type VerifyLoginCodeState,
+} from "@/app/(full-width-pages)/(auth)/login/actions";
 
-function SignInButton() {
+function SendCodeButton() {
   const { pending } = useFormStatus();
   return (
-    <Button
-      className="w-full"
-      size="sm"
-      type="submit"
-      disabled={pending}
-    >
+    <Button className="w-full" size="sm" type="submit" disabled={pending}>
+      {pending ? "Sending code..." : "Send code"}
+    </Button>
+  );
+}
+
+function VerifyButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button className="w-full" size="sm" type="submit" disabled={pending}>
       {pending ? "Signing in..." : "Sign in"}
     </Button>
   );
 }
 
+function ResendButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending || disabled}
+      className="text-sm text-brand-500 hover:text-brand-600 disabled:opacity-50 dark:text-brand-400"
+    >
+      {pending ? "Sending..." : "Resend code"}
+    </button>
+  );
+}
+
 export default function SignInForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
-  const [state, formAction] = useActionState(signIn, null);
+  const [email, setEmail] = useState("");
+  const [useDifferentEmail, setUseDifferentEmail] = useState(false);
+  const [resendDisabled, setResendDisabled] = useState(false);
 
-  useEffect(() => {
-    if (state !== null) {
-      if (state.error) {
-        console.log("[login] action result", { error: state.error });
-      } else {
-        console.log("[login] action result", "success");
-      }
+  const [sendState, sendAction] = useActionState<SendLoginCodeState, FormData>(
+    sendLoginCode,
+    null
+  );
+  const [verifyState, verifyAction] = useActionState<
+    VerifyLoginCodeState,
+    FormData
+  >(verifyLoginCode, null);
+
+  const showCodeStep = Boolean(sendState?.ok && email && !useDifferentEmail);
+
+  function handleEmailSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const fd = new FormData(e.currentTarget);
+    const raw = fd.get("email");
+    if (typeof raw === "string") {
+      setEmail(raw.trim().toLowerCase());
     }
-  }, [state]);
+    setUseDifferentEmail(false);
+  }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    console.log("[login] form submit", { emailPresent: !!fd.get("email"), passwordPresent: !!fd.get("password") });
+  function handleResendSubmit() {
+    setResendDisabled(true);
+    window.setTimeout(() => setResendDisabled(false), 30_000);
+  }
+
+  function handleDifferentEmail() {
+    setUseDifferentEmail(true);
+    setEmail("");
   }
 
   return (
@@ -62,90 +98,91 @@ export default function SignInForm() {
               Sign In
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign in!
+              {!showCodeStep
+                ? "Enter your email to receive a sign-in code."
+                : "Enter the 8-digit code we sent to your email."}
             </p>
           </div>
           <div>
-            {/* Sign in with Google / X - commented out */}
-            {/* <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
-                <svg ... >Sign in with Google</svg>
-              </button>
-              <button ...>Sign in with X</button>
-            </div>
-            <div className="relative py-3 sm:py-5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="p-2 text-gray-400 bg-white dark:bg-gray-900 sm:px-5 sm:py-2">Or</span>
-              </div>
-            </div> */}
-            <form action={formAction} onSubmit={handleSubmit}>
-              <div className="space-y-6">
-                {state?.error && (
-                  <p className="text-sm text-error-500">{state.error}</p>
-                )}
-                <div>
-                  <Label>
-                    Email <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <Input
-                    name="email"
-                    placeholder="info@gmail.com"
-                    type="email"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label>
-                    Password <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <div className="relative">
+            {!showCodeStep ? (
+              <form action={sendAction} onSubmit={handleEmailSubmit}>
+                <div className="space-y-6">
+                  {sendState?.error && (
+                    <p className="text-sm text-error-500">{sendState.error}</p>
+                  )}
+                  <div>
+                    <Label>
+                      Email <span className="text-error-500">*</span>
+                    </Label>
                     <Input
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      name="email"
+                      placeholder="you@example.com"
+                      type="email"
                       required
+                      defaultValue={email}
                     />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
-                      )}
-                    </span>
+                  </div>
+                  <div>
+                    <SendCodeButton />
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Checkbox checked={isChecked} onChange={setIsChecked} />
-                    <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                      Keep me logged in
+              </form>
+            ) : (
+              <div className="space-y-6">
+                {!verifyState?.error && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    If this email is registered, we sent a code to{" "}
+                    <span className="font-medium text-gray-800 dark:text-white/90">
+                      {email}
                     </span>
+                    .
+                  </p>
+                )}
+                {verifyState?.error && (
+                  <p className="text-sm text-error-500">{verifyState.error}</p>
+                )}
+                {sendState?.error && (
+                  <p className="text-sm text-error-500">{sendState.error}</p>
+                )}
+                <form action={verifyAction}>
+                  <input type="hidden" name="email" value={email} />
+                  <div className="space-y-6">
+                    <div>
+                      <Label>
+                        Code <span className="text-error-500">*</span>
+                      </Label>
+                      <Input
+                        name="token"
+                        placeholder="00000000"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={8}
+                        pattern="[0-9]{8}"
+                        required
+                        className="text-center tracking-[0.35em] font-mono"
+                      />
+                    </div>
+                    <div>
+                      <VerifyButton />
+                    </div>
                   </div>
-                  {/* <Link href="/reset-password" className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400">
-                    Forgot password?
-                  </Link> */}
-                </div>
-                <div>
-                  <SignInButton />
+                </form>
+                <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={handleDifferentEmail}
+                    className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  >
+                    Use a different email
+                  </button>
+                  <form action={sendAction} onSubmit={handleResendSubmit}>
+                    <input type="hidden" name="email" value={email} />
+                    <ResendButton disabled={resendDisabled} />
+                  </form>
                 </div>
               </div>
-            </form>
-
-            {/* Don't have an account? Sign Up - commented out */}
-            {/* <div className="mt-5">
-              <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Don&apos;t have an account? {""}
-                <Link href="/signup" className="text-brand-500 hover:text-brand-600 dark:text-brand-400">
-                  Sign Up
-                </Link>
-              </p>
-            </div> */}
+            )}
           </div>
         </div>
       </div>
