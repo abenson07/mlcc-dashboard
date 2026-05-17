@@ -153,7 +153,9 @@ function DraggableLineRow({
       style={{ opacity: isDragging ? 0.45 : 1 }}
     >
       <div
-        ref={drag}
+        ref={(node) => {
+          drag(node);
+        }}
         className="cursor-grab shrink-0 active:cursor-grabbing"
       >
         <LineDragHandle />

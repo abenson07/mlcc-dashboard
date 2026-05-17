@@ -35,14 +35,16 @@ interface VolunteerAsksTableProps {
 function HeaderCell({
   children,
   className = "",
+  ...rest
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
-}) {
+} & React.ComponentPropsWithoutRef<typeof TableCell>) {
   return (
     <TableCell
       isHeader
       className={`px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 ${className}`}
+      {...rest}
     >
       {children}
     </TableCell>
@@ -121,7 +123,9 @@ export default function VolunteerAsksTable({
                 <HeaderCell className="text-center">Remaining</HeaderCell>
                 <HeaderCell>Description</HeaderCell>
                 {(onEdit || onDelete) && (
-                  <HeaderCell className="w-10 px-1" aria-hidden />
+                  <HeaderCell className="w-10 px-1">
+                    <span className="sr-only">Actions</span>
+                  </HeaderCell>
                 )}
               </TableRow>
             </TableHeader>
