@@ -42,6 +42,14 @@ export function getWebflowBannersCollectionId(): string | undefined {
   return (process.env.WEBFLOW_BANNERS_COLLECTION_ID ?? disk.WEBFLOW_BANNERS_COLLECTION_ID)?.trim();
 }
 
+export function getWebflowVolunteerAsksCollectionId(): string | undefined {
+  const disk = getDiskEnv();
+  return (
+    process.env.WEBFLOW_VOLUNTEER_ASKS_COLLECTION_ID ??
+    disk.WEBFLOW_VOLUNTEER_ASKS_COLLECTION_ID
+  )?.trim();
+}
+
 /** Committees CMS collection (events Reference field target). */
 export function getWebflowCommitteesCollectionId(): string | undefined {
   const disk = getDiskEnv();

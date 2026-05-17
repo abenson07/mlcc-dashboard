@@ -17,6 +17,10 @@ export const METADATA_KEYS = {
   category: "category",
   created: "created",
   createdBy: "created_by",
+  /** Webflow Events CMS item id when category is event sponsorship. */
+  eventId: "event_id",
+  /** Display name at issue time (from Webflow). */
+  eventName: "event_name",
 } as const;
 
 export function categorySlugToLabel(slug: InvoiceCategorySlug): string {

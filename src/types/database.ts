@@ -22,4 +22,11 @@ export type {
   Events,
   EventsInsert,
   EventsUpdate,
+  VolunteerAsks,
+  VolunteerAsksInsert,
+  VolunteerAsksUpdate,
+  VolunteerCommitmentType,
+  VolunteerCommitmentUnit,
+  Volunteers,
+  VolunteersInsert,
 } from "../../schemas";

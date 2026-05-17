@@ -17,7 +17,7 @@ export default function MercuryTablePage() {
       <div className="space-y-6">
         <ComponentCard
           title="Mercury-style tables"
-          desc="Pick a table: neighbors and routes load from Supabase via the same hooks as their pages; duplicate memberships and invoices load from the existing Stripe API routes; businesses load from Supabase (members = active business_memberships only). The original Mercury invoice demo still uses static rows. Row click opens the panel where applicable; Escape closes it."
+          desc="Pick a table: neighbors and routes load from Supabase via the same hooks as their pages; duplicate memberships and invoices load from the existing Stripe API routes; businesses load from Supabase (members = active business_memberships only). Sponsorship invoices use the original Mercury invoice column layout with live Stripe data. The original invoice demo option still uses static sample rows. Row click opens the panel where applicable; Escape closes it."
         >
           <MercuryPlayground />
         </ComponentCard>

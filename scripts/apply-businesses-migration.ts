@@ -74,6 +74,7 @@ function connectionString(): string {
 const MIGRATION_FILES = [
   "20260509120000_businesses_places_outreach.sql",
   "20260509210000_business_hide_and_place_blocks.sql",
+  "20260517120000_business_member_sponsor_flags.sql",
 ];
 
 async function main(): Promise<void> {

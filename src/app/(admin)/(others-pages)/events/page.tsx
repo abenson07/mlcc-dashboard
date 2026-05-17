@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Events",
-  description: "List and calendar for Webflow Events CMS",
+  description: "Webflow Events CMS",
 };
 
 export default function EventsPage() {

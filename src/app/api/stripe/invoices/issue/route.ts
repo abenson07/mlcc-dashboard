@@ -5,6 +5,7 @@ import {
   METADATA_KEYS,
   type InvoiceCategorySlug,
 } from "@/lib/stripe/invoiceDashboardMetadata";
+import { resolveInvoiceEventById } from "@/lib/stripe/resolveInvoiceEvent";
 import { getStripe } from "@/lib/stripe/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -17,6 +18,7 @@ type ParsedIssue = {
   lineItems: LineItem[];
   dueDate: string | null;
   categorySlug: InvoiceCategorySlug;
+  eventId?: string;
   memo?: string;
 };
 
@@ -92,6 +94,25 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
   const memo =
     typeof o.memo === "string" && o.memo.trim() ? o.memo.trim() : undefined;
 
+  const eventId =
+    typeof o.eventId === "string" && o.eventId.trim()
+      ? o.eventId.trim()
+      : undefined;
+
+  if (categorySlug === "event" && !eventId) {
+    return {
+      ok: false,
+      error: "eventId is required when category is event.",
+    };
+  }
+
+  if (categorySlug === "leaflet" && eventId) {
+    return {
+      ok: false,
+      error: "eventId must not be set for leaflet sponsorship invoices.",
+    };
+  }
+
   return {
     ok: true,
     data: {
@@ -100,6 +121,7 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
       lineItems,
       dueDate,
       categorySlug,
+      eventId,
       memo,
     },
   };
@@ -169,6 +191,18 @@ export async function POST(req: Request) {
   }
   const input = parsed.data;
 
+  let eventMetadata: Record<string, string> = {};
+  if (input.categorySlug === "event" && input.eventId) {
+    const resolved = await resolveInvoiceEventById(input.eventId);
+    if (!resolved.ok) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 });
+    }
+    eventMetadata = {
+      [METADATA_KEYS.eventId]: resolved.event.eventId,
+      [METADATA_KEYS.eventName]: resolved.event.eventName,
+    };
+  }
+
   try {
     const customerId = await resolveCustomerId(stripe, input);
 
@@ -181,6 +215,7 @@ export async function POST(req: Request) {
         [METADATA_KEYS.category]: categorySlugToLabel(input.categorySlug),
         [METADATA_KEYS.created]: DASHBOARD_CREATED_VALUE,
         [METADATA_KEYS.createdBy]: auth.user.displayName,
+        ...eventMetadata,
       },
       ...(input.dueDate
         ? { due_date: dueDateToUnixEndOfDayUtc(input.dueDate) }

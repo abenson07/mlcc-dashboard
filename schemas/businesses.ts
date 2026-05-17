@@ -16,6 +16,8 @@ export interface Businesses {
   hidden: boolean; // hide from default lists in the dashboard
   membership_id: string | null; // uuid (references business_memberships)
   notes: string | null; // text
+  is_member: boolean; // dashboard flag
+  is_past_sponsor: boolean; // dashboard flag
 }
 
 export interface BusinessesInsert {
@@ -30,6 +32,8 @@ export interface BusinessesInsert {
   hidden?: boolean;
   membership_id?: string | null;
   notes?: string | null;
+  is_member?: boolean;
+  is_past_sponsor?: boolean;
 }
 
 export interface BusinessesUpdate {
@@ -44,4 +48,6 @@ export interface BusinessesUpdate {
   hidden?: boolean;
   membership_id?: string | null;
   notes?: string | null;
+  is_member?: boolean;
+  is_past_sponsor?: boolean;
 }

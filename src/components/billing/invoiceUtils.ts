@@ -20,3 +20,43 @@ export function formatDueDate(timestamp: number | null): string {
     day: "numeric",
   });
 }
+
+/** Short month + day (Mercury invoice table prototype). */
+export function formatShortMonthDay(timestamp: number | null): string {
+  if (timestamp === null) return "—";
+  return new Date(timestamp * 1000).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export type MercuryInvoiceDisplayStatus = "Overdue" | "Active" | "Paid";
+
+export function mercuryInvoiceDisplayStatus(inv: {
+  status: string | null;
+  due_date: number | null;
+}): MercuryInvoiceDisplayStatus {
+  if ((inv.status ?? "").toLowerCase() === "paid") return "Paid";
+  if (isOpenPastDue(inv)) return "Overdue";
+  return "Active";
+}
+
+export function mercuryInvoiceStatusColor(
+  status: MercuryInvoiceDisplayStatus,
+): "warning" | "info" | "success" {
+  if (status === "Overdue") return "warning";
+  if (status === "Paid") return "success";
+  return "info";
+}
+
+export function customerLabelFromEmail(email: string | null): string {
+  if (!email) return "—";
+  const at = email.indexOf("@");
+  const local = at > 0 ? email.slice(0, at) : email;
+  return (
+    local
+      .replace(/[._-]+/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim() || email
+  );
+}

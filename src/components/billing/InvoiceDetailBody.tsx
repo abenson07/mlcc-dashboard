@@ -20,6 +20,10 @@ type InvoicePayload = {
   amount_due: number | null;
   due_date: number | null;
   hosted_invoice_url: string | null;
+  sponsorship_category?: string | null;
+  event_id?: string | null;
+  event_name?: string | null;
+  created_by_name?: string | null;
 };
 
 export default function InvoiceDetailBody({
@@ -99,7 +103,7 @@ export default function InvoiceDetailBody({
           <p>We could not load this invoice.</p>
           <button
             type="button"
-            onClick={() => router.push("/billing/invoices")}
+            onClick={() => router.push("/sponsorship?view=invoices")}
             className="font-medium text-brand-600 underline dark:text-brand-400"
           >
             Back to list
@@ -178,10 +182,26 @@ export default function InvoiceDetailBody({
                 {formatDueDate(inv.due_date)}
               </dd>
             </div>
+            {inv.event_name ? (
+              <div>
+                <dt className="text-gray-500 dark:text-gray-400">Event</dt>
+                <dd className="mt-1 text-gray-900 dark:text-white/90">
+                  {inv.event_name}
+                </dd>
+              </div>
+            ) : null}
+            {inv.sponsorship_category ? (
+              <div>
+                <dt className="text-gray-500 dark:text-gray-400">Category</dt>
+                <dd className="mt-1 text-gray-900 dark:text-white/90">
+                  {inv.sponsorship_category}
+                </dd>
+              </div>
+            ) : null}
           </dl>
           <p>
             <Link
-              href="/billing/invoices"
+              href="/sponsorship?view=invoices"
               className="font-medium text-brand-600 underline dark:text-brand-400"
             >
               All invoices

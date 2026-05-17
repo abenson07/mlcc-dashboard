@@ -2,14 +2,13 @@
 
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import ComponentCard from "@/components/common/ComponentCard";
 import TableWithDetailSidebar from "@/components/detail-sidebar/TableWithDetailSidebar";
 import RouteDetailSidebar from "@/components/detail-sidebar/RouteDetailSidebar";
 import { MercuryVariantTable } from "@/components/table/mercury-demo/mercuryVariantTable";
 import { useMercuryPlaygroundData } from "@/components/table/mercury-demo/useMercuryPlaygroundData";
 import type { RouteWithDeliverer } from "hooks";
 
-export default function OpenRoutesContent() {
+export default function OpenRoutesPane() {
   const queryClient = useQueryClient();
   const mercury = useMercuryPlaygroundData("routes-open");
   const [selectedRoute, setSelectedRoute] = useState<RouteWithDeliverer | null>(null);
@@ -42,14 +41,12 @@ export default function OpenRoutesContent() {
         />
       )}
     >
-      <ComponentCard title="Open Routes">
-        <MercuryVariantTable
-          variant="routes-open"
-          mercury={mercury}
-          selectedKey={selectedKey}
-          onSelectKey={onSelectKey}
-        />
-      </ComponentCard>
+      <MercuryVariantTable
+        variant="routes-open"
+        mercury={mercury}
+        selectedKey={selectedKey}
+        onSelectKey={onSelectKey}
+      />
     </TableWithDetailSidebar>
   );
 }

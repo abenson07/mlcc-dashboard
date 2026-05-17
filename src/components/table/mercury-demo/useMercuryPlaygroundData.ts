@@ -81,7 +81,7 @@ export function useMercuryPlaygroundData(
 
   const businessesMembersFiltered =
     variant === "businesses-members"
-      ? businessesBundle.businesses.filter((b) => b.membership?.status?.toLowerCase() === "active")
+      ? businessesBundle.businesses.filter((b) => b.is_member)
       : [];
 
   let activeLoading = false;

@@ -14,6 +14,8 @@
     "webflow:setup-banners": "node scripts/setup-webflow-banners-collection.mjs",
     "webflow:list-sites": "node scripts/setup-webflow-banners-collection.mjs --list-sites",
     "webflow:verify-banners": "node scripts/setup-webflow-banners-collection.mjs --verify",
+    "webflow:setup-volunteer-asks": "node scripts/setup-webflow-volunteer-asks-collection.mjs",
+    "webflow:verify-volunteer-asks": "node scripts/setup-webflow-volunteer-asks-collection.mjs --verify",
     "webflow:create-events-collection": "node scripts/create-webflow-events-collection.mjs",
     "webflow:verify-events": "node scripts/setup-webflow-events-fields.mjs --verify",
     "webflow:bulk-silent-book-2026": "node scripts/bulk-silent-book-club-2026.mjs",

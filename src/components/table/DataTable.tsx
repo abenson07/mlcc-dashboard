@@ -70,7 +70,7 @@ export default function DataTable({ invoices }: Props) {
         <DetailPanel invoice={inv} onClose={() => setSelectedId(null)} showOuterHeader={false} />
       )}
     >
-      <div className="overflow-hidden bg-white dark:bg-white/[0.03]">
+      <div className="bg-white dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
           <Table className="w-full border-collapse">
             <TableHeader>

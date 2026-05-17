@@ -4,11 +4,12 @@ import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
 import { PlusIcon } from "@/icons";
 import { getApiBase } from "@/lib/apiBase";
-import { useBusinesses } from "hooks";
+import { useBusinesses, useWebflowEvents } from "hooks";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -207,6 +208,26 @@ function DraggableLineRow({
 
 const MIN_SEARCH_LEN = 2;
 
+function readEventDateKey(
+  fd: Record<string, unknown>,
+  slug: string | null
+): string | null {
+  if (!slug) return null;
+  const v = fd[slug];
+  if (typeof v !== "string" || !v) return null;
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return v.slice(0, 10);
+  return d.toISOString().slice(0, 10);
+}
+
+function formatEventOptionDate(ymd: string): string {
+  return new Date(`${ymd}T12:00:00`).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 /** Loose check for “looks like an email” (typed-in search, not RFC validation). */
 function resemblesEmailAddress(raw: string): boolean {
   const s = raw.trim();
@@ -382,9 +403,15 @@ function BusinessCustomerEmailField({
 
 export default function StripeInvoiceComposer() {
   const router = useRouter();
+  const {
+    data: eventsData,
+    isLoading: eventsLoading,
+    error: eventsError,
+  } = useWebflowEvents();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [category, setCategory] = useState<"event" | "leaflet">("event");
+  const [eventId, setEventId] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [memo, setMemo] = useState("");
   const [lines, setLines] = useState<LineRow[]>([
@@ -396,6 +423,28 @@ export default function StripeInvoiceComposer() {
     },
   ]);
   const [issuing, setIssuing] = useState(false);
+
+  const eventOptions = useMemo(() => {
+    if (!eventsData?.items) return [];
+    const titleSlug = eventsData.titleFieldSlug ?? "name";
+    const calSlug = eventsData.calendarFieldSlug ?? null;
+    return [...eventsData.items]
+      .filter((item) => !item.isArchived)
+      .map((item) => {
+        const fd = item.fieldData ?? {};
+        const name = String(fd[titleSlug] ?? fd.name ?? "Untitled event").trim();
+        const dateKey = readEventDateKey(fd, calSlug);
+        const label = dateKey
+          ? `${name || "Untitled event"} — ${formatEventOptionDate(dateKey)}`
+          : name || "Untitled event";
+        return {
+          id: item.id,
+          label,
+          sortKey: dateKey ?? "9999-12-31",
+        };
+      })
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  }, [eventsData]);
 
   const addLine = () => {
     setLines((prev) => [
@@ -482,11 +531,19 @@ export default function StripeInvoiceComposer() {
       lineItems.push({ description: desc, amountCents });
     }
 
+    if (category === "event" && !eventId.trim()) {
+      toast.error("Select the event this sponsorship invoice is for.");
+      return;
+    }
+
     const body: Record<string, unknown> = {
       email: em,
       lineItems,
       category,
     };
+    if (category === "event") {
+      body.eventId = eventId.trim();
+    }
     const nm = name.trim();
     if (nm) body.name = nm;
     const due = dueDate.trim();
@@ -506,7 +563,7 @@ export default function StripeInvoiceComposer() {
         throw new Error(data.error || "Could not issue invoice.");
       }
       toast.success(`Invoice sent (${data.id}).`);
-      router.push(`/billing/invoices/${encodeURIComponent(data.id)}`);
+      router.push(`/sponsorship/invoices/${encodeURIComponent(data.id)}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not issue invoice.");
     } finally {
@@ -554,9 +611,12 @@ export default function StripeInvoiceComposer() {
               <select
                 id="inv-category"
                 value={category}
-                onChange={(e) =>
-                  setCategory(e.target.value === "leaflet" ? "leaflet" : "event")
-                }
+                onChange={(e) => {
+                  const next =
+                    e.target.value === "leaflet" ? "leaflet" : "event";
+                  setCategory(next);
+                  if (next === "leaflet") setEventId("");
+                }}
                 className="mt-2 h-11 w-full max-w-md rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-blue-400"
               >
                 <option value="event">Event Sponsorship</option>
@@ -567,6 +627,43 @@ export default function StripeInvoiceComposer() {
                 your account name).
               </p>
             </div>
+            {category === "event" ? (
+              <div className="sm:col-span-2">
+                <Label htmlFor="inv-event">Event</Label>
+                <select
+                  id="inv-event"
+                  value={eventId}
+                  onChange={(e) => setEventId(e.target.value)}
+                  disabled={eventsLoading || !!eventsError}
+                  className="mt-2 h-11 w-full max-w-xl rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:text-white/90 dark:focus:border-blue-400"
+                >
+                  <option value="">
+                    {eventsLoading
+                      ? "Loading events…"
+                      : eventsError
+                        ? "Could not load events"
+                        : "Select an event…"}
+                  </option>
+                  {eventOptions.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                {eventsError ? (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    {eventsError instanceof Error
+                      ? eventsError.message
+                      : "Could not load events from Webflow."}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Required for event sponsorship. Saved on the invoice as Webflow
+                    event id and name.
+                  </p>
+                )}
+              </div>
+            ) : null}
           </div>
 
           <div>

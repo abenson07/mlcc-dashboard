@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabaseClient";
 import type {
   Businesses,
@@ -23,6 +23,8 @@ interface UseBusinessesOptions {
     status?: "active" | "past" | "yet-to-support";
     /** When true, include rows with hidden = true (default lists omit them). */
     includeHidden?: boolean;
+    isMember?: boolean;
+    isPastSponsor?: boolean;
   };
 }
 
@@ -55,6 +57,14 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
 
   if (filters?.membershipId) {
     query = query.eq("membership_id", filters.membershipId);
+  }
+
+  if (filters?.isMember !== undefined) {
+    query = query.eq("is_member", filters.isMember);
+  }
+
+  if (filters?.isPastSponsor !== undefined) {
+    query = query.eq("is_past_sponsor", filters.isPastSponsor);
   }
 
   const { data: businessesData, error: queryError } = await query.order("business_name", {
@@ -107,7 +117,13 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
     const membership = business.membership_id
       ? membershipsMap.get(business.membership_id) || null
       : null;
-    return { ...business, sponsorships, membership };
+    return {
+      ...business,
+      is_member: business.is_member ?? false,
+      is_past_sponsor: business.is_past_sponsor ?? false,
+      sponsorships,
+      membership,
+    };
   });
 
   if (filters?.status) {
@@ -141,10 +157,40 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
   return transformedData;
 }
 
+function patchBusinessesCache(
+  queryClient: QueryClient,
+  id: string,
+  patch: BusinessesUpdate | Businesses,
+) {
+  queryClient.setQueriesData<BusinessWithDetails[]>(
+    { queryKey: ["businesses"] },
+    (old) => {
+      if (!old) return old;
+      return old.map((b) => {
+        if (b.id !== id) return b;
+        const next = { ...b, ...patch };
+        return {
+          ...next,
+          is_member: next.is_member ?? false,
+          is_past_sponsor: next.is_past_sponsor ?? false,
+        };
+      });
+    },
+  );
+}
+
 export function useBusinesses(options: UseBusinessesOptions = {}): UseBusinessesReturn {
   const { autoFetch = true, filters = {} } = options;
   const queryClient = useQueryClient();
-  const queryKey = ["businesses", filters.search, filters.membershipId, filters.status, filters.includeHidden];
+  const queryKey = [
+    "businesses",
+    filters.search,
+    filters.membershipId,
+    filters.status,
+    filters.includeHidden,
+    filters.isMember,
+    filters.isPastSponsor,
+  ];
 
   const { data: businesses = [], isLoading, error, refetch } = useQuery({
     queryKey,
@@ -180,7 +226,25 @@ export function useBusinesses(options: UseBusinessesOptions = {}): UseBusinesses
       if (updateError) throw updateError;
       return updatedBusiness;
     },
-    onSuccess: () => {
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ["businesses"] });
+      const snapshots = queryClient.getQueriesData<BusinessWithDetails[]>({
+        queryKey: ["businesses"],
+      });
+      patchBusinessesCache(queryClient, id, data);
+      return { snapshots };
+    },
+    onError: (_err, _vars, context) => {
+      context?.snapshots.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
+    },
+    onSuccess: (updatedBusiness, { id }) => {
+      if (updatedBusiness) {
+        patchBusinessesCache(queryClient, id, updatedBusiness);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["businesses"] });
     },
   });

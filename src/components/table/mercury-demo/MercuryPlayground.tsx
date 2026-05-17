@@ -21,9 +21,9 @@ const VARIANT_OPTIONS: { value: MercuryVariantId; label: string }[] = [
   { value: "routes-all", label: "Routes — All (/routes/all)" },
   { value: "routes-claimed", label: "Routes — Claimed (/routes/claimed)" },
   { value: "routes-open", label: "Routes — Open (/routes/open)" },
-  { value: "businesses-all", label: "Businesses — All (/businesses/all)" },
-  { value: "businesses-members", label: "Businesses — Members (/businesses/members)" },
-  { value: "billing-invoices", label: "Billing — Invoices (/billing/invoices)" },
+  { value: "businesses-all", label: "Businesses — All (/businesses)" },
+  { value: "businesses-members", label: "Businesses — Members (/businesses?view=members)" },
+  { value: "billing-invoices", label: "Sponsorship — Invoices (/sponsorship?view=invoices)" },
   { value: "original-invoice-demo", label: "Original invoice demo (Mercury prototype)" },
 ];
 
@@ -66,7 +66,9 @@ export default function MercuryPlayground() {
         <p className="text-theme-xs text-gray-500 dark:text-gray-400">
           {variant === "original-invoice-demo"
             ? "Classic Mercury invoice list · Same sample data as the earlier standalone demo"
-            : "Live data from Supabase and Stripe (matches each route’s sources) · Original invoice option stays static"}
+            : variant === "billing-invoices"
+              ? "Original Mercury invoice columns · Live Stripe data (same as Sponsorship → Invoices tab)"
+              : "Live data from Supabase and Stripe (matches each route’s sources)"}
         </p>
       </div>
 

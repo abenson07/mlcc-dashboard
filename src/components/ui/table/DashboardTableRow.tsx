@@ -29,6 +29,7 @@ export function DashboardTableRow({
 }: DashboardTableRowProps) {
   const { showSelectColumn, showMenuColumn } = useDashboardTable();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const isClickable = typeof onClick === "function";
 
@@ -69,11 +70,12 @@ export function DashboardTableRow({
       {children}
       {showMenuColumn && (
         <TableCell
-          className="w-10 px-1 py-3 text-end align-middle bg-transparent"
+          className="w-10 overflow-visible px-1 py-3 text-end align-middle bg-transparent"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="relative flex justify-end">
             <button
+              ref={menuButtonRef}
               type="button"
               className="dropdown-toggle rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-white/10"
               aria-expanded={menuOpen}
@@ -89,7 +91,13 @@ export function DashboardTableRow({
                 <circle cx="8" cy="13" r="1.5" />
               </svg>
             </button>
-            <Dropdown isOpen={menuOpen} onClose={() => setMenuOpen(false)} className="min-w-[160px] py-1">
+            <Dropdown
+              isOpen={menuOpen}
+              onClose={() => setMenuOpen(false)}
+              className="min-w-[160px] py-1"
+              anchorRef={menuButtonRef}
+              usePortal
+            >
               {(menuItems ?? [{ label: "Open", onClick: () => undefined }]).map((item, i) => (
                 <DropdownItem
                   key={`${item.label}-${i}`}

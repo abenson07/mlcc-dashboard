@@ -1,20 +1,5 @@
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import OpenRoutesContent from "@/components/routes/OpenRoutesContent";
-import { Metadata } from "next";
-import React from "react";
-
-export const metadata: Metadata = {
-  title: "Open Routes",
-  description: "View open routes",
-};
+import { redirect } from "next/navigation";
 
 export default function OpenRoutesPage() {
-  return (
-    <div>
-      <PageBreadcrumb pageTitle="Open Routes" />
-      <div className="space-y-6">
-        <OpenRoutesContent />
-      </div>
-    </div>
-  );
+  redirect("/routes?view=open");
 }

@@ -37,7 +37,14 @@ function MenuButton({
   );
 }
 
-export default function MarketingEmailComposer() {
+type MarketingEmailComposerProps = {
+  /** Called after a broadcast is queued or scheduled successfully. */
+  onSent?: () => void;
+};
+
+export default function MarketingEmailComposer({
+  onSent,
+}: MarketingEmailComposerProps = {}) {
   const [brief, setBrief] = useState("");
   const [sendNow, setSendNow] = useState(false);
   const [scheduledLocal, setScheduledLocal] = useState("");
@@ -211,6 +218,7 @@ export default function MarketingEmailComposer() {
           ? "Broadcast queued to send shortly."
           : `Broadcast scheduled (id: ${data.id ?? "created"}).`
       );
+      onSent?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Send failed");
     } finally {

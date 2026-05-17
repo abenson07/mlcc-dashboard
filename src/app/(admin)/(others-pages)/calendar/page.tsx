@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Calendar lives under Events; keep this URL as a shortcut. */
+/** Legacy calendar URL — events list is the home for Events. */
 export default function CalendarRedirectPage() {
-  redirect("/events?view=calendar");
+  redirect("/events");
 }

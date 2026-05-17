@@ -41,10 +41,12 @@ export type WebflowEventsPayload = {
   eventFieldSlugs: EventFieldSlugs;
 };
 
-export function useWebflowEvents() {
+export function useWebflowEvents(options: { enabled?: boolean } = {}) {
+  const { enabled = true } = options;
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: WEBFLOW_EVENTS_QUERY_KEY,
+    enabled,
     queryFn: async (): Promise<WebflowEventsPayload> => {
       const res = await fetch(`${getApiBase()}/api/events/webflow`);
       const json = (await res.json()) as WebflowEventsPayload & { error?: string };

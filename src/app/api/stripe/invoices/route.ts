@@ -30,6 +30,10 @@ type StripeInvoiceListRow = {
   sponsorship_category: string | null;
   /** `invoice.metadata.created_by` — dashboard user display name. */
   created_by_name: string | null;
+  /** `invoice.metadata.event_id` — Webflow Events CMS item id. */
+  event_id: string | null;
+  /** `invoice.metadata.event_name` — event title at issue time. */
+  event_name: string | null;
 };
 
 function customerEmail(inv: Stripe.Invoice): string | null {
@@ -132,6 +136,8 @@ export async function GET() {
           inv.metadata?.[METADATA_KEYS.category]?.trim() ?? null,
         created_by_name:
           inv.metadata?.[METADATA_KEYS.createdBy]?.trim() ?? null,
+        event_id: inv.metadata?.[METADATA_KEYS.eventId]?.trim() ?? null,
+        event_name: inv.metadata?.[METADATA_KEYS.eventName]?.trim() ?? null,
       }))
     );
 

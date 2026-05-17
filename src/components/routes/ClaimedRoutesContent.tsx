@@ -2,15 +2,13 @@
 
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import ComponentCard from "@/components/common/ComponentCard";
 import TableWithDetailSidebar from "@/components/detail-sidebar/TableWithDetailSidebar";
 import RouteDetailSidebar from "@/components/detail-sidebar/RouteDetailSidebar";
-import { ClaimedRoutesHeaderAction } from "@/components/routes/ClaimedRoutesHeaderAction";
 import { MercuryVariantTable } from "@/components/table/mercury-demo/mercuryVariantTable";
 import { useMercuryPlaygroundData } from "@/components/table/mercury-demo/useMercuryPlaygroundData";
 import type { RouteWithDeliverer } from "hooks";
 
-export default function ClaimedRoutesContent() {
+export default function ClaimedRoutesPane() {
   const queryClient = useQueryClient();
   const mercury = useMercuryPlaygroundData("routes-claimed");
   const [selectedRoute, setSelectedRoute] = useState<RouteWithDeliverer | null>(null);
@@ -43,14 +41,12 @@ export default function ClaimedRoutesContent() {
         />
       )}
     >
-      <ComponentCard title="Claimed Routes" action={<ClaimedRoutesHeaderAction />}>
-        <MercuryVariantTable
-          variant="routes-claimed"
-          mercury={mercury}
-          selectedKey={selectedKey}
-          onSelectKey={onSelectKey}
-        />
-      </ComponentCard>
+      <MercuryVariantTable
+        variant="routes-claimed"
+        mercury={mercury}
+        selectedKey={selectedKey}
+        onSelectKey={onSelectKey}
+      />
     </TableWithDetailSidebar>
   );
 }

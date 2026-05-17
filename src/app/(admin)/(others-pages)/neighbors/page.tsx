@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Neighbors",
-  description: "Neighbors, members, and volunteers",
+  description: "Neighbors and members",
 };
 
 export default function NeighborsPage() {

@@ -18,7 +18,16 @@ import {
 import Badge from "@/components/ui/badge/Badge";
 import type { DuplicateMember } from "@/app/api/stripe/duplicate-members/route";
 import type { StripeInvoiceTableRow } from "@/components/billing/InvoicesListTable";
-import { formatDueDate } from "@/components/billing/invoiceUtils";
+import {
+  formatDueDate,
+  formatShortMonthDay,
+  isOpenPastDue,
+  mercuryInvoiceDisplayStatus,
+  mercuryInvoiceStatusColor,
+  customerLabelFromEmail,
+} from "@/components/billing/invoiceUtils";
+import Link from "next/link";
+import { CardLineIcon, DollarLineIcon } from "@/icons";
 import {
   formatRelativeFutureLabel,
   formatShortDate,
@@ -38,15 +47,15 @@ import {
   NameEmailHoverCell,
   NeighborNameAddressHoverCell,
   ContactEmailPhoneHover,
-  BusinessContactHoverCell,
+  BusinessNameWithStatusIcons,
+  businessTableNameCellClass,
+  truncateDisplayText,
   DelivererHoverCell,
   CoverageDeliverersHover,
   CountBreakdownHover,
   TruncatedTagPills,
   membershipBadgeColor,
-  invoiceStatusColor,
   splitCurrency,
-  InvoiceNumberCreatedHover,
 } from "./shared";
 
 function routeCoverage(route: RouteWithDeliverer): { label: string; deliverers: string[] } {
@@ -213,7 +222,7 @@ export function mercuryReadOnlySidebarTitle(
       return (item as BusinessWithDetails).business_name ?? "Business";
     case "billing-invoices": {
       const inv = item as StripeInvoiceTableRow;
-      return inv.customer_email ?? inv.number ?? "Invoice";
+      return `Invoice to ${customerLabelFromEmail(inv.customer_email)}`;
     }
     default:
       return "Details";
@@ -246,11 +255,28 @@ export function renderMercuryReadOnlySidebar(
   }
 }
 
+export type InvoiceRowActions = {
+  onRemind?: (invoiceId: string) => void;
+  remindingId?: string | null;
+  onCopyProductIds?: (inv: StripeInvoiceTableRow) => void;
+};
+
+export type BusinessRowActions = {
+  onEdit: (row: BusinessWithDetails) => void;
+  onToggleMember: (row: BusinessWithDetails) => void;
+  onTogglePastSponsor: (row: BusinessWithDetails) => void;
+};
+
 export interface MercuryVariantTableProps {
   variant: MercuryVariantId;
   mercury: MercuryPlaygroundData;
   selectedKey: string | null;
   onSelectKey: (key: string | null) => void;
+  /** When set for billing-invoices, renders these rows instead of mercury.stripeInvoices. */
+  invoiceRowsOverride?: StripeInvoiceTableRow[];
+  invoiceRowActions?: InvoiceRowActions;
+  emptyInvoicesMessage?: React.ReactNode;
+  businessRowActions?: BusinessRowActions;
 }
 
 export function MercuryVariantTable({
@@ -258,6 +284,10 @@ export function MercuryVariantTable({
   mercury,
   selectedKey,
   onSelectKey,
+  invoiceRowsOverride,
+  invoiceRowActions,
+  emptyInvoicesMessage,
+  businessRowActions,
 }: MercuryVariantTableProps) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [allChecked, setAllChecked] = useState(false);
@@ -280,12 +310,19 @@ export function MercuryVariantTable({
         return mercury.businessesAllList.map((b) => b.id);
       case "businesses-members":
         return mercury.businessesMembersList.map((b) => b.id);
-      case "billing-invoices":
-        return mercury.stripeInvoices.map((i) => i.id);
+      case "billing-invoices": {
+        const rows = invoiceRowsOverride ?? mercury.stripeInvoices;
+        return rows.map((i) => i.id);
+      }
       default:
         return [];
     }
-  }, [variant, mercury]);
+  }, [variant, mercury, invoiceRowsOverride]);
+
+  const invoiceRows =
+    variant === "billing-invoices"
+      ? (invoiceRowsOverride ?? mercury.stripeInvoices)
+      : [];
 
   const toggleRow = (id: string) => onSelectKey(selectedKey === id ? null : id);
   const toggleCheck = (id: string) => setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -327,8 +364,8 @@ export function MercuryVariantTable({
         : [];
 
   return (
-    <div className="overflow-hidden bg-white dark:bg-white/[0.03]">
-      <div className="max-w-full overflow-x-auto">
+    <div className="bg-white dark:bg-white/[0.03]">
+      <div className="max-w-full overflow-x-auto overflow-y-visible">
         <Table className="w-full border-collapse">
           <TableHeader>
             <tr className="border-b border-gray-200 dark:border-white/[0.05]">
@@ -345,8 +382,9 @@ export function MercuryVariantTable({
               {variant === "routes-all" && <RoutesAllHeaders />}
               {variant === "routes-claimed" && <RoutesClaimedHeaders />}
               {variant === "routes-open" && <RoutesOpenHeaders />}
-              {variant === "businesses-all" && <BusinessAllHeaders />}
-              {variant === "businesses-members" && <BusinessMembersHeaders />}
+              {(variant === "businesses-all" || variant === "businesses-members") && (
+                <BusinessTableHeaders />
+              )}
               {variant === "billing-invoices" && <InvoiceHeaders />}
               <DashboardTableMenuHeader />
             </tr>
@@ -432,17 +470,32 @@ export function MercuryVariantTable({
                       onToggle={() => toggleRow(row.id)}
                       onCheck={() => toggleCheck(row.id)}
                       condensed={detailOpen}
+                      businessRowActions={businessRowActions}
                     />
                   ))}
                 {variant === "billing-invoices" &&
-                  mercury.stripeInvoices.map((row) => (
-                    <InvoiceRowView
+                  invoiceRows.length === 0 &&
+                  !mercury.activeLoading &&
+                  !mercury.activeError && (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="px-4 py-12 text-center text-theme-sm text-gray-500 dark:text-gray-400"
+                      >
+                        {emptyInvoicesMessage ?? "No invoices."}
+                      </td>
+                    </tr>
+                  )}
+                {variant === "billing-invoices" &&
+                  invoiceRows.map((row) => (
+                    <OriginalInvoiceRowView
                       key={row.id}
                       row={row}
                       selected={selectedKey === row.id}
                       checked={!!checked[row.id] || allChecked}
                       onToggle={() => toggleRow(row.id)}
                       onCheck={() => toggleCheck(row.id)}
+                      actions={invoiceRowActions}
                     />
                   ))}
               </>
@@ -1005,58 +1058,55 @@ function RouteSidebar({ row, variant }: { row: RouteWithDeliverer; variant: Merc
   );
 }
 
-function BusinessAllHeaders() {
+function BusinessTableHeaders() {
   return (
     <>
-      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
+      <DashboardTableDataCell
+        isHeader
+        align="start"
+        className={`${mercuryHeaderCell} ${businessTableNameCellClass}`}
+      >
         Business
       </DashboardTableDataCell>
       <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
         Contact
       </DashboardTableDataCell>
       <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
-        Member
-      </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" collapsible className={mercuryHeaderCell}>
-        Sponsorships
-      </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" collapsible className={mercuryHeaderCell}>
-        Address
+        Email
       </DashboardTableDataCell>
     </>
   );
 }
 
-function BusinessMembersHeaders() {
-  return (
-    <>
-      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
-        Business
-      </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
-        Status
-      </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
-        Payment
-      </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" collapsible className={mercuryHeaderCell}>
-        Last renewal
-      </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" collapsible className={mercuryHeaderCell}>
-        Sponsorships
-      </DashboardTableDataCell>
-    </>
-  );
+function buildBusinessMenuItems(
+  row: BusinessWithDetails,
+  actions: BusinessRowActions
+): { label: string; onClick: () => void }[] {
+  return [
+    { label: "Edit", onClick: () => actions.onEdit(row) },
+    {
+      label: row.is_member ? "Remove member" : "Mark as member",
+      onClick: () => actions.onToggleMember(row),
+    },
+    {
+      label: row.is_past_sponsor ? "Remove past sponsor" : "Mark as past sponsor",
+      onClick: () => actions.onTogglePastSponsor(row),
+    },
+  ];
 }
+
+const businessStatusIconClass = "size-[1em] shrink-0";
+const businessMemberIcon = <CardLineIcon className={businessStatusIconClass} />;
+const businessPastSponsorIcon = <DollarLineIcon className={businessStatusIconClass} />;
 
 function BusinessRowView({
-  variant,
   row,
   selected,
   checked,
   onToggle,
   onCheck,
   condensed,
+  businessRowActions,
 }: {
   variant: MercuryVariantId;
   row: BusinessWithDetails;
@@ -1065,63 +1115,17 @@ function BusinessRowView({
   onToggle: () => void;
   onCheck: () => void;
   condensed: boolean;
+  businessRowActions?: BusinessRowActions;
 }) {
-  const bm = row.membership;
-  const memStatus = bm?.status ?? null;
-  const memLabel = memStatus ?? "—";
-  const memColor = membershipBadgeColor(memStatus);
-  const sponsorships = row.sponsorships ?? [];
-  const spLines = sponsorshipLines(sponsorships);
-  const spSummary = sponsorships.length ? sponsorshipSummary(sponsorships) : "—";
-
   const bizName = row.business_name ?? "—";
-  const contact = row.contact_name ?? "";
-  const email = row.email ?? "";
-  const phone = row.phone ?? "";
+  const contact = row.contact_name?.trim() || "—";
+  const email = row.email?.trim() || "—";
+  const phone = row.phone?.trim() || "—";
+  const address = row.address?.trim() ?? "";
 
-  if (variant === "businesses-all") {
-    return (
-      <DashboardTableRow
-        selected={selected}
-        checked={checked}
-        onCheckChange={onCheck}
-        onClick={onToggle}
-        menuItems={[{ label: "View", onClick: onToggle }]}
-      >
-        <DashboardTableDataCell align="start" className={`py-3.5 ${condensed ? "" : "group/business"}`}>
-          {condensed ? (
-            <StackedCellContent primary={bizName} secondary={contact || "—"} />
-          ) : (
-            <BusinessContactHoverCell business_name={bizName} contact_name={contact || "—"} />
-          )}
-        </DashboardTableDataCell>
-        <DashboardTableDataCell align="start" className={`py-3.5 ${condensed ? "" : "group/contact"}`}>
-          {condensed ? (
-            <NormalCellContent>{email || "—"}</NormalCellContent>
-          ) : (
-            <ContactEmailPhoneHover email={email || "—"} phone={phone || "—"} />
-          )}
-        </DashboardTableDataCell>
-        <DashboardTableDataCell align="start" className="py-3.5">
-          {memStatus ? (
-            <StatusCellContent label={memLabel} color={memColor} />
-          ) : (
-            <NormalCellContent>—</NormalCellContent>
-          )}
-        </DashboardTableDataCell>
-        <DashboardTableDataCell align="start" collapsible className={`py-3.5 ${condensed ? "" : "group/countbd"}`}>
-          {sponsorships.length ? (
-            <CountBreakdownHover summary={spSummary} lines={spLines} />
-          ) : (
-            <NormalCellContent>—</NormalCellContent>
-          )}
-        </DashboardTableDataCell>
-        <DashboardTableDataCell align="start" collapsible className="py-3.5">
-          <NormalCellContent>{row.address ?? "—"}</NormalCellContent>
-        </DashboardTableDataCell>
-      </DashboardTableRow>
-    );
-  }
+  const menuItems = businessRowActions
+    ? buildBusinessMenuItems(row, businessRowActions)
+    : [{ label: "View", onClick: onToggle }];
 
   return (
     <DashboardTableRow
@@ -1129,29 +1133,37 @@ function BusinessRowView({
       checked={checked}
       onCheckChange={onCheck}
       onClick={onToggle}
-      menuItems={[{ label: "View", onClick: onToggle }]}
+      menuItems={menuItems}
     >
-      <DashboardTableDataCell align="start" className="py-3.5">
-        <StackedCellContent primary={bizName} secondary={contact || "—"} />
-      </DashboardTableDataCell>
-      <DashboardTableDataCell align="start" className="py-3.5">
-        {memStatus ? (
-          <StatusCellContent label={memLabel} color={memColor} />
+      <DashboardTableDataCell
+        align="start"
+        className={`overflow-visible py-3.5 ${businessTableNameCellClass} ${condensed ? "" : "group/business"}`}
+      >
+        {condensed ? (
+          <StackedCellContent
+            primary={
+              <span title={bizName} className="block truncate">
+                {truncateDisplayText(bizName)}
+              </span>
+            }
+            secondary={address || "—"}
+          />
         ) : (
-          <NormalCellContent>—</NormalCellContent>
+          <BusinessNameWithStatusIcons
+            business_name={bizName}
+            address={address}
+            is_member={row.is_member}
+            is_past_sponsor={row.is_past_sponsor}
+            memberIcon={businessMemberIcon}
+            pastSponsorIcon={businessPastSponsorIcon}
+          />
         )}
       </DashboardTableDataCell>
       <DashboardTableDataCell align="start" className="py-3.5">
-        <StackedCellContent
-          primary={bm?.payment_method ?? "—"}
-          secondary={bm?.is_subscription ? "Subscription" : "One-time"}
-        />
+        <StackedCellContent primary={contact} secondary={phone} />
       </DashboardTableDataCell>
-      <DashboardTableDataCell align="start" collapsible className="py-3.5">
-        <NormalCellContent>{bm?.last_renewal ? formatShortDate(bm.last_renewal) : "—"}</NormalCellContent>
-      </DashboardTableDataCell>
-      <DashboardTableDataCell align="start" collapsible className="py-3.5">
-        <NormalCellContent>{spSummary}</NormalCellContent>
+      <DashboardTableDataCell align="start" className="py-3.5">
+        <NormalCellContent>{email}</NormalCellContent>
       </DashboardTableDataCell>
     </DashboardTableRow>
   );
@@ -1247,98 +1259,177 @@ function InvoiceHeaders() {
   return (
     <>
       <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
-        Customer
+        Due date
       </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" collapsible className={mercuryHeaderCell}>
-        Invoice
+      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
+        <span className="inline-flex items-center gap-1">
+          Status
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden>
+            <path
+              d="M5.5 2v7M2.5 6l3 3 3-3"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </DashboardTableDataCell>
+      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
+        Customer
       </DashboardTableDataCell>
       <DashboardTableDataCell isHeader align="end" className={`${mercuryHeaderCell} text-right`}>
         Amount
       </DashboardTableDataCell>
-      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
-        Status
+      <DashboardTableDataCell isHeader align="start" collapsible className={mercuryHeaderCell}>
+        Invoice no.
       </DashboardTableDataCell>
       <DashboardTableDataCell isHeader align="start" collapsible className={mercuryHeaderCell}>
-        Due
+        Invoice date
+      </DashboardTableDataCell>
+      <DashboardTableDataCell isHeader align="start" className={mercuryHeaderCell}>
+        Type
       </DashboardTableDataCell>
     </>
   );
 }
 
-function InvoiceRowView({
+function customerFromEmail(email: string | null): { primary: string; secondary: string } {
+  if (!email) return { primary: "—", secondary: "" };
+  const primary = customerLabelFromEmail(email);
+  const secondary = email.length > 28 ? `${email.slice(0, 25)}…` : email;
+  return { primary, secondary };
+}
+
+function originalInvoiceDueStack(row: StripeInvoiceTableRow): {
+  primary: string;
+  secondary?: string;
+} {
+  const statusNorm = (row.status ?? "").toLowerCase();
+  const absDue = formatShortMonthDay(row.due_date);
+  const dueIso =
+    row.due_date != null ? new Date(row.due_date * 1000).toISOString() : null;
+
+  if (row.due_date == null) {
+    return { primary: "—", secondary: undefined };
+  }
+  if (statusNorm === "paid") {
+    return { primary: absDue, secondary: undefined };
+  }
+  const then = new Date(row.due_date * 1000);
+  if (then <= new Date()) {
+    const stacked = formatStackedRelativePast(dueIso!);
+    return { primary: stacked.primary, secondary: stacked.secondary };
+  }
+  const rel = formatRelativeFutureLabel(dueIso!);
+  return {
+    primary: rel,
+    secondary: rel === absDue ? undefined : absDue,
+  };
+}
+
+function OriginalInvoiceRowView({
   row,
   selected,
   checked,
   onToggle,
   onCheck,
+  actions,
 }: {
   row: StripeInvoiceTableRow;
   selected: boolean;
   checked: boolean;
   onToggle: () => void;
   onCheck: () => void;
+  actions?: InvoiceRowActions;
 }) {
   const { dollars, cents } = splitCurrency(row.amount_due / 100);
-  const statusNorm = (row.status ?? "").toLowerCase();
-  const absDue = row.due_date != null ? formatDueDate(row.due_date) : "—";
-  const dueIso =
-    row.due_date != null ? new Date(row.due_date * 1000).toISOString() : null;
-
-  let duePrimary = "—";
-  let dueSecondary: string | undefined = absDue;
-
-  if (row.due_date == null) {
-    duePrimary = "—";
-    dueSecondary = "—";
-  } else if (statusNorm === "paid") {
-    duePrimary = absDue;
-    dueSecondary = absDue;
-  } else {
-    const then = new Date(row.due_date * 1000);
-    if (then <= new Date()) {
-      const stacked = formatStackedRelativePast(dueIso!);
-      duePrimary = stacked.primary;
-      dueSecondary = stacked.secondary;
-    } else {
-      duePrimary = formatRelativeFutureLabel(dueIso!);
-      dueSecondary = duePrimary === absDue ? undefined : absDue;
-    }
-  }
-
+  const displayStatus = mercuryInvoiceDisplayStatus(row);
+  const { primary: duePrimary, secondary: dueSecondary } = originalInvoiceDueStack(row);
+  const customer = customerFromEmail(row.customer_email);
   const invLabel = row.number ?? row.id.slice(0, 14);
+  const detailHref = `/sponsorship/invoices/${encodeURIComponent(row.id)}`;
+  const overdue = isOpenPastDue(row);
+
+  const menuItems = [
+    { label: "View invoice", onClick: onToggle },
+    ...(actions?.onCopyProductIds && row.catalog_product_ids.length > 0
+      ? [{ label: "Copy product ID", onClick: () => actions.onCopyProductIds!(row) }]
+      : []),
+    ...(overdue && actions?.onRemind
+      ? [
+          {
+            label:
+              actions.remindingId === row.id ? "Sending reminder…" : "Send reminder",
+            onClick: () => actions.onRemind!(row.id),
+          },
+        ]
+      : []),
+    ...(row.hosted_invoice_url
+      ? [
+          {
+            label: "Open pay link",
+            onClick: () => window.open(row.hosted_invoice_url!, "_blank", "noopener,noreferrer"),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <DashboardTableRow
       selected={selected}
       checked={checked}
       onCheckChange={onCheck}
       onClick={onToggle}
-      menuItems={[{ label: "View", onClick: onToggle }]}
+      menuItems={menuItems}
     >
       <DashboardTableDataCell align="start" className="py-3.5">
-        <NormalCellContent>{row.customer_email ?? "—"}</NormalCellContent>
+        <StackedCellContent primary={duePrimary} secondary={dueSecondary} />
       </DashboardTableDataCell>
-      <DashboardTableDataCell align="start" collapsible className="group/invmeta py-3.5">
-        <InvoiceNumberCreatedHover number={invLabel} created={formatDueDate(row.created)} />
+      <DashboardTableDataCell align="start" className="py-3.5">
+        <StatusCellContent
+          label={displayStatus}
+          color={mercuryInvoiceStatusColor(displayStatus)}
+        />
+      </DashboardTableDataCell>
+      <DashboardTableDataCell align="start" className="max-w-[200px] py-3.5">
+        <StackedCellContent primary={customer.primary} secondary={customer.secondary} />
       </DashboardTableDataCell>
       <DashboardTableDataCell align="end" className="py-3.5">
         <CurrencyCellContent dollars={dollars} cents={cents} align="end" />
       </DashboardTableDataCell>
-      <DashboardTableDataCell align="start" className="py-3.5">
-        <StatusCellContent
-          label={row.status ?? "—"}
-          color={invoiceStatusColor(row.status ?? "draft")}
-        />
+      <DashboardTableDataCell align="start" collapsible className="py-3.5">
+        <Link
+          href={detailHref}
+          onClick={(e) => e.stopPropagation()}
+          className="text-theme-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
+        >
+          <NormalCellContent>{invLabel}</NormalCellContent>
+        </Link>
       </DashboardTableDataCell>
       <DashboardTableDataCell align="start" collapsible className="py-3.5">
-        <StackedCellContent primary={duePrimary} secondary={dueSecondary} />
+        <NormalCellContent>{formatShortMonthDay(row.created)}</NormalCellContent>
+      </DashboardTableDataCell>
+      <DashboardTableDataCell align="start" className="py-3.5">
+        <NormalCellContent>{row.sponsorship_category ?? "One time"}</NormalCellContent>
       </DashboardTableDataCell>
     </DashboardTableRow>
   );
 }
 
-function InvoiceSidebar({ inv }: { inv: StripeInvoiceTableRow }) {
+export function InvoiceSidebar({
+  inv,
+  actions,
+}: {
+  inv: StripeInvoiceTableRow;
+  actions?: InvoiceRowActions;
+}) {
   const { dollars, cents } = splitCurrency(inv.amount_due / 100);
   const invLabel = inv.number ?? inv.id.slice(0, 14);
+  const detailHref = `/sponsorship/invoices/${encodeURIComponent(inv.id)}`;
+  const displayStatus = mercuryInvoiceDisplayStatus(inv);
+  const overdue = isOpenPastDue(inv);
+
   return (
     <div className="flex flex-col">
       <SidebarField label="Customer">{inv.customer_email ?? "—"}</SidebarField>
@@ -1347,6 +1438,9 @@ function InvoiceSidebar({ inv }: { inv: StripeInvoiceTableRow }) {
       </SidebarMutedLine>
       {inv.sponsorship_category ? (
         <SidebarField label="Category">{inv.sponsorship_category}</SidebarField>
+      ) : null}
+      {inv.event_name ? (
+        <SidebarField label="Event">{inv.event_name}</SidebarField>
       ) : null}
       {inv.created_by_name ? (
         <SidebarField label="Created by">{inv.created_by_name}</SidebarField>
@@ -1360,13 +1454,42 @@ function InvoiceSidebar({ inv }: { inv: StripeInvoiceTableRow }) {
         </span>
       </div>
       <SidebarField label="Status">
-        <Badge variant="light" color={invoiceStatusColor(inv.status ?? "draft")} size="sm">
-          {inv.status ?? "—"}
+        <Badge variant="light" color={mercuryInvoiceStatusColor(displayStatus)} size="sm">
+          {displayStatus}
         </Badge>
       </SidebarField>
       <SidebarField label="Due date">
         {inv.due_date != null ? formatDueDate(inv.due_date) : "—"}
       </SidebarField>
+      <SidebarDivider />
+      <SidebarSectionTitle>Actions</SidebarSectionTitle>
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href={detailHref}
+          className="inline-flex rounded-lg border border-gray-200 px-3 py-2 text-theme-sm font-medium text-gray-800 hover:bg-gray-50 dark:border-white/[0.08] dark:text-white/85 dark:hover:bg-white/[0.06]"
+        >
+          View invoice
+        </Link>
+        {overdue && actions?.onRemind ? (
+          <button
+            type="button"
+            disabled={actions.remindingId === inv.id}
+            onClick={() => actions.onRemind!(inv.id)}
+            className="inline-flex rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-theme-sm font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-500/35 dark:bg-amber-500/10 dark:text-amber-100"
+          >
+            {actions.remindingId === inv.id ? "Sending…" : "Send reminder"}
+          </button>
+        ) : null}
+        {actions?.onCopyProductIds && inv.catalog_product_ids.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => actions.onCopyProductIds!(inv)}
+            className="inline-flex rounded-lg border border-gray-200 px-3 py-2 text-theme-sm font-medium text-gray-800 hover:bg-gray-50 dark:border-white/[0.08] dark:text-white/85 dark:hover:bg-white/[0.06]"
+          >
+            Copy product ID
+          </button>
+        ) : null}
+      </div>
       <SidebarDivider />
       <SidebarSectionTitle>Links</SidebarSectionTitle>
       {inv.hosted_invoice_url ? (

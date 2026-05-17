@@ -1,4 +1,5 @@
 import { requireSession } from "@/lib/auth/require-session";
+import { METADATA_KEYS } from "@/lib/stripe/invoiceDashboardMetadata";
 import { getStripe } from "@/lib/stripe/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -49,6 +50,7 @@ export async function GET(
       expand: ["customer"],
     });
 
+    const meta = invoice.metadata ?? {};
     return NextResponse.json({
       id: invoice.id,
       number: invoice.number ?? null,
@@ -58,6 +60,10 @@ export async function GET(
       currency: invoice.currency,
       due_date: invoice.due_date,
       hosted_invoice_url: invoice.hosted_invoice_url,
+      sponsorship_category: meta[METADATA_KEYS.category]?.trim() ?? null,
+      event_id: meta[METADATA_KEYS.eventId]?.trim() ?? null,
+      event_name: meta[METADATA_KEYS.eventName]?.trim() ?? null,
+      created_by_name: meta[METADATA_KEYS.createdBy]?.trim() ?? null,
     });
   } catch (e: unknown) {
     return stripeErrorResponse(e);

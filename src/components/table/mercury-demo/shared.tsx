@@ -7,6 +7,17 @@ import Badge from "@/components/ui/badge/Badge";
 export const mercuryHeaderCell =
   "border-b border-gray-200 px-3 py-2.5 text-left text-xs font-medium text-gray-500 dark:border-white/[0.05] dark:text-gray-400";
 
+/** Max visible characters for business name in businesses table columns. */
+export const BUSINESS_TABLE_NAME_MAX_CHARS = 40;
+
+export const businessTableNameCellClass = "max-w-[40ch] w-[40ch]";
+
+export function truncateDisplayText(text: string, maxLen = BUSINESS_TABLE_NAME_MAX_CHARS): string {
+  const t = text.trim();
+  if (t.length <= maxLen) return t;
+  return `${t.slice(0, Math.max(0, maxLen - 1))}…`;
+}
+
 export function SidebarDivider() {
   return <hr className="my-4 border-gray-100 dark:border-white/[0.08]" />;
 }
@@ -125,20 +136,67 @@ export function ContactEmailPhoneHover({
   );
 }
 
-/** Business name primary; contact on hover. Parent `<td>` must include `group/business`. */
-export function BusinessContactHoverCell({
-  business_name,
-  contact_name,
+function BusinessStatusIconTooltip({
+  label,
+  children,
 }: {
-  business_name: string;
-  contact_name: string;
+  label: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-0">
-      <span className="truncate text-theme-sm font-medium text-gray-800 dark:text-white/90">{business_name}</span>
-      <span className="max-h-0 overflow-hidden text-theme-xs text-gray-500 opacity-0 transition-[max-height,opacity] duration-150 group-hover/business:max-h-6 group-hover/business:opacity-100 dark:text-gray-400">
-        {contact_name}
+    <span className="group/icon relative inline-flex size-[1em] items-center justify-center">
+      {children}
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 -translate-x-1/2 whitespace-nowrap rounded border border-gray-200 bg-gray-900 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white opacity-0 shadow-sm transition-opacity duration-100 group-hover/icon:opacity-100 dark:border-gray-700 dark:bg-gray-800"
+      >
+        {label}
       </span>
+    </span>
+  );
+}
+
+/** Business name + status icons; address on hover. Parent `<td>` must include `group/business`. */
+export function BusinessNameWithStatusIcons({
+  business_name,
+  address,
+  is_member,
+  is_past_sponsor,
+  memberIcon,
+  pastSponsorIcon,
+}: {
+  business_name: string;
+  address: string;
+  is_member: boolean;
+  is_past_sponsor: boolean;
+  memberIcon: React.ReactNode;
+  pastSponsorIcon: React.ReactNode;
+}) {
+  const addrTrim = address.trim();
+  const hoverLineClass =
+    "max-h-0 overflow-hidden text-theme-xs text-gray-500 opacity-0 transition-[max-height,opacity] duration-150 group-hover/business:max-h-24 group-hover/business:opacity-100 dark:text-gray-400";
+
+  return (
+    <div className="flex min-w-0 flex-col gap-0">
+      <div className="inline-flex max-w-full min-w-0 items-center gap-1.5">
+        <span
+          className="min-w-0 shrink truncate text-theme-sm font-medium leading-5 text-gray-800 dark:text-white/90"
+          title={business_name}
+        >
+          {truncateDisplayText(business_name)}
+        </span>
+        {is_member || is_past_sponsor ? (
+          <span className="inline-flex shrink-0 items-center gap-0.5 text-theme-sm leading-none text-gray-500 dark:text-gray-400">
+            {is_past_sponsor ? (
+              <BusinessStatusIconTooltip label="Past sponsor">{pastSponsorIcon}</BusinessStatusIconTooltip>
+            ) : null}
+            {is_member ? (
+              <BusinessStatusIconTooltip label="Member">{memberIcon}</BusinessStatusIconTooltip>
+            ) : null}
+          </span>
+        ) : null}
+      </div>
+      {addrTrim.length > 0 ? <span className={hoverLineClass}>{addrTrim}</span> : null}
     </div>
   );
 }

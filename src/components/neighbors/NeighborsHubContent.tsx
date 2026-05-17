@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
@@ -16,23 +16,16 @@ import type { PersonWithMembership } from "hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { QueryClient } from "@tanstack/react-query";
 
-export type NeighborTableView = "neighbors" | "members" | "volunteers";
+export type NeighborTableView = "neighbors" | "members";
 
 function parseNeighborView(sp: URLSearchParams | null): NeighborTableView {
   const raw = sp?.get("view");
-  if (raw === "members" || raw === "volunteers") return raw;
+  if (raw === "members") return "members";
   return "neighbors";
 }
 
 function neighborViewTitle(view: NeighborTableView): string {
-  switch (view) {
-    case "members":
-      return "Members";
-    case "volunteers":
-      return "Volunteers";
-    default:
-      return "All Neighbors";
-  }
+  return view === "members" ? "Members" : "All Neighbors";
 }
 
 function NeighborsMercuryPane({
@@ -49,7 +42,7 @@ function NeighborsMercuryPane({
   const tableVariant: MercuryVariantId =
     view === "members" ? "neighbors-members" : "neighbors-all";
 
-  const mercury = useMercuryPlaygroundData(tableVariant, { skip: view === "volunteers" });
+  const mercury = useMercuryPlaygroundData(tableVariant);
 
   const [selectedPerson, setSelectedPerson] = useState<PersonWithMembership | null>(null);
 
@@ -102,7 +95,6 @@ function NeighborsMercuryPane({
           tabs={[
             { value: "neighbors", label: "Neighbors" },
             { value: "members", label: "Members" },
-            { value: "volunteers", label: "Volunteers" },
           ]}
         />
         {view === "neighbors" && (
@@ -123,14 +115,6 @@ function NeighborsMercuryPane({
             onSelectKey={onSelectKey}
           />
         )}
-        {view === "volunteers" && (
-          <div className="rounded-xl border border-dashed border-mercury-line bg-mercury-bg px-6 py-14 text-center dark:border-white/15 dark:bg-white/[0.03]">
-            <p className="text-mercury-body text-mercury-muted dark:text-white/50">
-              No volunteer data yet. This view will list people who help with routes, events, and
-              programs.
-            </p>
-          </div>
-        )}
       </ComponentCard>
     </TableWithDetailSidebar>
   );
@@ -142,10 +126,16 @@ export default function NeighborsHubContent() {
   const queryClient = useQueryClient();
   const view = useMemo(() => parseNeighborView(searchParams), [searchParams]);
 
+  useEffect(() => {
+    if (searchParams?.get("view") !== "volunteers") return;
+    const tab = searchParams.get("volunteerTab");
+    router.replace(tab === "roster" ? "/volunteers?tab=roster" : "/volunteers");
+  }, [searchParams, router]);
+
   const [modalOpen, setModalOpen] = useState(false);
 
   const setView = (next: NeighborTableView) => {
-    const href = next === "neighbors" ? "/neighbors" : `/neighbors?view=${next}`;
+    const href = next === "neighbors" ? "/neighbors" : "/neighbors?view=members";
     router.replace(href);
   };
 

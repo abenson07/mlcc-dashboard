@@ -1,17 +1,23 @@
 "use client";
 
-import ComponentCard from "@/components/common/ComponentCard";
+import FilterPills from "@/components/common/FilterPills";
 import Badge from "@/components/ui/badge/Badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import Button from "@/components/ui/button/Button";
+import { Modal } from "@/components/ui/modal";
 import { getApiBase } from "@/lib/apiBase";
-import { defaultExpiresAtIso } from "@/lib/webflow/banner-helpers";
-import React, { useCallback, useEffect, useState } from "react";
+import {
+  classifyBannerTimeframe,
+  defaultExpiresAtIso,
+  type BannerTimeframe,
+} from "@/lib/webflow/banner-helpers";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 export type BannerRow = {
@@ -33,6 +39,13 @@ export type BannerRow = {
     hiddenByRetention: boolean;
   };
 };
+
+export type BannersManagerHandle = {
+  openCreate: () => void;
+};
+
+const thClass =
+  "px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500 dark:text-gray-400";
 
 function toDatetimeLocalValue(iso: string | null): string {
   if (!iso) return "";
@@ -60,14 +73,19 @@ const emptyForm = {
   editorNotes: "",
 };
 
-export default function BannersManager() {
+const BannersManager = forwardRef<BannersManagerHandle>(function BannersManager(
+  _props,
+  ref,
+) {
   const [banners, setBanners] = useState<BannerRow[]>([]);
   const [loading, setLoading] = useState(true);
   /** Set when GET /api/banners returns 503 — missing server env vars */
   const [missingEnv, setMissingEnv] = useState<string[] | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [timeframe, setTimeframe] = useState<BannerTimeframe>("current");
   const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [pendingConflict, setPendingConflict] = useState<{
     payload: Record<string, unknown>;
     mode: "create" | "edit";
@@ -77,7 +95,7 @@ export default function BannersManager() {
     setLoading(true);
     try {
       const base = getApiBase();
-      const res = await fetch(`${base}/api/banners`, {
+      const res = await fetch(`${base}/api/banners?showArchived=1`, {
         credentials: "include",
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -113,14 +131,16 @@ export default function BannersManager() {
     void load();
   }, [load]);
 
-  function openCreate() {
+  const openCreate = useCallback(() => {
     setEditingId(null);
     setCreating(true);
     setForm({
       ...emptyForm,
       expiresAt: toDatetimeLocalValue(defaultExpiresAtIso(Date.now())),
     });
-  }
+  }, []);
+
+  useImperativeHandle(ref, () => ({ openCreate }), [openCreate]);
 
   function openEdit(b: BannerRow) {
     setCreating(false);
@@ -207,197 +227,172 @@ export default function BannersManager() {
   }
 
   async function onSave() {
+    setSaving(true);
     try {
       await submit(buildBodyFromForm());
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
   }
 
   async function onConfirmReplaceUrgent() {
     if (!pendingConflict) return;
+    setSaving(true);
     try {
       await submit(pendingConflict.payload, { confirmReplaceUrgent: true });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <ComponentCard
-        title="Website banners"
-        headerLayout="stacked"
-        desc={
-          missingEnv && missingEnv.length > 0 ? (
-            <div className="space-y-2 text-sm text-amber-800 dark:text-amber-200/90">
-              <p className="font-medium">Server environment is incomplete.</p>
-              <p>
-                Set these variables where the Next.js server runs (e.g.{" "}
-                <code className="rounded bg-amber-100/80 px-1 dark:bg-amber-900/40">
-                  .env.local
-                </code>{" "}
-                for local dev, or your Webflow Cloud / Vercel env for production),
-                then restart the dev server or redeploy:
-              </p>
-              <ul className="list-inside list-disc font-mono text-xs">
-                {missingEnv.map((k) => (
-                  <li key={k}>{k}</li>
-                ))}
-              </ul>
-              <p className="text-gray-600 dark:text-gray-400">
-                Token: Webflow token with <strong>CMS:read</strong> and{" "}
-                <strong>CMS:write</strong> (and <strong>sites:read</strong> for the
-                list step). One-time setup from the repo:{" "}
-                <code className="rounded bg-gray-100 px-1 dark:bg-white/10">
-                  npm run webflow:list-sites
-                </code>{" "}
-                then{" "}
-                <code className="rounded bg-gray-100 px-1 dark:bg-white/10">
-                  npm run webflow:setup-banners
-                </code>{" "}
-                (see <code className="rounded bg-gray-100 px-1 dark:bg-white/10">.env.example</code>).
-              </p>
-            </div>
-          ) : (
-          <span>
-            Stored in your Webflow &quot;Site banners&quot; CMS collection.
-            Times use each editor&apos;s browser local time when you pick a
-            date; compare urgent vs expiration on the server in absolute time.
-            Banners more than 30 days past expiration are archived in Webflow
-            when you save—they stay in the CMS but no longer appear in this list.
-          </span>
-          )
-        }
-        action={
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => openCreate()}
-              className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-mercury-on-accent hover:bg-brand-600 hover:text-white"
-            >
-              New banner
-            </button>
-          </div>
-        }
-      >
-        {loading ? (
-          <p className="px-6 pb-6 text-sm text-gray-500">Loading…</p>
-        ) : banners.length === 0 ? (
-          <p className="px-6 pb-6 text-sm text-gray-500">
-            No banners. Let&apos;s make one.
-          </p>
-        ) : (
-          <div className="overflow-x-auto px-6 pb-6">
-            <Table>
-              <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                <TableRow>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Name
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Status
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Expires
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Urgent
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 text-end text-theme-xs font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {banners.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell className="px-5 py-3 font-medium text-gray-800 dark:text-white/90">
-                      {b.name}
-                    </TableCell>
-                    <TableCell className="px-5 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {b.active ? (
-                          <Badge color="success" size="sm">
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge color="light" size="sm">
-                            Inactive
-                          </Badge>
-                        )}
-                        {b.isArchived ? (
-                          <Badge color="warning" size="sm">
-                            Archived
-                          </Badge>
-                        ) : null}
-                        {b.derived.isExpired ? (
-                          <Badge color="error" size="sm">
-                            Expired
-                          </Badge>
-                        ) : null}
-                        {b.derived.inUrgentWindow ? (
-                          <Badge color="warning" size="sm">
-                            Urgent window
-                          </Badge>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
-                      {b.expiresAt
-                        ? new Date(b.expiresAt).toLocaleString()
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">
-                      {b.urgent ? "Yes" : "No"}
-                    </TableCell>
-                    <TableCell className="px-5 py-3 text-end">
-                      <button
-                        type="button"
-                        onClick={() => openEdit(b)}
-                        className="text-sm font-medium text-brand-500 hover:text-brand-600"
-                      >
-                        Edit
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </ComponentCard>
+  const filteredBanners = useMemo(
+    () => banners.filter((b) => classifyBannerTimeframe(b) === timeframe),
+    [banners, timeframe],
+  );
 
-      {(creating || editingId) && (
-        <ComponentCard
-          title={editingId ? "Edit banner" : "New banner"}
-          headerLayout="stacked"
-          action={
-            <button
-              type="button"
-              onClick={closeForm}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              Cancel
-            </button>
-          }
+  const formOpen = creating || editingId != null;
+
+  const emptyLabel =
+    timeframe === "current"
+      ? "No banners are live right now."
+      : timeframe === "upcoming"
+        ? "No upcoming banners."
+        : "No past banners.";
+
+  return (
+    <>
+      {missingEnv && missingEnv.length > 0 ? (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+          <p className="font-medium">Server environment is incomplete.</p>
+          <p className="mt-2">
+            Set these variables where the Next.js server runs, then restart or
+            redeploy:{" "}
+            <span className="font-mono text-xs">{missingEnv.join(", ")}</span>
+          </p>
+        </div>
+      ) : null}
+
+      <div className="pt-4">
+        <FilterPills<BannerTimeframe>
+          aria-label="Banner timeframe"
+          value={timeframe}
+          onChange={setTimeframe}
+          pills={[
+            { value: "current", label: "Current" },
+            { value: "upcoming", label: "Upcoming" },
+            { value: "past", label: "Past" },
+          ]}
+        />
+      </div>
+
+      <div className="overflow-x-auto rounded-b-xl pt-4">
+        <table className="min-w-full border-collapse border-t border-gray-100 dark:border-gray-800">
+          <thead>
+            <tr className="border-b border-gray-200 dark:border-gray-800">
+              <th className={thClass}>Name</th>
+              <th className={thClass}>Status</th>
+              <th className={thClass}>Expires</th>
+              <th className={thClass}>Urgent</th>
+              <th className={`${thClass} text-right`}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
+                >
+                  Loading banners…
+                </td>
+              </tr>
+            ) : filteredBanners.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
+                >
+                  {emptyLabel}
+                </td>
+              </tr>
+            ) : (
+              filteredBanners.map((b) => (
+                <tr
+                  key={b.id}
+                  className="border-b border-gray-100 last:border-0 dark:border-gray-800"
+                >
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white/90">
+                    {b.name}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {b.active ? (
+                        <Badge color="success" size="sm">
+                          Active
+                        </Badge>
+                      ) : (
+                        <Badge color="light" size="sm">
+                          Inactive
+                        </Badge>
+                      )}
+                      {b.isArchived ? (
+                        <Badge color="warning" size="sm">
+                          Archived
+                        </Badge>
+                      ) : null}
+                      {b.derived.isExpired ? (
+                        <Badge color="error" size="sm">
+                          Expired
+                        </Badge>
+                      ) : null}
+                      {b.derived.inUrgentWindow ? (
+                        <Badge color="warning" size="sm">
+                          Urgent window
+                        </Badge>
+                      ) : null}
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    {b.expiresAt ? new Date(b.expiresAt).toLocaleString() : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    {b.urgent ? "Yes" : "No"}
+                  </td>
+                  <td className="px-4 py-3 text-end">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(b)}
+                      className="text-sm font-medium text-brand-500 hover:text-brand-600"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <Modal
+        isOpen={formOpen}
+        onClose={closeForm}
+        className="max-h-[min(90vh,900px)] max-w-[640px] overflow-y-auto p-5 lg:p-8"
+      >
+        <h4 className="mb-6 pr-10 text-lg font-medium text-gray-800 dark:text-white/90">
+          {editingId ? "Edit banner" : "New banner"}
+        </h4>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void onSave();
+          }}
         >
-          <div className="grid gap-4 px-6 pb-6 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Internal name
@@ -451,27 +446,27 @@ export default function BannersManager() {
             </div>
             <div className="flex items-center gap-2 pt-6">
               <input
-                id="active"
+                id="banner-active"
                 type="checkbox"
                 checked={form.active}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, active: e.target.checked }))
                 }
               />
-              <label htmlFor="active" className="text-sm text-gray-700 dark:text-gray-300">
+              <label htmlFor="banner-active" className="text-sm text-gray-700 dark:text-gray-300">
                 Active on site
               </label>
             </div>
             <div className="flex items-center gap-2 sm:col-span-2">
               <input
-                id="urgent"
+                id="banner-urgent"
                 type="checkbox"
                 checked={form.urgent}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, urgent: e.target.checked }))
                 }
               />
-              <label htmlFor="urgent" className="text-sm text-gray-700 dark:text-gray-300">
+              <label htmlFor="banner-urgent" className="text-sm text-gray-700 dark:text-gray-300">
                 Urgent (only one at a time; the public site should treat urgent
                 as overriding other banners until urgent-until passes—even if
                 this switch stays on).
@@ -527,18 +522,19 @@ export default function BannersManager() {
                 </div>
               </div>
             ) : null}
-            <div className="sm:col-span-2 flex gap-2">
-              <button
-                type="button"
-                onClick={() => void onSave()}
-                className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-mercury-on-accent hover:bg-brand-600 hover:text-white"
-              >
-                Save
-              </button>
+            <div className="sm:col-span-2 mt-2 flex justify-end gap-3">
+              <Button size="sm" type="button" variant="outline" onClick={closeForm}>
+                Cancel
+              </Button>
+              <Button size="sm" type="submit" disabled={saving}>
+                {saving ? "Saving…" : "Save"}
+              </Button>
             </div>
           </div>
-        </ComponentCard>
-      )}
-    </div>
+        </form>
+      </Modal>
+    </>
   );
-}
+});
+
+export default BannersManager;

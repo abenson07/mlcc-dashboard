@@ -88,7 +88,7 @@ function CopyRoutesButton({ routes }: { routes: RouteWithDeliverer[] }) {
   );
 }
 
-export default function DeliverersContent() {
+export default function DeliverersPane() {
   const { routes, loading, error } = useRoutes({
     autoFetch: true,
     filters: { claimedOnly: true },
@@ -96,17 +96,13 @@ export default function DeliverersContent() {
 
   if (loading) {
     return (
-      <ComponentCard title="Deliverers">
-        <p className="text-gray-500 dark:text-gray-400">Loading deliverers...</p>
-      </ComponentCard>
+      <p className="text-gray-500 dark:text-gray-400">Loading deliverers…</p>
     );
   }
 
   if (error) {
     return (
-      <ComponentCard title="Deliverers">
-        <p className="text-red-600 dark:text-red-400">{error}</p>
-      </ComponentCard>
+      <p className="text-red-600 dark:text-red-400">{error}</p>
     );
   }
 
@@ -117,11 +113,9 @@ export default function DeliverersContent() {
 
   if (deliverers.length === 0) {
     return (
-      <ComponentCard title="Deliverers">
-        <p className="text-gray-500 dark:text-gray-400">
-          No deliverers with claimed routes found.
-        </p>
-      </ComponentCard>
+      <p className="text-gray-500 dark:text-gray-400">
+        No deliverers with claimed routes found.
+      </p>
     );
   }
 

@@ -69,6 +69,26 @@ export function validateUrgentWindow(
   return { ok: true };
 }
 
+export type BannerTimeframe = "current" | "upcoming" | "past";
+
+/** Classify a banner for dashboard tabs (current = live, upcoming = inactive, past = expired/archived). */
+export function classifyBannerTimeframe(
+  banner: {
+    active: boolean;
+    isArchived: boolean;
+    derived: { isExpired: boolean; hiddenByRetention?: boolean };
+  },
+): BannerTimeframe {
+  if (
+    banner.isArchived ||
+    banner.derived.isExpired ||
+    banner.derived.hiddenByRetention === true
+  ) {
+    return "past";
+  }
+  return banner.active ? "current" : "upcoming";
+}
+
 export function slugifyBase(name: string): string {
   return name
     .trim()

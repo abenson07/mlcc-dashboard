@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  classifyBannerTimeframe,
   defaultExpiresAtIso,
   defaultUrgentUntilIso,
   isPastRetentionArchive,
@@ -8,6 +9,45 @@ import {
   slugifyBase,
   validateUrgentWindow,
 } from "./banner-helpers";
+
+describe("classifyBannerTimeframe", () => {
+  it("returns current for active, non-expired banners", () => {
+    expect(
+      classifyBannerTimeframe({
+        active: true,
+        isArchived: false,
+        derived: { isExpired: false },
+      }),
+    ).toBe("current");
+  });
+
+  it("returns upcoming for inactive, non-expired banners", () => {
+    expect(
+      classifyBannerTimeframe({
+        active: false,
+        isArchived: false,
+        derived: { isExpired: false },
+      }),
+    ).toBe("upcoming");
+  });
+
+  it("returns past for expired or archived banners", () => {
+    expect(
+      classifyBannerTimeframe({
+        active: true,
+        isArchived: false,
+        derived: { isExpired: true },
+      }),
+    ).toBe("past");
+    expect(
+      classifyBannerTimeframe({
+        active: true,
+        isArchived: true,
+        derived: { isExpired: false },
+      }),
+    ).toBe("past");
+  });
+});
 
 describe("slugifyBase", () => {
   it("normalizes names", () => {

@@ -210,6 +210,23 @@ export default function BusinessDetailSidebar({
           <dt className="font-medium text-gray-500 dark:text-gray-400">Business name</dt>
           <dd className="mt-0.5 text-gray-800 dark:text-white/90">{item.business_name ?? "—"}</dd>
         </div>
+        {item.is_member || item.is_past_sponsor ? (
+          <div>
+            <dt className="font-medium text-gray-500 dark:text-gray-400">Dashboard flags</dt>
+            <dd className="mt-1 flex flex-wrap gap-2">
+              {item.is_member ? (
+                <Badge size="sm" color="info">
+                  Member
+                </Badge>
+              ) : null}
+              {item.is_past_sponsor ? (
+                <Badge size="sm" color="warning">
+                  Past sponsor
+                </Badge>
+              ) : null}
+            </dd>
+          </div>
+        ) : null}
         <div>
           <dt className="font-medium text-gray-500 dark:text-gray-400">Contact</dt>
           <dd className="mt-0.5 text-gray-800 dark:text-white/90">{item.contact_name ?? "—"}</dd>
