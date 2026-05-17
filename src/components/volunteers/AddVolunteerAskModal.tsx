@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
@@ -8,9 +8,11 @@ import Input from "@/components/form/input/InputField";
 import TextArea from "@/components/form/input/TextArea";
 import Select from "@/components/form/Select";
 import { useWebflowEvents } from "hooks";
+import type { VolunteerAskWithSignups } from "hooks";
 import type { VolunteerCommitmentType, VolunteerCommitmentUnit } from "@/types/database";
 import { getApiBase } from "@/lib/apiBase";
 import { buildWebflowEventSelectOptions } from "@/lib/volunteers/webflowEventOptions";
+import { webflowEventIdForAsk } from "@/lib/volunteers/webflowEventIdForAsk";
 import { toast } from "sonner";
 
 type FormState = {
@@ -33,17 +35,36 @@ const initialForm: FormState = {
   webflow_event_id: "",
 };
 
+function formFromAsk(
+  ask: VolunteerAskWithSignups,
+  webflowEventId: string
+): FormState {
+  return {
+    title: ask.title,
+    description: ask.description ?? "",
+    commitment_type: ask.commitment_type,
+    commitment_unit: ask.commitment_unit,
+    commitment_quantity: String(ask.commitment_quantity),
+    quantity: String(ask.quantity),
+    webflow_event_id: webflowEventId,
+  };
+}
+
 interface AddVolunteerAskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated?: () => void;
+  ask?: VolunteerAskWithSignups | null;
 }
 
 export default function AddVolunteerAskModal({
   isOpen,
   onClose,
   onCreated,
+  ask = null,
 }: AddVolunteerAskModalProps) {
+  const isEdit = ask != null;
+
   const {
     data: webflowEvents,
     isLoading: eventsLoading,
@@ -61,6 +82,18 @@ export default function AddVolunteerAskModal({
     () => buildWebflowEventSelectOptions(webflowEvents),
     [webflowEvents]
   );
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!isEdit || !ask) {
+      setForm(initialForm);
+      setFormKey((k) => k + 1);
+      return;
+    }
+    const webflowId = webflowEventIdForAsk(ask, webflowEvents);
+    setForm(formFromAsk(ask, webflowId));
+    setFormKey((k) => k + 1);
+  }, [isOpen, isEdit, ask, webflowEvents]);
 
   const update = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -96,6 +129,10 @@ export default function AddVolunteerAskModal({
       errors.quantity = "Enter at least 1 volunteer needed.";
     }
 
+    if (isEdit && ask && Number.isFinite(slots) && slots < ask.signup_count) {
+      errors.quantity = `At least ${ask.signup_count} (${ask.signup_count} already signed up).`;
+    }
+
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -104,18 +141,25 @@ export default function AddVolunteerAskModal({
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`${getApiBase()}/api/volunteers/asks`, {
-        method: "POST",
+      const payload = {
+        title,
+        description: form.description.trim() || null,
+        commitment_type: form.commitment_type,
+        commitment_unit: form.commitment_unit,
+        commitment_quantity: commitmentQty,
+        quantity: slots,
+        webflowEventItemId: form.webflow_event_id.trim() || null,
+      };
+
+      const url = isEdit
+        ? `${getApiBase()}/api/volunteers/asks/${encodeURIComponent(ask!.id)}`
+        : `${getApiBase()}/api/volunteers/asks`;
+      const method = isEdit ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description: form.description.trim() || null,
-          commitment_type: form.commitment_type,
-          commitment_unit: form.commitment_unit,
-          commitment_quantity: commitmentQty,
-          quantity: slots,
-          webflowEventItemId: form.webflow_event_id.trim() || null,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const json = (await res.json()) as {
@@ -128,23 +172,38 @@ export default function AddVolunteerAskModal({
       if (!res.ok) {
         const missing =
           json.missing?.length ? ` Missing: ${json.missing.join(", ")}.` : "";
-        throw new Error((json.error ?? "Failed to create volunteer ask.") + missing);
+        throw new Error(
+          (json.error ??
+            (isEdit
+              ? "Failed to update volunteer ask."
+              : "Failed to create volunteer ask.")) + missing
+        );
       }
 
       if (json.webflow) {
-        toast.success("Volunteer ask saved and published to Webflow.");
+        toast.success(
+          isEdit
+            ? "Volunteer ask updated and published to Webflow."
+            : "Volunteer ask saved and published to Webflow."
+        );
       } else if (json.webflowError) {
-        toast.success("Volunteer ask saved.");
+        toast.success(isEdit ? "Volunteer ask updated." : "Volunteer ask saved.");
         toast.error(json.webflowError);
       } else {
-        toast.success("Volunteer ask saved.");
+        toast.success(isEdit ? "Volunteer ask updated." : "Volunteer ask saved.");
       }
 
       reset();
       onClose();
       onCreated?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create volunteer ask.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : isEdit
+            ? "Failed to update volunteer ask."
+            : "Failed to create volunteer ask."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -154,11 +213,18 @@ export default function AddVolunteerAskModal({
     <Modal isOpen={isOpen} onClose={handleClose} className="max-w-[640px] p-5 lg:p-10">
       <form key={formKey} onSubmit={handleSubmit}>
         <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
-          Add volunteer ask
+          {isEdit ? "Edit volunteer ask" : "Add volunteer ask"}
         </h4>
 
         {error ? (
           <p className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+        ) : null}
+
+        {isEdit && ask && ask.signup_count > 0 ? (
+          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            {ask.signup_count} volunteer{ask.signup_count === 1 ? "" : "s"} signed up — volunteers
+            needed cannot go below that.
+          </p>
         ) : null}
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -276,7 +342,7 @@ export default function AddVolunteerAskModal({
             Cancel
           </Button>
           <Button type="submit" size="sm" disabled={submitting}>
-            {submitting ? "Saving…" : "Save volunteer ask"}
+            {submitting ? "Saving…" : isEdit ? "Save changes" : "Save volunteer ask"}
           </Button>
         </div>
       </form>

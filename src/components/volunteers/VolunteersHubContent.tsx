@@ -10,6 +10,9 @@ import VolunteerAsksTable from "./VolunteerAsksTable";
 import VolunteerEventRoster from "./VolunteerEventRoster";
 import AddVolunteerAskModal from "./AddVolunteerAskModal";
 import { useVolunteerAsks, VOLUNTEER_ASKS_QUERY_KEY } from "hooks";
+import type { VolunteerAskWithSignups } from "hooks";
+import { getApiBase } from "@/lib/apiBase";
+import { toast } from "sonner";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -28,6 +31,60 @@ export default function VolunteersHubContent() {
   const tab = useMemo(() => parseVolunteerTab(searchParams), [searchParams]);
   const { asks, loading, error } = useVolunteerAsks({ autoFetch: true });
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingAsk, setEditingAsk] = useState<VolunteerAskWithSignups | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingAsk(null);
+  };
+
+  const openCreate = () => {
+    setEditingAsk(null);
+    setModalOpen(true);
+  };
+
+  const openEdit = (ask: VolunteerAskWithSignups) => {
+    setEditingAsk(ask);
+    setModalOpen(true);
+  };
+
+  const handleDelete = async (ask: VolunteerAskWithSignups) => {
+    const signupNote =
+      ask.signup_count > 0
+        ? ` This will also remove ${ask.signup_count} signup${ask.signup_count === 1 ? "" : "s"}.`
+        : "";
+    if (
+      !window.confirm(
+        `Delete "${ask.title}"?${signupNote} The Webflow listing will be archived.`
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(ask.id);
+    try {
+      const res = await fetch(
+        `${getApiBase()}/api/volunteers/asks/${encodeURIComponent(ask.id)}`,
+        { method: "DELETE" }
+      );
+      const json = (await res.json()) as { error?: string; webflowError?: string | null };
+      if (!res.ok) {
+        throw new Error(json.error ?? "Failed to delete volunteer ask.");
+      }
+      if (json.webflowError) {
+        toast.success("Volunteer ask deleted.");
+        toast.error(json.webflowError);
+      } else {
+        toast.success("Volunteer ask deleted.");
+      }
+      void queryClient.invalidateQueries({ queryKey: VOLUNTEER_ASKS_QUERY_KEY });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete volunteer ask.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const setTab = (next: VolunteerTabView) => {
     router.replace(next === "roster" ? "/volunteers?tab=roster" : "/volunteers");
@@ -49,7 +106,7 @@ export default function VolunteersHubContent() {
               { value: "roster", label: "By event" },
             ]}
             endSlot={
-              <Button size="sm" onClick={() => setModalOpen(true)}>
+              <Button size="sm" onClick={openCreate}>
                 Add volunteer ask
               </Button>
             }
@@ -60,7 +117,12 @@ export default function VolunteersHubContent() {
             ) : error ? (
               <p className="text-red-600 dark:text-red-400">{error}</p>
             ) : tab === "asks" ? (
-              <VolunteerAsksTable asks={asks} />
+              <VolunteerAsksTable
+                asks={asks}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+                deletingId={deletingId}
+              />
             ) : (
               <VolunteerEventRoster asks={asks} />
             )}
@@ -68,7 +130,8 @@ export default function VolunteersHubContent() {
         </ComponentCard>
         <AddVolunteerAskModal
           isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
+          ask={editingAsk}
+          onClose={closeModal}
           onCreated={() =>
             void queryClient.invalidateQueries({ queryKey: VOLUNTEER_ASKS_QUERY_KEY })
           }

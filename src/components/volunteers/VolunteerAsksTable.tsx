@@ -8,6 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  type TableRowMenuItem,
+} from "@/components/ui/table/TableRowActionsMenu";
 import type { VolunteerAskWithSignups } from "hooks";
 import {
   formatCommitmentTypeLabel,
@@ -23,6 +27,9 @@ function formatEventLabel(ask: VolunteerAskWithSignups): string {
 
 interface VolunteerAsksTableProps {
   asks: VolunteerAskWithSignups[];
+  onEdit?: (ask: VolunteerAskWithSignups) => void;
+  onDelete?: (ask: VolunteerAskWithSignups) => void;
+  deletingId?: string | null;
 }
 
 function HeaderCell({
@@ -63,7 +70,33 @@ function RemainingBadge({
   );
 }
 
-export default function VolunteerAsksTable({ asks }: VolunteerAsksTableProps) {
+function rowMenuItems(
+  ask: VolunteerAskWithSignups,
+  onEdit: VolunteerAsksTableProps["onEdit"],
+  onDelete: VolunteerAsksTableProps["onDelete"],
+  deletingId: string | null
+): TableRowMenuItem[] {
+  const items: TableRowMenuItem[] = [];
+  if (onEdit) {
+    items.push({ label: "Edit", onClick: () => onEdit(ask) });
+  }
+  if (onDelete) {
+    items.push({
+      label: deletingId === ask.id ? "Deleting…" : "Delete",
+      onClick: () => onDelete(ask),
+      disabled: deletingId === ask.id,
+      variant: "danger",
+    });
+  }
+  return items;
+}
+
+export default function VolunteerAsksTable({
+  asks,
+  onEdit,
+  onDelete,
+  deletingId = null,
+}: VolunteerAsksTableProps) {
   if (asks.length === 0) {
     return (
       <p className="py-10 text-center text-mercury-muted dark:text-white/50">
@@ -87,6 +120,9 @@ export default function VolunteerAsksTable({ asks }: VolunteerAsksTableProps) {
                 <HeaderCell className="text-center">Signed up</HeaderCell>
                 <HeaderCell className="text-center">Remaining</HeaderCell>
                 <HeaderCell>Description</HeaderCell>
+                {(onEdit || onDelete) && (
+                  <HeaderCell className="w-10 px-1" aria-hidden />
+                )}
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
@@ -118,6 +154,16 @@ export default function VolunteerAsksTable({ asks }: VolunteerAsksTableProps) {
                       {ask.description?.trim() || "—"}
                     </span>
                   </TableCell>
+                  {(onEdit || onDelete) && (
+                    <TableCell
+                      className="w-10 overflow-visible px-1 py-3 text-end align-middle"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <TableRowActionsMenu
+                        items={rowMenuItems(ask, onEdit, onDelete, deletingId)}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
