@@ -4,12 +4,10 @@ import {
   createScheduledSocialPost,
   createScheduledSocialPostsBatch,
 } from "@/lib/buffer/mutations";
-import {
-  getChannelById,
-  getDailyPostingLimits,
-  listSocialPosts,
-} from "@/lib/buffer/queries";
+import { getDailyPostingLimits, listSocialPosts } from "@/lib/buffer/queries";
 import { imageRequiredForService } from "@/lib/buffer/imageSpecs";
+import type { BufferChannelRow } from "@/lib/buffer/types";
+
 export const runtime = "nodejs";
 
 type ChannelPostInput = {
@@ -19,11 +17,12 @@ type ChannelPostInput = {
   imageHeight?: number;
 };
 
-async function validateChannelPost(
+function validateChannelPost(
   item: ChannelPostInput,
   text: string,
-): Promise<{ error: string; status: number } | { channel: NonNullable<Awaited<ReturnType<typeof getChannelById>>> }> {
-  const channel = await getChannelById(item.channelId);
+  channelById: Map<string, BufferChannelRow>,
+): { error: string; status: number } | { ok: true } {
+  const channel = channelById.get(item.channelId);
   if (!channel) {
     return {
       error: "Channel not found or not supported (Instagram/Facebook only).",
@@ -39,7 +38,7 @@ async function validateChannelPost(
   if (!text) {
     return { error: "Caption text is required.", status: 400 };
   }
-  return { channel };
+  return { ok: true };
 }
 
 export async function GET(request: NextRequest) {
@@ -145,8 +144,13 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      const snapshot = await listSocialPosts();
+      const channelById = new Map(
+        snapshot.channels.map((c) => [c.id, c]),
+      );
+
       for (const item of channelPosts) {
-        const check = await validateChannelPost(item, text);
+        const check = validateChannelPost(item, text, channelById);
         if ("error" in check) {
           return NextResponse.json(
             { error: check.error },
@@ -155,18 +159,21 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const result = await createScheduledSocialPostsBatch({
-        text,
-        dueAt,
-        posts: channelPosts.map((item) => ({
-          channelId: item.channelId,
+      const result = await createScheduledSocialPostsBatch(
+        {
           text,
           dueAt,
-          imageUrl: item.imageUrl,
-          imageWidth: item.imageWidth,
-          imageHeight: item.imageHeight,
-        })),
-      });
+          posts: channelPosts.map((item) => ({
+            channelId: item.channelId,
+            text,
+            dueAt,
+            imageUrl: item.imageUrl,
+            imageWidth: item.imageWidth,
+            imageHeight: item.imageHeight,
+          })),
+        },
+        snapshot,
+      );
 
       const status = result.errors.length > 0 ? 207 : 200;
       return NextResponse.json(result, { status });
@@ -188,22 +195,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const check = await validateChannelPost(
+    const snapshot = await listSocialPosts();
+    const channelById = new Map(snapshot.channels.map((c) => [c.id, c]));
+
+    const check = validateChannelPost(
       { channelId, imageUrl, imageWidth, imageHeight },
       text,
+      channelById,
     );
     if ("error" in check) {
       return NextResponse.json({ error: check.error }, { status: check.status });
     }
 
-    const post = await createScheduledSocialPost({
-      channelId,
-      text,
-      dueAt,
-      imageUrl,
-      imageWidth,
-      imageHeight,
-    });
+    const post = await createScheduledSocialPost(
+      {
+        channelId,
+        text,
+        dueAt,
+        imageUrl,
+        imageWidth,
+        imageHeight,
+      },
+      snapshot,
+    );
 
     return NextResponse.json({ post });
   } catch (e) {

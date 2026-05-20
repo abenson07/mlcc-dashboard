@@ -1,11 +1,11 @@
 import { bufferGraphql } from "@/lib/buffer/client";
 import {
   countScheduledForChannel,
-  getChannelById,
   listSocialPosts,
 } from "@/lib/buffer/queries";
-import { resolveBufferOrganizationId } from "@/lib/buffer/organization";
 import type {
+  BufferChannelRow,
+  BufferPostsListResponse,
   BufferSocialPostRow,
   SupportedSocialService,
 } from "@/lib/buffer/types";
@@ -74,24 +74,11 @@ type CreatePostResponse = {
     | { message: string };
 };
 
-export async function createScheduledSocialPost(
+/** One Buffer API call — createPost only. */
+async function bufferCreatePost(
+  channel: BufferChannelRow,
   input: CreateSocialPostInput,
 ): Promise<BufferSocialPostRow> {
-  const channel = await getChannelById(input.channelId);
-  if (!channel) {
-    throw new Error("Channel not found or not supported (Instagram/Facebook only).");
-  }
-
-  const { queueMax, posts } = await listSocialPosts();
-  const used = countScheduledForChannel(posts, input.channelId);
-  if (used >= queueMax) {
-    throw new Error(
-      `This channel already has ${used} scheduled posts (limit ${queueMax}). Remove or publish one before scheduling more.`,
-    );
-  }
-
-  await resolveBufferOrganizationId();
-
   const assets =
     input.imageUrl && input.imageUrl.trim()
       ? [
@@ -154,6 +141,37 @@ export async function createScheduledSocialPost(
   };
 }
 
+function scheduledCountByChannel(
+  snapshot: BufferPostsListResponse,
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const ch of snapshot.channels) {
+    counts.set(ch.id, countScheduledForChannel(snapshot.posts, ch.id));
+  }
+  return counts;
+}
+
+export async function createScheduledSocialPost(
+  input: CreateSocialPostInput,
+  snapshot?: BufferPostsListResponse,
+): Promise<BufferSocialPostRow> {
+  const state = snapshot ?? (await listSocialPosts());
+  const channel = state.channels.find((c) => c.id === input.channelId);
+  if (!channel) {
+    throw new Error("Channel not found or not supported (Instagram/Facebook only).");
+  }
+
+  const counts = scheduledCountByChannel(state);
+  const used = counts.get(input.channelId) ?? 0;
+  if (used >= state.queueMax) {
+    throw new Error(
+      `This channel already has ${used} scheduled posts (limit ${state.queueMax}). Remove or publish one before scheduling more.`,
+    );
+  }
+
+  return bufferCreatePost(channel, input);
+}
+
 export type CreateSocialPostBatchInput = {
   text: string;
   dueAt: string;
@@ -167,17 +185,41 @@ export type CreateSocialPostBatchResult = {
 
 export async function createScheduledSocialPostsBatch(
   input: CreateSocialPostBatchInput,
+  snapshot?: BufferPostsListResponse,
 ): Promise<CreateSocialPostBatchResult> {
+  const state = snapshot ?? (await listSocialPosts());
+  const channelById = new Map(state.channels.map((c) => [c.id, c]));
+  const scheduledByChannel = scheduledCountByChannel(state);
+
   const created: BufferSocialPostRow[] = [];
   const errors: Array<{ channelId: string; message: string }> = [];
 
   for (const item of input.posts) {
+    const channel = channelById.get(item.channelId);
+    if (!channel) {
+      errors.push({
+        channelId: item.channelId,
+        message: "Channel not found or not supported (Instagram/Facebook only).",
+      });
+      continue;
+    }
+
+    const used = scheduledByChannel.get(item.channelId) ?? 0;
+    if (used >= state.queueMax) {
+      errors.push({
+        channelId: item.channelId,
+        message: `Queue full (${used}/${state.queueMax} scheduled).`,
+      });
+      continue;
+    }
+
     try {
-      const post = await createScheduledSocialPost({
+      const post = await bufferCreatePost(channel, {
         ...item,
         text: input.text,
         dueAt: input.dueAt,
       });
+      scheduledByChannel.set(item.channelId, used + 1);
       created.push(post);
     } catch (e) {
       errors.push({

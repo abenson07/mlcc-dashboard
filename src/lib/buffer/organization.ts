@@ -18,9 +18,16 @@ const ACCOUNT_ORGS_QUERY = `
   }
 `;
 
+let cachedOrganizationId: string | null = null;
+
 export async function resolveBufferOrganizationId(): Promise<string> {
+  if (cachedOrganizationId) return cachedOrganizationId;
+
   const fromEnv = getBufferOrganizationId();
-  if (fromEnv) return fromEnv;
+  if (fromEnv) {
+    cachedOrganizationId = fromEnv;
+    return cachedOrganizationId;
+  }
 
   const data = await bufferGraphql<AccountOrgsResponse>(ACCOUNT_ORGS_QUERY);
   const orgs = data.account?.organizations ?? [];
@@ -29,7 +36,8 @@ export async function resolveBufferOrganizationId(): Promise<string> {
     throw new Error("No Buffer organizations found for this API token.");
   }
   if (orgs.length === 1) {
-    return orgs[0].id;
+    cachedOrganizationId = orgs[0].id;
+    return cachedOrganizationId;
   }
 
   throw new Error(

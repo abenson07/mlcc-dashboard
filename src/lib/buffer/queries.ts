@@ -149,10 +149,12 @@ function mapPost(node: GqlPostNode): BufferSocialPostRow | null {
   };
 }
 
-export async function listSupportedChannels(): Promise<BufferChannelRow[]> {
-  const organizationId = await resolveBufferOrganizationId();
+export async function listSupportedChannels(
+  organizationId?: string,
+): Promise<BufferChannelRow[]> {
+  const orgId = organizationId ?? (await resolveBufferOrganizationId());
   const data = await bufferGraphql<{ channels: GqlChannel[] }>(CHANNELS_QUERY, {
-    organizationId,
+    organizationId: orgId,
   });
   return (data.channels ?? [])
     .map(mapChannel)
@@ -169,7 +171,7 @@ async function getQueueMax(organizationId: string): Promise<number> {
 
 export async function listSocialPosts(): Promise<BufferPostsListResponse> {
   const organizationId = await resolveBufferOrganizationId();
-  const channels = await listSupportedChannels();
+  const channels = await listSupportedChannels(organizationId);
   const channelIds = channels.map((c) => c.id);
 
   if (channelIds.length === 0) {
