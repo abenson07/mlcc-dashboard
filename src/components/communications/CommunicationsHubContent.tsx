@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
@@ -10,8 +10,11 @@ import BannersManager, {
 } from "@/components/banners/BannersManager";
 import ScheduledEmailsTable from "./ScheduledEmailsTable";
 import ScheduledSocialTable from "./ScheduledSocialTable";
+import QrCodesTable from "./QrCodesTable";
+import AddQrCodeModal from "./AddQrCodeModal";
+import type { QrCodes } from "@/types/database";
 
-export type CommunicationsTableView = "email" | "social" | "banners";
+export type CommunicationsTableView = "email" | "social" | "banners" | "qr-codes";
 
 function parseCommunicationsView(
   sp: URLSearchParams | null,
@@ -19,6 +22,7 @@ function parseCommunicationsView(
   const raw = sp?.get("view");
   if (raw === "social") return "social";
   if (raw === "banners") return "banners";
+  if (raw === "qr-codes") return "qr-codes";
   return "email";
 }
 
@@ -47,6 +51,7 @@ function CommunicationsViewTabs({
           { value: "email", label: "Email" },
           { value: "social", label: "Social" },
           { value: "banners", label: "Banners" },
+          { value: "qr-codes", label: "QR codes" },
         ]}
       />
       {trailing ? (
@@ -60,12 +65,16 @@ function CommunicationsHubPane({
   view,
   setView,
   bannersRef,
+  onOpenNewQrCode,
+  onEditQrCode,
 }: {
   view: CommunicationsTableView;
   setView: (next: CommunicationsTableView) => void;
   bannersRef: React.RefObject<BannersManagerHandle | null>;
+  onOpenNewQrCode: () => void;
+  onEditQrCode: (row: QrCodes) => void;
 }) {
-  const newBannerButton =
+  const trailingButton =
     view === "banners" ? (
       <button
         type="button"
@@ -74,6 +83,14 @@ function CommunicationsHubPane({
       >
         New banner
       </button>
+    ) : view === "qr-codes" ? (
+      <button
+        type="button"
+        onClick={onOpenNewQrCode}
+        className="inline-flex shrink-0 items-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-mercury-on-accent hover:bg-brand-600 hover:text-white"
+      >
+        New QR code
+      </button>
     ) : undefined;
 
   return (
@@ -81,11 +98,12 @@ function CommunicationsHubPane({
       <CommunicationsViewTabs
         view={view}
         setView={setView}
-        trailing={newBannerButton}
+        trailing={trailingButton}
       />
       {view === "email" ? <ScheduledEmailsTable /> : null}
       {view === "social" ? <ScheduledSocialTable /> : null}
       {view === "banners" ? <BannersManager ref={bannersRef} /> : null}
+      {view === "qr-codes" ? <QrCodesTable onEdit={onEditQrCode} /> : null}
     </ComponentCard>
   );
 }
@@ -94,6 +112,8 @@ export default function CommunicationsHubContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bannersRef = useRef<BannersManagerHandle>(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [editingQr, setEditingQr] = useState<QrCodes | null>(null);
   const view = useMemo(
     () => parseCommunicationsView(searchParams),
     [searchParams],
@@ -101,6 +121,21 @@ export default function CommunicationsHubContent() {
 
   const setView = (next: CommunicationsTableView) => {
     router.replace(communicationsHref(next));
+  };
+
+  const openNewQrCode = () => {
+    setEditingQr(null);
+    setQrModalOpen(true);
+  };
+
+  const openEditQrCode = (row: QrCodes) => {
+    setEditingQr(row);
+    setQrModalOpen(true);
+  };
+
+  const closeQrModal = () => {
+    setQrModalOpen(false);
+    setEditingQr(null);
   };
 
   return (
@@ -112,8 +147,15 @@ export default function CommunicationsHubContent() {
           view={view}
           setView={setView}
           bannersRef={bannersRef}
+          onOpenNewQrCode={openNewQrCode}
+          onEditQrCode={openEditQrCode}
         />
       </div>
+      <AddQrCodeModal
+        isOpen={qrModalOpen}
+        onClose={closeQrModal}
+        editing={editingQr}
+      />
     </div>
   );
 }

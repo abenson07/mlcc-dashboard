@@ -33,4 +33,7 @@ export type {
   TshirtLineItem,
   FundraisingDonations,
   FundraisingDonationTier,
+  QrCodes,
+  QrCodesInsert,
+  QrCodesUpdate,
 } from "../../schemas";

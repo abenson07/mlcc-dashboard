@@ -13,6 +13,7 @@ export {
   type VolunteerSignup,
 } from "./useVolunteerAsks";
 export { useEvents, EVENTS_QUERY_KEY } from "./useEvents";
+export { useQrCodes, QR_CODES_QUERY_KEY } from "./useQrCodes";
 export { useDashboard } from "./useDashboard";
 export { useWebflowEvents, WEBFLOW_EVENTS_QUERY_KEY } from "./useWebflowEvents";
 export type {

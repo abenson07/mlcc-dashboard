@@ -165,7 +165,13 @@ const mainNavSections: NavSection[] = [
     icon: <MailIcon />,
     rootPath: "/communications",
     pathPrefixes: ["/communications", "/marketing/email"],
-    items: [],
+    items: [
+      {
+        name: "QR codes",
+        path: "/communications?view=qr-codes",
+        matchSearch: (sp) => sp.get("view") === "qr-codes",
+      },
+    ],
   },
   {
     id: "events",

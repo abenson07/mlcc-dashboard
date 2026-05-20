@@ -17,3 +17,4 @@ export * from "./payments";
 export * from "./sponsorships";
 export * from "./tshirt_preorders";
 export * from "./fundraising_donations";
+export * from "./qr_codes";
