@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Checkout — T-Shirt Preorder</title>
+    <link rel="stylesheet" href="../shared/css/design-system.css" />
+    <link rel="stylesheet" href="../shared/css/layout.css" />
+  </head>
+  <body>
+    <header data-mlcc-nav></header>
+    <main class="site-main layout-product">
+      <div class="slider-placeholder" aria-hidden="true">Image slider</div>
+      <section>
+        <h1>Your information</h1>
+        <p id="cart-summary" class="cart-summary"></p>
+        <form id="checkout-form">
+          <div class="form-field">
+            <label for="name">Name</label>
+            <input id="name" name="name" required autocomplete="name" />
+          </div>
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <div class="form-field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" />
+          </div>
+          <div class="form-field">
+            <label for="addressLine1">Address</label>
+            <input
+              id="addressLine1"
+              name="addressLine1"
+              required
+              autocomplete="address-line1"
+            />
+          </div>
+          <div class="form-field">
+            <label for="addressLine2">Apt / unit (optional)</label>
+            <input
+              id="addressLine2"
+              name="addressLine2"
+              autocomplete="address-line2"
+            />
+          </div>
+          <div class="form-field">
+            <label for="city">City</label>
+            <input id="city" name="city" required autocomplete="address-level2" />
+          </div>
+          <div class="form-field">
+            <label for="state">State</label>
+            <input
+              id="state"
+              name="state"
+              required
+              autocomplete="address-level1"
+              maxlength="2"
+              placeholder="WA"
+            />
+          </div>
+          <div class="form-field">
+            <label for="postalCode">ZIP</label>
+            <input
+              id="postalCode"
+              name="postalCode"
+              required
+              autocomplete="postal-code"
+            />
+          </div>
+          <p id="checkout-error" class="message-error hidden" role="alert"></p>
+          <div class="actions-row">
+            <a href="index.html" class="btn btn-outline">Back</a>
+            <button type="submit" class="btn btn-filled">Preorder</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <script src="../shared/js/config.js"></script>
+    <script src="../shared/js/nav.js"></script>
+    <script src="../shared/js/cart.js"></script>
+    <script src="../shared/js/checkout.js"></script>
+    <script src="../shared/js/tshirt-checkout.js"></script>
+  </body>
+</html>

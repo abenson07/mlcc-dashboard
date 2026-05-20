@@ -23,7 +23,8 @@
     "webflow:rewrite-event-short-descriptions": "tsx scripts/rewrite-event-short-descriptions.ts",
     "seed:businesses": "tsx scripts/seed-businesses-from-places.ts",
     "seed:businesses:sql": "tsx scripts/seed-businesses-from-places.ts --emit-sql",
-    "migrate:businesses": "tsx scripts/apply-businesses-migration.ts"
+    "migrate:businesses": "tsx scripts/apply-businesses-migration.ts",
+    "stripe:setup-commerce": "node scripts/stripe-setup-commerce-products.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.0",

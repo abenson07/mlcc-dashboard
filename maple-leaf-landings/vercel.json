@@ -1,0 +1,33 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "give.mapleleafcommunity.org" }],
+      "destination": "/fundraise/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "give.mapleleafcommunity.org" }],
+      "destination": "/fundraise/$1"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "shop.mapleleafcommunity.org" }],
+      "destination": "/tshirt/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "shop.mapleleafcommunity.org" }],
+      "destination": "/tshirt/$1"
+    }
+  ]
+}

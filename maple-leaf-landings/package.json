@@ -1,0 +1,9 @@
+{
+  "name": "maple-leaf-landings",
+  "private": true,
+  "description": "Standalone fundraiser and t-shirt preorder pages for Maple Leaf Community Council",
+  "scripts": {
+    "build": "node scripts/generate-config.js",
+    "config:example": "cp shared/js/config.example.js shared/js/config.js"
+  }
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Help save Summer in Maple Leaf</title>
+    <link rel="stylesheet" href="../shared/css/design-system.css" />
+    <link rel="stylesheet" href="../shared/css/layout.css" />
+  </head>
+  <body>
+    <header data-mlcc-nav></header>
+    <main class="site-main">
+      <div class="layout-two-col">
+        <section>
+          <h1>Help save Summer in Maple Leaf</h1>
+          <p class="subhead">
+            If every neighbor only gave $10, we would be able to recover our
+            losses.
+          </p>
+          <p>
+            We recently experienced a significant loss from our community account.
+            Summer events and programs our neighborhood counts on are now at
+            risk. Your gift helps us rebuild and keep Maple Leaf gatherings
+            going.
+          </p>
+        </section>
+        <section>
+          <h2>Our Goal</h2>
+          <div class="progress" aria-hidden="true">
+            <div
+              class="progress-fill"
+              id="progress-fill"
+              style="width: 0%"
+            ></div>
+          </div>
+          <div class="progress-meta">
+            <span id="raised-label">$0 raised</span>
+            <span id="goal-label">$25,000 goal</span>
+          </div>
+          <p class="muted" style="margin-top: 24px">Donate</p>
+          <div class="donate-grid" id="donate-grid">
+            <button type="button" class="donate-card" data-tier="individual">
+              <strong>$10</strong>
+              <span>Individual</span>
+            </button>
+            <button type="button" class="donate-card" data-tier="household">
+              <strong>$40</strong>
+              <span>Household</span>
+            </button>
+            <button type="button" class="donate-card" data-tier="champ">
+              <strong>$100</strong>
+              <span>Champ</span>
+            </button>
+            <button type="button" class="donate-card" data-tier="custom">
+              <strong>Any</strong>
+              <span>Amount</span>
+            </button>
+          </div>
+          <div class="form-field" style="margin-top: 24px">
+            <label for="donor-email">Email (optional)</label>
+            <input
+              type="email"
+              id="donor-email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+            />
+          </div>
+          <p id="donate-error" class="message-error hidden" role="alert"></p>
+        </section>
+      </div>
+    </main>
+    <div id="custom-modal" class="modal-backdrop hidden" aria-hidden="true">
+      <div class="modal" role="dialog" aria-labelledby="custom-modal-title">
+        <h3 id="custom-modal-title">Custom amount</h3>
+        <div class="form-field">
+          <label for="custom-amount">Amount (USD)</label>
+          <input
+            type="number"
+            id="custom-amount"
+            min="1"
+            max="10000"
+            step="1"
+            placeholder="50"
+          />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-filled-2" id="custom-cancel">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-filled" id="custom-submit">
+            Continue to payment
+          </button>
+        </div>
+        <p id="custom-error" class="message-error hidden"></p>
+      </div>
+    </div>
+    <script src="../shared/js/config.js"></script>
+    <script src="../shared/js/nav.js"></script>
+    <script src="../shared/js/checkout.js"></script>
+    <script src="../shared/js/fundraise.js"></script>
+  </body>
+</html>

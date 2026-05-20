@@ -29,4 +29,8 @@ export type {
   VolunteerCommitmentUnit,
   Volunteers,
   VolunteersInsert,
+  TshirtPreorders,
+  TshirtLineItem,
+  FundraisingDonations,
+  FundraisingDonationTier,
 } from "../../schemas";

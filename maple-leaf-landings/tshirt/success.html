@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Preorder confirmed</title>
+    <link rel="stylesheet" href="../shared/css/design-system.css" />
+    <link rel="stylesheet" href="../shared/css/layout.css" />
+  </head>
+  <body>
+    <header data-mlcc-nav></header>
+    <main class="site-main message-success">
+      <h1>Confirmation</h1>
+      <p>
+        Thank you for your t-shirt preorder. We will be in touch about pickup at
+        the summer social or shipping if needed.
+      </p>
+      <p class="muted">A confirmation email will arrive shortly.</p>
+      <a href="https://mapleleafcommunity.org/" class="btn btn-filled"
+        >Back to Maple Leaf</a
+      >
+    </main>
+    <script src="../shared/js/nav.js"></script>
+    <script>
+      sessionStorage.removeItem("mlcc_tshirt_cart");
+    </script>
+  </body>
+</html>

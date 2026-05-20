@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Summer Social T-Shirt Preorder</title>
+    <link rel="stylesheet" href="../shared/css/design-system.css" />
+    <link rel="stylesheet" href="../shared/css/layout.css" />
+  </head>
+  <body>
+    <header data-mlcc-nav></header>
+    <main class="site-main layout-product">
+      <div class="slider-placeholder" aria-hidden="true">Image slider</div>
+      <section>
+        <h1>Summer Social T-Shirt</h1>
+        <p class="muted" id="product-price">Preorder — price shown at checkout</p>
+        <p>
+          Reserve your Maple Leaf summer social shirt. Choose sizes and
+          quantities below — you can order multiple sizes in one checkout.
+        </p>
+
+        <h3>Adults</h3>
+        <div id="adult-sizes"></div>
+
+        <h3>Kids</h3>
+        <div id="child-sizes"></div>
+
+        <p id="cart-summary" class="cart-summary">Select at least one shirt</p>
+        <div class="actions-row">
+          <button
+            type="button"
+            class="btn btn-filled"
+            id="continue-btn"
+            disabled
+          >
+            Continue
+          </button>
+        </div>
+      </section>
+    </main>
+    <script src="../shared/js/config.js"></script>
+    <script src="../shared/js/nav.js"></script>
+    <script src="../shared/js/cart.js"></script>
+    <script src="../shared/js/tshirt-product.js"></script>
+  </body>
+</html>

@@ -175,6 +175,25 @@ const mainNavSections: NavSection[] = [
     pathPrefixes: ["/events"],
     items: [],
   },
+  {
+    id: "commerce",
+    title: "Commerce",
+    icon: <BoxCubeIcon />,
+    rootPath: "/commerce/tshirt-preorders",
+    pathPrefixes: ["/commerce"],
+    items: [
+      {
+        name: "T-shirt preorders",
+        path: "/commerce/tshirt-preorders",
+        pro: false,
+      },
+      {
+        name: "Fundraising",
+        path: "/commerce/fundraising",
+        pro: false,
+      },
+    ],
+  },
 ];
 
 const navItems: NavItem[] = [

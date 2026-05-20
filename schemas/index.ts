@@ -15,3 +15,5 @@ export * from "./volunteer_asks";
 export * from "./volunteers";
 export * from "./payments";
 export * from "./sponsorships";
+export * from "./tshirt_preorders";
+export * from "./fundraising_donations";
