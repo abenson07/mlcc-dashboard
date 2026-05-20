@@ -4,13 +4,13 @@ If API routes work locally but return **404** on the deployed site (e.g. `GET /a
 
 ## Fix
 
-1. **In your Webflow Cloud environment** (or hosting env), set:
+1. **Preferred:** In your Webflow Cloud environment (or hosting env), set at **build** time:
    - `NEXT_PUBLIC_BASE_PATH` = your app’s mount path (e.g. `"/dashboard"`).
-   - `BASE_PATH` = same value (e.g. `"/dashboard"`) so the Next.js build uses that base path.
+   - `BASE_PATH` = same value so the Next.js build uses `basePath` / `assetPrefix`.
 
-2. **Redeploy** so the worker and client both use the same path. The client will request e.g. `/dashboard/api/linear/project-issues`, which is routed to the Next.js app.
+2. **Redeploy** after changing env vars.
 
-3. **Optional:** In `next.config.ts`, `basePath` and `assetPrefix` are applied when `BASE_PATH` is set, so you don’t need to edit the config file if you set `BASE_PATH` in the environment.
+3. **Fallback (client):** If `NEXT_PUBLIC_BASE_PATH` was not set, `getApiBase()` in `src/lib/apiBase.ts` infers `/dashboard` when the page URL is under `/dashboard/...`, so API calls become `/dashboard/api/...`. This fixes the common “404 on `/api/...` at site root” case without relying on build-time env—**but** you should still set `BASE_PATH` for correct `_next` asset URLs and router base in all setups.
 
 ## Summary
 
