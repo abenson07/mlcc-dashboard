@@ -81,7 +81,7 @@ async function fetchVolunteerAsksData(): Promise<VolunteerAskWithSignups[]> {
     .select(
       `
       *,
-      event:events(id, name, date),
+      event:events(*),
       volunteers(
         id,
         volunteer_ask_id,

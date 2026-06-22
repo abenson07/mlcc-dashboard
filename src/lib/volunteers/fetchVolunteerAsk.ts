@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { VolunteerAskWithSignups } from "hooks";
-import type { VolunteerAsks, People } from "@/types/database";
+import type { VolunteerAsks, People, Events } from "@/types/database";
 
 type AskRow = VolunteerAsks & {
   volunteers: {
@@ -10,10 +10,7 @@ type AskRow = VolunteerAsks & {
     created_at: string;
     person: People | People[] | null;
   }[];
-  event:
-    | { id: string; name: string | null; date: string | null }
-    | { id: string; name: string | null; date: string | null }[]
-    | null;
+  event: Events | Events[] | null;
 };
 
 function normalizeOne<T>(value: T | T[] | null | undefined): T | null {
@@ -43,7 +40,7 @@ function transformAsk(row: AskRow): VolunteerAskWithSignups {
 
 const ASK_SELECT = `
   *,
-  event:events(id, name, date),
+  event:events(*),
   volunteers(
     id,
     volunteer_ask_id,
