@@ -1,0 +1,216 @@
+import type { Events, Sponsorships } from "@/types/database";
+import { buildSponsorshipTiers } from "@/components/leaflet/leafletData";
+
+export type EventKind = "council" | "external";
+
+/** Conventional keys stored in `events.field_data` jsonb. */
+export type EventFieldData = {
+  location?: string;
+  status?: string;
+  capacity?: number;
+  image_url?: string;
+  description?: string;
+  kind?: EventKind;
+  qr_code_id?: string;
+  webflow_item_id?: string;
+  address?: string;
+};
+
+export type EventListItem = {
+  id: string;
+  title: string;
+  date: string;
+  day: number;
+  month: string;
+  monthLabel: string;
+  status: string;
+  location: string;
+  daysUntil: number;
+  distributionLabel: string;
+  kind: EventKind;
+};
+
+export type EventEdition = {
+  id: string;
+  title: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  event_template_id: string | null;
+  slug: string | null;
+  fieldData: EventFieldData;
+  /** ISO date (YYYY-MM-DD) for task due-date anchor */
+  anchorDate: string | null;
+  distributionLabel: string;
+  daysUntilLabel: string;
+  status: string;
+  kind: EventKind;
+};
+
+export function parseEventFieldData(raw: Record<string, unknown> | null | undefined): EventFieldData {
+  if (!raw || typeof raw !== "object") return {};
+  const fd = raw as EventFieldData;
+  return {
+    location: typeof fd.location === "string" ? fd.location : undefined,
+    status: typeof fd.status === "string" ? fd.status : undefined,
+    capacity: typeof fd.capacity === "number" ? fd.capacity : undefined,
+    image_url: typeof fd.image_url === "string" ? fd.image_url : undefined,
+    description: typeof fd.description === "string" ? fd.description : undefined,
+    kind: fd.kind === "external" ? "external" : fd.kind === "council" ? "council" : undefined,
+    qr_code_id: typeof fd.qr_code_id === "string" ? fd.qr_code_id : undefined,
+    webflow_item_id: typeof fd.webflow_item_id === "string" ? fd.webflow_item_id : undefined,
+    address: typeof fd.address === "string" ? fd.address : undefined,
+  };
+}
+
+export function eventPrimaryIso(row: Events): string | null {
+  return row.starts_at ?? (row.date ? `${row.date}T12:00:00.000Z` : null);
+}
+
+export function eventAnchorDate(row: Events): string | null {
+  const iso = eventPrimaryIso(row);
+  if (!iso) return null;
+  return iso.slice(0, 10);
+}
+
+function capitalizeStatus(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+export function deriveEventStatus(row: Events, fieldData: EventFieldData): string {
+  if (fieldData.status) return capitalizeStatus(fieldData.status);
+  const now = Date.now();
+  if (row.ends_at && new Date(row.ends_at).getTime() < now) return "Completed";
+  if (row.starts_at && new Date(row.starts_at).getTime() < now) return "Completed";
+  if (row.starts_at && new Date(row.starts_at).getTime() > now) return "Upcoming";
+  return "Planning";
+}
+
+export function daysUntilEvent(iso: string | null): number {
+  if (!iso) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(iso.slice(0, 10) + "T00:00:00");
+  return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export function daysUntilEventLabel(iso: string | null): string {
+  const diff = daysUntilEvent(iso);
+  if (diff < 0) return `${Math.abs(diff)} days since event`;
+  if (diff === 0) return "Event is today";
+  return `${diff} days until event`;
+}
+
+export function formatEventDateRange(row: Events): string {
+  const start = row.starts_at ?? (row.date ? `${row.date}T12:00:00` : null);
+  if (!start) return "Date TBD";
+  const startDate = new Date(start);
+  const startStr = startDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  if (!row.ends_at) return startStr;
+  const endDate = new Date(row.ends_at);
+  const sameDay = startDate.toDateString() === endDate.toDateString();
+  if (sameDay) {
+    const timeStr = `${startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – ${endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+    return `${startStr} · ${timeStr}`;
+  }
+  return `${startStr} – ${endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+}
+
+export function formatEventTimeRange(row: Events): string {
+  if (!row.starts_at) return "—";
+  const start = new Date(row.starts_at);
+  if (!row.ends_at) {
+    return start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  }
+  const end = new Date(row.ends_at);
+  return `${start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – ${end.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+}
+
+export function mapEventListItem(row: Events): EventListItem {
+  const fieldData = parseEventFieldData(row.field_data);
+  const iso = eventPrimaryIso(row);
+  const d = iso ? new Date(iso) : null;
+  const status = deriveEventStatus(row, fieldData);
+
+  return {
+    id: row.id,
+    title: row.name ?? "Untitled event",
+    date: iso?.slice(0, 10) ?? "",
+    day: d ? d.getDate() : 0,
+    month: d ? d.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : "",
+    monthLabel: d
+      ? d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+      : "No date",
+    status,
+    location: fieldData.location ?? "—",
+    daysUntil: daysUntilEvent(iso),
+    distributionLabel: formatEventDateRange(row),
+    kind: fieldData.kind ?? "council",
+  };
+}
+
+export function mapEventEdition(row: Events): EventEdition {
+  const fieldData = parseEventFieldData(row.field_data);
+  const iso = eventPrimaryIso(row);
+
+  return {
+    id: row.id,
+    title: row.name ?? "Untitled event",
+    starts_at: row.starts_at,
+    ends_at: row.ends_at,
+    event_template_id: row.event_template_id,
+    slug: row.slug,
+    fieldData,
+    anchorDate: eventAnchorDate(row),
+    distributionLabel: formatEventDateRange(row),
+    daysUntilLabel: daysUntilEventLabel(iso),
+    status: deriveEventStatus(row, fieldData),
+    kind: fieldData.kind ?? "council",
+  };
+}
+
+export function isEventReadOnly(row: Events, fieldData: EventFieldData): boolean {
+  if (fieldData.status?.toLowerCase() === "completed") return true;
+  if (row.ends_at && new Date(row.ends_at).getTime() < Date.now()) return true;
+  return false;
+}
+
+export function buildEventBudget(
+  sponsorships: Sponsorships[],
+  raised: number,
+  pledgedAmount: number,
+) {
+  const goal = sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0) || 15_000;
+  const progressPct = goal > 0 ? Math.round((raised / goal) * 100) : 0;
+  return { goal, raised, pledged: pledgedAmount, progressPct };
+}
+
+export { buildSponsorshipTiers };
+
+export function groupEventsByMonth(events: EventListItem[]): [string, EventListItem[]][] {
+  const map = new Map<string, EventListItem[]>();
+  for (const event of events) {
+    const list = map.get(event.monthLabel) ?? [];
+    list.push(event);
+    map.set(event.monthLabel, list);
+  }
+  return [...map.entries()];
+}
+
+export function eventsOnCalendarDay(events: EventListItem[], year: number, month: number, day: number): EventListItem[] {
+  return events.filter((e) => {
+    if (!e.date) return false;
+    const d = new Date(`${e.date}T12:00:00`);
+    return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+  });
+}
+
+export function eventIdsForInvoiceFilter(eventId: string, fieldData: EventFieldData): string[] {
+  const ids = [eventId];
+  if (fieldData.webflow_item_id) ids.push(fieldData.webflow_item_id);
+  return ids;
+}

@@ -372,7 +372,8 @@
 .lf-event-calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-weight: 600; font-size: 14px; }
 .lf-event-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 12px; }
 .lf-event-calendar-dow { color: var(--lf-text-subtle); font-weight: 500; padding: 4px 0; }
-.lf-event-calendar-day { padding: 6px 0; border-radius: 6px; color: var(--lf-text-muted); }
+.lf-event-calendar-day { padding: 6px 0; border-radius: 6px; color: var(--lf-text-muted); border: none; background: transparent; cursor: pointer; font: inherit; }
+.lf-event-calendar-day--has-event { font-weight: 700; color: var(--lf-text); }
 .lf-event-calendar-day--active { background: var(--lf-text); color: #fff; font-weight: 600; }
 
 /* Integrated dashboard — event detail */

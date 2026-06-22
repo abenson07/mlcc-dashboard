@@ -2,35 +2,50 @@
 
 import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useEvents } from "hooks";
 import { IconChevronsUpDown } from "@/components/leaflet/icons";
-import { getEventById, MOCK_EVENTS } from "../mockData";
 
 export default function EventSelector({ eventId }: { eventId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const { events } = useEvents();
 
-  const current = getEventById(eventId);
+  const current = events.find((e) => e.id === eventId) ?? {
+    id: eventId,
+    title: "Event",
+    status: "",
+    distributionLabel: "",
+    monthLabel: "",
+    date: "",
+    day: 0,
+    month: "",
+    location: "",
+    daysUntil: 0,
+    kind: "council" as const,
+  };
 
   const { upcoming, others } = useMemo(() => {
-    const council = MOCK_EVENTS.filter(
-      (e) => e.kind === "council" && e.status.toLowerCase() !== "completed",
-    ).sort((a, b) => a.date.localeCompare(b.date));
+    const council = events
+      .filter((e) => e.kind === "council" && e.status.toLowerCase() !== "completed")
+      .sort((a, b) => a.date.localeCompare(b.date));
 
     const upcomingEvents = council.filter((e) => e.id !== eventId);
     const currentIsUpcoming = council.some((e) => e.id === eventId);
-    const rest = MOCK_EVENTS.filter((e) => {
-      if (e.id === eventId) return false;
-      if (council.some((c) => c.id === e.id)) return false;
-      return true;
-    }).sort((a, b) => a.date.localeCompare(b.date));
+    const rest = events
+      .filter((e) => {
+        if (e.id === eventId) return false;
+        if (council.some((c) => c.id === e.id)) return false;
+        return true;
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
 
     return {
       upcoming: currentIsUpcoming ? council.filter((e) => e.id !== eventId) : upcomingEvents,
       others: rest,
     };
-  }, [eventId]);
+  }, [events, eventId]);
 
   const filteredOthers = useMemo(() => {
     const q = search.trim().toLowerCase();

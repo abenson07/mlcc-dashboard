@@ -1,6 +1,11 @@
 /**
  * Events Schema
  * Dashboard-native events (parallel track to Webflow calendar).
+ *
+ * `field_data` jsonb conventions (see `src/lib/events/eventData.ts`):
+ * - location, status, capacity, image_url, description
+ * - kind: "council" | "external" (default council)
+ * - qr_code_id, webflow_item_id (migration bridge)
  */
 
 export interface Events {

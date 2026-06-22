@@ -12,7 +12,10 @@ export {
   type VolunteerAskWithSignups,
   type VolunteerSignup,
 } from "./useVolunteerAsks";
-export { useEvents, EVENTS_QUERY_KEY } from "./useEvents";
+export { useEvents, EVENTS_QUERY_KEY, useEvent, type CreateEventPayload } from "./useEvents";
+export { useEventTemplates, EVENT_TEMPLATES_QUERY_KEY } from "./useEventTemplates";
+export { useEventSponsorships } from "./useEventSponsorships";
+export { useEventVolunteerAsks, eventVolunteerAsksQueryKey } from "./useEventVolunteerAsks";
 export { useQrCodes, QR_CODES_QUERY_KEY } from "./useQrCodes";
 export { useDashboard } from "./useDashboard";
 export { useWebflowEvents, WEBFLOW_EVENTS_QUERY_KEY } from "./useWebflowEvents";

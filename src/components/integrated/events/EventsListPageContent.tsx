@@ -1,46 +1,84 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEvents } from "hooks";
+import { eventsOnCalendarDay, groupEventsByMonth } from "@/lib/events/eventData";
 import { IconPlus, IconSearch } from "@/components/leaflet/icons";
 import IntegratedTopbar from "../IntegratedTopbar";
-import { MOCK_EVENTS } from "../mockData";
+import CreateEventModal from "./CreateEventModal";
 import EventsListSidebar from "./EventsListSidebar";
 
-const CALENDAR_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
+function calendarCells(year: number, month: number) {
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  return cells;
+}
 
 export default function EventsListPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const highlightedEventId = searchParams.get("event");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const { events, loading, error, create } = useEvents();
 
   const filtered = useMemo(() => {
-    return MOCK_EVENTS.filter((e) => {
+    return events.filter((e) => {
       const q = search.trim().toLowerCase();
-      const matchesSearch = !q || e.title.toLowerCase().includes(q);
+      const matchesSearch =
+        !q ||
+        e.title.toLowerCase().includes(q) ||
+        e.location.toLowerCase().includes(q);
       const matchesStatus = status === "all" || e.status.toLowerCase() === status;
       const matchesHighlight = !highlightedEventId || e.id === highlightedEventId;
-      return matchesSearch && matchesStatus && matchesHighlight;
+      const y = calendarMonth.getFullYear();
+      const m = calendarMonth.getMonth();
+      const matchesDay =
+        selectedDay == null ||
+        eventsOnCalendarDay([e], y, m, selectedDay).length > 0;
+      return matchesSearch && matchesStatus && matchesHighlight && matchesDay;
     });
-  }, [search, status, highlightedEventId]);
+  }, [events, search, status, highlightedEventId, calendarMonth, selectedDay]);
 
-  const byMonth = useMemo(() => {
-    const map = new Map<string, typeof filtered>();
-    for (const event of filtered) {
-      const list = map.get(event.monthLabel) ?? [];
-      list.push(event);
-      map.set(event.monthLabel, list);
-    }
-    return [...map.entries()];
-  }, [filtered]);
+  const byMonth = useMemo(() => groupEventsByMonth(filtered), [filtered]);
+
+  const calYear = calendarMonth.getFullYear();
+  const calMonthIndex = calendarMonth.getMonth();
+  const monthLabel = calendarMonth.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+  const cells = calendarCells(calYear, calMonthIndex);
+
+  function shiftMonth(delta: number) {
+    setCalendarMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
+    setSelectedDay(null);
+  }
+
+  async function handleCreate(input: Parameters<typeof create>[0]) {
+    const event = await create(input);
+    router.push(`/events-hub/${event.id}/overview`);
+  }
 
   return (
     <>
       <IntegratedTopbar
         primaryAction={
-          <button type="button" className="lf-btn lf-btn--outline">
+          <button
+            type="button"
+            className="lf-btn lf-btn--outline"
+            onClick={() => setCreateOpen(true)}
+          >
             <IconPlus />
             New event
           </button>
@@ -55,6 +93,7 @@ export default function EventsListPageContent() {
             <div className="lf-events-centered">
               <div className="lf-events-list-col">
                 <h1 className="lf-h1">Events</h1>
+                {error && <p className="lf-text-red">{error}</p>}
                 <div className="lf-filters">
                   <label className="lf-search" style={{ flex: 1, maxWidth: 360 }}>
                     <IconSearch />
@@ -75,11 +114,16 @@ export default function EventsListPageContent() {
                   </select>
                 </div>
 
-                {byMonth.map(([month, events]) => (
+                {loading && <p className="lf-meta">Loading events…</p>}
+                {!loading && filtered.length === 0 && (
+                  <p className="lf-meta">No events found. Create one to get started.</p>
+                )}
+
+                {byMonth.map(([month, monthEvents]) => (
                   <section key={month}>
                     <p className="lf-event-month-label">{month}</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {events.map((event) => {
+                      {monthEvents.map((event) => {
                         const rowClassName =
                           highlightedEventId === event.id
                             ? "lf-event-row lf-event-row--active"
@@ -130,28 +174,53 @@ export default function EventsListPageContent() {
 
               <aside className="lf-event-calendar">
                 <div className="lf-event-calendar-header">
-                  <button type="button" className="lf-small-btn">‹</button>
-                  <span>August 2026</span>
-                  <button type="button" className="lf-small-btn">›</button>
+                  <button type="button" className="lf-small-btn" onClick={() => shiftMonth(-1)}>
+                    ‹
+                  </button>
+                  <span>{monthLabel}</span>
+                  <button type="button" className="lf-small-btn" onClick={() => shiftMonth(1)}>
+                    ›
+                  </button>
                 </div>
                 <div className="lf-event-calendar-grid">
                   {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
                     <span key={d} className="lf-event-calendar-dow">{d}</span>
                   ))}
-                  {CALENDAR_DAYS.map((day) => (
-                    <span
-                      key={day}
-                      className={day === 31 ? "lf-event-calendar-day lf-event-calendar-day--active" : "lf-event-calendar-day"}
-                    >
-                      {day}
-                    </span>
-                  ))}
+                  {cells.map((day, i) => {
+                    if (day == null) {
+                      return <span key={`empty-${i}`} className="lf-event-calendar-day" />;
+                    }
+                    const hasEvent = eventsOnCalendarDay(events, calYear, calMonthIndex, day).length > 0;
+                    const isSelected = selectedDay === day;
+                    const className = [
+                      "lf-event-calendar-day",
+                      hasEvent ? "lf-event-calendar-day--has-event" : "",
+                      isSelected ? "lf-event-calendar-day--active" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        className={className}
+                        onClick={() => setSelectedDay(isSelected ? null : day)}
+                      >
+                        {day}
+                      </button>
+                    );
+                  })}
                 </div>
               </aside>
             </div>
           </main>
         </div>
       </div>
+      <CreateEventModal
+        isOpen={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreate={handleCreate}
+      />
     </>
   );
 }
