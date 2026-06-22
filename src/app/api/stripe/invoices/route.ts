@@ -34,6 +34,8 @@ type StripeInvoiceListRow = {
   event_id: string | null;
   /** `invoice.metadata.event_name` — event title at issue time. */
   event_name: string | null;
+  /** `invoice.metadata.leaflet_id` */
+  leaflet_id: string | null;
 };
 
 function customerEmail(inv: Stripe.Invoice): string | null {
@@ -138,6 +140,7 @@ export async function GET() {
           inv.metadata?.[METADATA_KEYS.createdBy]?.trim() ?? null,
         event_id: inv.metadata?.[METADATA_KEYS.eventId]?.trim() ?? null,
         event_name: inv.metadata?.[METADATA_KEYS.eventName]?.trim() ?? null,
+        leaflet_id: inv.metadata?.[METADATA_KEYS.leafletId]?.trim() ?? null,
       }))
     );
 

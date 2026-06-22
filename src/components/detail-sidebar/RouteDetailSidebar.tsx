@@ -11,9 +11,7 @@ import { useRoutes } from "hooks";
 
 function getDelivererDisplay(route: RouteWithDeliverer): { name: string; email: string | null } | null {
   const primary = route.primary_deliverer;
-  const secondary = route.secondary_deliverer;
   if (primary) return { name: primary.full_name, email: primary.email ?? null };
-  if (secondary) return { name: secondary.full_name, email: secondary.email ?? null };
   return null;
 }
 
@@ -56,7 +54,7 @@ export default function RouteDetailSidebar({ item, onSaved }: RouteDetailSidebar
 
   const dirty = isDirty(form, item);
   const deliverer = getDelivererDisplay(item);
-  const covered = !!(item.primary_deliverer_id || item.secondary_deliverer_id);
+  const covered = !!item.primary_deliverer_id;
 
   const handleCancel = () => {
     if (dirty && !window.confirm("Discard unsaved changes?")) return;
@@ -178,12 +176,6 @@ export default function RouteDetailSidebar({ item, onSaved }: RouteDetailSidebar
           <dt className="font-medium text-gray-500 dark:text-gray-400">Status</dt>
           <dd className="mt-0.5 text-gray-800 dark:text-white/90">{covered ? "Covered" : "Uncovered"}</dd>
         </div>
-        {item.is_skipped && (
-          <div>
-            <dt className="font-medium text-gray-500 dark:text-gray-400">Skipped</dt>
-            <dd className="mt-0.5 text-amber-600 dark:text-amber-400">Yes</dd>
-          </div>
-        )}
         {deliverer && (
           <div>
             <dt className="font-medium text-gray-500 dark:text-gray-400">Deliverer</dt>
@@ -195,12 +187,6 @@ export default function RouteDetailSidebar({ item, onSaved }: RouteDetailSidebar
                 </span>
               )}
             </dd>
-          </div>
-        )}
-        {item.secondary_deliverer && (
-          <div>
-            <dt className="font-medium text-gray-500 dark:text-gray-400">Secondary deliverer</dt>
-            <dd className="mt-0.5 text-gray-800 dark:text-white/90">{item.secondary_deliverer.full_name}</dd>
           </div>
         )}
       </dl>

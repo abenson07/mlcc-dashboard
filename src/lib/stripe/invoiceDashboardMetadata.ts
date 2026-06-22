@@ -21,6 +21,8 @@ export const METADATA_KEYS = {
   eventId: "event_id",
   /** Display name at issue time (from Webflow). */
   eventName: "event_name",
+  leafletId: "leaflet_id",
+  sponsorshipId: "sponsorship_id",
 } as const;
 
 export function categorySlugToLabel(slug: InvoiceCategorySlug): string {

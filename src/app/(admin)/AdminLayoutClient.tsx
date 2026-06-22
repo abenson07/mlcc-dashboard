@@ -4,6 +4,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 export default function AdminLayoutClient({
@@ -11,7 +12,13 @@ export default function AdminLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isLeafletShell = pathname?.startsWith("/leaflet");
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+
+  if (isLeafletShell) {
+    return <div className="min-h-screen">{children}</div>;
+  }
 
   const mainContentMargin = isMobileOpen
     ? "ml-0"

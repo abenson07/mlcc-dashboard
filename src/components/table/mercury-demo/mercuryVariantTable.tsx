@@ -61,9 +61,7 @@ import {
 function routeCoverage(route: RouteWithDeliverer): { label: string; deliverers: string[] } {
   const names: string[] = [];
   if (route.primary_deliverer) names.push(route.primary_deliverer.full_name);
-  if (route.secondary_deliverer) names.push(route.secondary_deliverer.full_name);
-  if (route.is_skipped) return { label: "Skipped", deliverers: names };
-  if (route.primary_deliverer || route.secondary_deliverer) return { label: "Covered", deliverers: names };
+  if (route.primary_deliverer) return { label: "Covered", deliverers: names };
   return { label: "Open", deliverers: [] };
 }
 
@@ -938,7 +936,6 @@ function RouteRowView({
 
   if (variant === "routes-claimed") {
     const p = row.primary_deliverer;
-    const s = row.secondary_deliverer;
     return (
       <DashboardTableRow
         selected={selected}
@@ -964,24 +961,12 @@ function RouteRowView({
             <NormalCellContent>—</NormalCellContent>
           )}
         </DashboardTableDataCell>
-        <DashboardTableDataCell align="start" collapsible className="group/deliverer py-3.5">
-          {s ? (
-            condensed ? (
-              <NormalCellContent>{s.full_name}</NormalCellContent>
-            ) : (
-              <DelivererHoverCell name={s.full_name} email={s.email} />
-            )
-          ) : (
-            <NormalCellContent>—</NormalCellContent>
-          )}
-        </DashboardTableDataCell>
       </DashboardTableRow>
     );
   }
 
-  const statusLabel = row.is_skipped ? "Skipped" : "Unassigned";
-  const lastDel =
-    row.is_skipped && row.primary_deliverer ? row.primary_deliverer.full_name : "—";
+  const statusLabel = "Unassigned";
+  const lastDel = "—";
   return (
     <DashboardTableRow
       selected={selected}
@@ -997,7 +982,7 @@ function RouteRowView({
         <NormalCellContent>{row.leaflet_count}</NormalCellContent>
       </DashboardTableDataCell>
       <DashboardTableDataCell align="start" className="py-3.5">
-        <StatusCellContent label={statusLabel} color={row.is_skipped ? "warning" : "light"} />
+        <StatusCellContent label={statusLabel} color="light" />
       </DashboardTableDataCell>
       <DashboardTableDataCell align="start" className="py-3.5">
         <NormalCellContent>{lastDel}</NormalCellContent>
@@ -1008,15 +993,11 @@ function RouteRowView({
 
 function RouteSidebar({ row, variant }: { row: RouteWithDeliverer; variant: MercuryVariantId }) {
   const p = row.primary_deliverer;
-  const s = row.secondary_deliverer;
   const primaryLine = p ? `${p.full_name} · ${p.email ?? "—"}` : "Unassigned";
-  const secondaryLine = s ? `${s.full_name} · ${s.email ?? "—"}` : "None";
 
   if (variant === "routes-open") {
-    const statusLabel = row.is_skipped ? "Skipped" : "Unassigned";
-    const expl = row.is_skipped
-      ? "Marked skipped for this cycle; last deliverer context may still apply."
-      : "No primary or secondary deliverer is assigned.";
+    const statusLabel = "Unassigned";
+    const expl = "No primary deliverer is assigned on the master route.";
     return (
       <div className="flex flex-col">
         <SidebarField label="Route">
@@ -1029,12 +1010,6 @@ function RouteSidebar({ row, variant }: { row: RouteWithDeliverer; variant: Merc
         <SidebarSectionTitle>Status</SidebarSectionTitle>
         <SidebarField label="State">{statusLabel}</SidebarField>
         <SidebarMutedLine>{expl}</SidebarMutedLine>
-        {row.is_skipped && p && (
-          <SidebarField label="Primary deliverer">{p.full_name} · {p.email ?? "—"}</SidebarField>
-        )}
-        {s && (
-          <SidebarField label="Secondary deliverer">{s.full_name} · {s.email ?? "—"}</SidebarField>
-        )}
         <SidebarField label="Created">{row.created_at ? formatShortDate(row.created_at) : "—"}</SidebarField>
       </div>
     );
@@ -1051,8 +1026,6 @@ function RouteSidebar({ row, variant }: { row: RouteWithDeliverer; variant: Merc
       <SidebarDivider />
       <SidebarSectionTitle>Coverage</SidebarSectionTitle>
       <SidebarField label="Primary">{primaryLine.trim()}</SidebarField>
-      <SidebarField label="Secondary">{secondaryLine.trim()}</SidebarField>
-      {row.is_skipped && <SidebarField label="Skipped">Yes</SidebarField>}
       <SidebarField label="Created">{row.created_at ? formatShortDate(row.created_at) : "—"}</SidebarField>
     </div>
   );

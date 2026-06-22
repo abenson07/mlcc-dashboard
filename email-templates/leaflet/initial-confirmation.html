@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirm your leaflet delivery routes</title>
+    <!--
+      Resend alias: leaflet-initial-confirmation
+      Variables:
+        DELIVERER_FIRST_NAME, LEAFLET_TITLE, DISTRIBUTION_DATE,
+        ROUTES_HTML, CONFIRM_URL, UNSUBSCRIBE_URL
+    -->
+    <style type="text/css">
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600;700&display=swap");
+
+      @media only screen and (max-width: 600px) {
+        .container {
+          width: 100% !important;
+        }
+        .stack {
+          display: block !important;
+          width: 100% !important;
+        }
+        .header-title {
+          font-size: 24px !important;
+        }
+        .reminder-cell {
+          display: block !important;
+          width: 100% !important;
+          padding-bottom: 24px !important;
+        }
+        .editor-photo {
+          display: block !important;
+          width: 100% !important;
+          padding-bottom: 20px !important;
+        }
+        .editor-copy {
+          display: block !important;
+          width: 100% !important;
+        }
+      }
+    </style>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f5;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    "
+  >
+    <div
+      style="
+        display: none;
+        max-height: 0;
+        overflow: hidden;
+        mso-hide: all;
+        font-size: 1px;
+        line-height: 1px;
+        color: #f4f4f5;
+      "
+    >
+      Please confirm your delivery routes for the {{{LEAFLET_TITLE}}} leaflet.
+    </div>
+
+    <table
+      role="presentation"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      width="100%"
+      style="background-color: #f4f4f5; border-collapse: collapse;"
+    >
+      <tr>
+        <td align="center" style="padding: 24px 12px;">
+          <table
+            role="presentation"
+            class="container"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            width="600"
+            style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff;"
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                bgcolor="#F8F9F8"
+                style="background-color: #f8f9f8; padding: 32px 40px 24px;"
+              >
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+                  <tr>
+                    <td valign="top" style="padding-right: 16px;">
+                      <h1
+                        class="header-title"
+                        style="
+                          margin: 0;
+                          font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+                          font-size: 28px;
+                          font-weight: 700;
+                          line-height: 1.2;
+                          color: #3e5642;
+                        "
+                      >
+                        Get Ready to Deliver the Next Leaflet to Your Neighbors
+                      </h1>
+                    </td>
+                    <td valign="top" align="right" width="1" style="white-space: nowrap;">
+                      <span
+                        style="
+                          display: inline-block;
+                          padding: 8px 16px;
+                          background-color: #d9e4d1;
+                          border-radius: 20px;
+                          font-family: 'Playfair Display', Georgia, serif;
+                          font-size: 11px;
+                          font-weight: 600;
+                          color: #3e5642;
+                        "
+                      >
+                        Maple Leaf Community Council
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Hero image placeholder -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; margin-top: 24px;">
+                  <tr>
+                    <td
+                      align="center"
+                      bgcolor="#D9E4D1"
+                      style="
+                        background-color: #d9e4d1;
+                        border-radius: 10px;
+                        height: 220px;
+                        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #3e5642;
+                      "
+                    >
+                      [ Hero Image ]
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Greeting + CTA -->
+            <tr>
+              <td style="padding: 32px 40px; background-color: #ffffff;">
+                <p
+                  style="
+                    margin: 0 0 16px;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: 22px;
+                    font-weight: 700;
+                    line-height: 1.3;
+                    color: #0a2533;
+                  "
+                >
+                  Hi {{{DELIVERER_FIRST_NAME}}},
+                </p>
+                <p
+                  style="
+                    margin: 0 0 24px;
+                    font-family: Lora, Georgia, serif;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    color: #3e5642;
+                  "
+                >
+                  You&rsquo;re scheduled to help deliver the
+                  <strong>{{{LEAFLET_TITLE}}}</strong> community leaflet to your neighbors on
+                  <strong>{{{DISTRIBUTION_DATE}}}</strong>. Below are the routes you normally take
+                  care of &mdash; please review them and confirm when you&rsquo;re ready.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+                  <tr>
+                    <td bgcolor="#0A2533" style="background-color: #0a2533; border-radius: 8px;">
+                      <a
+                        href="{{{CONFIRM_URL}}}"
+                        style="
+                          display: inline-block;
+                          padding: 14px 24px;
+                          font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                          font-size: 15px;
+                          font-weight: 600;
+                          color: #ffffff;
+                          text-decoration: none;
+                        "
+                      >
+                        Confirm my routes
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Your routes -->
+            <tr>
+              <td align="center" style="padding: 40px 40px 48px; background-color: #ffffff;">
+                <h2
+                  style="
+                    margin: 0 0 32px;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #3e5642;
+                  "
+                >
+                  Your Routes
+                </h2>
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  style="
+                    max-width: 520px;
+                    border-collapse: collapse;
+                    background-color: #f8f9f8;
+                    border: 1px solid #d9e4d1;
+                    border-radius: 8px;
+                  "
+                >
+                  <tr>
+                    <td
+                      style="
+                        padding: 16px 20px;
+                        font-family: Lora, Georgia, serif;
+                        font-size: 14px;
+                        line-height: 1.8;
+                        color: #3e5642;
+                      "
+                    >
+                      {{{ROUTES_HTML}}}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Before delivery day -->
+            <tr>
+              <td bgcolor="#F8F9F8" style="background-color: #f8f9f8; padding: 40px;">
+                <h2
+                  style="
+                    margin: 0 0 32px;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #3e5642;
+                  "
+                >
+                  Before Delivery Day
+                </h2>
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+                  <tr>
+                    <td class="reminder-cell" valign="top" width="50%" style="padding: 0 10px 24px 0;">
+                      <p style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 14px; font-weight: 700; color: #3e5642;">
+                        Confirm Your Routes
+                      </p>
+                      <p style="margin: 0; font-family: Lora, Georgia, serif; font-size: 12px; line-height: 1.5; color: #3e5642;">
+                        Please confirm your routes so we know how many leaflets to print for your delivery.
+                      </p>
+                    </td>
+                    <td class="reminder-cell" valign="top" width="50%" style="padding: 0 0 24px 10px;">
+                      <p style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 14px; font-weight: 700; color: #3e5642;">
+                        Delivery Timing
+                      </p>
+                      <p style="margin: 0; font-family: Lora, Georgia, serif; font-size: 12px; line-height: 1.5; color: #3e5642;">
+                        Plan to complete your delivery within one week of the distribution date.
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="reminder-cell" valign="top" width="50%" style="padding: 0 10px 0 0;">
+                      <p style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 14px; font-weight: 700; color: #3e5642;">
+                        Need Help?
+                      </p>
+                      <p style="margin: 0; font-family: Lora, Georgia, serif; font-size: 12px; line-height: 1.5; color: #3e5642;">
+                        Let us know if you need help &mdash; it&rsquo;s okay to skip a route if you need to.
+                      </p>
+                    </td>
+                    <td class="reminder-cell" valign="top" width="50%" style="padding: 0 0 0 10px;">
+                      <p style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 14px; font-weight: 700; color: #3e5642;">
+                        Stay Hydrated
+                      </p>
+                      <p style="margin: 0; font-family: Lora, Georgia, serif; font-size: 12px; line-height: 1.5; color: #3e5642;">
+                        Delivery can be a workout. Bring water, take breaks, and pace yourself.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Editor message -->
+            <tr>
+              <td bgcolor="#0A2533" style="background-color: #0a2533; padding: 40px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+                  <tr>
+                    <td class="editor-photo" valign="top" width="160" style="padding-right: 24px;">
+                      <table role="presentation" width="160" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+                        <tr>
+                          <td
+                            align="center"
+                            valign="middle"
+                            bgcolor="#1A3A4A"
+                            width="160"
+                            height="200"
+                            style="
+                              background-color: #1a3a4a;
+                              border-radius: 10px;
+                              font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                              font-size: 10px;
+                              color: #d9e4d1;
+                            "
+                          >
+                            [ Photo ]
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td class="editor-copy" valign="middle">
+                      <h2
+                        style="
+                          margin: 0 0 16px;
+                          font-family: 'Playfair Display', Georgia, serif;
+                          font-size: 20px;
+                          font-weight: 700;
+                          color: #ffffff;
+                        "
+                      >
+                        Message from Our Editor
+                      </h2>
+                      <p
+                        style="
+                          margin: 0 0 16px;
+                          font-family: Lora, Georgia, serif;
+                          font-size: 13px;
+                          line-height: 1.6;
+                          color: #d9e4d1;
+                        "
+                      >
+                        &ldquo;This leaflet is packed with neighborhood news, local events, and updates from
+                        your community council. Thank you for helping us reach every doorstep &mdash; your
+                        effort keeps Maple Leaf connected.&rdquo;
+                      </p>
+                      <p
+                        style="
+                          margin: 0;
+                          font-family: 'Playfair Display', Georgia, serif;
+                          font-size: 14px;
+                          font-weight: 700;
+                          color: #ffffff;
+                        "
+                      >
+                        &mdash; MLCC Editorial Team
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Thank you -->
+            <tr>
+              <td align="center" style="padding: 40px 40px 32px; background-color: #ffffff;">
+                <h2
+                  style="
+                    margin: 0 0 20px;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #0a2533;
+                  "
+                >
+                  Thank You
+                </h2>
+                <p
+                  style="
+                    margin: 0 0 20px;
+                    max-width: 400px;
+                    font-family: Lora, Georgia, serif;
+                    font-size: 13px;
+                    line-height: 1.5;
+                    color: #3e5642;
+                  "
+                >
+                  A heartfelt thank you from everyone at the Maple Leaf Community Council. We couldn&rsquo;t
+                  do this without volunteers like you.
+                </p>
+                <span
+                  style="
+                    display: inline-block;
+                    margin-bottom: 20px;
+                    padding: 8px 16px;
+                    background-color: #d9e4d1;
+                    border-radius: 20px;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: #3e5642;
+                  "
+                >
+                  Maple Leaf Community Council
+                </span>
+                <p
+                  style="
+                    margin: 0;
+                    max-width: 480px;
+                    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                    font-size: 10px;
+                    line-height: 1.5;
+                    color: #6b7280;
+                  "
+                >
+                  You are receiving this email because you are a registered leaflet deliverer with the Maple
+                  Leaf Community Council.<br />
+                  <a href="{{{UNSUBSCRIBE_URL}}}" style="color: #6b7280;">Unsubscribe</a>
+                  &nbsp;|&nbsp; Manage Preferences &nbsp;|&nbsp; View Online
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

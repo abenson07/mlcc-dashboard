@@ -19,6 +19,8 @@ type ParsedIssue = {
   dueDate: string | null;
   categorySlug: InvoiceCategorySlug;
   eventId?: string;
+  leafletId?: string;
+  sponsorshipId?: string;
   memo?: string;
 };
 
@@ -99,6 +101,16 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
       ? o.eventId.trim()
       : undefined;
 
+  const leafletId =
+    typeof o.leafletId === "string" && o.leafletId.trim()
+      ? o.leafletId.trim()
+      : undefined;
+
+  const sponsorshipId =
+    typeof o.sponsorshipId === "string" && o.sponsorshipId.trim()
+      ? o.sponsorshipId.trim()
+      : undefined;
+
   if (categorySlug === "event" && !eventId) {
     return {
       ok: false,
@@ -113,6 +125,13 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
     };
   }
 
+  if (categorySlug === "leaflet" && !leafletId) {
+    return {
+      ok: false,
+      error: "leafletId is required when category is leaflet.",
+    };
+  }
+
   return {
     ok: true,
     data: {
@@ -122,6 +141,8 @@ function parseIssueBody(body: unknown): { ok: true; data: ParsedIssue } | { ok: 
       dueDate,
       categorySlug,
       eventId,
+      leafletId,
+      sponsorshipId,
       memo,
     },
   };
@@ -203,6 +224,14 @@ export async function POST(req: Request) {
     };
   }
 
+  const leafletMetadata: Record<string, string> = {};
+  if (input.categorySlug === "leaflet" && input.leafletId) {
+    leafletMetadata[METADATA_KEYS.leafletId] = input.leafletId;
+    if (input.sponsorshipId) {
+      leafletMetadata[METADATA_KEYS.sponsorshipId] = input.sponsorshipId;
+    }
+  }
+
   try {
     const customerId = await resolveCustomerId(stripe, input);
 
@@ -216,6 +245,7 @@ export async function POST(req: Request) {
         [METADATA_KEYS.created]: DASHBOARD_CREATED_VALUE,
         [METADATA_KEYS.createdBy]: auth.user.displayName,
         ...eventMetadata,
+        ...leafletMetadata,
       },
       ...(input.dueDate
         ? { due_date: dueDateToUnixEndOfDayUtc(input.dueDate) }

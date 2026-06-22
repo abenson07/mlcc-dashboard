@@ -16,24 +16,12 @@ function getRoutesByDeliverer(
 
   for (const route of routes) {
     const primary = route.primary_deliverer;
-    const secondary = route.secondary_deliverer;
-    const isSkipped = route.is_skipped === true;
-
-    // Skipped routes show only under secondary; non-skipped show under primary (and secondary if different)
-    if (primary && !isSkipped) {
+    if (primary) {
       const existing = map.get(primary.id);
       if (existing) {
         existing.routes.push(route);
       } else {
         map.set(primary.id, { deliverer: primary, routes: [route] });
-      }
-    }
-    if (secondary && secondary.id !== route.primary_deliverer_id) {
-      const existing = map.get(secondary.id);
-      if (existing) {
-        existing.routes.push(route);
-      } else {
-        map.set(secondary.id, { deliverer: secondary, routes: [route] });
       }
     }
   }

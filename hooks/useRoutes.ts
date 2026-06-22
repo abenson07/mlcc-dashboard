@@ -6,7 +6,6 @@ import type { Routes, RoutesInsert, RoutesUpdate, People } from "@/types/databas
 
 export interface RouteWithDeliverer extends Routes {
   primary_deliverer?: People | null;
-  secondary_deliverer?: People | null;
 }
 
 interface UseRoutesOptions {
@@ -15,11 +14,10 @@ interface UseRoutesOptions {
     search?: string;
     delivererId?: string;
     routeType?: string;
-    isSkipped?: boolean;
     hasDeliverer?: boolean;
-    /** Only routes with primary or secondary deliverer */
+    /** Only routes with primary deliverer */
     claimedOnly?: boolean;
-    /** Only routes with no deliverer or is_skipped */
+    /** Only routes with no primary deliverer */
     openOnly?: boolean;
   };
 }
@@ -43,14 +41,12 @@ async function fetchRoutesData(filters: UseRoutesOptions["filters"] = {}) {
   if (filters?.search) {
     const searchTerm = filters.search.toLowerCase();
     query = query.or(
-      `route_name.ilike.%${searchTerm}%,primary_deliverer_email.ilike.%${searchTerm}%`
+      `route_name.ilike.%${searchTerm}%,primary_deliverer_email.ilike.%${searchTerm}%`,
     );
   }
 
   if (filters?.delivererId) {
-    query = query.or(
-      `primary_deliverer_id.eq.${filters.delivererId},secondary_deliverer_id.eq.${filters.delivererId}`
-    );
+    query = query.eq("primary_deliverer_id", filters.delivererId);
   }
 
   if (filters?.hasDeliverer !== undefined) {
@@ -62,24 +58,15 @@ async function fetchRoutesData(filters: UseRoutesOptions["filters"] = {}) {
   }
 
   if (filters?.claimedOnly) {
-    query = query.or(
-      "primary_deliverer_id.not.is.null,secondary_deliverer_id.not.is.null"
-    );
+    query = query.not("primary_deliverer_id", "is", null);
   }
 
   if (filters?.openOnly) {
-    // Truly open (no primary, no secondary) OR skipped with primary but no secondary
-    query = query.or(
-      "and(primary_deliverer_id.is.null,secondary_deliverer_id.is.null),and(is_skipped.eq.true,primary_deliverer_id.not.is.null,secondary_deliverer_id.is.null)"
-    );
+    query = query.is("primary_deliverer_id", null);
   }
 
   if (filters?.routeType) {
     query = query.eq("route_type", filters.routeType);
-  }
-
-  if (filters?.isSkipped !== undefined) {
-    query = query.eq("is_skipped", filters.isSkipped);
   }
 
   const { data: routesData, error: queryError } = await query.order("route_name", {
@@ -93,7 +80,6 @@ async function fetchRoutesData(filters: UseRoutesOptions["filters"] = {}) {
   const delivererIds = new Set<string>();
   (routesData || []).forEach((route) => {
     if (route.primary_deliverer_id) delivererIds.add(route.primary_deliverer_id);
-    if (route.secondary_deliverer_id) delivererIds.add(route.secondary_deliverer_id);
   });
 
   let deliverersMap = new Map<string, People>();
@@ -114,9 +100,6 @@ async function fetchRoutesData(filters: UseRoutesOptions["filters"] = {}) {
     primary_deliverer: route.primary_deliverer_id
       ? deliverersMap.get(route.primary_deliverer_id) || null
       : null,
-    secondary_deliverer: route.secondary_deliverer_id
-      ? deliverersMap.get(route.secondary_deliverer_id) || null
-      : null,
   }));
 
   return transformedData;
@@ -130,7 +113,6 @@ export function useRoutes(options: UseRoutesOptions = {}): UseRoutesReturn {
     filters.search,
     filters.delivererId,
     filters.routeType,
-    filters.isSkipped,
     filters.hasDeliverer,
     filters.claimedOnly,
     filters.openOnly,

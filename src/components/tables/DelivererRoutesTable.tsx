@@ -16,7 +16,7 @@ interface DelivererRoutesTableProps {
   routes: RouteWithDeliverer[];
 }
 
-/** Table of routes without deliverer column (for per-deliverer view). Same row actions as Claimed Routes. */
+/** Table of routes without deliverer column (for per-deliverer view). */
 export default function DelivererRoutesTable({ routes }: DelivererRoutesTableProps) {
   const { update } = useRoutes({
     autoFetch: true,
@@ -70,18 +70,8 @@ export default function DelivererRoutesTable({ routes }: DelivererRoutesTablePro
                     try {
                       await update(route.id, {
                         primary_deliverer_id: null,
-                        secondary_deliverer_id: null,
                         primary_deliverer_email: null,
-                        is_skipped: false,
                       });
-                    } finally {
-                      setUpdatingId(null);
-                    }
-                  };
-                  const handleSkip = async () => {
-                    setUpdatingId(route.id);
-                    try {
-                      await update(route.id, { is_skipped: true });
                     } finally {
                       setUpdatingId(null);
                     }
@@ -99,35 +89,20 @@ export default function DelivererRoutesTable({ routes }: DelivererRoutesTablePro
                           <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
                             {route.route_type ?? "—"}
                           </span>
-                          {route.is_skipped && route.primary_deliverer && (
-                            <span className="inline-flex w-fit rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-                              Filling in for {route.primary_deliverer.full_name}
-                            </span>
-                          )}
                         </div>
                       </TableCell>
                       <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
                         {route.leaflet_count ?? "—"}
                       </TableCell>
                       <TableCell className="px-4 py-3 text-end">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleSkip}
-                            disabled={isRowBusy || route.is_skipped === true}
-                          >
-                            Skip
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleRemove}
-                            disabled={isRowBusy}
-                          >
-                            Unassign
-                          </Button>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRemove}
+                          disabled={isRowBusy}
+                        >
+                          Unassign
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );

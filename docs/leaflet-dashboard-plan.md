@@ -785,6 +785,8 @@ src/components/leaflet/
 
 ## 10. Next step
 
+**Phased build plans (your tasks vs agent tasks):** [`docs/leaflet-phases/README.md`](./leaflet-phases/README.md) — start with [`00-human-checklist.md`](./leaflet-phases/00-human-checklist.md) Batch 1, then implement **Phase A** → **M** in order.
+
 **Designs:** `integrated-dashboard.pen` — screen node reference:
 
 | Screen | Node ID |
@@ -803,3 +805,18 @@ src/components/leaflet/
 | Close confirmed modal | `Qaphk` |
 
 **Implementation:** start with migration **A**, then **B** + **C** (shell at `/admin/leaflet`), then page phases per §6.
+
+---
+
+## 11. Vercel deployment (when ready)
+
+The leaflet dashboard is developed locally first. When you move this app to Vercel:
+
+| Step | Action |
+|------|--------|
+| Link project | Connect the repo in Vercel (or `vercel link` from the project root). |
+| Environment variables | Copy from `.env.local`: `LEAFLET_RESPONSE_SIGNING_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, Supabase keys, Stripe keys. Set for **Preview** and **Production**. |
+| Preview smoke test | After first deploy, walk Batch **3** URLs on the preview URL. |
+| Production promote | Promote a verified preview build when Batch **5** checklist is complete. |
+
+Until then, local `npm run dev` + Supabase is sufficient for leaflet development and click-testing.
