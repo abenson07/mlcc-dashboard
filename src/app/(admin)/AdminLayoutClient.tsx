@@ -13,10 +13,16 @@ export default function AdminLayoutClient({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isLeafletShell = pathname?.startsWith("/leaflet");
+  const isIntegratedShell =
+    pathname?.startsWith("/leaflet") ||
+    pathname?.startsWith("/site") ||
+    pathname?.startsWith("/people") ||
+    pathname?.startsWith("/events-hub") ||
+    pathname?.startsWith("/stories") ||
+    pathname?.startsWith("/finance");
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
-  if (isLeafletShell) {
+  if (isIntegratedShell) {
     return <div className="min-h-screen">{children}</div>;
   }
 

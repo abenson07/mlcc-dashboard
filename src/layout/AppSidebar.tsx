@@ -177,8 +177,8 @@ const mainNavSections: NavSection[] = [
     id: "events",
     title: "Events",
     icon: <CalenderIcon />,
-    rootPath: "/events",
-    pathPrefixes: ["/events"],
+    rootPath: "/events/cms",
+    pathPrefixes: ["/events/cms", "/events/edit", "/events/new"],
     items: [],
   },
   {
