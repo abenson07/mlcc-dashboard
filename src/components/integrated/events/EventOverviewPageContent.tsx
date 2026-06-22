@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { IconArrowRight, IconCalendar, IconPlus } from "@/components/leaflet/icons";
+import { IconCalendar, IconPlus } from "@/components/leaflet/icons";
 import { getEventById } from "../mockData";
 
 export default function EventOverviewPageContent({ eventId }: { eventId: string }) {
@@ -52,9 +52,9 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
               <span className="lf-meta">12 signed up</span>
             </div>
             {[
-              { name: "Mitch Chae", role: "Safety lead", status: "green" },
-              { name: "Marcus Aurel", role: "Registration", status: "green" },
-              { name: "Elena Ruiz", role: "Food & drinks", status: "amber" },
+              { name: "Mitch Chae", role: "Safety lead", status: "confirmed" as const },
+              { name: "Marcus Aurel", role: "Registration", status: "confirmed" as const },
+              { name: "Elena Ruiz", role: "Food & drinks", status: "pending" as const },
             ].map((v) => (
               <div key={v.name} className="lf-open-route">
                 <span className="lf-avatar">{v.name.slice(0, 2).toUpperCase()}</span>
@@ -62,9 +62,20 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
                   <div className="lf-open-route-name">{v.name}</div>
                   <div className="lf-meta">{v.role}</div>
                 </div>
-                <span className={v.status === "amber" ? "lf-dot lf-dot--amber" : "lf-dot lf-dot--green"} />
+                <span
+                  className={
+                    v.status === "pending"
+                      ? "lf-status-badge lf-status-badge--amber"
+                      : "lf-status-badge lf-status-badge--green"
+                  }
+                >
+                  {v.status === "pending" ? "Pending" : "Confirmed"}
+                </span>
               </div>
             ))}
+            <Link href={`/events-hub/${eventId}/volunteers`} className="lf-see-all">
+              See all
+            </Link>
             <Link href={`/events-hub/${eventId}/volunteers`} className="lf-view-all-btn">
               <IconPlus />
               Add volunteer
@@ -105,9 +116,11 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
               <span>Silver</span>
               <span className="lf-qty-badge lf-qty-badge--paid">4 left</span>
             </div>
-            <Link href={`/events-hub/${eventId}/sponsorship`} className="lf-see-all">
-              See all sponsorship levels and earnings
-            </Link>
+            <div className="lf-card-footer">
+              <Link href={`/events-hub/${eventId}/sponsorship`} className="lf-see-all">
+                See all
+              </Link>
+            </div>
           </section>
         </div>
 
@@ -151,14 +164,6 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
           <div className="lf-detail-row">
             <span className="lf-detail-label">Location</span>
             <span>Mooreland Park</span>
-          </div>
-          <div className="lf-detail-row">
-            <span className="lf-detail-label">Capacity</span>
-            <span>500 attendees</span>
-          </div>
-          <div className="lf-detail-row">
-            <span className="lf-detail-label">Status</span>
-            <span className="lf-status-pill lf-status-pill--blue">Planning</span>
           </div>
         </section>
 

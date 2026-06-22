@@ -15,6 +15,7 @@ interface UsePeopleOptions {
     membershipId?: string;
     hasMembership?: boolean;
     membershipStatus?: string;
+    role?: string;
   };
 }
 
@@ -95,13 +96,27 @@ async function fetchPeopleData(filters: UsePeopleOptions["filters"] = {}) {
     );
   }
 
+  if (filters?.role) {
+    const roleLower = filters.role.toLowerCase();
+    transformedData = transformedData.filter((p) =>
+      p.roles?.some((r) => r.toLowerCase() === roleLower)
+    );
+  }
+
   return transformedData;
 }
 
 export function usePeople(options: UsePeopleOptions = {}): UsePeopleReturn {
   const { autoFetch = true, filters = {} } = options;
   const queryClient = useQueryClient();
-  const queryKey = ["people", filters.search, filters.membershipId, filters.hasMembership, filters.membershipStatus];
+  const queryKey = [
+    "people",
+    filters.search,
+    filters.membershipId,
+    filters.hasMembership,
+    filters.membershipStatus,
+    filters.role,
+  ];
 
   const { data: people = [], isLoading, error, refetch } = useQuery({
     queryKey,

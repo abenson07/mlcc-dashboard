@@ -31,7 +31,7 @@ export default function EventSponsorshipPageContent() {
   }, [invoiceTab]);
 
   return (
-    <div className="lf-overview-layout">
+    <div className="lf-overview-layout lf-overview-layout--single">
       <div className="lf-overview-main">
         <h1 className="lf-h2">Sponsorship</h1>
 

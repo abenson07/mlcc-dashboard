@@ -30,6 +30,15 @@ export function IconPlus() {
   );
 }
 
+export function IconCalendarNav() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M8 3v4M16 3v4M3 10h18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconCalendar() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -124,6 +133,66 @@ export function IconCalendarCheck() {
 
 export function IconUser() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.75"/><path d="M4 20c1.5-4 6-6 8-6s6.5 2 8 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconUsers() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8zM22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconBuilding() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18M6 12H4a2 2 0 00-2 2v6a2 2 0 002 2h2M18 9h2a2 2 0 012 2v9a2 2 0 01-2 2h-2M10 6h4M10 10h4M10 14h4M10 18h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconIdCard() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.75"/><path d="M6 10h.01M6 14h.01M10 10h8M10 14h5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconHeartHandshake() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round"/><path d="M12 5l-3 3 3 3 3-3-3-3z" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+}
+
+export function IconCopy() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.75"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconBriefcase() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.75"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M2 13h20" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconMailNav() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.75"/><path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconMegaphoneNav() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M3 11v2a2 2 0 002 2h2l8 4V5L7 9H5a2 2 0 00-2 2z" stroke="currentColor" strokeWidth="1.75"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/></svg>;
+}
+
+export function IconFileTextNav() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconLifeBuoy() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.75" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M4.93 4.93l3.54 3.54M15.53 15.53l3.54 3.54M4.93 19.07l3.54-3.54M15.53 8.47l3.54-3.54" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconPanelTop() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M3 9h18" stroke="currentColor" strokeWidth="1.75" />
+    </svg>
+  );
 }
 
 export function IconMail() {

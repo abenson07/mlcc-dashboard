@@ -1,5 +1,15 @@
 export type PersonStatus = "Active" | "Pending" | "Inactive";
 
+export type Business = {
+  id: string;
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+  category: string;
+  status: string;
+};
+
 export type Person = {
   id: string;
   name: string;
@@ -27,6 +37,7 @@ export type EventItem = {
   location: string;
   daysUntil: number;
   distributionLabel: string;
+  kind: "council" | "external";
 };
 
 export type VolunteerHub = {
@@ -211,6 +222,63 @@ export const MOCK_PEOPLE: Person[] = [
   },
 ];
 
+export const MOCK_BUSINESSES: Business[] = [
+  {
+    id: "b1",
+    name: "Main Street Bakery",
+    address: "120 Main St",
+    email: "hello@mainstreetbakery.com",
+    phone: "(555) 201-4400",
+    category: "Food & drink",
+    status: "Active",
+  },
+  {
+    id: "b2",
+    name: "Downtown Hardware",
+    address: "88 Oak Ave",
+    email: "info@downtownhardware.com",
+    phone: "(555) 201-4401",
+    category: "Retail",
+    status: "Active",
+  },
+  {
+    id: "b3",
+    name: "Green Valley Cafe",
+    address: "15 Park Ln",
+    email: "contact@greenvalleycafe.com",
+    phone: "(555) 201-4402",
+    category: "Food & drink",
+    status: "Member",
+  },
+  {
+    id: "b4",
+    name: "Riverfront Printing",
+    address: "402 River Rd",
+    email: "sales@riverfrontprinting.com",
+    phone: "(555) 201-4403",
+    category: "Services",
+    status: "Sponsor",
+  },
+  {
+    id: "b5",
+    name: "Maple Leaf Books",
+    address: "77 Cedar St",
+    email: "shop@mapleleafbooks.com",
+    phone: "(555) 201-4404",
+    category: "Retail",
+    status: "Active",
+  },
+  {
+    id: "b6",
+    name: "Northside Fitness",
+    address: "210 Birch Ct",
+    email: "frontdesk@northsidefitness.com",
+    phone: "(555) 201-4405",
+    category: "Health",
+    status: "Outreach",
+  },
+];
+
 export const MOCK_EVENTS: EventItem[] = [
   {
     id: "summer-block-party",
@@ -220,9 +288,23 @@ export const MOCK_EVENTS: EventItem[] = [
     month: "AUG",
     monthLabel: "August 2026",
     status: "Upcoming",
-    location: "Mooreland Park · Community Event",
+    location: "Maple Leaf Park · Community festival",
     daysUntil: 27,
     distributionLabel: "Sunday, Aug 31, 2026",
+    kind: "council",
+  },
+  {
+    id: "neighborhood-cleanup",
+    title: "Neighborhood Cleanup Day",
+    date: "2026-09-15",
+    day: 15,
+    month: "SEP",
+    monthLabel: "September 2026",
+    status: "Published",
+    location: "Community Center · Volunteer event",
+    daysUntil: 42,
+    distributionLabel: "Tuesday, Sep 15, 2026",
+    kind: "council",
   },
   {
     id: "fall-festival",
@@ -235,6 +317,7 @@ export const MOCK_EVENTS: EventItem[] = [
     location: "Main Street · Festival",
     daysUntil: 75,
     distributionLabel: "Saturday, Oct 18, 2026",
+    kind: "council",
   },
   {
     id: "winter-gala",
@@ -247,6 +330,59 @@ export const MOCK_EVENTS: EventItem[] = [
     location: "Community Center · Fundraiser",
     daysUntil: 123,
     distributionLabel: "Saturday, Dec 5, 2026",
+    kind: "council",
+  },
+  {
+    id: "harvest-festival",
+    title: "Harvest Festival",
+    date: "2026-10-22",
+    day: 22,
+    month: "OCT",
+    monthLabel: "October 2026",
+    status: "Published",
+    location: "Oak Street Plaza · Food and music",
+    daysUntil: 79,
+    distributionLabel: "Thursday, Oct 22, 2026",
+    kind: "external",
+  },
+  {
+    id: "holiday-market",
+    title: "Holiday Market",
+    date: "2026-11-08",
+    day: 8,
+    month: "NOV",
+    monthLabel: "November 2026",
+    status: "Draft",
+    location: "Maple Leaf Park · Local vendors",
+    daysUntil: 96,
+    distributionLabel: "Sunday, Nov 8, 2026",
+    kind: "external",
+  },
+  {
+    id: "maple-leaf-farmers-market",
+    title: "Maple Leaf Farmers Market",
+    date: "2026-06-14",
+    day: 14,
+    month: "JUN",
+    monthLabel: "June 2026",
+    status: "Published",
+    location: "Community Center · Weekly market",
+    daysUntil: -8,
+    distributionLabel: "Sunday, Jun 14, 2026",
+    kind: "external",
+  },
+  {
+    id: "oak-street-art-fair",
+    title: "Oak Street Art Fair",
+    date: "2026-07-19",
+    day: 19,
+    month: "JUL",
+    monthLabel: "July 2026",
+    status: "Published",
+    location: "Oak Street · Local artists",
+    daysUntil: 15,
+    distributionLabel: "Sunday, Jul 19, 2026",
+    kind: "external",
   },
   {
     id: "spring-cleanup",
@@ -259,6 +395,7 @@ export const MOCK_EVENTS: EventItem[] = [
     location: "Various routes · Volunteer",
     daysUntil: -71,
     distributionLabel: "Sunday, Apr 12, 2026",
+    kind: "council",
   },
 ];
 

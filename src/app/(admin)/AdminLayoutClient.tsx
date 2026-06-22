@@ -17,6 +17,9 @@ export default function AdminLayoutClient({
     pathname?.startsWith("/leaflet") ||
     pathname?.startsWith("/site") ||
     pathname?.startsWith("/people") ||
+    pathname?.startsWith("/biz") ||
+    pathname === "/events" ||
+    pathname?.startsWith("/events?") ||
     pathname?.startsWith("/events-hub") ||
     pathname?.startsWith("/stories") ||
     pathname?.startsWith("/finance");

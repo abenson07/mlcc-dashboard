@@ -40,7 +40,7 @@ export default function EventVolunteersPageContent() {
         ))}
         <button type="button" className="lf-volunteer-hub-card lf-volunteer-hub-card--new">
           <IconPlus />
-          New volunteer hub
+          New Volunteer Opportunity
         </button>
       </section>
 

@@ -1,5 +1,5 @@
-import EventsListPageContent from "@/components/integrated/events/EventsListPageContent";
+import { redirect } from "next/navigation";
 
-export default function EventsPage() {
-  return <EventsListPageContent />;
+export default function EventsHubRedirectPage() {
+  redirect("/events");
 }

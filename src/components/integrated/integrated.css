@@ -3,9 +3,29 @@
 .lf-mode--link { text-decoration: none; cursor: pointer; }
 .lf-mode--link.lf-mode--inactive:hover { color: var(--lf-text-muted); }
 
-.lf-topbar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; }
-.lf-topbar-spacer { min-width: 0; }
+.lf-topbar--with-center {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+}
+
+.lf-topbar--with-center .lf-topbar-controls {
+  justify-self: end;
+}
+
 .lf-topbar-center { display: flex; justify-content: center; align-items: center; }
+
+.lf-sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
+
+.lf-sidebar .lf-sidebar-nav {
+  flex: 1;
+}
 .lf-topbar-controls-inline { display: flex; gap: 8px; }
 
 .lf-context-ribbon {
@@ -136,6 +156,26 @@
 
 .lf-comment-menu button:hover { background: #fafafa; }
 
+.lf-nav-section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 16px 10px 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lf-text-muted);
+}
+
+.lf-nav-section-header span {
+  flex: 1;
+}
+
+.lf-nav-section-header svg {
+  color: var(--lf-text-subtle);
+  flex-shrink: 0;
+}
+
 .lf-people-layout {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -159,7 +199,20 @@
   flex-shrink: 0;
 }
 
-.lf-person-detail { min-width: 0; }
+.lf-person-detail {
+  min-width: 0;
+  border-left: none;
+  padding-left: 0;
+}
+
+.lf-people-layout--single {
+  grid-template-columns: 1fr;
+}
+
+.lf-page-header .lf-search {
+  width: 220px;
+  flex-shrink: 0;
+}
 
 .lf-person-detail-header {
   display: flex;
@@ -323,6 +376,28 @@
 .lf-small-btn { cursor: pointer; }
 .lf-tab { cursor: pointer; }
 .lf-nav-item { cursor: pointer; }
+
+.lf-nav-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.lf-nav-badge {
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--lf-text-muted);
+  background: #f4f4f5;
+  flex-shrink: 0;
+}
+
+.lf-people-table-message {
+  padding: 24px 0;
+}
 .lf-selector-trigger { cursor: pointer; }
 
 @media (max-width: 1100px) {
@@ -336,7 +411,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .lf-topbar {
+  .lf-topbar--with-center {
     grid-template-columns: 1fr;
     height: auto;
     padding: 12px 16px;

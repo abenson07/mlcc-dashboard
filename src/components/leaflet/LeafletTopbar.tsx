@@ -11,7 +11,7 @@ import { useLeafletContext } from "./LeafletContext";
 const MODE_TABS = [
   { label: "Site", href: "/site", dividerAfter: false },
   { label: "People", href: "/people", dividerAfter: false },
-  { label: "Events", href: "/events-hub", dividerAfter: true },
+  { label: "Events", href: "/events", dividerAfter: true },
   { label: "Leaflets", href: "/leaflet", dividerAfter: true },
   { label: "Stories", href: "/stories", dividerAfter: false },
 ] as const;
@@ -61,6 +61,9 @@ export default function LeafletTopbar() {
         <button type="button" className="lf-icon-btn lf-icon-btn--promo" aria-label="Promotion menu" onClick={() => toast.message("Promotion menu — wire up later")}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          </svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
           </svg>
         </button>
         <button type="button" className="lf-btn lf-btn--outline" onClick={() => setModalOpen(true)}>
