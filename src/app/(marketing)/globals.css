@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Decalotype Fix";
+  src:
+    url("/fonts/Decalotype-ExtraBold-fix.otf") format("opentype"),
+    url("/fonts/Decalotype-Bold-fix.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Decalotype Fix";
+  src: url("/fonts/Decalotype-Regular-fix.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Bricolagegrotesque;
+  src: url("/fonts/BricolageGrotesque-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Bricolagegrotesque;
+  src: url("/fonts/BricolageGrotesque-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Bricolagegrotesque;
+  src: url("/fonts/BricolageGrotesque-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #fdf8f1;
+  --foreground: #0d1526;
+
+  --sparkles-cream: #fdf8f1;
+  --sparkles-navy: #0d1526;
+  --sparkles-warm: #f2ece5;
+  --sparkles-blue: #c1cb38;
+  --sparkles-accent: #2e7b34;
+  --sparkles-muted: #0d1526a3;
+  --sparkles-navy-8: #0d152614;
+  --sparkles-navy-16: #0d152629;
+  --sparkles-gold: #ffc216;
+  --sparkles-panel: #243047;
+  --puget-night: #34422e;
+
+  --font-decalotype: "Decalotype Fix", Arial, sans-serif;
+  --font-bricolage: Bricolagegrotesque, Arial, sans-serif;
+
+  --radius-sm: 1.25rem;
+  --radius-md: 1.5rem;
+  --radius-lg: 2rem;
+  --radius-pill: 100vw;
+
+  --container-max: 1800px;
+  --section-px: 2rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sparkles-cream: var(--sparkles-cream);
+  --color-sparkles-navy: var(--sparkles-navy);
+  --color-sparkles-warm: var(--sparkles-warm);
+  --color-sparkles-blue: var(--sparkles-blue);
+  --color-sparkles-accent: var(--sparkles-accent);
+  --color-sparkles-muted: var(--sparkles-muted);
+  --color-sparkles-panel: var(--sparkles-panel);
+  --color-sparkles-gold: var(--sparkles-gold);
+  --color-puget-night: var(--puget-night);
+  --font-sans: var(--font-bricolage);
+  --font-display: var(--font-decalotype);
+}
+
+body {
+  background: var(--sparkles-cream);
+  color: var(--sparkles-navy);
+  font-family: var(--font-bricolage);
+}
+
+.font-display {
+  font-family: var(--font-decalotype);
+}
+
+.font-body {
+  font-family: var(--font-bricolage);
+}
+
+.leaflet-body p {
+  margin-bottom: 1rem;
+}
+
+.leaflet-body h1,
+.leaflet-body h2,
+.leaflet-body h3 {
+  margin: 1.5rem 0 0.75rem;
+  font-family: var(--font-decalotype);
+  font-weight: 700;
+  color: var(--puget-night);
+}
+
+.leaflet-body h1 {
+  font-size: 2rem;
+  line-height: 2.25rem;
+}
+
+.leaflet-body h2 {
+  font-size: 1.5rem;
+  line-height: 1.75rem;
+}
+
+.leaflet-body a {
+  color: var(--sparkles-accent);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.leaflet-body a:hover {
+  color: var(--sparkles-navy);
+}
+
+.leaflet-body strong {
+  font-weight: 700;
+}
+
+.leaflet-body ul {
+  margin: 0 0 1rem 1.25rem;
+  list-style: disc;
+}
+
+.leaflet-body li {
+  margin-bottom: 0.5rem;
+}
+
+.leaflet-body figure {
+  margin: 1.5rem 0;
+}
+
+.leaflet-body figure img {
+  width: 100%;
+  border-radius: 0.75rem;
+}
+
+.leaflet-body figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--sparkles-muted);
+  text-align: center;
+}
+
+.leaflet-body .w-button,
+.leaflet-body .button {
+  display: inline-block;
+  margin-top: 0.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--sparkles-navy);
+  background: var(--sparkles-navy);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-decalotype);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  color: var(--sparkles-cream);
+  text-decoration: none;
+}

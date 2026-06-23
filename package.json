@@ -25,6 +25,8 @@
     "seed:businesses:sql": "tsx scripts/seed-businesses-from-places.ts --emit-sql",
     "migrate:businesses": "tsx scripts/apply-businesses-migration.ts",
     "migrate:qr-codes": "tsx scripts/apply-qr-codes-migration.ts",
+    "db:export:list": "tsx scripts/db-export/01-list-tables.ts",
+    "db:export:dump": "tsx scripts/db-export/02-export-schema-and-data.ts",
     "stripe:setup-commerce": "node scripts/stripe-setup-commerce-products.mjs"
   },
   "dependencies": {

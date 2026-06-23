@@ -1,0 +1,146 @@
+import { SectionLabel } from "@marketing/components/SectionLabel";
+import { TestimonialPanel, type TestimonialPanelProps } from "@marketing/components/byq/TestimonialPanel";
+
+const defaultTestimonial: TestimonialPanelProps = {
+  quote:
+    "Volunteering with MLCC connected me with neighbors I would never have met otherwise. It is the best way to feel at home in Maple Leaf.",
+  name: "Maple Leaf neighbor",
+  attribution: "Newsletter volunteer",
+};
+
+const inputClassName =
+  "mb-3 min-h-12 w-full rounded-lg border border-sparkles-warm bg-sparkles-cream px-4 py-2 font-body text-base leading-6 text-sparkles-navy/90 placeholder:text-sparkles-muted focus:border-sparkles-navy focus:outline-none";
+
+const labelClassName =
+  "mb-2 font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy";
+
+export type ContactCtaPreFooterSectionProps = {
+  testimonial?: TestimonialPanelProps;
+  committeeName?: string;
+};
+
+function formatCommitteeName(name: string): string {
+  const trimmed = name.trim();
+  if (/committee$/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `${trimmed} committee`;
+}
+
+function getJoinCopy(committeeName?: string) {
+  if (committeeName) {
+    const committee = formatCommitteeName(committeeName);
+    return {
+      label: "Get involved",
+      headline: `Join the ${committee}`,
+      description:
+        "Share your name and email and a committee lead will be in touch about volunteering.",
+      button: "Join the committee",
+      idPrefix: committeeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    };
+  }
+
+  return {
+    label: "Get involved",
+    headline: "Join a committee",
+    description:
+      "Share your name and email and a committee lead will be in touch about volunteering.",
+    button: "Join the committee",
+    idPrefix: "committee",
+  };
+}
+
+export function ContactCtaPreFooterSection({
+  testimonial = defaultTestimonial,
+  committeeName,
+}: ContactCtaPreFooterSectionProps = {}) {
+  const copy = getJoinCopy(committeeName);
+
+  return (
+    <section className="bg-sparkles-cream">
+      <div className="px-8 max-[767px]:px-4">
+        <div className="mx-auto w-full max-w-[1800px]">
+          <div className="py-[7.5rem] max-[767px]:py-20">
+            <div className="grid gap-16 rounded-2xl bg-sparkles-warm p-20 [grid-template-columns:1.5fr_1fr] max-[991px]:grid-cols-1 max-[479px]:p-12">
+              <div>
+                <SectionLabel>{copy.label}</SectionLabel>
+                <div className="mb-8 mt-6 flex flex-col gap-6">
+                  <div className="font-display text-[2.5rem] leading-[2.75rem] font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7">
+                    {copy.headline}
+                  </div>
+                  <div className="font-body text-xl leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
+                    {copy.description}
+                  </div>
+                </div>
+
+                <form className="flex flex-col gap-0" aria-label={copy.headline}>
+                  <div className="grid w-full grid-cols-2 gap-4 max-[479px]:grid-cols-1">
+                    <div className="flex flex-col">
+                      <label htmlFor={`${copy.idPrefix}-first-name`} className={labelClassName}>
+                        First name
+                      </label>
+                      <input
+                        className={inputClassName}
+                        maxLength={256}
+                        name="firstName"
+                        placeholder="First name"
+                        type="text"
+                        id={`${copy.idPrefix}-first-name`}
+                        autoComplete="given-name"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label htmlFor={`${copy.idPrefix}-last-name`} className={labelClassName}>
+                        Last name
+                      </label>
+                      <input
+                        className={inputClassName}
+                        maxLength={256}
+                        name="lastName"
+                        placeholder="Last name"
+                        type="text"
+                        id={`${copy.idPrefix}-last-name`}
+                        autoComplete="family-name"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label htmlFor={`${copy.idPrefix}-email`} className={labelClassName}>
+                      Email
+                    </label>
+                    <input
+                      className={inputClassName}
+                      maxLength={256}
+                      name="email"
+                      placeholder="Email"
+                      type="email"
+                      id={`${copy.idPrefix}-email`}
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="submit"
+                      className="cursor-pointer rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90"
+                    >
+                      {copy.button}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <TestimonialPanel {...testimonial} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default ContactCtaPreFooterSection;

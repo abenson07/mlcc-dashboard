@@ -1,0 +1,37 @@
+---
+description: Fetch and work Linear issues for the MLCC Website project via MCP
+alwaysApply: true
+---
+
+# Linear (MLCC Website)
+
+This repo is tied to the **MLCC Website** Linear project. Canonical IDs live in `linear.config.json`.
+
+| Field | Value |
+|-------|-------|
+| Project | MLCC Website |
+| Project ID | `7987d67b-317a-4f02-8e14-72bf82aeed3f` |
+| Team key | `MWO` (issues look like `MWO-123`) |
+
+## Pull an issue by ID
+
+Use the **Linear** MCP server (`plugin-linear-linear`):
+
+1. **`get_issue`** — pass the identifier the user gives you:
+   - Team key form: `MWO-434`
+   - Or the UUID from a Linear URL
+2. Set `includeRelations: true` when dependencies (blocked by / blocking) matter.
+
+Example: user says "build MWO-432" → call `get_issue` with `id: "MWO-432"`.
+
+## List project issues
+
+Use **`list_issues`** with `project: "7987d67b-317a-4f02-8e14-72bf82aeed3f"` to scope results to this repo.
+
+## Parse issue links
+
+`https://linear.app/midwestern/issue/MWO-434/banner` → identifier `MWO-434`.
+
+## Status workflow
+
+When implementing issues end-to-end, use the `build-linear-issue` skill. When planning only, use `plan-linear-issue`.

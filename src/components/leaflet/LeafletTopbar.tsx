@@ -10,7 +10,6 @@ import CreateLeafletModal from "./overview/CreateLeafletModal";
 import { useLeafletContext } from "./LeafletContext";
 
 const MODE_TABS = [
-  { label: "Site", href: "/site", dividerAfter: false },
   { label: "People", href: "/people", dividerAfter: false },
   { label: "Events", href: "/events", dividerAfter: true },
   { label: "Leaflets", href: "/leaflet", dividerAfter: true },

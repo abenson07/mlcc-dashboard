@@ -6,6 +6,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { DevLinkProvider } from "@/devlink/DevLinkProvider";
+import AgentationDev from "@/components/dev/AgentationDev";
 import FeedbackFab from "@/components/feedback/FeedbackFab";
 
 /**
@@ -44,6 +45,7 @@ export default function RootLayout({
         </QueryProvider>
         <Toaster richColors position="bottom-right" />
         <FeedbackFab />
+        <AgentationDev />
       </body>
     </html>
   );

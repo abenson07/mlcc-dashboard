@@ -12,10 +12,9 @@ import {
   IconVolume,
 } from "@/components/leaflet/icons";
 
-export type DashboardMode = "Site" | "People" | "Events" | "Leaflets" | "Stories";
+export type DashboardMode = "People" | "Events" | "Leaflets" | "Stories";
 
 const MODE_TABS: { label: DashboardMode; href: string; dividerAfter: boolean }[] = [
-  { label: "Site", href: "/site", dividerAfter: false },
   { label: "People", href: "/people", dividerAfter: false },
   { label: "Events", href: "/events", dividerAfter: true },
   { label: "Leaflets", href: "/leaflet", dividerAfter: true },
@@ -33,12 +32,12 @@ function isIntegratedEventsPath(pathname: string | null) {
   return pathname.startsWith("/events-hub");
 }
 
-function modeFromPath(pathname: string | null): DashboardMode {
+function modeFromPath(pathname: string | null): DashboardMode | null {
   if (pathname?.startsWith("/people") || pathname?.startsWith("/biz")) return "People";
   if (isIntegratedEventsPath(pathname)) return "Events";
   if (pathname?.startsWith("/leaflet")) return "Leaflets";
   if (pathname?.startsWith("/stories")) return "Stories";
-  return "Site";
+  return null;
 }
 
 type IntegratedTopbarProps = {

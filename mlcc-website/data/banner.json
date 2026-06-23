@@ -1,0 +1,19 @@
+{
+  "banners": [
+    {
+      "headline": "June Silent Book Club is almost here",
+      "linkText": "Volunteer to help organize",
+      "linkPath": "/volunteer/help-organize-silent-book-club"
+    },
+    {
+      "headline": "Help neighbors stay connected by email",
+      "linkText": "See the open role",
+      "linkPath": "/volunteer/email-coordinator"
+    },
+    {
+      "headline": "A quiet way to belong in Maple Leaf",
+      "linkText": "Read the Leaflet story",
+      "linkPath": "/leaflet/template/silent-book-club"
+    }
+  ]
+}

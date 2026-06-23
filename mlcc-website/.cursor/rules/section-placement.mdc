@@ -1,0 +1,32 @@
+---
+description: Place new page sections at the end of app/page.tsx unless told otherwise
+alwaysApply: true
+---
+
+# Section placement
+
+When adding a new BYQ or custom section to the homepage:
+
+1. Create the component under `components/sections/`.
+2. Import it in `app/page.tsx`.
+3. Render it **last** in `<main>` — after all existing sections (footer lives in `app/layout.tsx`).
+4. Only place it elsewhere if the user explicitly specifies a position (e.g. "after the hero", "before pricing").
+
+# Sparkles styling
+
+This site uses the **Sparkles** design system only:
+
+- Colors: `sparkles-cream`, `sparkles-navy`, `sparkles-warm`, `sparkles-blue`, `sparkles-accent` (see `app/globals.css`)
+- Fonts: `font-display` (Decalotype Fix) for headings/buttons, `font-body` (Bricolage Grotesque) for body/labels
+- Container: `max-w-[1800px] mx-auto px-8 max-[767px]:px-4`
+- Do not use Evermind or other template color palettes
+
+Example — default (append):
+
+```tsx
+<main className="bg-sparkles-cream">
+  <HeroSection />
+  {/* ...existing sections... */}
+  <NewSection />
+</main>
+```
