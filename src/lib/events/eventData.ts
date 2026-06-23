@@ -14,6 +14,7 @@ export type EventFieldData = {
   qr_code_id?: string;
   webflow_item_id?: string;
   address?: string;
+  sponsorship_goal_cents?: number;
 };
 
 export type EventListItem = {
@@ -59,6 +60,8 @@ export function parseEventFieldData(raw: Record<string, unknown> | null | undefi
     qr_code_id: typeof fd.qr_code_id === "string" ? fd.qr_code_id : undefined,
     webflow_item_id: typeof fd.webflow_item_id === "string" ? fd.webflow_item_id : undefined,
     address: typeof fd.address === "string" ? fd.address : undefined,
+    sponsorship_goal_cents:
+      typeof fd.sponsorship_goal_cents === "number" ? fd.sponsorship_goal_cents : undefined,
   };
 }
 
@@ -183,8 +186,12 @@ export function buildEventBudget(
   sponsorships: Sponsorships[],
   raised: number,
   pledgedAmount: number,
+  goalCents?: number | null,
 ) {
-  const goal = sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0) || 15_000;
+  const goalFromField = goalCents != null && goalCents > 0 ? goalCents / 100 : null;
+  const goal =
+    goalFromField ??
+    (sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0) || 15_000);
   const progressPct = goal > 0 ? Math.round((raised / goal) * 100) : 0;
   return { goal, raised, pledged: pledgedAmount, progressPct };
 }
