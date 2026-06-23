@@ -1,0 +1,154 @@
+id,route_name,leaflet_count,created_at,route_type,primary_deliverer_id,primary_deliverer_email,building_contact_name,building_contact_email,building_contact_phone,building_contact_is_deliverer
+003a2509-28f8-4e5a-8dd0-f5b4557c4098,89th: 2nd to 5th,21,2025-11-12 02:40:49.561317+00,Single family residences,867f7eb2-e11e-4341-9605-957a38d3b61a,dbb52wa@aol.com,,,,false
+003e52f5-9bf3-4ae4-8c12-df7d90cfaddd,83rd: 5th to Roosevelt,58,2025-11-12 02:40:49.561317+00,Single family residences,385dc4c9-bc42-4a94-ab5e-308c18043478,billythompson508@gmail.com,,,,false
+0105de96-74f6-4106-8e7c-81a96c0c50df,Harrison Court Condominiums,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+028dcdc9-ef08-4e60-832d-412139bc5851,95th: 1st to 5th,21,2025-11-12 02:40:49.561317+00,Single family residences,17090591-0c3d-47eb-9290-556223168235,cmsyrjala@gmail.com,,,,false
+062a0834-6615-4550-865d-0fa39d244b99,4th: Elk to 85th,23,2025-11-12 02:40:49.561317+00,Single family residences,2aa372e1-2c2f-4ed0-931e-a1e439763cef,rsletwin@yahoo.com,,,,false
+063fb50b-dee1-49dd-a5b7-800b3c60f919,80th: Banner to 5th and 4th Banner to 80th,14,2025-11-12 02:40:49.561317+00,Single family residences,70a4de85-3c37-40d7-8df7-582b773b0fa1,marensherry@gmail.com,,,,false
+0b308d06-d243-4ecc-bdc8-cca417b33c42,92nd: Roosevelt to 15th,40,2025-11-12 02:40:49.561317+00,Single family residences,4aec410f-ff59-4227-b334-0848bdcd003c,dbrittrn@gmail.com,,,,false
+13b95e43-84d8-47ca-ba5c-0f74e12dcd9f,15th: 85th to 92nd,47,2025-11-12 02:40:49.561317+00,Single family residences,20fd7e5e-c007-438b-8aa1-ef1960816192,Garrettjlandry@gmail.com,,,,false
+1492341b-db3d-49bc-9ac0-95444023c6c7,Maple Leaf Court Appartments,14,2025-11-12 02:40:49.561317+00,Apartments/Condos,34aba2b4-35ed-4586-b188-0a6151e2f07d,agassett@gmail.com,,,,false
+15e9a654-fefa-473e-b0f3-7db2dd492410,Harnell Apartments,9,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+1905c802-1566-491f-8bce-2236873fe958,85th: 5th to Roosevelt,50,2025-11-12 02:40:49.561317+00,Single family residences,b37c07b0-3ff6-4baa-9b65-4e2a7d9c481b,kionewong@gmail.com,,,,false
+19568be8-d009-4a63-8fc7-15d9e2bc8bcc,104th: Roosevelt to 15th,35,2025-11-12 02:40:49.561317+00,Single family residences,3f9e62d5-0841-4855-96f8-4d9f078b962f,family@mattera.io,,,,false
+1a4d9d42-01d9-41c1-9d87-e48ec4b930b1,95th: 15th to 17th,16,2025-11-12 02:40:49.561317+00,Single family residences,c2c3cbe4-e415-472a-9eb5-21e6fbe32a86,danaepmoore@gmail.com,,,,false
+1b726462-8232-4c18-8122-268a632b6afb,5th: 81st to 85th,30,2025-11-12 02:40:49.561317+00,Single family residences,385dc4c9-bc42-4a94-ab5e-308c18043478,billythompson508@gmail.com,,,,false
+1c73cb8a-d1c4-452e-8a8a-09ebe2dcd022,8th: 89th to 95th,48,2025-11-12 02:40:49.561317+00,Single family residences,4aec410f-ff59-4227-b334-0848bdcd003c,dbrittrn@gmail.com,,,,false
+1dac06d1-3733-4021-bd36-eb427e562ef2,"104th: 5th to Roosevelt (renamed, formerly 8th and west of 8th)",28,2025-11-12 02:40:49.561317+00,Single family residences,3f9e62d5-0841-4855-96f8-4d9f078b962f,family@mattera.io,,,,false
+1e325ba6-8f1d-4ecd-8c50-926bceb0006e,17th: 91st to 98th,44,2025-11-12 02:40:49.561317+00,Single family residences,914a6039-6707-4f22-bd93-1bfaba7d2760,nettasmith@comcast.net,,,,false
+1f3993a6-c0fc-4119-a999-340f54579d8c,Latona: 85th to 90th,34,2025-11-12 02:40:49.561317+00,Single family residences,b9e018b3-2f4a-4803-aea3-0e62a95942ca,sdshelton@comcast.net,,,,false
+1fcfea22-b0f0-479b-bbd6-849178bddcb2,4th: 80th to Elk,13,2025-11-12 02:40:49.561317+00,Single family residences,2aa372e1-2c2f-4ed0-931e-a1e439763cef,rsletwin@yahoo.com,,,,false
+2095cc60-568d-4007-865e-2ae92eadb2bb,8th: 95th to 103rd,42,2025-11-12 02:40:49.561317+00,Single family residences,a00b41b6-0a91-4fa5-b05c-86131b2a9c9b,chadphelan@gmail.com,,,,false
+213ec502-3ea7-4283-a02b-caf0ba16e554,86th: 15th to LCW (not condo bldg),26,2025-11-12 02:40:49.561317+00,Single family residences,e0dbb51c-2196-404e-9d1b-6d087724e40e,teagan.george26@gmail.com,,,,false
+2218aa7d-b2d5-4992-8cc6-f1fe6a9367cf,92nd: 15th to 16th (Dead End),17,2025-11-12 02:40:49.561317+00,Single family residences,ec69a96a-eaa0-47f6-b45f-0b85b369b6c1,erintroedson@gmail.com,,,,false
+22d1f4b3-4ac7-4dfc-b96e-9729e6bd3c3d,16th: 82nd to 86th,30,2025-11-12 02:40:49.561317+00,Single family residences,868c9779-1ee3-4700-bf6c-0b65ae4f92cc,info@mathnificent.com,,,,false
+2a4257a9-9fbd-4845-91e5-db35888df2fb,Cloud City Coffee,50,2025-11-12 02:40:49.561317+00,Businesses,7b33a646-ee36-4243-8423-331ea1162eeb,alexbensonux@gmail.com,,,,false
+32850caf-812d-44c7-ad1f-c2c98f351519,Northgate Villa Apartments,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+330701ea-a47e-46ae-801c-6527774d8ff0,105th: 5th to 11th (inc 2 alleys),25,2025-11-12 02:40:49.561317+00,Single family residences,3f9e62d5-0841-4855-96f8-4d9f078b962f,family@mattera.io,,,,false
+330d2d14-3051-4147-a6d0-504a79fbfba4,Maple View Condominiums,4,2025-11-12 02:40:49.561317+00,Apartments/Condos,2933bf35-c03a-43a0-b5bc-9413da311e53,kmilts@gmail.com,,,,false
+34a0fdea-86c7-42f8-9787-84c16f3aad07,9th: 75th to 78th,15,2025-11-12 02:40:49.561317+00,Single family residences,4898daa4-b535-4279-af56-eccfbb3da3b1,hollyreichmannyoung7@gmail.com,,,,false
+351dffa2-6e68-4229-9140-ff37fff51d4c,15th: 92nd to 98th,43,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+356fb22d-1831-49c9-907d-a56a28724c40,8221 5th Ave NE Apartments,26,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+36992fdf-f1c0-4ece-98e4-0c599c252aa8,Hive Apartments,45,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+3c64a273-bdf2-4dab-af90-8d3ac1733057,Latona: 81st to 85th,35,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+418e3e75-d917-4a81-83ac-78115b93b393,84th: 5th to Roosevelt,55,2025-11-12 02:40:49.561317+00,Single family residences,ea12d6d4-4191-4cf1-965c-15393f586888,raul.vejar@gmail.com,,,,false
+44fbd79f-425f-4819-b7cf-89260c25aab0,Maple Leaf Veterinary Care Center,10,2025-11-12 02:40:49.561317+00,Businesses,df259a3e-8697-48fa-958f-5cc025d5ee36,cameraone@prodigy.net,,,,false
+4ab6f1ca-1cdb-452c-b1ef-bfa4559a4c84,79th: 8th to Roosevelt,10,2025-11-12 02:40:49.561317+00,Single family residences,9c8df363-fb11-46b9-8f4d-e71e5a9dece5,joangoodman@centurylink.net,,,,false
+4b17d99d-1966-4799-ba50-75a80b11ab89,Guillemot Condos,12,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+4be97b31-e0c7-4a65-80ed-5bc60596499a,91st: Roosevelt to 15th,36,2025-11-12 02:40:49.561317+00,Single family residences,4aec410f-ff59-4227-b334-0848bdcd003c,dbrittrn@gmail.com,,,,false
+4c6ab1cd-19f6-4e32-98ea-f06649ef71da,102nd: 5th to 8th,20,2025-11-12 02:40:49.561317+00,Single family residences,868c9779-1ee3-4700-bf6c-0b65ae4f92cc,info@mathnificent.com,,,,false
+4e9363dd-4cd7-48d9-99b2-d74c0474f36f,77th: Banner to 8th,15,2025-11-12 02:40:49.561317+00,Single family residences,50ebedd9-3ac9-495e-a409-744d2f4d28eb,janafry28@gmail.com,,,,false
+4f850860-023a-4abc-817d-22c3c95429c2,90th: 5th to Roosevelt,45,2025-11-12 02:40:49.561317+00,Single family residences,ebde2e2d-d79f-49d6-9192-1ed4c78b8196,mzsed@oz.net,,,,false
+50b259d6-c92e-4809-9be4-9ce2ba57a941,80th Roosevelt to Lake City Way,18,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+50de2b22-9e58-468e-974a-e6091290a906,94th: 15th to 20th,22,2025-11-12 02:40:49.561317+00,Single family residences,c2c3cbe4-e415-472a-9eb5-21e6fbe32a86,danaepmoore@gmail.com,,,,false
+5164e6c1-5951-47c0-8356-2feee7a880b4,103rd: 5th to Roosevelt,35,2025-11-12 02:40:49.561317+00,Single family residences,a00b41b6-0a91-4fa5-b05c-86131b2a9c9b,chadphelan@gmail.com,,,,false
+553bb081-4022-4b49-ac2b-62c2450584b9,Brooklyn: 80th to 82nd,28,2025-11-12 02:40:49.561317+00,Single family residences,ea12d6d4-4191-4cf1-965c-15393f586888,raul.vejar@gmail.com,,,,false
+56a1c613-5216-4062-9792-8d2338e2a7a0,17th Ave LCW to 86th (becomes 17th PL 85th to 86th),25,2025-11-12 02:40:49.561317+00,Single family residences,e0dbb51c-2196-404e-9d1b-6d087724e40e,teagan.george26@gmail.com,,,,false
+57297a32-e206-45b8-a5af-247dd8d7d79a,17th: 98th to Dead End (Ravine),17,2025-11-12 02:40:49.561317+00,Single family residences,914a6039-6707-4f22-bd93-1bfaba7d2760,nettasmith@comcast.net,,,,false
+577e21ce-6666-4101-ad6a-28b34f4ed640,90th: 1st to 5th,34,2025-11-12 02:40:49.561317+00,Single family residences,b9e018b3-2f4a-4803-aea3-0e62a95942ca,sdshelton@comcast.net,,,,false
+5975b21d-fb9c-46c8-a086-28737395ffa6,100th: 8th to Roosevelt,19,2025-11-12 02:40:49.561317+00,Single family residences,a70ea4d3-adf7-4daf-9fd3-390ee70d3451,Gjhenscheid@yahoo.com,,,,false
+5bac07e9-ffde-4b6a-ad6b-823e5bf502dd,97th: 15th to 19th,30,2025-11-12 02:40:49.561317+00,Single family residences,61e52f8b-4fbe-4229-9529-850f6a2e4aed,hollanddimaio@gmail.com,,,,false
+5c0edd20-2652-4f11-87fc-68f9a3e55fea,102nd: Roosevelt to 15th,45,2025-11-12 02:40:49.561317+00,Single family residences,7bea0c12-8fb8-41dc-b4ee-c928f91ed7bb,theresa3303@gmail.com,,,,false
+5daf82bf-4a48-4ac3-88cf-c63f90b4cb4e,85th: ML Park to LCW,15,2025-11-12 02:40:49.561317+00,Single family residences,8e135f97-de30-4153-9fb2-6c9a32f7aa75,scott.b.andrews@outlook.com,,,,false
+5f2b71aa-cafc-4c93-a52a-d208a3e17320,76th: Banner to 8th,10,2025-11-12 02:40:49.561317+00,Single family residences,50ebedd9-3ac9-495e-a409-744d2f4d28eb,janafry28@gmail.com,,,,false
+600b7043-627a-4b58-a601-f05a06c7d154,96th: 8th to Roosevelt,21,2025-11-12 02:40:49.561317+00,Single family residences,ad385f66-4008-4aaa-87c0-912ea2b99fc2,charleyzee@hotmail.com,,,,false
+610a5b95-419e-45bb-96b7-2d97165731a0,86th: 5th to Roosevelt,50,2025-11-12 02:40:49.561317+00,Single family residences,d576b604-e63b-4894-b1bd-f7b836889362,cdknut@comcast.net,,,,false
+61f70a34-3f55-44af-a1fa-40092a81821a,8261 5th Ave NE Apartments,6,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+622f5322-7e2c-4c7e-9935-7cd11a8b32e5,12th: LCW to 82nd,28,2025-11-12 02:40:49.561317+00,Single family residences,50ebedd9-3ac9-495e-a409-744d2f4d28eb,janafry28@gmail.com,,,,false
+62c98464-666c-4a64-a304-7b31b1217cbb,94th: 5th to Roosevelt,45,2025-11-12 02:40:49.561317+00,Single family residences,a61f1c3e-1eaf-4d53-91a4-0e11b2c2a7c8,dolphinbeach2015@gmail.com,,,,false
+682215d2-b0c3-490e-9008-a54c4863816b,Maple Court Condominiums,25,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+684d5891-6da4-4fe7-a4e9-743ef9b4eada,4th: 85th to 88th,17,2025-11-12 02:40:49.561317+00,Single family residences,607f2181-9118-42e8-bc8e-901f93cce5d9,mlgiordano1@gmail.com,,,,false
+6c055178-854e-478c-8e04-9b6d347a3b33,Northgate Plaza Condominiums,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+6cdadaa0-c3fe-40c6-8436-aee7dded9540,8315 5th Ave NE Apartments,12,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+6e78f6b0-f93e-4fe2-ab27-36205d924014,95th: 5th to Roosevelt,40,2025-11-12 02:40:49.561317+00,Single family residences,a61f1c3e-1eaf-4d53-91a4-0e11b2c2a7c8,dolphinbeach2015@gmail.com,,,,false
+6f2e6e64-2591-4bc8-8337-f2877014dc24,Cambridge Court Condos,40,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+6fbdc5f9-074a-4fc7-a799-4feeb2b8705d,102nd: 8th to Roosevelt,18,2025-11-12 02:40:49.561317+00,Single family residences,0707b9e1-43bd-4e9b-8f06-27e2d4ea67f3,caskeyrb@gmail.com,,,,false
+703a3f3f-fab1-4a4d-a023-0c560f30fe73,92nd: 5th to Roosevelt,42,2025-11-12 02:40:49.561317+00,Single family residences,f63fc66c-c5db-4737-bc66-c356b5b88d9e,tmatth@gmail.com,,,,false
+70ec8a37-b7c9-481d-a75c-48b4be180281,82nd: 5th to Roosevelt,47,2025-11-12 02:40:49.561317+00,Single family residences,385dc4c9-bc42-4a94-ab5e-308c18043478,billythompson508@gmail.com,,,,false
+71355544-ff25-4e75-b17e-6f2e985faecd,97th: 5th to Roosevelt,32,2025-11-12 02:40:49.561317+00,Single family residences,d78fab08-fcde-4f06-ae8e-a7d22ca93f17,Davis.wickwire@gmail.com,,,,false
+7703056a-72c1-4b4d-8e7f-baa906581543,8th: 103rd to 105th,15,2025-11-12 02:40:49.561317+00,Single family residences,a00b41b6-0a91-4fa5-b05c-86131b2a9c9b,chadphelan@gmail.com,,,,false
+77b321b4-ba1a-499c-b319-207adccd22e1,20th: 88th to 92nd,45,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+7af4e861-b215-4c66-bd09-a212009c7771,8th: 78th to 80th,8,2025-11-12 02:40:49.561317+00,Single family residences,2aa372e1-2c2f-4ed0-931e-a1e439763cef,rsletwin@yahoo.com,,,,false
+7afb6644-a2ad-4230-9388-3d3c3658f695,Javasti Coffee,15,2025-11-12 02:40:49.561317+00,Businesses,fea05631-26e3-49cd-a476-a2ecb28198d4,slandau6@gmail.com,,,,false
+7c2c860a-33e4-4495-a2e0-87456831c1b2,Crystal Court Apartments,15,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+7d928d0d-f129-4244-bba6-2f85dfe3452a,12th: 88th to 91st,30,2025-11-12 02:40:49.561317+00,Single family residences,df259a3e-8697-48fa-958f-5cc025d5ee36,cameraone@prodigy.net,,,,false
+7efd6d09-b2db-4dce-978b-2beb9964915a,79th: 5th to 8th,28,2025-11-12 02:40:49.561317+00,Single family residences,2220b414-d6d2-4da1-871b-9c262c0f0bab,caldartbrad@gmail.com,,,,false
+7f31ed6b-ce3d-4300-857e-b0ac53c08713,Roosevelt: 75th to 80th,47,2025-11-12 02:40:49.561317+00,Single family residences,50ebedd9-3ac9-495e-a409-744d2f4d28eb,janafry28@gmail.com,,,,false
+7f3cd438-730e-4a1e-8127-5312898c5d7d,100th: 5th to 8th,20,2025-11-12 02:40:49.561317+00,Single family residences,a70ea4d3-adf7-4daf-9fd3-390ee70d3451,Gjhenscheid@yahoo.com,,,,false
+7fc06b91-a199-4761-94dc-d00ebe650977,1st: 85th to 92nd,80,2025-11-12 02:40:49.561317+00,Single family residences,4898daa4-b535-4279-af56-eccfbb3da3b1,hollyreichmannyoung7@gmail.com,,,,false
+826bf6aa-2aae-426b-80bd-25dfafbd17ab,95th: Roosevelt to 15th,50,2025-11-12 02:40:49.561317+00,Single family residences,c2c3cbe4-e415-472a-9eb5-21e6fbe32a86,danaepmoore@gmail.com,,,,false
+83a72555-27fa-4d6a-9ea4-d52de97f6d8f,90th: Roosevelt to 15th,43,2025-11-12 02:40:49.561317+00,Single family residences,d576b604-e63b-4894-b1bd-f7b836889362,cdknut@comcast.net,,,,false
+84f62c0e-2a41-4921-9511-d65b31252a98,Lakeside North Condominiums,15,2025-11-12 02:40:49.561317+00,Apartments/Condos,3fb3f57a-e249-49a2-bf19-ae69d31e2aa6,roniq1212@yahoo.com,,,,false
+853a878f-bd00-406f-bdf0-12f2d4eac1df,Roosevelt: 102nd to Thornton Creek,24,2025-11-12 02:40:49.561317+00,Single family residences,7bea0c12-8fb8-41dc-b4ee-c928f91ed7bb,theresa3303@gmail.com,,,,false
+85fe2ab1-af02-40d5-be7e-3c869f60d260,103rd: Roosevelt to Dead End (formerly 15th),38,2025-11-12 02:40:49.561317+00,Single family residences,de9b8017-beeb-4eff-815e-2a13fa5563c7,nllbham77@gmail.com,,,,false
+883765bf-131c-42ee-96ae-868cf6acf9d4,98th: 20th to Lake City Way,17,2025-11-12 02:40:49.561317+00,Single family residences,914a6039-6707-4f22-bd93-1bfaba7d2760,nettasmith@comcast.net,,,,false
+8b4e0e49-8a89-410e-83b7-722aa3c2c67c,Ace Hardware,50,2025-11-12 02:40:49.561317+00,Businesses,8e135f97-de30-4153-9fb2-6c9a32f7aa75,scott.b.andrews@outlook.com,,,,false
+8bec5646-394c-4802-94d2-e99f16328e01,88th: 15th to 17th,31,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+8d5f5b9b-8d12-499b-8a01-5def7a9821cd,5th: 78th to 81th,40,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+951f38b2-23cf-45b8-99fc-a64fff483ebf,82nd: 2nd to 5th,37,2025-11-12 02:40:49.561317+00,Single family residences,2aa372e1-2c2f-4ed0-931e-a1e439763cef,rsletwin@yahoo.com,,,,false
+9721731f-c56b-40d5-aa23-548ccc93fa86,8301 5th Ave NE Apartments,6,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+99d636b2-6fcc-4ffc-8041-40bda0b49de7,20th: 92nd to 98th,38,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+9a9f3382-60cb-442f-9f54-05e89fa70f15,Ravine loop: 12th ave: 104th to 106th (street’s end) // 105th st. loop around 105th pl// 11th ave: 104th to 106th,48,2025-11-12 02:40:49.561317+00,Single family residences,2dbb878c-3f9d-4f2e-82dd-206d55d056c4,Kristin.jue@gmail.com,,,,false
+9bf00375-d910-4cb4-bfd7-957a1e3a05a6,14th: LCW to 85th,34,2025-11-12 02:40:49.561317+00,Single family residences,8e135f97-de30-4153-9fb2-6c9a32f7aa75,scott.b.andrews@outlook.com,,,,false
+9da2a05d-806e-4419-8678-e923c2b1fdc0,5th: 85th to 90th,40,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+9fad5e40-b1bd-4b7a-89a0-1ce906da81fd,15th: LCW to 85th,42,2025-11-12 02:40:49.561317+00,Single family residences,a13b3ef1-9396-436d-9113-beba4ee7eb99,mxcpence@gmail.com,,,,false
+a0311f22-1ff8-4369-b6e7-c06580f6cfab,5th Ave Manor Apartments,16,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+a43d6185-5fe8-4afb-a9be-42f6c7411baa,88th: Latona to 5th,20,2025-11-12 02:40:49.561317+00,Single family residences,a9644117-ce7d-4b6b-a824-4c838b1f7de5,heidi.tobaben@gmail.com,,,,false
+a5460496-20b9-4e71-9a21-f9178f3f4a44,11th: 80th to 82nd,25,2025-11-12 02:40:49.561317+00,Single family residences,57a08414-6c90-44c5-b8a8-2eee6e5095ab,seattlepeg@gmail.com,,,,false
+a8e29b0b-e471-4c07-9762-6879457c3b31,5th: 90th to 95th,45,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+a9279af6-e1dd-4d8e-816b-35a3608c4845,94th: Roosevelt to 15th,43,2025-11-12 02:40:49.561317+00,Single family residences,c2c3cbe4-e415-472a-9eb5-21e6fbe32a86,danaepmoore@gmail.com,,,,false
+a9ca04c8-6843-4f68-847e-6adc7cf16827,100th: Roosevelt to 12th,37,2025-11-12 02:40:49.561317+00,Single family residences,e174eb55-166f-4744-a80f-29601d16e46b,wilson5113@gmail.com,,,,false
+ae47251a-f3ad-4410-8f91-8c1ad4a3491f,12th: 91st to 98th,45,2025-11-12 02:40:49.561317+00,Single family residences,4aec410f-ff59-4227-b334-0848bdcd003c,dbrittrn@gmail.com,,,,false
+af6154f7-74b7-4365-9c4c-83cc3a00c89f,97th: 20th to 23rd,14,2025-11-12 02:40:49.561317+00,Single family residences,61e52f8b-4fbe-4229-9529-850f6a2e4aed,hollanddimaio@gmail.com,,,,false
+b08b6b8c-3463-4f84-a9e7-8c8714d75257,82nd: Roosevelt to 15th,13,2025-11-12 02:40:49.561317+00,Single family residences,8e135f97-de30-4153-9fb2-6c9a32f7aa75,scott.b.andrews@outlook.com,,,,false
+b279a7f6-2e76-4b1a-a5c7-3aeb01bdeb5d,Marco Apartments,25,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+b34b545a-0463-4ca2-ac4f-4bba41632b01,Roosevelt: 80th to 85th,30,2025-11-12 02:40:49.561317+00,Single family residences,50ebedd9-3ac9-495e-a409-744d2f4d28eb,janafry28@gmail.com,,,,false
+b51a8b39-ae81-46c8-805a-62fd3227a3b1,The Highlands Condominiums,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+b57173d2-f8ed-4565-9547-bc4996c0c21a,90th: 15th to LCW,32,2025-11-12 02:40:49.561317+00,Single family residences,64e7b4e2-4f77-4b9e-93cb-39efc8e11ff4,amswilcox@gmail.com,,,,false
+b88c5a89-d744-41ff-8ce0-4421d8a321ce,98th: 15th to 20th; 19th; AND 17th: 98th to 102nd,35,2025-11-12 02:40:49.561317+00,Single family residences,914a6039-6707-4f22-bd93-1bfaba7d2760,nettasmith@comcast.net,,,,false
+b8e0bd6f-ba9f-42f2-a723-2c80f4013276,97th: Roosevelt to 15th,45,2025-11-12 02:40:49.561317+00,Single family residences,61e52f8b-4fbe-4229-9529-850f6a2e4aed,hollanddimaio@gmail.com,,,,false
+b966accd-ae73-4d7c-9ef4-297b2c68296d,100th: 12th to Ravine,42,2025-11-12 02:40:49.561317+00,Single family residences,3a0db482-8df2-46dc-a7e4-44590b90847f,bsteffe@gmail.com,,,,false
+b9f61a8c-73d3-4455-8d49-e0d97a54bf26,85th: 1st to 5th,25,2025-11-12 02:40:49.561317+00,Single family residences,a9644117-ce7d-4b6b-a824-4c838b1f7de5,heidi.tobaben@gmail.com,,,,false
+ba8e25c8-9f02-45be-8c3c-55b12ed91832,Highland Terrace Condominiums,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+ba9d9a76-5f7a-4f89-b8f7-2e977a458d85,Aegis Senior Living,48,2025-11-12 02:40:49.561317+00,Businesses,8e135f97-de30-4153-9fb2-6c9a32f7aa75,scott.b.andrews@outlook.com,,,,false
+bc6a4c56-145d-42a9-8906-194e25a5a5c7,8409 5th Ave NE Apartments,8,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+bd42b240-8a01-46a2-8141-02f7ea1d0dbe,8320 5th Ave NE Apartments,8,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+bd81f2da-0809-4173-987e-2c0ccd827de8,78th: 5th to Roosevelt,40,2025-11-12 02:40:49.561317+00,Single family residences,591906b1-e309-4f67-9f29-370a634f240e,kileimus@gmail.com,,,,false
+bf64f142-a2cc-4a5f-9cd9-7bc410c7bbd0,Lower Maple Leaf Below 75th,14,2025-11-12 02:40:49.561317+00,Single family residences,4898daa4-b535-4279-af56-eccfbb3da3b1,hollyreichmannyoung7@gmail.com,,,,false
+bfcdd321-5af7-4ffa-bf89-98d4958ae359,98th: 5th to Roosevelt,32,2025-11-12 02:40:49.561317+00,Single family residences,56425b5a-f830-4eec-8bbb-5e531bba5b27,stefanh@windermere.com,,,,false
+c398756d-7207-4539-89fb-2fcb4afbaa34,81st: Latona to 5th,12,2025-11-12 02:40:49.561317+00,Single family residences,2aa372e1-2c2f-4ed0-931e-a1e439763cef,rsletwin@yahoo.com,,,,false
+c5bbf716-b15f-4ec9-85cb-e11d5613b705,2nd: 82nd to 89th,46,2025-11-12 02:40:49.561317+00,Single family residences,f8ad7b94-1629-48c7-8831-01fabcaa97f8,kimberlybdecker@gmail.com,,,,false
+c5c021ee-41d1-4bda-a471-baa6e2b74d6f,86th: 14th to 15th,12,2025-11-12 02:40:49.561317+00,Single family residences,df259a3e-8697-48fa-958f-5cc025d5ee36,cameraone@prodigy.net,,,,false
+c714d168-f04b-4f59-8975-6ee15379c829,12th: 98th to 104th,17,2025-11-12 02:40:49.561317+00,Single family residences,a00b41b6-0a91-4fa5-b05c-86131b2a9c9b,chadphelan@gmail.com,,,,false
+c79bdfb0-4868-4f5c-a362-b61ed8c2f399,91st: 1st to 5th,51,2025-11-12 02:40:49.561317+00,Single family residences,9c8df363-fb11-46b9-8f4d-e71e5a9dece5,joangoodman@centurylink.net,,,,false
+c7b8a6d0-d25a-4b8a-983b-41d4fd078d07,102nd: 15th to Dead End,20,2025-11-12 02:40:49.561317+00,Single family residences,92599ac6-9f16-412c-8bb4-bb8684020331,bjcummings@aol.com,,,,false
+c9142dda-23e4-4b01-b54a-7e0429a87eb8,17th Ave: 85th to 91st,46,2025-11-12 02:40:49.561317+00,Single family residences,e0dbb51c-2196-404e-9d1b-6d087724e40e,teagan.george26@gmail.com,,,,false
+c9704601-2772-4e52-a6c4-7ea7783bfec9,98th: Roosevelt to 15th,50,2025-11-12 02:40:49.561317+00,Single family residences,56425b5a-f830-4eec-8bbb-5e531bba5b27,stefanh@windermere.com,,,,false
+ca0b601e-acee-42b7-ae97-901d1023bdf0,96th: W of 17th (deadend) to 96th E of 20th (spur),32,2025-11-12 02:40:49.561317+00,Single family residences,ec60d6f0-00fc-46ae-80d1-298e4f217eaf,kaitlyn.c.phillips@outlook.com,,,,false
+cab51984-611d-480a-8cf0-972467904207,"3rd, 4th & 5th North of 95th",23,2025-11-12 02:40:49.561317+00,Single family residences,17090591-0c3d-47eb-9290-556223168235,cmsyrjala@gmail.com,,,,false
+cc43afa7-8c93-494e-aaea-43e44f7b6086,11th: LCW to 80th,46,2025-11-12 02:40:49.561317+00,Single family residences,f00f8a7c-590c-4772-aef5-4044590625ef,langerphelps1995@yahoo.com,,,,false
+d4c3277a-881a-4559-8f83-6523b60ade88,91st: 5th to Roosevelt,54,2025-11-12 02:40:49.561317+00,Single family residences,9c8df363-fb11-46b9-8f4d-e71e5a9dece5,joangoodman@centurylink.net,,,,false
+d5d5fc68-a94f-4fe9-ad7c-aed40dc3bdeb,88th: 17th to 20th,19,2025-11-12 02:40:49.561317+00,Single family residences,,,,,,false
+d7330cb8-0ca7-44db-a503-d388deed2958,89th: 5th to Roosevelt,44,2025-11-12 02:40:49.561317+00,Single family residences,2b8c9419-63da-4314-8173-206b5d50cf8a,mollymooregomes@gmail.com,,,,false
+d950631c-8285-4f5b-80bb-49fd5e1f95a6,92nd: 1st to 5th,44,2025-11-12 02:40:49.561317+00,Single family residences,ec69a96a-eaa0-47f6-b45f-0b85b369b6c1,erintroedson@gmail.com,,,,false
+dce44264-9d60-49f9-8dbf-567f04bf0817,89th: Roosevelt to 15th,50,2025-11-12 02:40:49.561317+00,Single family residences,d576b604-e63b-4894-b1bd-f7b836889362,cdknut@comcast.net,,,,false
+e362dd0a-5b6b-4648-8d5c-5499eb0564a1,Math 'n' Stuff,30,2025-11-12 02:40:49.561317+00,Businesses,868c9779-1ee3-4700-bf6c-0b65ae4f92cc,info@mathnificent.com,,,,false
+e46a5b11-373d-4914-b56a-fd908bacc791,89th: 15th to LCW,45,2025-11-12 02:40:49.561317+00,Single family residences,4aec410f-ff59-4227-b334-0848bdcd003c,dbrittrn@gmail.com,,,,false
+e58645f9-5355-42de-b67d-e4ded53ffff9,Roosevelt: 92nd to 102nd,69,2025-11-12 02:40:49.561317+00,Single family residences,27e85827-d389-4344-abb6-485cfc2ed766,dakotaburgerhoff@gmail.com,,,,false
+e90ee1f7-9f51-498c-9303-97814427118b,94th: 1st to 5th,49,2025-11-12 02:40:49.561317+00,Single family residences,9b0c1ff5-cdbf-4182-b218-007370d9eb7a,karenacrosby@gmail.com,,,,false
+e9ca603f-e15d-4823-8339-9abc5f685214,106th: 11th Ave west until 10th pl (to dead end),13,2025-11-12 02:40:49.561317+00,Single family residences,de9b8017-beeb-4eff-815e-2a13fa5563c7,nllbham77@gmail.com,,,,false
+ed1ef53d-5fca-46b7-aa96-a21f2a9df63c,81st: 5th to Roosevelt,50,2025-11-12 02:40:49.561317+00,Single family residences,2aa372e1-2c2f-4ed0-931e-a1e439763cef,rsletwin@yahoo.com,,,,false
+f13bfddb-bb6d-437a-8df0-3a25be60f95d,91st: 15th to 20th,32,2025-11-12 02:40:49.561317+00,Single family residences,ec69a96a-eaa0-47f6-b45f-0b85b369b6c1,erintroedson@gmail.com,,,,false
+f1e7c21c-70c0-4558-8fd5-6cd7648e800a,La Romarr Apartments,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+f2224bec-41c1-46c6-b8c5-4fb9967e7bd4,88th: 5th to Roosevelt,36,2025-11-12 02:40:49.561317+00,Single family residences,7b33a646-ee36-4243-8423-331ea1162eeb,stefanh@windermere.com,,,,false
+f2b27bbc-8788-497a-a281-449d65f06080,2nd: 89th to 92nd,25,2025-11-12 02:40:49.561317+00,Single family residences,b9e018b3-2f4a-4803-aea3-0e62a95942ca,sdshelton@comcast.net,,,,false
+f2b2a3fc-bd36-4273-aeb3-227d56e45b53,96th: Roosevelt to deadend E. of 15th,50,2025-11-12 02:40:49.561317+00,Single family residences,d78fab08-fcde-4f06-ae8e-a7d22ca93f17,Davis.wickwire@gmail.com,,,,false
+f71f2514-5f63-4294-ab81-f5198f267cfa,Thornton Creek Apartments,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+f87f9fd3-6773-4d17-a072-25681ba09099,88th: Roosevelt to 15th,46,2025-11-12 02:40:49.561317+00,Single family residences,df259a3e-8697-48fa-958f-5cc025d5ee36,cameraone@prodigy.net,,,,false
+f9465fbf-39f5-464e-9828-3f6b7215019e,105th: Roosevelt to 11th (inc alley),13,2025-11-12 02:40:49.561317+00,Single family residences,3f9e62d5-0841-4855-96f8-4d9f078b962f,family@mattera.io,,,,false
+fa6eebdd-74b7-43c2-9a30-13aedd88fbca,80th: 5th to Roosevelt,48,2025-11-12 02:40:49.561317+00,Single family residences,4fe5f4d4-0b5d-4505-9fe4-98ae7bf20e2f,eshalom75@gmail.com,,,,false
+fad7e5e2-de39-4591-a013-31a73a507a6d,19th: 97th to 98th,12,2025-11-12 02:40:49.561317+00,Single family residences,914a6039-6707-4f22-bd93-1bfaba7d2760,nettasmith@comcast.net,,,,false
+fbdbed4a-d982-4047-94f2-f39536663708,Maple Leaf Park Box,50,2025-11-12 02:40:49.561317+00,Businesses,34aba2b4-35ed-4586-b188-0a6151e2f07d,agassett@gmail.com,,,,false
+fc7b99bb-7dd8-4681-a8ef-1629c143e995,8th: 81st to 89th,41,2025-11-12 02:40:49.561317+00,Single family residences,7b33a646-ee36-4243-8423-331ea1162eeb,kionewong@gmail.com,,,,false
+ff3c639b-17ac-4d4d-8a92-1a87a9b7ef33,Westbury Terrace Condominiums,0,2025-11-12 02:40:49.561317+00,Apartments/Condos,,,,,,false
+ff8fc968-a64a-4b58-9073-169acb66183b,92nd: 17th to 20th,25,2025-11-12 02:40:49.561317+00,Single family residences,ec69a96a-eaa0-47f6-b45f-0b85b369b6c1,erintroedson@gmail.com,,,,false

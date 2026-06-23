@@ -1,0 +1,6 @@
+-- Load tasks (3 rows)
+-- Run on NEW database after 01_setup_schema.sql
+
+INSERT INTO public.tasks (id, context, context_id, template_id, title, description, offset_days, is_complete, completed_at, created_at) VALUES ('01fff89a-aae9-4b1f-9ced-3a3913f94133'::uuid, 'leaflet', 'c291cb16-72e4-44a7-a5f7-830d575b39c3'::uuid, '6196c619-fc32-4605-9801-8bd9e563403d'::uuid, 'Example task three', 'Placeholder — replace with real checklist item.', '-7', 'false', NULL, '2026-06-22 17:24:17.119377+00'::timestamptz);
+INSERT INTO public.tasks (id, context, context_id, template_id, title, description, offset_days, is_complete, completed_at, created_at) VALUES ('6ad394e9-cfb4-493f-8310-b01d62338397'::uuid, 'leaflet', 'c291cb16-72e4-44a7-a5f7-830d575b39c3'::uuid, 'd84ce7e4-a0a3-4eb7-828c-126e0c2a2e6f'::uuid, 'Example task one', 'Placeholder — replace with real checklist item.', '-42', 'false', NULL, '2026-06-22 17:24:17.119377+00'::timestamptz);
+INSERT INTO public.tasks (id, context, context_id, template_id, title, description, offset_days, is_complete, completed_at, created_at) VALUES ('a88fa9ef-b423-40e5-8b49-942ee8202ff9'::uuid, 'leaflet', 'c291cb16-72e4-44a7-a5f7-830d575b39c3'::uuid, 'e28300ce-ce4a-4fd9-8d1e-df86399eee78'::uuid, 'Example task two', 'Placeholder — replace with real checklist item.', '-14', 'false', NULL, '2026-06-22 17:24:17.119377+00'::timestamptz);

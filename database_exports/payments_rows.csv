@@ -1,0 +1,2 @@
+id,person_id,membership_id,amount,date,memo,type,method,stripe_transaction_id
+49e93252-13d7-4ed7-b88c-12e40edce370,,,1.00,2025-11-12,,donation,check,

@@ -1,0 +1,3 @@
+-- Paste INSERT statements exported from SOURCE for: user_roles
+-- (from SOURCE_02_export_all_inserts.sql)
+-- Run on TARGET after 20_auth_users.sql
