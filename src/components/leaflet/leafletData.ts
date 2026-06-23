@@ -459,7 +459,9 @@ export function mapSponsors(
         ? "Paid"
         : s.status === "pledged"
           ? "Pledged"
-          : "Previous",
+          : s.status === "invoiced"
+            ? "Invoiced"
+            : "Previous",
   }));
 }
 

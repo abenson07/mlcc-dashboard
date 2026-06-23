@@ -1,7 +1,7 @@
 import type { Events, Sponsorships } from "@/types/database";
 import { buildSponsorshipTiers } from "@/components/leaflet/leafletData";
 
-export type EventKind = "council" | "external";
+export type EventKind = "council" | "external" | "committee_meeting";
 
 /** Conventional keys stored in `events.field_data` jsonb. */
 export type EventFieldData = {
@@ -11,6 +11,7 @@ export type EventFieldData = {
   image_url?: string;
   description?: string;
   kind?: EventKind;
+  committee?: string;
   qr_code_id?: string;
   webflow_item_id?: string;
   address?: string;
@@ -29,6 +30,7 @@ export type EventListItem = {
   daysUntil: number;
   distributionLabel: string;
   kind: EventKind;
+  committee?: string;
 };
 
 export type EventEdition = {
@@ -56,7 +58,15 @@ export function parseEventFieldData(raw: Record<string, unknown> | null | undefi
     capacity: typeof fd.capacity === "number" ? fd.capacity : undefined,
     image_url: typeof fd.image_url === "string" ? fd.image_url : undefined,
     description: typeof fd.description === "string" ? fd.description : undefined,
-    kind: fd.kind === "external" ? "external" : fd.kind === "council" ? "council" : undefined,
+    kind:
+      fd.kind === "external"
+        ? "external"
+        : fd.kind === "committee_meeting"
+          ? "committee_meeting"
+          : fd.kind === "council"
+            ? "council"
+            : undefined,
+    committee: typeof fd.committee === "string" ? fd.committee : undefined,
     qr_code_id: typeof fd.qr_code_id === "string" ? fd.qr_code_id : undefined,
     webflow_item_id: typeof fd.webflow_item_id === "string" ? fd.webflow_item_id : undefined,
     address: typeof fd.address === "string" ? fd.address : undefined,
@@ -153,6 +163,7 @@ export function mapEventListItem(row: Events): EventListItem {
     daysUntil: daysUntilEvent(iso),
     distributionLabel: formatEventDateRange(row),
     kind: fieldData.kind ?? "council",
+    committee: fieldData.committee,
   };
 }
 

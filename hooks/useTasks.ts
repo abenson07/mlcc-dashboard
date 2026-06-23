@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabaseClient";
-import type { Tasks, TasksUpdate } from "@/types/database";
+import type { Tasks, TasksInsert, TasksUpdate } from "@/types/database";
 
 export function taskDueDate(distributionDate: string, offsetDays: number): Date {
   const d = new Date(`${distributionDate}T00:00:00`);
@@ -10,28 +10,37 @@ export function taskDueDate(distributionDate: string, offsetDays: number): Date 
   return d;
 }
 
-export function useTasks(leafletId: string | null, distributionDate: string | null) {
+export type TaskContext = "leaflet" | "event";
+
+type UseTasksOptions = {
+  context: TaskContext;
+  contextId: string | null;
+  anchorDate: string | null;
+};
+
+export function useTasks(options: UseTasksOptions) {
+  const { context, contextId, anchorDate } = options;
   const queryClient = useQueryClient();
 
   const { data: tasks = [], isLoading, error, refetch } = useQuery({
-    queryKey: ["tasks", "leaflet", leafletId],
+    queryKey: ["tasks", context, contextId],
     queryFn: async () => {
-      if (!supabaseClient || !leafletId) return [];
+      if (!supabaseClient || !contextId) return [];
       const { data, error: qError } = await supabaseClient
         .from("tasks")
         .select("*")
-        .eq("context", "leaflet")
-        .eq("context_id", leafletId);
+        .eq("context", context)
+        .eq("context_id", contextId);
       if (qError) throw qError;
       const rows = (data ?? []) as Tasks[];
-      if (!distributionDate) return rows;
+      if (!anchorDate) return rows;
       return [...rows].sort(
         (a, b) =>
-          taskDueDate(distributionDate, a.offset_days).getTime() -
-          taskDueDate(distributionDate, b.offset_days).getTime(),
+          taskDueDate(anchorDate, a.offset_days).getTime() -
+          taskDueDate(anchorDate, b.offset_days).getTime(),
       );
     },
-    enabled: Boolean(leafletId),
+    enabled: Boolean(contextId),
   });
 
   const openCount = tasks.filter((t) => !t.is_complete).length;
@@ -49,7 +58,27 @@ export function useTasks(leafletId: string | null, distributionDate: string | nu
       return data as Tasks;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "leaflet", leafletId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", context, contextId] });
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (payload: Omit<TasksInsert, "context" | "context_id">) => {
+      if (!supabaseClient || !contextId) throw new Error("Supabase client is not initialized");
+      const { data, error: iError } = await supabaseClient
+        .from("tasks")
+        .insert({
+          ...payload,
+          context,
+          context_id: contextId,
+        })
+        .select()
+        .single();
+      if (iError) throw iError;
+      return data as Tasks;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", context, contextId] });
     },
   });
 
@@ -70,6 +99,9 @@ export function useTasks(leafletId: string | null, distributionDate: string | nu
           completed_at: next ? new Date().toISOString() : null,
         },
       });
+    },
+    createTask: async (payload: { title: string; offset_days: number; description?: string | null }) => {
+      return createMutation.mutateAsync(payload);
     },
   };
 }

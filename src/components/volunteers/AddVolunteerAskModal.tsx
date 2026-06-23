@@ -55,6 +55,9 @@ interface AddVolunteerAskModalProps {
   onClose: () => void;
   onCreated?: () => void;
   ask?: VolunteerAskWithSignups | null;
+  /** When set, links ask to this Supabase event and hides Webflow event picker. */
+  eventId?: string | null;
+  eventLabel?: string | null;
 }
 
 export default function AddVolunteerAskModal({
@@ -62,15 +65,18 @@ export default function AddVolunteerAskModal({
   onClose,
   onCreated,
   ask = null,
+  eventId = null,
+  eventLabel = null,
 }: AddVolunteerAskModalProps) {
   const isEdit = ask != null;
+  const presetEvent = Boolean(eventId);
 
   const {
     data: webflowEvents,
     isLoading: eventsLoading,
     isError: eventsError,
     error: eventsErrorDetail,
-  } = useWebflowEvents({ enabled: isOpen });
+  } = useWebflowEvents({ enabled: isOpen && !presetEvent });
 
   const [form, setForm] = useState<FormState>(initialForm);
   const [formKey, setFormKey] = useState(0);
@@ -141,15 +147,20 @@ export default function AddVolunteerAskModal({
     setSubmitting(true);
     setError(null);
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         title,
         description: form.description.trim() || null,
         commitment_type: form.commitment_type,
         commitment_unit: form.commitment_unit,
         commitment_quantity: commitmentQty,
         quantity: slots,
-        webflowEventItemId: form.webflow_event_id.trim() || null,
       };
+
+      if (presetEvent && eventId) {
+        payload.event_id = eventId;
+      } else {
+        payload.webflowEventItemId = form.webflow_event_id.trim() || null;
+      }
 
       const url = isEdit
         ? `${getApiBase()}/api/volunteers/asks/${encodeURIComponent(ask!.id)}`
@@ -309,26 +320,35 @@ export default function AddVolunteerAskModal({
             </p>
           </div>
 
-          <div className="col-span-1 sm:col-span-2">
-            <Label>Event (optional)</Label>
-            {eventsLoading ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">Loading events…</p>
-            ) : eventsError ? (
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {eventsErrorDetail instanceof Error
-                  ? eventsErrorDetail.message
-                  : "Could not load events from Webflow."}
-              </p>
-            ) : (
-              <Select
-                key={`event-${formKey}`}
-                defaultValue={form.webflow_event_id}
-                placeholder="No linked event"
-                options={eventOptions}
-                onChange={(v) => update("webflow_event_id", v)}
-              />
-            )}
-          </div>
+          {!presetEvent && (
+            <div className="col-span-1 sm:col-span-2">
+              <Label>Event (optional)</Label>
+              {eventsLoading ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">Loading events…</p>
+              ) : eventsError ? (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {eventsErrorDetail instanceof Error
+                    ? eventsErrorDetail.message
+                    : "Could not load events from Webflow."}
+                </p>
+              ) : (
+                <Select
+                  key={`event-${formKey}`}
+                  defaultValue={form.webflow_event_id}
+                  placeholder="No linked event"
+                  options={eventOptions}
+                  onChange={(v) => update("webflow_event_id", v)}
+                />
+              )}
+            </div>
+          )}
+
+          {presetEvent && eventLabel ? (
+            <div className="col-span-1 sm:col-span-2">
+              <Label>Event</Label>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{eventLabel}</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-8 flex items-center justify-end gap-3">

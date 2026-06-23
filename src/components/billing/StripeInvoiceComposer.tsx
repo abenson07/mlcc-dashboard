@@ -403,17 +403,26 @@ function BusinessCustomerEmailField({
   );
 }
 
-export default function StripeInvoiceComposer() {
+export default function StripeInvoiceComposer({
+  fixedEventId,
+  fixedEventLabel,
+  onIssued,
+}: {
+  fixedEventId?: string;
+  fixedEventLabel?: string;
+  onIssued?: (invoiceId: string) => void;
+} = {}) {
   const router = useRouter();
+  const presetEvent = Boolean(fixedEventId);
   const {
     data: eventsData,
     isLoading: eventsLoading,
     error: eventsError,
-  } = useWebflowEvents();
+  } = useWebflowEvents({ enabled: !presetEvent });
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [category, setCategory] = useState<"event" | "leaflet">("event");
-  const [eventId, setEventId] = useState("");
+  const [eventId, setEventId] = useState(fixedEventId ?? "");
   const [dueDate, setDueDate] = useState("");
   const [memo, setMemo] = useState("");
   const [lines, setLines] = useState<LineRow[]>([
@@ -425,6 +434,10 @@ export default function StripeInvoiceComposer() {
     },
   ]);
   const [issuing, setIssuing] = useState(false);
+
+  useEffect(() => {
+    if (fixedEventId) setEventId(fixedEventId);
+  }, [fixedEventId]);
 
   const eventOptions = useMemo(() => {
     if (!eventsData?.items) return [];
@@ -538,13 +551,15 @@ export default function StripeInvoiceComposer() {
       return;
     }
 
+    const resolvedEventId = presetEvent ? (fixedEventId ?? eventId.trim()) : eventId.trim();
+
     const body: Record<string, unknown> = {
       email: em,
       lineItems,
       category,
     };
     if (category === "event") {
-      body.eventId = eventId.trim();
+      body.eventId = resolvedEventId;
     }
     const nm = name.trim();
     if (nm) body.name = nm;
@@ -565,7 +580,11 @@ export default function StripeInvoiceComposer() {
         throw new Error(data.error || "Could not issue invoice.");
       }
       toast.success(`Invoice sent (${data.id}).`);
-      router.push(`/sponsorship/invoices/${encodeURIComponent(data.id)}`);
+      if (onIssued) {
+        onIssued(data.id);
+      } else {
+        router.push(`/sponsorship/invoices/${encodeURIComponent(data.id)}`);
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not issue invoice.");
     } finally {
@@ -608,28 +627,26 @@ export default function StripeInvoiceComposer() {
                 className="mt-2 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-400"
               />
             </div>
-            <div className="sm:col-span-2">
-              <Label htmlFor="inv-category">Sponsorship category</Label>
-              <select
-                id="inv-category"
-                value={category}
-                onChange={(e) => {
-                  const next =
-                    e.target.value === "leaflet" ? "leaflet" : "event";
-                  setCategory(next);
-                  if (next === "leaflet") setEventId("");
-                }}
-                className="mt-2 h-11 w-full max-w-md rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-blue-400"
-              >
-                <option value="event">Event Sponsorship</option>
-                <option value="leaflet">Leaflet Sponsorship</option>
-              </select>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Stored as Stripe invoice metadata (Created: Dashboard; Created by:
-                your account name).
-              </p>
-            </div>
-            {category === "event" ? (
+            {!presetEvent && (
+              <div className="sm:col-span-2">
+                <Label htmlFor="inv-category">Sponsorship category</Label>
+                <select
+                  id="inv-category"
+                  value={category}
+                  onChange={(e) => {
+                    const next =
+                      e.target.value === "leaflet" ? "leaflet" : "event";
+                    setCategory(next);
+                    if (next === "leaflet") setEventId("");
+                  }}
+                  className="mt-2 h-11 w-full max-w-md rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-blue-400"
+                >
+                  <option value="event">Event Sponsorship</option>
+                  <option value="leaflet">Leaflet Sponsorship</option>
+                </select>
+              </div>
+            )}
+            {category === "event" && !presetEvent ? (
               <div className="sm:col-span-2">
                 <Label htmlFor="inv-event">Event</Label>
                 <select
@@ -664,6 +681,12 @@ export default function StripeInvoiceComposer() {
                     event id and name.
                   </p>
                 )}
+              </div>
+            ) : null}
+            {presetEvent && fixedEventLabel ? (
+              <div className="sm:col-span-2">
+                <Label>Event</Label>
+                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{fixedEventLabel}</p>
               </div>
             ) : null}
           </div>

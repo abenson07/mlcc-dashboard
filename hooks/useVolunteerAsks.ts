@@ -111,8 +111,9 @@ export function useVolunteerAsks({
     enabled: autoFetch,
   });
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: VOLUNTEER_ASKS_QUERY_KEY });
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ["volunteer_asks"] });
+  };
 
   const createAskMutation = useMutation({
     mutationFn: async (payload: VolunteerAsksInsert) => {

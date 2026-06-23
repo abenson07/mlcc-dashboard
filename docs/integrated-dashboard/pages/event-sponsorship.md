@@ -3,7 +3,7 @@
 > **Route:** `/events-hub/[eventId]/sponsorship`  
 > **Component:** `src/components/integrated/events/EventSponsorshipPageContent.tsx`  
 > **Design node:** `p143P`  
-> **Status:** Mock data; **leaflet sponsorship page is fully wired — reuse patterns**
+> **Status:** Wired — `EventContext` + `useEventSponsorships` + Stripe invoices + add sponsor / issue invoice
 
 ---
 

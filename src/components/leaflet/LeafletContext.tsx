@@ -149,7 +149,11 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     loading: tasksLoading,
     toggleComplete,
     refetch: refetchTasks,
-  } = useTasks(leafletId, leaflet?.distribution_date ?? null);
+  } = useTasks({
+    context: "leaflet",
+    contextId: leafletId,
+    anchorDate: leaflet?.distribution_date ?? null,
+  });
 
   const { settings: commSettings, refetch: refetchComm } = useCommSettings("leaflet");
 

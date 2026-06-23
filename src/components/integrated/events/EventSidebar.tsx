@@ -13,6 +13,7 @@ import {
 } from "@/components/leaflet/icons";
 import SidebarSettingsNavItem from "../SidebarSettingsNavItem";
 import EventSelector from "./EventSelector";
+import { useEventContext } from "./EventContext";
 
 const EVENT_NAV = [
   { label: "Overview", href: "overview", icon: IconLayoutDashboard },
@@ -23,15 +24,23 @@ const EVENT_NAV = [
   { label: "Schedule", href: "schedule", icon: IconCalendarNav },
 ] as const;
 
+const COMMITTEE_NAV = [
+  { label: "Overview", href: "overview", icon: IconLayoutDashboard },
+  { label: "Meeting details", href: "details", icon: IconFileTextNav },
+] as const;
+
 export default function EventSidebar({ eventId }: { eventId: string }) {
   const pathname = usePathname();
+  const { event } = useEventContext();
+  const isCommitteeMeeting = event?.kind === "committee_meeting";
+  const navItems = isCommitteeMeeting ? COMMITTEE_NAV : EVENT_NAV;
 
   return (
     <>
       <EventSelector eventId={eventId} />
       <aside className="lf-sidebar">
         <nav className="lf-sidebar-nav" aria-label="Event sections">
-          {EVENT_NAV.map(({ label, href, icon: Icon }) => {
+          {navItems.map(({ label, href, icon: Icon }) => {
             const fullHref = `/events-hub/${eventId}/${href}`;
             const active = pathname?.startsWith(fullHref);
             return (

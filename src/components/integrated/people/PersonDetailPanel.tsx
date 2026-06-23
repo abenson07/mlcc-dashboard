@@ -1,30 +1,42 @@
 "use client";
 
+import { useState } from "react";
 import { IconMail, IconMapPin } from "@/components/leaflet/icons";
 import { IconClose } from "@/components/leaflet/routes/leafletIcons";
+import { usePeople, useRoutes } from "hooks";
 import type { PersonWithMembership } from "hooks";
-import { formatDisplayDate, personStatusLabel } from "./peopleFilters";
+import {
+  formatDisplayDate,
+  personDetailSubtitle,
+  personMemberSinceDate,
+  personMembershipTierLabel,
+} from "./peopleFilters";
 
 type PersonDetailPanelProps = {
   person: PersonWithMembership;
   onClose: () => void;
+  onUpdated?: () => void;
 };
 
-export default function PersonDetailPanel({ person, onClose }: PersonDetailPanelProps) {
-  const status = personStatusLabel(person);
-  const memberSince = formatDisplayDate(
-    person.membership?.start_date ?? person.created_at ?? undefined
-  );
-  const roleLabel = person.roles?.[0] ?? "Neighbor";
+export default function PersonDetailPanel({ person, onClose, onUpdated }: PersonDetailPanelProps) {
+  const { update } = usePeople({ autoFetch: false });
+  const [boardSaving, setBoardSaving] = useState(false);
+  const isExecutiveBoard = person.is_executive_board ?? false;
+  const membershipStatus = person.membership?.status ?? "Non-member";
+  const subtitle = personDetailSubtitle(person);
+  const memberSince = formatDisplayDate(personMemberSinceDate(person) ?? undefined);
+
+  const { routes, loading: routesLoading } = useRoutes({
+    autoFetch: true,
+    filters: { delivererId: person.id },
+  });
 
   return (
     <aside className="lf-person-detail">
       <div className="lf-person-detail-header">
         <div>
           <h2 className="lf-person-detail-name">{person.full_name ?? "—"}</h2>
-          <p className="lf-meta">
-            {roleLabel} · Member since {memberSince}
-          </p>
+          {subtitle ? <p className="lf-meta">{subtitle}</p> : null}
         </div>
         <button
           type="button"
@@ -69,11 +81,11 @@ export default function PersonDetailPanel({ person, onClose }: PersonDetailPanel
         <div className="lf-card-body">
           <div className="lf-detail-row">
             <span className="lf-detail-label">Status</span>
-            <span className="lf-status-badge lf-status-badge--green">{status}</span>
+            <span className="lf-status-badge lf-status-badge--green">{membershipStatus}</span>
           </div>
           <div className="lf-detail-row">
             <span className="lf-detail-label">Type</span>
-            <span>{person.membership?.tier ?? "—"}</span>
+            <span>{personMembershipTierLabel(person)}</span>
           </div>
           <div className="lf-detail-row">
             <span className="lf-detail-label">Member since</span>
@@ -85,6 +97,49 @@ export default function PersonDetailPanel({ person, onClose }: PersonDetailPanel
           </div>
         </div>
       </section>
+
+      <section className="lf-detail-card">
+        <div className="lf-card-header">
+          <span className="lf-card-title">Council roles</span>
+        </div>
+        <div className="lf-card-body">
+          <label className="lf-task-box">
+            <input
+              type="checkbox"
+              checked={isExecutiveBoard}
+              disabled={boardSaving}
+              onChange={async (e) => {
+                setBoardSaving(true);
+                try {
+                  await update(person.id, { is_executive_board: e.target.checked });
+                  onUpdated?.();
+                } finally {
+                  setBoardSaving(false);
+                }
+              }}
+            />
+            <span>Executive board (default attendee for board meetings)</span>
+          </label>
+        </div>
+      </section>
+
+      {routesLoading ? null : routes.length > 0 ? (
+        <section className="lf-detail-card">
+          <div className="lf-card-header">
+            <span className="lf-card-title">Leaflet routes</span>
+          </div>
+          <div className="lf-card-body">
+            {routes.map((route) => (
+              <div key={route.id} className="lf-detail-row">
+                <span>{route.route_name}</span>
+                {route.leaflet_count != null ? (
+                  <span className="lf-meta">{route.leaflet_count} leaflets</span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </aside>
   );
 }

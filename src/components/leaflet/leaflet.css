@@ -300,7 +300,8 @@
 .lf-master-detail--wide { --lf-detail-width: 320px; }
 .lf-table-wrap { overflow: auto; }
 .lf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.lf-table thead th { padding: 8px 4px 8px 28px; text-align: left; font-size: 12px; font-weight: 400; color: var(--lf-text-subtle); }
+.lf-table thead th { padding: 8px 4px; text-align: left; font-size: 12px; font-weight: 400; color: var(--lf-text-subtle); }
+.lf-table thead th:first-child { padding-left: 28px; }
 .lf-table tbody tr { border-radius: 6px; cursor: pointer; }
 .lf-table tbody tr:hover { background: #fafafa; }
 .lf-table tbody tr.selected { background: #ebebec; }
@@ -356,8 +357,14 @@
 .lf-donation-amount { font-weight: 600; font-size: 13px; }
 
 /* Integrated dashboard — events list */
-.lf-events-centered { display: flex; justify-content: center; gap: 32px; padding: 8px 0; }
-.lf-events-list-col { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 20px; }
+.lf-events-centered { display: flex; justify-content: center; align-items: flex-start; gap: 48px; padding: 8px 0; }
+.lf-events-list-col { flex: 1; width: 100%; max-width: 640px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.lf-events-empty-box {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+  border: 1px dashed var(--lf-canvas-border); border-radius: 12px;
+  background: var(--lf-bg); padding: 24px 28px; max-width: 420px;
+}
+.lf-events-empty-box .lf-h2 { font-size: 16px; font-weight: 600; margin: 0; }
 .lf-event-month-label { font-size: 12px; font-weight: 600; color: var(--lf-text-muted); margin-bottom: 8px; }
 .lf-event-row { display: flex; align-items: center; gap: 16px; width: 100%; border: 1px solid var(--lf-canvas-border); border-radius: 10px; background: var(--lf-card); padding: 14px 16px; text-align: left; color: inherit; cursor: pointer; }
 .lf-event-row:hover { background: #fafafa; }
@@ -368,11 +375,16 @@
 .lf-event-row-body { flex: 1; min-width: 0; }
 .lf-event-row-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
 .lf-event-status-tag { font-size: 11px; font-weight: 500; color: var(--lf-text-muted); background: #f4f4f5; border-radius: 4px; padding: 2px 6px; }
-.lf-event-calendar { width: fit-content; flex-shrink: 0; border: 1px solid var(--lf-canvas-border); border-radius: 10px; background: var(--lf-card); padding: 16px; }
-.lf-event-calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-weight: 600; font-size: 14px; }
-.lf-event-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 12px; }
-.lf-event-calendar-dow { color: var(--lf-text-subtle); font-weight: 500; padding: 4px 0; }
-.lf-event-calendar-day { padding: 6px 0; border-radius: 6px; color: var(--lf-text-muted); border: none; background: transparent; cursor: pointer; font: inherit; }
+.lf-event-calendar {
+  width: 320px; min-width: 320px; flex-shrink: 0;
+  border: 1px solid var(--lf-canvas-border); border-radius: 12px;
+  background: var(--lf-card); padding: 20px 22px;
+}
+.lf-event-calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; font-weight: 600; font-size: 15px; min-width: 0; }
+.lf-event-calendar-header span { flex: 1; text-align: center; white-space: nowrap; }
+.lf-event-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 13px; }
+.lf-event-calendar-dow { color: var(--lf-text-subtle); font-weight: 500; padding: 6px 0; }
+.lf-event-calendar-day { padding: 8px 0; min-height: 36px; border-radius: 8px; color: var(--lf-text-muted); border: none; background: transparent; cursor: pointer; font: inherit; display: flex; align-items: center; justify-content: center; }
 .lf-event-calendar-day--has-event { font-weight: 700; color: var(--lf-text); }
 .lf-event-calendar-day--active { background: var(--lf-text); color: #fff; font-weight: 600; }
 

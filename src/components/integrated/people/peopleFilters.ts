@@ -81,10 +81,46 @@ export function businessStatusLabel(business: {
   return "Non-member";
 }
 
-export function personStatusLabel(person: {
-  membership?: { status?: string | null } | null;
+function formatMembershipTier(tier: string): string {
+  return tier
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+export function personMembershipTierLabel(person: {
+  membership?: { tier?: string | null } | null;
 }): string {
-  return person.membership?.status ?? "Non-member";
+  if (!person.membership?.tier) return "—";
+  return formatMembershipTier(person.membership.tier);
+}
+
+export function personStatusLabel(person: {
+  membership?: { status?: string | null; tier?: string | null } | null;
+}): string {
+  if (person.membership?.tier) {
+    return formatMembershipTier(person.membership.tier);
+  }
+  if (person.membership?.status) {
+    return person.membership.status;
+  }
+  return "Non-member";
+}
+
+export function personMemberSinceDate(person: {
+  membership?: { start_date?: string | null; last_renewal?: string | null } | null;
+}): string | null {
+  if (!person.membership) return null;
+  return person.membership.start_date ?? person.membership.last_renewal ?? null;
+}
+
+export function personDetailSubtitle(person: {
+  membership?: { start_date?: string | null; last_renewal?: string | null } | null;
+}): string | null {
+  const since = personMemberSinceDate(person);
+  if (!since) return null;
+  return `Member since ${formatDisplayDate(since)}`;
 }
 
 export function formatDisplayDate(dateString: string | null | undefined): string {

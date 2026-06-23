@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Input from "@/components/form/input/InputField";
@@ -11,20 +11,30 @@ type CreateEventModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (input: CreateEventPayload) => Promise<void>;
+  /** Prefill event name (e.g. from list search). */
+  initialName?: string;
 };
 
 export default function CreateEventModal({
   isOpen,
   onClose,
   onCreate,
+  initialName = "",
 }: CreateEventModalProps) {
   const { templates } = useEventTemplates({ autoFetch: isOpen });
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialName);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [templateId, setTemplateId] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(initialName);
+      setError(null);
+    }
+  }, [isOpen, initialName]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

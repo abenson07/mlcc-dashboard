@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { IconPlus } from "@/components/leaflet/icons";
+import ActionItemsTopbarMenu from "@/components/integrated/ActionItemsTopbarMenu";
 import CreateLeafletModal from "./overview/CreateLeafletModal";
 import { useLeafletContext } from "./LeafletContext";
 
@@ -53,6 +54,7 @@ export default function LeafletTopbar() {
       </nav>
       <div className="lf-topbar-spacer" />
       <div className="lf-topbar-controls">
+        <ActionItemsTopbarMenu />
         <Link href="/finance" className="lf-icon-btn" aria-label="Revenue dashboard">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />

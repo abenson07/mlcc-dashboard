@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useEvents } from "hooks";
+import { useEvents, createCommitteeMeetingApi, EVENTS_QUERY_KEY } from "hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { eventsOnCalendarDay, groupEventsByMonth } from "@/lib/events/eventData";
 import { IconPlus, IconSearch } from "@/components/leaflet/icons";
 import IntegratedTopbar from "../IntegratedTopbar";
 import CreateEventModal from "./CreateEventModal";
+import CreateCommitteeMeetingModal from "./CreateCommitteeMeetingModal";
 import EventsListSidebar from "./EventsListSidebar";
 
 function calendarCells(year: number, month: number) {
@@ -29,6 +31,9 @@ export default function EventsListPageContent() {
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [committeeCreateOpen, setCommitteeCreateOpen] = useState(false);
+  const [createInitialName, setCreateInitialName] = useState("");
+  const queryClient = useQueryClient();
 
   const { events, loading, error, create } = useEvents();
 
@@ -70,18 +75,46 @@ export default function EventsListPageContent() {
     router.push(`/events-hub/${event.id}/overview`);
   }
 
+  async function handleCreateCommitteeMeeting(
+    input: Parameters<typeof createCommitteeMeetingApi>[0],
+  ) {
+    const { event } = await createCommitteeMeetingApi(input);
+    await queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY });
+    router.push(`/events-hub/${event.id}/overview`);
+  }
+
+  function openCreateModal(prefillName = "") {
+    setCreateInitialName(prefillName);
+    setCreateOpen(true);
+  }
+
+  const searchTrimmed = search.trim();
+  const showEmptyState = !loading && filtered.length === 0;
+  const emptyFromFilters =
+    events.length > 0 &&
+    (searchTrimmed.length > 0 || status !== "all" || selectedDay != null);
+
   return (
     <>
       <IntegratedTopbar
         primaryAction={
-          <button
-            type="button"
-            className="lf-btn lf-btn--outline"
-            onClick={() => setCreateOpen(true)}
-          >
-            <IconPlus />
-            New event
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              className="lf-btn lf-btn--ghost"
+              onClick={() => setCommitteeCreateOpen(true)}
+            >
+              Committee meeting
+            </button>
+            <button
+              type="button"
+              className="lf-btn lf-btn--outline"
+              onClick={() => openCreateModal()}
+            >
+              <IconPlus />
+              New event
+            </button>
+          </div>
         }
       />
       <div className="lf-main">
@@ -115,8 +148,27 @@ export default function EventsListPageContent() {
                 </div>
 
                 {loading && <p className="lf-meta">Loading events…</p>}
-                {!loading && filtered.length === 0 && (
-                  <p className="lf-meta">No events found. Create one to get started.</p>
+                {showEmptyState && (
+                  <div className="lf-events-empty-box">
+                    <h2 className="lf-h2">
+                      {emptyFromFilters ? "No matching events" : "No events yet"}
+                    </h2>
+                    <p className="lf-meta">
+                      {emptyFromFilters
+                        ? searchTrimmed
+                          ? `Nothing matched “${searchTrimmed}”. Create a new event with that name?`
+                          : "Try clearing filters, or create a new event."
+                        : "Schedule your first council event to unlock overview, volunteers, and sponsorship tools."}
+                    </p>
+                    <button
+                      type="button"
+                      className="lf-btn lf-btn--outline"
+                      onClick={() => openCreateModal(searchTrimmed)}
+                    >
+                      <IconPlus />
+                      Make an event now
+                    </button>
+                  </div>
                 )}
 
                 {byMonth.map(([month, monthEvents]) => (
@@ -129,7 +181,7 @@ export default function EventsListPageContent() {
                             ? "lf-event-row lf-event-row--active"
                             : "lf-event-row";
 
-                        if (event.kind === "council") {
+                        if (event.kind === "council" || event.kind === "committee_meeting") {
                           return (
                             <Link
                               key={event.id}
@@ -143,6 +195,9 @@ export default function EventsListPageContent() {
                               <div className="lf-event-row-body">
                                 <div className="lf-event-row-title">
                                   {event.title}
+                                  {event.kind === "committee_meeting" && (
+                                    <span className="lf-committee-badge">Meeting</span>
+                                  )}
                                   <span className="lf-event-status-tag">{event.status}</span>
                                 </div>
                                 <p className="lf-meta">{event.location}</p>
@@ -220,6 +275,12 @@ export default function EventsListPageContent() {
         isOpen={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreate={handleCreate}
+        initialName={createInitialName}
+      />
+      <CreateCommitteeMeetingModal
+        isOpen={committeeCreateOpen}
+        onClose={() => setCommitteeCreateOpen(false)}
+        onCreate={handleCreateCommitteeMeeting}
       />
     </>
   );

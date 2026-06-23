@@ -16,6 +16,7 @@ interface UsePeopleOptions {
     hasMembership?: boolean;
     membershipStatus?: string;
     role?: string;
+    isExecutiveBoard?: boolean;
   };
 }
 
@@ -53,6 +54,10 @@ async function fetchPeopleData(filters: UsePeopleOptions["filters"] = {}) {
     } else {
       query = query.is("membership_id", null);
     }
+  }
+
+  if (filters?.isExecutiveBoard === true) {
+    query = query.eq("is_executive_board", true);
   }
 
   const { data: peopleData, error: queryError } = await query.order("full_name", {
@@ -103,6 +108,10 @@ async function fetchPeopleData(filters: UsePeopleOptions["filters"] = {}) {
     );
   }
 
+  if (filters?.isExecutiveBoard === true) {
+    transformedData = transformedData.filter((p) => p.is_executive_board === true);
+  }
+
   return transformedData;
 }
 
@@ -116,6 +125,7 @@ export function usePeople(options: UsePeopleOptions = {}): UsePeopleReturn {
     filters.hasMembership,
     filters.membershipStatus,
     filters.role,
+    filters.isExecutiveBoard,
   ];
 
   const { data: people = [], isLoading, error, refetch } = useQuery({

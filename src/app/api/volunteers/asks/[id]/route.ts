@@ -53,7 +53,9 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
     }
 
     let event_id: string | null = null;
-    if (parsed.webflowEventItemId) {
+    if (parsed.event_id) {
+      event_id = parsed.event_id;
+    } else if (parsed.webflowEventItemId) {
       event_id = await ensureSupabaseEventFromWebflow(supabase, parsed.webflowEventItemId);
     }
 

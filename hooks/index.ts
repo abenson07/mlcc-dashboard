@@ -27,6 +27,19 @@ export { useLeafletSponsorships } from "./useLeafletSponsorships";
 export { useLeafletHistory } from "./useLeafletHistory";
 export { useCloseOutEligible } from "./useCloseOutEligible";
 export { useLeafletQr } from "./useLeafletQr";
+export {
+  useCommitteeMeeting,
+  createCommitteeMeetingApi,
+  COMMITTEE_MEETING_QUERY_KEY,
+  type CommitteeMeetingWithRelations,
+  type CreateCommitteeMeetingPayload,
+} from "./useCommitteeMeeting";
+export {
+  useMyActionItems,
+  useActionItemsForMeeting,
+  MY_ACTION_ITEMS_QUERY_KEY,
+  type MyActionItem,
+} from "./useActionItems";
 export type {
   WebflowEventsPayload,
   WebflowCollectionFieldDTO,

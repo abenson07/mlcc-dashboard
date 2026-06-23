@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { IconPlus, IconSearch } from "@/components/leaflet/icons";
 import { useBusinesses, usePeople } from "hooks";
@@ -23,8 +23,7 @@ export default function PeoplePageContent() {
   const filter = parsePeopleFilter(searchParams.get("filter"));
   const isBusinessesView = isBusinessFilter(filter);
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [detailOpen, setDetailOpen] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(() => searchParams.get("selected"));
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -32,8 +31,6 @@ export default function PeoplePageContent() {
     const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 300);
     return () => window.clearTimeout(timer);
   }, [search]);
-
-  const selectedFromUrl = searchParams.get("selected");
 
   const peopleFilters = useMemo(
     () => ({ search: debouncedSearch || undefined, ...peopleHookFilters(filter) }),
@@ -49,6 +46,7 @@ export default function PeoplePageContent() {
     people,
     loading: peopleLoading,
     error: peopleError,
+    refetch,
   } = usePeople({
     autoFetch: !isBusinessesView,
     filters: peopleFilters,
@@ -66,9 +64,25 @@ export default function PeoplePageContent() {
   const loading = isBusinessesView ? businessesLoading : peopleLoading;
   const error = isBusinessesView ? businessesError : peopleError;
 
+  const selectedFromUrl = searchParams.get("selected");
+
+  const selected = selectedId ? people.find((p) => p.id === selectedId) ?? null : null;
+
+  const clearSelectedFromUrl = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (!params.has("selected")) return;
+    params.delete("selected");
+    const query = params.toString();
+    router.replace(query ? `/people?${query}` : "/people", { scroll: false });
+  }, [router, searchParams]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedId(null);
+    clearSelectedFromUrl();
+  }, [clearSelectedFromUrl]);
+
   useEffect(() => {
-    if (isBusinessesView) return;
-    if (people.length === 0) {
+    if (isBusinessesView) {
       setSelectedId(null);
       return;
     }
@@ -76,24 +90,35 @@ export default function PeoplePageContent() {
       setSelectedId(selectedFromUrl);
       return;
     }
-    if (selectedId && people.some((p) => p.id === selectedId)) return;
-    setSelectedId(people[0]?.id ?? null);
-  }, [isBusinessesView, people, selectedFromUrl, selectedId]);
-
-  const selected = people.find((p) => p.id === selectedId) ?? people[0] ?? null;
+    if (selectedFromUrl && !people.some((p) => p.id === selectedFromUrl)) {
+      setSelectedId(null);
+    }
+  }, [isBusinessesView, people, selectedFromUrl]);
 
   useEffect(() => {
-    if (!detailOpen) return;
+    if (isBusinessesView || people.length === 0) return;
+    if (selectedId && !people.some((p) => p.id === selectedId)) {
+      setSelectedId(null);
+      clearSelectedFromUrl();
+    }
+  }, [clearSelectedFromUrl, isBusinessesView, people, selectedId]);
+
+  useEffect(() => {
+    if (!selected) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setDetailOpen(false);
+      if (e.key === "Escape") clearSelection();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [detailOpen]);
+  }, [clearSelection, selected]);
 
   function handleSelectPerson(id: string) {
+    if (selectedId === id) {
+      clearSelection();
+      return;
+    }
+
     setSelectedId(id);
-    setDetailOpen(true);
     const params = new URLSearchParams(searchParams.toString());
     params.set("selected", id);
     router.replace(`/people?${params.toString()}`, { scroll: false });
@@ -115,7 +140,7 @@ export default function PeoplePageContent() {
         </div>
         <div className="lf-content-col">
           <main
-            className={`lf-canvas lf-canvas--white lf-people-layout${!isBusinessesView && detailOpen && selected ? "" : " lf-people-layout--single"}`}
+            className={`lf-canvas lf-canvas--white lf-people-layout${!isBusinessesView && selected ? "" : " lf-people-layout--single"}`}
           >
             <div className="lf-people-main">
               <div className="lf-page-header">
@@ -203,8 +228,8 @@ export default function PeoplePageContent() {
                 </div>
               )}
             </div>
-            {!isBusinessesView && detailOpen && selected ? (
-              <PersonDetailPanel person={selected} onClose={() => setDetailOpen(false)} />
+            {!isBusinessesView && selected ? (
+              <PersonDetailPanel person={selected} onClose={clearSelection} onUpdated={() => void refetch()} />
             ) : null}
           </main>
         </div>

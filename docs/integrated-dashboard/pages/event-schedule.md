@@ -3,7 +3,7 @@
 > **Route:** `/events-hub/[eventId]/schedule`  
 > **Component:** `src/components/integrated/events/EventSchedulePageContent.tsx`  
 > **Design node:** `v399X3`  
-> **Status:** Mock tasks with **local React state only** (changes lost on refresh)
+> **Status:** Wired — `EventContext` + Supabase `tasks` (read/write toggle + add task)
 
 ---
 

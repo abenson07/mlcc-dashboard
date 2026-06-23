@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Events, EventsInsert } from "@/types/database";
 import { parseEventFieldData } from "./eventData";
+import { activateEventResources } from "./spawnEventResources";
 
 function eventSlug(name: string): string {
   return name
@@ -68,30 +69,7 @@ export async function createEvent(
   const fieldData = parseEventFieldData(event.field_data);
 
   if (input.event_template_id) {
-    let templateQuery = supabase
-      .from("task_templates")
-      .select("*")
-      .eq("context", "event")
-      .eq("is_active", true)
-      .eq("event_template_id", input.event_template_id);
-
-    const { data: taskTemplates, error: templatesError } = await templateQuery;
-
-    if (templatesError) throw new Error(templatesError.message);
-
-    if (taskTemplates?.length) {
-      const tasks = taskTemplates.map((t) => ({
-        context: "event" as const,
-        context_id: event.id,
-        template_id: t.id,
-        title: t.title,
-        description: t.description,
-        offset_days: t.offset_days,
-      }));
-
-      const { error: tasksError } = await supabase.from("tasks").insert(tasks);
-      if (tasksError) throw new Error(tasksError.message);
-    }
+    await activateEventResources(supabase, event as Events);
   }
 
   if (!fieldData.qr_code_id && slug) {

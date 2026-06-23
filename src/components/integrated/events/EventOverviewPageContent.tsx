@@ -2,10 +2,68 @@
 
 import Link from "next/link";
 import { IconCalendar, IconPlus } from "@/components/leaflet/icons";
-import { getEventById } from "../mockData";
+import { formatEventTimeRange } from "@/lib/events/eventData";
+import { useEventContext } from "./EventContext";
 
-export default function EventOverviewPageContent({ eventId }: { eventId: string }) {
-  const event = getEventById(eventId);
+export default function EventOverviewPageContent() {
+  const {
+    eventId,
+    event,
+    loading,
+    error,
+    tasks,
+    tasksOpenTotal,
+    toggleTask,
+    readOnly,
+    volunteerAsks,
+    volunteerSignupTotal,
+    budget,
+    sponsorshipTiers,
+  } = useEventContext();
+
+  if (loading && !event) {
+    return <p className="lf-meta">Loading event…</p>;
+  }
+
+  if (error && !event) {
+    return <p className="lf-text-red">{error}</p>;
+  }
+
+  if (!event) {
+    return (
+      <div className="lf-empty-page">
+        <h1 className="lf-h2">Event not found</h1>
+        <Link href="/events" className="lf-link">Back to events</Link>
+      </div>
+    );
+  }
+
+  const openTasks = tasks.filter((t) => !t.is_complete).slice(0, 2);
+
+  const volunteerPreview = volunteerAsks
+    .flatMap((ask) =>
+      ask.signups.map((signup) => ({
+        id: signup.id,
+        name: signup.person?.full_name ?? "Volunteer",
+        role: ask.title,
+      })),
+    )
+    .slice(0, 3);
+
+  const timeRange = event.starts_at
+    ? formatEventTimeRange({
+        starts_at: event.starts_at,
+        ends_at: event.ends_at,
+        name: event.title,
+        id: event.id,
+        date: null,
+        event_template_id: event.event_template_id,
+        slug: event.slug,
+        field_data: event.fieldData,
+        created_at: "",
+        updated_at: "",
+      })
+    : "—";
 
   return (
     <div className="lf-overview-layout">
@@ -13,7 +71,7 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
         <div className="lf-hero">
           <h1 className="lf-h1">{event.title}</h1>
           <div className="lf-hero-meta">
-            <span className="lf-meta">{event.daysUntil} days until event</span>
+            <span className="lf-meta">{event.daysUntilLabel}</span>
             <span className="lf-hero-date">
               <IconCalendar />
               {event.distributionLabel}
@@ -24,24 +82,31 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
         <section className="lf-overview-card">
           <div className="lf-overview-card-header">
             <span className="lf-overview-card-title">To-do checklist</span>
-            <span className="lf-meta">2 items to finish</span>
+            <span className="lf-meta">
+              {tasksOpenTotal} item{tasksOpenTotal === 1 ? "" : "s"} to finish
+            </span>
           </div>
-          <label className="lf-task-box">
-            <input type="checkbox" />
-            <span>
-              <span>Finalize vendor list</span>
-              <span className="lf-task-due">Due May 20</span>
-            </span>
-          </label>
-          <label className="lf-task-box">
-            <input type="checkbox" />
-            <span>
-              <span>Open volunteer applications</span>
-              <span className="lf-task-due">Due May 1</span>
-            </span>
-          </label>
+          {openTasks.length === 0 && (
+            <p className="lf-meta">No open tasks — you&apos;re all caught up.</p>
+          )}
+          {openTasks.map((task) => (
+            <label key={task.id} className="lf-task-box">
+              <input
+                type="checkbox"
+                checked={task.is_complete}
+                disabled={readOnly}
+                onChange={() => void toggleTask(task.id)}
+              />
+              <span>
+                <span>{task.title}</span>
+                <span className={task.isOverdue ? "lf-task-due lf-task-due--overdue" : "lf-task-due"}>
+                  {task.dueLabel}
+                </span>
+              </span>
+            </label>
+          ))}
           <Link href={`/events-hub/${eventId}/schedule`} className="lf-see-all">
-            See all items in checklist (12)
+            See all items in checklist ({tasks.length})
           </Link>
         </section>
 
@@ -49,28 +114,19 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
           <section className="lf-overview-card">
             <div className="lf-overview-card-header">
               <span className="lf-overview-card-title">Volunteers</span>
-              <span className="lf-meta">12 signed up</span>
+              <span className="lf-meta">{volunteerSignupTotal} signed up</span>
             </div>
-            {[
-              { name: "Mitch Chae", role: "Safety lead", status: "confirmed" as const },
-              { name: "Marcus Aurel", role: "Registration", status: "confirmed" as const },
-              { name: "Elena Ruiz", role: "Food & drinks", status: "pending" as const },
-            ].map((v) => (
-              <div key={v.name} className="lf-open-route">
+            {volunteerPreview.length === 0 && (
+              <p className="lf-meta">No volunteer signups yet.</p>
+            )}
+            {volunteerPreview.map((v) => (
+              <div key={v.id} className="lf-open-route">
                 <span className="lf-avatar">{v.name.slice(0, 2).toUpperCase()}</span>
                 <div className="lf-open-route-info">
                   <div className="lf-open-route-name">{v.name}</div>
                   <div className="lf-meta">{v.role}</div>
                 </div>
-                <span
-                  className={
-                    v.status === "pending"
-                      ? "lf-status-badge lf-status-badge--amber"
-                      : "lf-status-badge lf-status-badge--green"
-                  }
-                >
-                  {v.status === "pending" ? "Pending" : "Confirmed"}
-                </span>
+                <span className="lf-status-badge lf-status-badge--green">Confirmed</span>
               </div>
             ))}
             <Link href={`/events-hub/${eventId}/volunteers`} className="lf-see-all">
@@ -88,34 +144,36 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
             </div>
             <div className="lf-metric-row">
               <span className="lf-metric-label">Sponsorship goal progress</span>
-              <span className="lf-metric-strong">76%</span>
+              <span className="lf-metric-strong">{budget.progressPct}%</span>
             </div>
             <div className="lf-progress-track">
-              <div className="lf-progress-fill" style={{ width: "76%" }} />
+              <div className="lf-progress-fill" style={{ width: `${budget.progressPct}%` }} />
             </div>
             <div className="lf-budget-metrics">
               <div className="lf-budget-metric">
                 <div className="lf-budget-metric-label">Goal</div>
-                <div className="lf-budget-metric-value">$15,000</div>
+                <div className="lf-budget-metric-value">${budget.goal.toLocaleString()}</div>
               </div>
               <div className="lf-budget-metric">
                 <div className="lf-budget-metric-label">Raised</div>
-                <div className="lf-budget-metric-value">$11,400</div>
+                <div className="lf-budget-metric-value">${budget.raised.toLocaleString()}</div>
               </div>
               <div className="lf-budget-metric">
                 <div className="lf-budget-metric-label">Pledged</div>
-                <div className="lf-budget-metric-value">$3,700</div>
+                <div className="lf-budget-metric-value">${budget.pledged.toLocaleString()}</div>
               </div>
             </div>
-            <p className="lf-line-items-label">Available levels</p>
-            <div className="lf-line-item">
-              <span>Platinum</span>
-              <span className="lf-qty-badge lf-qty-badge--paid">1 left</span>
-            </div>
-            <div className="lf-line-item">
-              <span>Silver</span>
-              <span className="lf-qty-badge lf-qty-badge--paid">4 left</span>
-            </div>
+            {sponsorshipTiers.length > 0 && (
+              <>
+                <p className="lf-line-items-label">Available levels</p>
+                {sponsorshipTiers.slice(0, 2).map((tier) => (
+                  <div key={tier.name} className="lf-line-item">
+                    <span>{tier.name}</span>
+                    <span className="lf-qty-badge lf-qty-badge--paid">{tier.left}</span>
+                  </div>
+                ))}
+              </>
+            )}
             <div className="lf-card-footer">
               <Link href={`/events-hub/${eventId}/sponsorship`} className="lf-see-all">
                 See all
@@ -123,26 +181,6 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
             </div>
           </section>
         </div>
-
-        <section className="lf-overview-card">
-          <div className="lf-overview-card-header">
-            <span className="lf-overview-card-title">Marketing</span>
-            <span className="lf-meta">4 scheduled campaigns</span>
-          </div>
-          <div className="lf-story-list">
-            {[
-              { date: "Jan 20", status: "Scheduled", title: "Sponsor thank you email" },
-              { date: "Feb 1", status: "Draft", title: "Volunteer recruitment post" },
-              { date: "Mar 15", status: "Scheduled", title: "Event reminder email" },
-            ].map((item) => (
-              <div key={item.title} className="lf-story-row">
-                <span className="lf-story-date lf-meta">{item.date}</span>
-                <span className="lf-story-badge">{item.status}</span>
-                <span>{item.title}</span>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       <aside className="lf-overview-aside">
@@ -159,38 +197,48 @@ export default function EventOverviewPageContent({ eventId }: { eventId: string 
           </div>
           <div className="lf-detail-row">
             <span className="lf-detail-label">Time</span>
-            <span>12:00 PM – 4:00 PM</span>
+            <span>{timeRange}</span>
           </div>
           <div className="lf-detail-row">
             <span className="lf-detail-label">Location</span>
-            <span>Mooreland Park</span>
+            <span>{event.fieldData.location ?? "—"}</span>
           </div>
+          {event.fieldData.capacity != null && (
+            <div className="lf-detail-row">
+              <span className="lf-detail-label">Capacity</span>
+              <span>{event.fieldData.capacity}</span>
+            </div>
+          )}
         </section>
 
         <section className="lf-overview-card">
           <div className="lf-overview-card-header">
             <span className="lf-overview-card-title">Event image</span>
           </div>
-          <div className="lf-event-image-placeholder" />
-          <button type="button" className="lf-link">
-            Replace image
-          </button>
+          {event.fieldData.image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={event.fieldData.image_url} alt="" className="lf-event-image-placeholder" />
+          ) : (
+            <div className="lf-event-image-placeholder" />
+          )}
         </section>
 
-        <section className="lf-overview-card">
-          <div className="lf-overview-card-header">
-            <span className="lf-overview-card-title">QR code</span>
-          </div>
-          <div className="lf-qr-block">
-            <div className="lf-qr-preview lf-qr-preview--placeholder" />
-            <div className="lf-qr-meta">
-              <p className="lf-meta">Scan for event info page</p>
-              <button type="button" className="lf-btn lf-btn--outline">
-                Download QR code
-              </button>
+        {event.fieldData.qr_code_id && (
+          <section className="lf-overview-card">
+            <div className="lf-overview-card-header">
+              <span className="lf-overview-card-title">QR code</span>
             </div>
-          </div>
-        </section>
+            <div className="lf-qr-block">
+              <div className="lf-qr-preview lf-qr-preview--placeholder" />
+              <div className="lf-qr-meta">
+                <p className="lf-meta">Scan for event info page</p>
+                <button type="button" className="lf-btn lf-btn--outline">
+                  Download QR code
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
       </aside>
     </div>
   );

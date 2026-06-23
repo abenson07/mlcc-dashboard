@@ -33,11 +33,13 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await getSupabaseForVolunteerRoutes();
-  const { webflowEventItemId, ...fields } = parsed;
+  const { webflowEventItemId, event_id: directEventId, ...fields } = parsed;
   const insertPayload: CreateVolunteerAskBody = { ...fields, event_id: null };
 
   try {
-    if (webflowEventItemId) {
+    if (directEventId) {
+      insertPayload.event_id = directEventId;
+    } else if (webflowEventItemId) {
       insertPayload.event_id = await ensureSupabaseEventFromWebflow(
         supabase,
         webflowEventItemId

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import ActionItemsTopbarMenu from "./ActionItemsTopbarMenu";
 import {
   IconChevronDown,
   IconDollar,
@@ -85,6 +86,7 @@ export default function IntegratedTopbar({ center, primaryAction }: IntegratedTo
       {center ? <div className="lf-topbar-center">{center}</div> : null}
 
       <div className="lf-topbar-controls">
+        <ActionItemsTopbarMenu />
         <Link
           href="/finance"
           className={`lf-icon-btn${pathname?.startsWith("/finance") ? " lf-icon-btn--active" : ""}`}

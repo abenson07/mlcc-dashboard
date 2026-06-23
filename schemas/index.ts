@@ -23,3 +23,5 @@ export * from "./qr_codes";
 export * from "./leaflets";
 export * from "./tasks";
 export * from "./comm_settings";
+export * from "./committee_meetings";
+export * from "./action_items";

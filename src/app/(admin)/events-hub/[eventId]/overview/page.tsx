@@ -1,10 +1,15 @@
-import EventOverviewPageContent from "@/components/integrated/events/EventOverviewPageContent";
+"use client";
 
-export default async function EventOverviewPage({
-  params,
-}: {
-  params: Promise<{ eventId: string }>;
-}) {
-  const { eventId } = await params;
-  return <EventOverviewPageContent eventId={eventId} />;
+"use client";
+
+import EventOverviewPageContent from "@/components/integrated/events/EventOverviewPageContent";
+import CommitteeMeetingOverviewContent from "@/components/integrated/events/CommitteeMeetingOverviewContent";
+import { useEventContext } from "@/components/integrated/events/EventContext";
+
+export default function EventOverviewPage() {
+  const { event } = useEventContext();
+  if (event?.kind === "committee_meeting") {
+    return <CommitteeMeetingOverviewContent />;
+  }
+  return <EventOverviewPageContent />;
 }

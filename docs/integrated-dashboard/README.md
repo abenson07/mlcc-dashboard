@@ -127,9 +127,9 @@ UI component
 | People | `/people` | [people.md](./pages/people.md) | Mock table + detail | ❌ (`usePeople` exists) |
 | Events list | `/events-hub` | [events-list.md](./pages/events-list.md) | Mock events | ⚠️ (`useEvents` partial) |
 | Event overview | `/events-hub/[id]/overview` | [event-overview.md](./pages/event-overview.md) | Mock widgets | ❌ |
-| Event volunteers | `/events-hub/[id]/volunteers` | [event-volunteers.md](./pages/event-volunteers.md) | Mock hubs/table | ⚠️ (`useVolunteerAsks` exists) |
-| Event sponsorship | `/events-hub/[id]/sponsorship` | [event-sponsorship.md](./pages/event-sponsorship.md) | Mock sponsors/invoices | ⚠️ (patterns from leaflet) |
-| Event schedule | `/events-hub/[id]/schedule` | [event-schedule.md](./pages/event-schedule.md) | Mock tasks (local state) | ⚠️ (`useTasks` leaflet-only) |
+| Event volunteers | `/events-hub/[id]/volunteers` | [event-volunteers.md](./pages/event-volunteers.md) | Live hubs + table | ✅ |
+| Event sponsorship | `/events-hub/[id]/sponsorship` | [event-sponsorship.md](./pages/event-sponsorship.md) | Live budget/sponsors/invoices | ✅ |
+| Event schedule | `/events-hub/[id]/schedule` | [event-schedule.md](./pages/event-schedule.md) | Live checklist | ✅ |
 | Event communications | `/events-hub/[id]/communications` | [event-communications.md](./pages/event-communications.md) | Placeholder | ❌ |
 | Event marketing | `/events-hub/[id]/marketing` | [event-marketing.md](./pages/event-marketing.md) | Placeholder | ❌ |
 | Stories | `/stories` | [stories.md](./pages/stories.md) | Empty state | ❌ |

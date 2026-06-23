@@ -3,7 +3,7 @@
 > **Route:** `/events-hub/[eventId]/volunteers`  
 > **Component:** `src/components/integrated/events/EventVolunteersPageContent.tsx`  
 > **Design node:** `MgRVq`  
-> **Status:** Mock hubs + table; **`useVolunteerAsks` exists**
+> **Status:** Wired — `EventContext` + `useEventVolunteerAsks` + hub/signup modals
 
 ---
 

@@ -3,6 +3,9 @@ import type {
   VolunteerCommitmentUnit,
 } from "@/types/database";
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export type ParsedVolunteerAskBody = {
   title: string;
   description: string | null;
@@ -11,6 +14,7 @@ export type ParsedVolunteerAskBody = {
   commitment_quantity: number;
   quantity: number;
   webflowEventItemId: string | null;
+  event_id: string | null;
 };
 
 export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | null {
@@ -32,6 +36,9 @@ export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | nu
   const webflowEventItemId =
     typeof b.webflowEventItemId === "string" ? b.webflowEventItemId.trim() : "";
 
+  const eventIdRaw = typeof b.event_id === "string" ? b.event_id.trim() : "";
+  const event_id = eventIdRaw && UUID_RE.test(eventIdRaw) ? eventIdRaw : null;
+
   return {
     title,
     description:
@@ -43,5 +50,6 @@ export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | nu
     commitment_quantity,
     quantity,
     webflowEventItemId: webflowEventItemId || null,
+    event_id,
   };
 }
