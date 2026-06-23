@@ -14,7 +14,7 @@ import {
   IconMegaphoneNav,
   IconUsers,
 } from "@/components/leaflet/icons";
-import SidebarSettingsNavItem from "../SidebarSettingsNavItem";
+import SidebarFooterNav from "../SidebarFooterNav";
 import { isBusinessFilter, isPeopleSubFilter, parsePeopleFilter } from "./peopleFilters";
 
 const PEOPLE_NAV = [
@@ -123,8 +123,7 @@ export default function PeopleSidebar() {
           </div>
         ))}
 
-        <div className="lf-nav-spacer" />
-        <SidebarSettingsNavItem />
+        <SidebarFooterNav />
       </nav>
     </aside>
   );

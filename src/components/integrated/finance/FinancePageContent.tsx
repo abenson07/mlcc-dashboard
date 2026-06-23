@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconPlus } from "@/components/leaflet/icons";
 import IntegratedTopbar from "../IntegratedTopbar";
+import SidebarFooterNav from "../SidebarFooterNav";
 
 const FINANCE_NAV = [
   { label: "Overview", href: "/finance" },
@@ -42,21 +43,24 @@ export default function FinancePageContent() {
       />
       <div className="lf-main">
         <div className="lf-sidebar-col lf-finance-sidebar-nav">
-          <div className="lf-finance-title-block">
-            <strong>Financial Tracker</strong>
-            <span>MLCC · 2026 fiscal year</span>
-          </div>
-          <nav className="lf-sidebar-nav">
-            {FINANCE_NAV.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                className={pathname === href ? "lf-nav-item lf-nav-item--active" : "lf-nav-item"}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
+          <aside className="lf-sidebar">
+            <div className="lf-finance-title-block">
+              <strong>Financial Tracker</strong>
+              <span>MLCC · 2026 fiscal year</span>
+            </div>
+            <nav className="lf-sidebar-nav" aria-label="Finance sections">
+              {FINANCE_NAV.map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={pathname === href ? "lf-nav-item lf-nav-item--active" : "lf-nav-item"}
+                >
+                  {label}
+                </Link>
+              ))}
+              <SidebarFooterNav />
+            </nav>
+          </aside>
         </div>
         <div className="lf-content-col">
           <main className="lf-canvas">

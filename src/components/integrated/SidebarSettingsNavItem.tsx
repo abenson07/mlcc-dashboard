@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function IconSettings() {
   return (
@@ -19,8 +22,14 @@ function IconSettings() {
 }
 
 export default function SidebarSettingsNavItem() {
+  const pathname = usePathname();
+  const active = pathname?.startsWith("/settings");
+
   return (
-    <Link href="/settings" className="lf-nav-item lf-nav-item--muted">
+    <Link
+      href="/settings/committee"
+      className={active ? "lf-nav-item lf-nav-item--active" : "lf-nav-item lf-nav-item--muted"}
+    >
       <IconSettings />
       Settings
     </Link>

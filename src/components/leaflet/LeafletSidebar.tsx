@@ -12,6 +12,7 @@ import {
   IconRoute,
 } from "./icons";
 import { leafletHref, useLeafletContext } from "./LeafletContext";
+import SidebarFooterNav from "@/components/integrated/SidebarFooterNav";
 
 const DELIVERY_NAV = [
   { label: "Deliverers", href: "/leaflet/deliverers", icon: IconBike },
@@ -41,8 +42,6 @@ export default function LeafletSidebar() {
           Overview
         </Link>
 
-        <div className="lf-nav-spacer" />
-
         <p className="lf-nav-section">Delivery</p>
         {DELIVERY_NAV.map(({ label, href, icon: Icon }) => (
           <Link
@@ -70,6 +69,7 @@ export default function LeafletSidebar() {
             {label}
           </Link>
         ))}
+        <SidebarFooterNav />
       </nav>
     </aside>
   );

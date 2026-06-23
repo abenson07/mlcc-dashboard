@@ -3,6 +3,7 @@ import type { CommitteeMeetings, Events } from "@/types/database";
 import type { CommitteeSlug } from "schemas/committee_meetings";
 import { createEvent } from "@/lib/events/createEvent";
 import { committeeMeetingEventName } from "./committeeMeetingUtils";
+import { seedMeetingAttendeesFromDefaults } from "./defaultAttendees";
 
 export type CreateCommitteeMeetingInput = {
   committee: CommitteeSlug;
@@ -49,25 +50,7 @@ export async function createCommitteeMeeting(
     throw new Error(meetingError?.message ?? "Failed to create committee meeting");
   }
 
-  const { data: boardMembers, error: boardError } = await supabase
-    .from("people")
-    .select("id")
-    .eq("is_executive_board", true);
-
-  if (boardError) throw new Error(boardError.message);
-
-  if (boardMembers && boardMembers.length > 0) {
-    const { error: attendeeError } = await supabase
-      .from("committee_meeting_attendees")
-      .insert(
-        boardMembers.map((p) => ({
-          meeting_id: meeting.id,
-          person_id: p.id,
-        })),
-      );
-
-    if (attendeeError) throw new Error(attendeeError.message);
-  }
+  await seedMeetingAttendeesFromDefaults(supabase, meeting.id, input.committee);
 
   return { event, meeting: meeting as CommitteeMeetings };
 }

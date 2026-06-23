@@ -11,7 +11,7 @@ import {
   IconMegaphoneNav,
   IconUsers,
 } from "@/components/leaflet/icons";
-import SidebarSettingsNavItem from "../SidebarSettingsNavItem";
+import SidebarFooterNav from "../SidebarFooterNav";
 import EventSelector from "./EventSelector";
 import { useEventContext } from "./EventContext";
 
@@ -54,12 +54,14 @@ export default function EventSidebar({ eventId }: { eventId: string }) {
               </Link>
             );
           })}
-          <div className="lf-nav-spacer" />
-          <button type="button" className="lf-nav-item lf-nav-item--help">
-            <IconLifeBuoy />
-            Event guide
-          </button>
-          <SidebarSettingsNavItem />
+          <SidebarFooterNav
+            beforeFooter={
+              <button type="button" className="lf-nav-item lf-nav-item--help">
+                <IconLifeBuoy />
+                Event guide
+              </button>
+            }
+          />
         </nav>
       </aside>
     </>

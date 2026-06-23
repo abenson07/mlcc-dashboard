@@ -22,11 +22,13 @@ export default function AdminLayoutClient({
     pathname?.startsWith("/events?") ||
     pathname?.startsWith("/events-hub") ||
     pathname?.startsWith("/stories") ||
-    pathname?.startsWith("/finance");
+    pathname?.startsWith("/finance") ||
+    pathname?.startsWith("/settings") ||
+    pathname?.startsWith("/action-items");
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   if (isIntegratedShell) {
-    return <div className="min-h-screen">{children}</div>;
+    return <div className="h-screen overflow-hidden">{children}</div>;
   }
 
   const mainContentMargin = isMobileOpen

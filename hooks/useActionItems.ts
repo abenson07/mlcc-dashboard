@@ -5,6 +5,7 @@ import { getApiBase } from "@/lib/apiBase";
 import type { ActionItemStatus } from "@/types/database";
 
 export const MY_ACTION_ITEMS_QUERY_KEY = ["action-items", "mine"] as const;
+export const ALL_ACTION_ITEMS_QUERY_KEY = ["action-items", "all"] as const;
 
 export type MyActionItem = {
   id: string;
@@ -60,6 +61,7 @@ export function useMyActionItems({ autoFetch = true } = {}) {
     const body = (await res.json()) as { error?: string };
     if (!res.ok) throw new Error(body.error ?? "Failed to update action item");
     await queryClient.invalidateQueries({ queryKey: MY_ACTION_ITEMS_QUERY_KEY });
+    await queryClient.invalidateQueries({ queryKey: ALL_ACTION_ITEMS_QUERY_KEY });
   }
 
   async function markDone(id: string) {

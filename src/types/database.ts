@@ -75,4 +75,6 @@ export type {
   ActionItemsUpdate,
   ActionItemStatus,
   ActionItemSource,
+  CommitteeDefaultAttendees,
+  CommitteeDefaultAttendeesInsert,
 } from "../../schemas";

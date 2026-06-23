@@ -53,7 +53,9 @@ export default function AttendancePanel({
       </div>
 
       {attendees.length === 0 && (
-        <p className="lf-meta">Executive board members appear here by default. Search to add others.</p>
+        <p className="lf-meta">
+          No attendees yet. Defaults come from Settings → Committee, or search to add others.
+        </p>
       )}
 
       {attendees.map((attendee) => (

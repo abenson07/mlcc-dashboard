@@ -38,8 +38,15 @@ export {
   useMyActionItems,
   useActionItemsForMeeting,
   MY_ACTION_ITEMS_QUERY_KEY,
+  ALL_ACTION_ITEMS_QUERY_KEY,
   type MyActionItem,
 } from "./useActionItems";
+export { useAllActionItems } from "./useAllActionItems";
+export {
+  useCommitteeDefaultAttendees,
+  committeeDefaultAttendeesKey,
+  type CommitteeDefaultAttendee,
+} from "./useCommitteeDefaultAttendees";
 export type {
   WebflowEventsPayload,
   WebflowCollectionFieldDTO,

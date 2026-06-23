@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEvents } from "hooks";
 import { IconCalendarNav, IconChevronDown, IconLayoutDashboard } from "@/components/leaflet/icons";
-import SidebarSettingsNavItem from "../SidebarSettingsNavItem";
+import SidebarFooterNav from "../SidebarFooterNav";
 
 export default function EventsListSidebar() {
   const pathname = usePathname();
@@ -16,12 +16,21 @@ export default function EventsListSidebar() {
   const councilEvents = events.filter(
     (event) => event.kind === "council" && event.status.toLowerCase() !== "completed",
   );
+  const committeeMeetings = events.filter(
+    (event) => event.kind === "committee_meeting" && event.status.toLowerCase() !== "completed",
+  );
   const externalEvents = events.filter((event) => event.kind === "external");
 
   const sidebarGroups = [
     {
       label: "Upcoming Council Events",
       items: councilEvents,
+      hrefFor: (id: string) => `/events-hub/${id}/overview` as const,
+      isCouncil: true,
+    },
+    {
+      label: "Upcoming Committee Meetings",
+      items: committeeMeetings,
       hrefFor: (id: string) => `/events-hub/${id}/overview` as const,
       isCouncil: true,
     },
@@ -72,8 +81,7 @@ export default function EventsListSidebar() {
           </div>
         ))}
 
-        <div className="lf-nav-spacer" />
-        <SidebarSettingsNavItem />
+        <SidebarFooterNav />
       </nav>
     </aside>
   );
