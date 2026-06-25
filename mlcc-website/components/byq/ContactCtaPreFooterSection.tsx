@@ -34,7 +34,7 @@ function getJoinCopy(committeeName?: string) {
       label: "Get involved",
       headline: `Join the ${committee}`,
       description:
-        "Share your name and email and a committee lead will be in touch about volunteering.",
+        "Share your name and email or phone and a committee lead will be in touch about volunteering.",
       button: "Join the committee",
       idPrefix: committeeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     };
@@ -44,7 +44,7 @@ function getJoinCopy(committeeName?: string) {
     label: "Get involved",
     headline: "Join a committee",
     description:
-      "Share your name and email and a committee lead will be in touch about volunteering.",
+      "Share your name and email or phone and a committee lead will be in touch about volunteering.",
     button: "Join the committee",
     idPrefix: "committee",
   };
@@ -91,17 +91,17 @@ export function ContactCtaPreFooterSection({
                   </div>
 
                   <div className="flex flex-col">
-                    <label htmlFor={`${copy.idPrefix}-email`} className={labelClassName}>
-                      Email
+                    <label htmlFor={`${copy.idPrefix}-contact`} className={labelClassName}>
+                      Email or phone
                     </label>
                     <input
                       className={inputClassName}
                       maxLength={256}
-                      name="email"
-                      placeholder="Email"
-                      type="email"
-                      id={`${copy.idPrefix}-email`}
-                      autoComplete="email"
+                      name="contact"
+                      placeholder="Email or phone"
+                      type="text"
+                      id={`${copy.idPrefix}-contact`}
+                      autoComplete="off"
                       required
                     />
                   </div>

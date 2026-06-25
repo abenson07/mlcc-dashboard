@@ -144,10 +144,10 @@ export function CommitteeSpotlightSection({
                     />
                     <input
                       className="min-h-12 w-full rounded-lg border border-sparkles-cream/20 bg-sparkles-cream/10 px-4 py-2 font-body text-base leading-6 text-sparkles-cream placeholder:text-sparkles-cream/50 focus:border-sparkles-cream focus:outline-none"
-                      type="email"
-                      name="email"
-                      placeholder="Email"
-                      autoComplete="email"
+                      type="text"
+                      name="contact"
+                      placeholder="Email or phone"
+                      autoComplete="off"
                       maxLength={256}
                       required
                     />
