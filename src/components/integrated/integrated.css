@@ -1,6 +1,10 @@
 /* Integrated dashboard extensions (Site, People, Events, Stories) */
 
-.lf-mode--link { text-decoration: none; cursor: pointer; }
+.lf-task-box--highlight {
+  outline: 2px solid var(--lf-accent, #465fff);
+  outline-offset: 2px;
+}
+
 .lf-mode--link.lf-mode--inactive:hover { color: var(--lf-text-muted); }
 
 .lf-topbar--with-center {

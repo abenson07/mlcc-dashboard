@@ -66,14 +66,22 @@ export default function PeoplePageContent() {
 
   const selectedFromUrl = searchParams.get("selected");
 
-  const selected = selectedId ? people.find((p) => p.id === selectedId) ?? null : null;
+  const selected = selectedId
+    ? isBusinessesView
+      ? null
+      : (people.find((p) => p.id === selectedId) ?? null)
+    : null;
+
+  const selectedBusiness = selectedId && isBusinessesView
+    ? (businesses.find((b) => b.id === selectedId) ?? null)
+    : null;
 
   const clearSelectedFromUrl = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (!params.has("selected")) return;
     params.delete("selected");
     const query = params.toString();
-    router.replace(query ? `/people?${query}` : "/people", { scroll: false });
+    router.replace(query ? `/admin/people?${query}` : "/admin/people", { scroll: false });
   }, [router, searchParams]);
 
   const clearSelection = useCallback(() => {
@@ -83,7 +91,13 @@ export default function PeoplePageContent() {
 
   useEffect(() => {
     if (isBusinessesView) {
-      setSelectedId(null);
+      if (selectedFromUrl && businesses.some((b) => b.id === selectedFromUrl)) {
+        setSelectedId(selectedFromUrl);
+        return;
+      }
+      if (selectedFromUrl && !businesses.some((b) => b.id === selectedFromUrl)) {
+        setSelectedId(null);
+      }
       return;
     }
     if (selectedFromUrl && people.some((p) => p.id === selectedFromUrl)) {
@@ -93,15 +107,22 @@ export default function PeoplePageContent() {
     if (selectedFromUrl && !people.some((p) => p.id === selectedFromUrl)) {
       setSelectedId(null);
     }
-  }, [isBusinessesView, people, selectedFromUrl]);
+  }, [businesses, isBusinessesView, people, selectedFromUrl]);
 
   useEffect(() => {
-    if (isBusinessesView || people.length === 0) return;
+    if (isBusinessesView) {
+      if (selectedId && !businesses.some((b) => b.id === selectedId)) {
+        setSelectedId(null);
+        clearSelectedFromUrl();
+      }
+      return;
+    }
+    if (people.length === 0) return;
     if (selectedId && !people.some((p) => p.id === selectedId)) {
       setSelectedId(null);
       clearSelectedFromUrl();
     }
-  }, [clearSelectedFromUrl, isBusinessesView, people, selectedId]);
+  }, [businesses, clearSelectedFromUrl, isBusinessesView, people, selectedId]);
 
   useEffect(() => {
     if (!selected) return;
@@ -121,7 +142,20 @@ export default function PeoplePageContent() {
     setSelectedId(id);
     const params = new URLSearchParams(searchParams.toString());
     params.set("selected", id);
-    router.replace(`/people?${params.toString()}`, { scroll: false });
+    router.replace(`/admin/people?${params.toString()}`, { scroll: false });
+  }
+
+  function handleSelectBusiness(id: string) {
+    if (selectedId === id) {
+      clearSelection();
+      return;
+    }
+
+    setSelectedId(id);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("filter", "businesses");
+    params.set("selected", id);
+    router.replace(`/admin/people?${params.toString()}`, { scroll: false });
   }
 
   return (
@@ -140,7 +174,7 @@ export default function PeoplePageContent() {
         </div>
         <div className="lf-content-col">
           <main
-            className={`lf-canvas lf-canvas--white lf-people-layout${!isBusinessesView && selected ? "" : " lf-people-layout--single"}`}
+            className={`lf-canvas lf-canvas--white lf-people-layout${(!isBusinessesView && selected) || (isBusinessesView && selectedBusiness) ? "" : " lf-people-layout--single"}`}
           >
             <div className="lf-people-main">
               <div className="lf-page-header">
@@ -177,7 +211,11 @@ export default function PeoplePageContent() {
                       </thead>
                       <tbody>
                         {businesses.map((business) => (
-                          <tr key={business.id}>
+                          <tr
+                            key={business.id}
+                            className={selectedId === business.id ? "selected" : undefined}
+                            onClick={() => handleSelectBusiness(business.id)}
+                          >
                             <td>
                               <span className="lf-person-name-cell">
                                 {business.business_name ?? "—"}
@@ -230,6 +268,32 @@ export default function PeoplePageContent() {
             </div>
             {!isBusinessesView && selected ? (
               <PersonDetailPanel person={selected} onClose={clearSelection} onUpdated={() => void refetch()} />
+            ) : null}
+            {isBusinessesView && selectedBusiness ? (
+              <aside className="lf-people-detail lf-people-detail--business">
+                <div className="lf-page-header">
+                  <h2 className="lf-h2">{selectedBusiness.business_name ?? "Business"}</h2>
+                  <button type="button" className="lf-small-btn" onClick={clearSelection}>
+                    Close
+                  </button>
+                </div>
+                <div className="lf-detail-row">
+                  <span className="lf-detail-label">Contact</span>
+                  <span>{selectedBusiness.contact_name ?? "—"}</span>
+                </div>
+                <div className="lf-detail-row">
+                  <span className="lf-detail-label">Email</span>
+                  <span>{selectedBusiness.email ?? "—"}</span>
+                </div>
+                <div className="lf-detail-row">
+                  <span className="lf-detail-label">Phone</span>
+                  <span>{selectedBusiness.phone ?? "—"}</span>
+                </div>
+                <div className="lf-detail-row">
+                  <span className="lf-detail-label">Address</span>
+                  <span>{selectedBusiness.address ?? "—"}</span>
+                </div>
+              </aside>
             ) : null}
           </main>
         </div>

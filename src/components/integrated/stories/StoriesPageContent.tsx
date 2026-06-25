@@ -1,14 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { IconPlus, IconSearch } from "@/components/leaflet/icons";
 import IntegratedTopbar from "../IntegratedTopbar";
 import SidebarFooterNav from "../SidebarFooterNav";
 import { MOCK_STORIES } from "../mockData";
 
 export default function StoriesPageContent() {
-  const [selectedId, setSelectedId] = useState(MOCK_STORIES[0].id);
+  const searchParams = useSearchParams();
+  const selectedFromUrl = searchParams.get("selected");
+  const [selectedId, setSelectedId] = useState(
+    () => selectedFromUrl ?? MOCK_STORIES[0]?.id ?? "",
+  );
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (selectedFromUrl && MOCK_STORIES.some((story) => story.id === selectedFromUrl)) {
+      setSelectedId(selectedFromUrl);
+    }
+  }, [selectedFromUrl]);
 
   const groups = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -24,7 +35,8 @@ export default function StoriesPageContent() {
     return [...map.entries()];
   }, [search]);
 
-  const selected = MOCK_STORIES.find((s) => s.id === selectedId) ?? MOCK_STORIES[0];
+  const selected =
+    MOCK_STORIES.find((s) => s.id === selectedId) ?? MOCK_STORIES[0];
 
   return (
     <>

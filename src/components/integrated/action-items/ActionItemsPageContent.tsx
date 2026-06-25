@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAllActionItems } from "hooks";
 import {
   actionItemDueLabel,
@@ -13,16 +14,29 @@ import EventsListSidebar from "../events/EventsListSidebar";
 
 function ActionItemRow({
   item,
+  highlighted,
   onToggle,
 }: {
   item: ActionItemListRow;
+  highlighted?: boolean;
   onToggle: (id: string, done: boolean) => void;
 }) {
   const done = item.status === "done";
   const overdue = actionItemIsOverdue(item.due_at, item.status);
 
   return (
-    <label className={done ? "lf-task-box lf-task-box--complete" : "lf-task-box"}>
+    <label
+      id={`action-item-${item.id}`}
+      className={
+        done
+          ? highlighted
+            ? "lf-task-box lf-task-box--complete lf-task-box--highlight"
+            : "lf-task-box lf-task-box--complete"
+          : highlighted
+            ? "lf-task-box lf-task-box--highlight"
+            : "lf-task-box"
+      }
+    >
       <input
         type="checkbox"
         checked={done}
@@ -42,8 +56,12 @@ function ActionItemRow({
 }
 
 export default function ActionItemsPageContent() {
+  const searchParams = useSearchParams();
+  const highlightedItemId = searchParams.get("item");
   const { groups, openCount, loading, error, toggleDone } = useAllActionItems();
   const [showCompleted, setShowCompleted] = useState(false);
+  const [flashItemId, setFlashItemId] = useState<string | null>(null);
+  const scrolledRef = useRef<string | null>(null);
 
   const activeGroups = useMemo(
     () => groups.filter((group) => group.openItems.length > 0),
@@ -53,6 +71,20 @@ export default function ActionItemsPageContent() {
     () => groups.filter((group) => group.doneItems.length > 0),
     [groups],
   );
+
+  useEffect(() => {
+    if (!highlightedItemId || loading) return;
+    if (scrolledRef.current === highlightedItemId) return;
+
+    const node = document.getElementById(`action-item-${highlightedItemId}`);
+    if (!node) return;
+
+    scrolledRef.current = highlightedItemId;
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    setFlashItemId(highlightedItemId);
+    const timer = window.setTimeout(() => setFlashItemId(null), 2000);
+    return () => window.clearTimeout(timer);
+  }, [highlightedItemId, loading, groups]);
 
   return (
     <>
@@ -93,7 +125,7 @@ export default function ActionItemsPageContent() {
                   <div key={group.key} className="lf-schedule-group">
                     <div className="lf-schedule-group-label">
                       {group.eventId ? (
-                        <Link href={`/events-hub/${group.eventId}/overview`} className="lf-link">
+                        <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
                           {group.label}
                         </Link>
                       ) : (
@@ -104,6 +136,7 @@ export default function ActionItemsPageContent() {
                       <ActionItemRow
                         key={item.id}
                         item={item}
+                        highlighted={flashItemId === item.id || highlightedItemId === item.id}
                         onToggle={(id, done) => void toggleDone(id, done)}
                       />
                     ))}
@@ -125,7 +158,7 @@ export default function ActionItemsPageContent() {
                     <div key={group.key} className="lf-schedule-completed-group">
                       <div className="lf-schedule-group-label">
                         {group.eventId ? (
-                          <Link href={`/events-hub/${group.eventId}/overview`} className="lf-link">
+                          <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
                             {group.label}
                           </Link>
                         ) : (
@@ -136,6 +169,7 @@ export default function ActionItemsPageContent() {
                         <ActionItemRow
                           key={item.id}
                           item={item}
+                          highlighted={flashItemId === item.id || highlightedItemId === item.id}
                           onToggle={(id, done) => void toggleDone(id, done)}
                         />
                       ))}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { routesTableStatusLabel, exportDeliveriesCsv } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
 import DeliveryDetailPanel from "./DeliveryDetailPanel";
@@ -13,11 +14,19 @@ function statusClass(label: string) {
 }
 
 export default function RoutesPageContent() {
+  const searchParams = useSearchParams();
+  const deliveryFromUrl = searchParams.get("delivery");
   const { deliveries, countChangeByRouteId, deliveryHistoryForRoute } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(() => deliveryFromUrl);
+
+  useEffect(() => {
+    if (deliveryFromUrl) {
+      setSelectedId(deliveryFromUrl);
+    }
+  }, [deliveryFromUrl]);
 
   const routeTypes = useMemo(() => {
     const types = new Set<string>();
