@@ -88,6 +88,7 @@ function walk(dir: string): string[] {
     if (entry.isDirectory()) {
       if (entry.name === "app" && dir.endsWith(`${path.sep}src`)) {
         for (const sub of fs.readdirSync(full, { withFileTypes: true })) {
+          if (!sub.isDirectory()) continue;
           if (sub.name === "(marketing)") continue;
           files.push(...walk(path.join(full, sub.name)));
         }

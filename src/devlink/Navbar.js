@@ -43,7 +43,7 @@ export function Navbar({ as: _Component = _Builtin.NavbarWrapper }) {
             height="auto"
             loading="lazy"
             alt=""
-            src="/images/mlcc-logo.jpg"
+            src="/admin/images/mlcc-logo.jpg"
           />
         </_Builtin.NavbarBrand>
         <_Builtin.NavbarMenu

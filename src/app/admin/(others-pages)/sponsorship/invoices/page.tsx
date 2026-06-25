@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function SponsorshipInvoicesPage() {
-  redirect("/sponsorship?view=invoices");
+  redirect("/admin/sponsorship?view=invoices");
 }

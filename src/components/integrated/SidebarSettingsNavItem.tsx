@@ -23,11 +23,11 @@ function IconSettings() {
 
 export default function SidebarSettingsNavItem() {
   const pathname = usePathname();
-  const active = pathname?.startsWith("/settings");
+  const active = pathname?.startsWith("/admin/settings");
 
   return (
     <Link
-      href="/settings/committee"
+      href="/admin/settings/committee"
       className={active ? "lf-nav-item lf-nav-item--active" : "lf-nav-item lf-nav-item--muted"}
     >
       <IconSettings />

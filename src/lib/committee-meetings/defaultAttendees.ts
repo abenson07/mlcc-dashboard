@@ -31,11 +31,15 @@ export async function fetchDefaultAttendeesWithPeople(
   if (error) throw new Error(error.message);
 
   return (data ?? []).map((row) => {
-    const people = row.people as DefaultAttendeePerson | null;
+    const peopleRaw = row.people as unknown;
+    const people = (Array.isArray(peopleRaw) ? peopleRaw[0] : peopleRaw) as
+      | DefaultAttendeePerson
+      | null
+      | undefined;
     return {
       id: row.id as string,
       person_id: row.person_id as string,
-      person: people,
+      person: people ?? null,
     };
   });
 }

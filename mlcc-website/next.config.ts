@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/skeleton-home",
+        destination: "/",
+        permanent: true,
+      },
+      {
         source: "/skeleton-events",
         destination: "/events",
         permanent: true,

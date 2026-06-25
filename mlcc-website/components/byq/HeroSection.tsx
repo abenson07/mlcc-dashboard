@@ -7,7 +7,13 @@ export function HeroSection({ title }: { title: string }) {
   const [btnHovered, setBtnHovered] = React.useState(false);
 
   return (
-    <div className="flex h-[calc(100vh-6.75rem)] max-[991px]:h-[calc(100vh-6.25rem)] bg-sparkles-cream p-2">
+    <div
+      className="flex h-[calc(100vh-6.75rem)] max-[991px]:h-[calc(100vh-6.25rem)] bg-sparkles-cream p-2"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="home.hero"
+      data-editable-label="Hero Section"
+    >
       <div className="relative flex flex-row w-full h-full rounded-2xl overflow-hidden p-6">
         {/* Video — swap back in when ready
         <video
@@ -33,9 +39,13 @@ export function HeroSection({ title }: { title: string }) {
         */}
         <img
           loading="lazy"
-          alt=""
+          alt="Maple Leaf neighborhood hero"
           src="https://cdn.prod.website-files.com/6931c0eea92dec5b7ca905e9%2F69b53b7293cf73e76c9173d6_Silhouette%20Profile%20Art_poster.0000000.jpg"
           className="absolute inset-0 w-full h-full object-cover rounded-2xl"
+          data-editable="true"
+          data-editable-type="image"
+          data-editable-id="home.hero.background"
+          data-editable-label="Hero background"
         />
 
         <div
@@ -52,7 +62,13 @@ export function HeroSection({ title }: { title: string }) {
           <div className="flex flex-col w-full h-full justify-end">
             <div className="relative z-[2] flex justify-between items-end w-full gap-6 max-[767px]:flex-col max-[767px]:items-start max-[767px]:gap-8">
               <div className="max-w-[42.5rem]">
-                <h1 className="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-sparkles-cream max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">
+                <h1
+                  className="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-sparkles-cream max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]"
+                  data-editable="true"
+                  data-editable-type="text"
+                  data-editable-id="home.hero.title"
+                  data-editable-label="Hero headline"
+                >
                   {title}
                 </h1>
               </div>
@@ -64,6 +80,10 @@ export function HeroSection({ title }: { title: string }) {
                   transition-colors duration-[400ms]
                   ${ctaHovered ? "bg-sparkles-warm" : "bg-sparkles-cream"}
                 `}
+                data-editable="true"
+                data-editable-type="button"
+                data-editable-id="home.hero.cta"
+                data-editable-label="Hero CTA"
                 onMouseEnter={() => setCtaHovered(true)}
                 onMouseLeave={() => setCtaHovered(false)}
               >

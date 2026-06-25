@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function WebsiteBannersRedirectPage() {
-  redirect("/communications?view=banners");
+  redirect("/admin/communications?view=banners");
 }

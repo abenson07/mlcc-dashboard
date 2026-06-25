@@ -881,7 +881,7 @@ const Calendar: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
                 <>
                   {" "}
                   <Link
-                    href={`/events/edit/${encodeURIComponent(editingId)}`}
+                    href={`/admin/events/edit/${encodeURIComponent(editingId)}`}
                     className="font-medium text-brand-600 hover:underline dark:text-brand-400"
                   >
                     Open full editor

@@ -7,7 +7,7 @@ export function parseListRange(sp: URLSearchParams | null): EventsListRange {
 }
 
 export function eventsListHref(range?: EventsListRange): string {
-  return range === "past" ? "/events?range=past" : "/events";
+  return range === "past" ? "/admin/events?range=past" : "/admin/events";
 }
 
 export function formatEventDateTime(raw: unknown): string {

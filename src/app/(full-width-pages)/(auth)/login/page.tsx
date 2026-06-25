@@ -1,4 +1,4 @@
-import SignInForm from "@/components/auth/SignInForm";
+import AccountSection from "@/components/sections/AccountSection";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -7,6 +7,8 @@ export const metadata = {
   description: "Sign in to Maple Leaf Community Dashboard",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function SignIn() {
   const supabase = await createClient();
   const {
@@ -14,8 +16,8 @@ export default async function SignIn() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/neighbors");
+    redirect("/admin/people");
   }
 
-  return <SignInForm />;
+  return <AccountSection />;
 }

@@ -65,7 +65,6 @@ export function CmsPageSection({
   story?: LeafletStory;
   relatedStories?: LeafletStory[];
 }) {
-  const [hoveredCard, setHoveredCard] = React.useState<number | null>(null);
   const heroImage = story?.image ?? skeletonHeroImage;
 
   return (
@@ -78,9 +77,7 @@ export function CmsPageSection({
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <SectionLabel>{story?.type ?? "Label"}</SectionLabel>
                   {story ? (
-                    <SectionLabel>
-                      {formatLeafletDate(story.publishDate)} · {formatLeafletAuthor(story.author)}
-                    </SectionLabel>
+                    <SectionLabel>{formatLeafletDate(story.publishDate)}</SectionLabel>
                   ) : (
                     <SectionLabel>More Label</SectionLabel>
                   )}
@@ -88,6 +85,9 @@ export function CmsPageSection({
                 <h1 className="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">
                   {title}
                 </h1>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <SectionLabel>{story ? formatLeafletAuthor(story.author) : "Author"}</SectionLabel>
+                </div>
               </div>
 
               {story?.image ? (
@@ -181,70 +181,42 @@ export function CmsPageSection({
 
               <div className="grid grid-cols-2 gap-x-3 gap-y-16 max-[479px]:grid-cols-1">
                 {relatedStories
-                  ? relatedStories.map((card, i) => (
+                  ? relatedStories.map((card) => (
                       <Link
                         key={card.slug}
                         href={`/leaflet/template/${card.slug}`}
                         className="flex w-full flex-col gap-4 text-sparkles-navy no-underline"
-                        onMouseEnter={() => setHoveredCard(i)}
-                        onMouseLeave={() => setHoveredCard(null)}
                       >
                         <div className="relative h-[25rem] w-full overflow-hidden rounded-2xl max-[991px]:h-[18.75rem] max-[767px]:h-[15.625rem] max-[479px]:h-[12.5rem] max-[479px]:rounded-lg">
                           <ParallaxImage src={card.image ?? skeletonHeroImage} alt="" />
-                          <div className="absolute inset-0 z-10 flex h-full w-full items-center justify-center">
-                            <div
-                              className={`
-                                cursor-pointer rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3
-                                font-display text-sm leading-5 font-bold text-sparkles-cream
-                                transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]
-                                ${hoveredCard === i ? "border-sparkles-navy/90 bg-sparkles-navy/90" : ""}
-                              `}
-                            >
-                              Read story
-                            </div>
-                          </div>
                         </div>
 
-                        <div className="flex flex-row items-center justify-between gap-5 max-[767px]:flex-col max-[767px]:items-start max-[767px]:justify-between">
+                        <div className="flex flex-col items-start justify-start gap-3">
+                          <div className="flex flex-wrap items-stretch justify-start gap-2">
+                            <SectionLabel>{card.type}</SectionLabel>
+                          </div>
                           <div className="font-display text-2xl leading-7 font-bold tracking-[-0.03125rem] text-puget-night">
                             {card.title}
-                          </div>
-                          <div className="flex flex-wrap items-stretch justify-end gap-2">
-                            <SectionLabel>{card.type}</SectionLabel>
                           </div>
                         </div>
                       </Link>
                     ))
-                  : skeletonRelatedCards.map((card, i) => (
+                  : skeletonRelatedCards.map((card) => (
                       <a
                         key={card.img}
                         href={card.href}
                         className="flex w-full flex-col gap-4 text-sparkles-navy no-underline"
-                        onMouseEnter={() => setHoveredCard(i)}
-                        onMouseLeave={() => setHoveredCard(null)}
                       >
                         <div className="relative h-[25rem] w-full overflow-hidden rounded-2xl max-[991px]:h-[18.75rem] max-[767px]:h-[15.625rem] max-[479px]:h-[12.5rem] max-[479px]:rounded-lg">
                           <ParallaxImage src={card.img} alt="" />
-                          <div className="absolute inset-0 z-10 flex h-full w-full items-center justify-center">
-                            <div
-                              className={`
-                                cursor-pointer rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3
-                                font-display text-sm leading-5 font-bold text-sparkles-cream
-                                transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]
-                                ${hoveredCard === i ? "border-sparkles-navy/90 bg-sparkles-navy/90" : ""}
-                              `}
-                            >
-                              Read story
-                            </div>
-                          </div>
                         </div>
 
-                        <div className="flex flex-row items-center justify-between gap-5 max-[767px]:flex-col max-[767px]:items-start max-[767px]:justify-between">
+                        <div className="flex flex-col items-start justify-start gap-3">
+                          <div className="flex flex-wrap items-stretch justify-start gap-2">
+                            <SectionLabel>{card.label}</SectionLabel>
+                          </div>
                           <div className="font-display text-2xl leading-7 font-bold tracking-[-0.03125rem] text-puget-night">
                             {card.title}
-                          </div>
-                          <div className="flex flex-wrap items-stretch justify-end gap-2">
-                            <SectionLabel>{card.label}</SectionLabel>
                           </div>
                         </div>
                       </a>

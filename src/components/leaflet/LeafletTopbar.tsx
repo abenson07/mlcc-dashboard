@@ -10,10 +10,10 @@ import CreateLeafletModal from "./overview/CreateLeafletModal";
 import { useLeafletContext } from "./LeafletContext";
 
 const MODE_TABS = [
-  { label: "People", href: "/people", dividerAfter: false },
-  { label: "Events", href: "/events", dividerAfter: true },
-  { label: "Leaflets", href: "/leaflet", dividerAfter: true },
-  { label: "Stories", href: "/stories", dividerAfter: false },
+  { label: "People", href: "/admin/people", dividerAfter: false },
+  { label: "Events", href: "/admin/events", dividerAfter: true },
+  { label: "Leaflets", href: "/admin/leaflet", dividerAfter: true },
+  { label: "Stories", href: "/admin/stories", dividerAfter: false },
 ] as const;
 
 export default function LeafletTopbar() {
@@ -28,7 +28,7 @@ export default function LeafletTopbar() {
   }
 
   function isActive(href: string) {
-    if (href === "/leaflet") return pathname?.startsWith("/leaflet");
+    if (href === "/admin/leaflet") return pathname?.startsWith("/admin/leaflet");
     return pathname?.startsWith(href);
   }
 
@@ -54,7 +54,7 @@ export default function LeafletTopbar() {
       <div className="lf-topbar-spacer" />
       <div className="lf-topbar-controls">
         <ActionItemsTopbarMenu />
-        <Link href="/finance" className="lf-icon-btn" aria-label="Revenue dashboard">
+        <Link href="/admin/finance" className="lf-icon-btn" aria-label="Revenue dashboard">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
           </svg>

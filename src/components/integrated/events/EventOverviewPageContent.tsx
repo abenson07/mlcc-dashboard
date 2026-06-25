@@ -33,7 +33,7 @@ export default function EventOverviewPageContent() {
     return (
       <div className="lf-empty-page">
         <h1 className="lf-h2">Event not found</h1>
-        <Link href="/events" className="lf-link">Back to events</Link>
+        <Link href="/admin/events" className="lf-link">Back to events</Link>
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function EventOverviewPageContent() {
               </span>
             </label>
           ))}
-          <Link href={`/events-hub/${eventId}/schedule`} className="lf-see-all">
+          <Link href={`/admin/events-hub/${eventId}/schedule`} className="lf-see-all">
             See all items in checklist ({tasks.length})
           </Link>
         </section>
@@ -129,10 +129,10 @@ export default function EventOverviewPageContent() {
                 <span className="lf-status-badge lf-status-badge--green">Confirmed</span>
               </div>
             ))}
-            <Link href={`/events-hub/${eventId}/volunteers`} className="lf-see-all">
+            <Link href={`/admin/events-hub/${eventId}/volunteers`} className="lf-see-all">
               See all
             </Link>
-            <Link href={`/events-hub/${eventId}/volunteers`} className="lf-view-all-btn">
+            <Link href={`/admin/events-hub/${eventId}/volunteers`} className="lf-view-all-btn">
               <IconPlus />
               Add volunteer
             </Link>
@@ -175,7 +175,7 @@ export default function EventOverviewPageContent() {
               </>
             )}
             <div className="lf-card-footer">
-              <Link href={`/events-hub/${eventId}/sponsorship`} className="lf-see-all">
+              <Link href={`/admin/events-hub/${eventId}/sponsorship`} className="lf-see-all">
                 See all
               </Link>
             </div>

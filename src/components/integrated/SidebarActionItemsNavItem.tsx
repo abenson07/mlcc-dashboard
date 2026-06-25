@@ -6,11 +6,11 @@ import { IconCheckSquare } from "@/components/leaflet/icons";
 
 export default function SidebarActionItemsNavItem() {
   const pathname = usePathname();
-  const active = pathname?.startsWith("/action-items");
+  const active = pathname?.startsWith("/admin/action-items");
 
   return (
     <Link
-      href="/action-items"
+      href="/admin/action-items"
       className={active ? "lf-nav-item lf-nav-item--active" : "lf-nav-item lf-nav-item--muted"}
     >
       <IconCheckSquare />

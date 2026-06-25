@@ -15,3 +15,10 @@ export function isAdminPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return pathname === ADMIN_PREFIX || pathname.startsWith(`${ADMIN_PREFIX}/`);
 }
+
+/** Path after `/admin`, or the full pathname if not under admin. */
+export function adminSegment(pathname: string | null | undefined): string {
+  if (!pathname || !isAdminPath(pathname)) return pathname ?? "";
+  const rest = pathname.slice(ADMIN_PREFIX.length);
+  return rest === "" ? "/" : rest;
+}

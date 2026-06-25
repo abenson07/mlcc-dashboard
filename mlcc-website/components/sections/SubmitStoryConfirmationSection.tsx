@@ -76,7 +76,7 @@ export function SubmitStoryConfirmationSection() {
 
               <div className="flex flex-row flex-wrap items-center justify-center gap-2">
                 <PrimaryButton href="/leaflet" label="Read the Leaflet" />
-                <SecondaryButton href="/skeleton-home" label="Back to home" />
+                <SecondaryButton href="/" label="Back to home" />
               </div>
             </div>
           </div>

@@ -23,15 +23,19 @@ export async function GET() {
   }
 
   const entries = (data ?? []).map((row) => {
-    const events = row.events as { name: string; starts_at: string | null } | null;
+    const eventsRaw = row.events as unknown;
+    const event = (Array.isArray(eventsRaw) ? eventsRaw[0] : eventsRaw) as
+      | { name: string; starts_at: string | null }
+      | null
+      | undefined;
     const committee = row.committee as CommitteeSlug;
     return {
       slug: row.website_slug,
-      month: events?.starts_at
-        ? new Date(events.starts_at).toLocaleDateString("en-US", { month: "long" })
+      month: event?.starts_at
+        ? new Date(event.starts_at).toLocaleDateString("en-US", { month: "long" })
         : "",
       committeeSlug: WEBSITE_COMMITTEE_SLUG[committee] ?? committee,
-      dateIso: events?.starts_at ?? null,
+      dateIso: event?.starts_at ?? null,
       detail: row.structured_minutes as StructuredMinutes | null,
     };
   });

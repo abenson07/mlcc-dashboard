@@ -88,7 +88,7 @@ export const COMMITTEE_CONTENT: Record<CommitteeSlug, CommitteeContent> = {
     headline: "Gatherings that bring Maple Leaf together",
     body: "The Events committee plans and hosts the traditions neighbors look forward to year after year — from the Summer Social and Halloween Parade to Movie Nights, Silent Book Club, and community meetings. Volunteers handle logistics, promotion, and the small details that make each gathering feel welcoming.",
     featureSection: {
-      label: "What we host",
+      label: "Made possible by this committee",
       headline: "Neighborhood traditions neighbors help make happen",
       cards: [
         {
@@ -142,7 +142,7 @@ export const COMMITTEE_CONTENT: Record<CommitteeSlug, CommitteeContent> = {
   },
   advocacy: {
     title: "Advocacy",
-    headline: "A voice for Maple Leaf at the city level",
+    headline: "A voice for Maple Leaf",
     body: "The Advocacy committee creates spaces where neighbors can learn about policy changes, talk through what they mean for Maple Leaf, and decide what to do next. Recent work has included zoning workshops connected to the One Seattle Plan and encouraging meaningful community involvement as the city grows.",
   },
   "business-committee": {

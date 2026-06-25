@@ -14,17 +14,17 @@ export default function AdminLayoutClient({
 }) {
   const pathname = usePathname();
   const isIntegratedShell =
-    pathname?.startsWith("/leaflet") ||
-    pathname?.startsWith("/site") ||
-    pathname?.startsWith("/people") ||
-    pathname?.startsWith("/biz") ||
-    pathname === "/events" ||
-    pathname?.startsWith("/events?") ||
-    pathname?.startsWith("/events-hub") ||
-    pathname?.startsWith("/stories") ||
-    pathname?.startsWith("/finance") ||
-    pathname?.startsWith("/settings") ||
-    pathname?.startsWith("/action-items");
+    pathname?.startsWith("/admin/leaflet") ||
+    pathname?.startsWith("/admin/site") ||
+    pathname?.startsWith("/admin/people") ||
+    pathname?.startsWith("/admin/biz") ||
+    pathname === "/admin/events" ||
+    pathname?.startsWith("/admin/events?") ||
+    pathname?.startsWith("/admin/events-hub") ||
+    pathname?.startsWith("/admin/stories") ||
+    pathname?.startsWith("/admin/finance") ||
+    pathname?.startsWith("/admin/settings") ||
+    pathname?.startsWith("/admin/action-items");
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   if (isIntegratedShell) {

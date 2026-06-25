@@ -121,7 +121,7 @@ export function Footer({
                 width="auto"
                 height="auto"
                 alt=""
-                src="/images/mlcc-logo.jpg"
+                src="/admin/images/mlcc-logo.jpg"
               />
               <_Builtin.Block
                 className={_utils.cx(_styles, "footer-contact_info-wrapper")}

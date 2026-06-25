@@ -14,7 +14,7 @@ export default function SponsorshipInvoicesNewPage() {
       <PageBreadcrumb pageTitle="New invoice" />
       <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
         <Link
-          href="/sponsorship?view=invoices"
+          href="/admin/sponsorship?view=invoices"
           className="font-medium text-brand-600 underline dark:text-brand-400"
         >
           Back to invoices

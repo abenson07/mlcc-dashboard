@@ -129,13 +129,13 @@ export default function NeighborsHubContent() {
   useEffect(() => {
     if (searchParams?.get("view") !== "volunteers") return;
     const tab = searchParams.get("volunteerTab");
-    router.replace(tab === "roster" ? "/volunteers?tab=roster" : "/volunteers");
+    router.replace(tab === "roster" ? "/admin/volunteers?tab=roster" : "/admin/volunteers");
   }, [searchParams, router]);
 
   const [modalOpen, setModalOpen] = useState(false);
 
   const setView = (next: NeighborTableView) => {
-    const href = next === "neighbors" ? "/neighbors" : "/neighbors?view=members";
+    const href = next === "neighbors" ? "/admin/neighbors" : "/admin/neighbors?view=members";
     router.replace(href);
   };
 

@@ -90,7 +90,13 @@ export function FeatureIntroWithVideoCardsSection() {
 
   return (
     <div className="w-full">
-      <section className="bg-sparkles-cream pt-[7.5rem] pb-20 max-[767px]:pt-20 max-[767px]:pb-12">
+      <section
+        className="bg-sparkles-cream pt-[7.5rem] pb-20 max-[767px]:pt-20 max-[767px]:pb-12"
+        data-editable="true"
+        data-editable-type="section"
+        data-editable-id="home.mission"
+        data-editable-label="Mission Section"
+      >
         <div className="px-8 max-[767px]:px-4">
           <div className="z-[2] w-full max-w-[1800px] mx-auto">
             <div className="flex flex-col items-center gap-16 max-[767px]:gap-12">
@@ -98,7 +104,13 @@ export function FeatureIntroWithVideoCardsSection() {
                 <SectionLabel>Mission</SectionLabel>
 
                 <div className="text-center">
-                  <h2 className="m-0 text-puget-night font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
+                  <h2
+                    className="m-0 text-puget-night font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]"
+                    data-editable="true"
+                    data-editable-type="text"
+                    data-editable-id="home.mission.title"
+                    data-editable-label="Mission headline"
+                  >
                     Connecting neighbors to the people and things that matter most.
                   </h2>
                 </div>

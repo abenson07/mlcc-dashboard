@@ -23,7 +23,7 @@ export default function EventDetailLayout({
 
   async function handleCreate(input: Parameters<typeof create>[0]) {
     const event = await create(input);
-    router.push(`/events-hub/${event.id}/overview`);
+    router.push(`/admin/events-hub/${event.id}/overview`);
   }
 
   return (

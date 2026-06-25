@@ -29,7 +29,7 @@ export async function GET() {
   }
 
   const action_items: ActionItemListRow[] = (data ?? []).map((row) => {
-    const { people, ...rest } = row as Record<string, unknown> & {
+    const { people, ...rest } = row as unknown as Record<string, unknown> & {
       people: ActionItemListRow["assignee"];
     };
     return {

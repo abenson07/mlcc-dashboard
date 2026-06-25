@@ -70,9 +70,11 @@
 .lf-main--site .lf-content-col,
 .lf-main--site-comments .lf-content-col { padding-top: 0; }
 
-.lf-main--site-comments .lf-comments-col {
+.lf-main--site-comments .lf-comments-col,
+.lf-main--site.lf-main--site-comments .lf-comments-col {
   padding: 24px 32px 32px 0;
   box-sizing: border-box;
+  height: calc(100vh - 48px);
 }
 .lf-content-col--full { width: 100%; }
 
@@ -93,6 +95,176 @@
   border: 1px solid var(--lf-canvas-border);
   background: var(--lf-canvas);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.lf-site-canvas--loading {
+  min-height: calc(100vh - 120px);
+}
+
+.lf-site-preview-iframe {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 120px);
+  min-height: 640px;
+  border: none;
+  background: #fff;
+}
+
+.lf-main--site.lf-main--site-comments {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+}
+
+.lf-main--site.lf-main--site-comments .lf-site-canvas {
+  max-width: none;
+}
+
+.lf-site-page-picker {
+  position: relative;
+}
+
+.lf-site-page-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--lf-canvas-border);
+  border-radius: 8px;
+  background: var(--lf-card);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.lf-site-page-dropdown-item {
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.lf-site-page-dropdown-item:hover {
+  background: #fafafa;
+}
+
+.lf-site-page-dropdown-item--active {
+  font-weight: 600;
+  background: #f4f4f5;
+}
+
+.lf-comments-count {
+  margin-left: 6px;
+  color: var(--lf-text-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.lf-comments-empty {
+  padding: 8px 0;
+}
+
+.lf-comment-element-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lf-text-muted);
+  text-transform: capitalize;
+}
+
+.lf-comment-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lf-comment-edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.lf-feedback-textarea {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  border: 1px solid var(--lf-canvas-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+
+.lf-page-feedback-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding: 12px;
+  border: 1px solid var(--lf-canvas-border);
+  border-radius: 10px;
+  background: var(--lf-card);
+}
+
+.lf-page-feedback-composer--page {
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.lf-page-feedback-composer-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lf-text);
+}
+
+.lf-page-feedback-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lf-feedback-submit-row {
+  padding-top: 4px;
+}
+
+.lf-feedback-batch-status {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f4f4f5;
+  font-size: 12px;
+}
+
+.lf-link {
+  color: var(--lf-accent, #2563eb);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.lf-link:hover {
+  text-decoration: underline;
+}
+
+.lf-btn--primary {
+  width: 100%;
+  background: #18181b;
+  color: #fff;
+  border-color: #18181b;
+}
+
+.lf-btn--active {
+  background: #18181b;
+  color: #fff;
+  border-color: #18181b;
 }
 
 .lf-site-canvas-perms {
@@ -119,6 +291,7 @@
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  overflow: hidden;
 }
 
 .lf-comments-header {
@@ -131,9 +304,11 @@
 
 .lf-comments-list {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 12px;
   overflow: auto;
+  min-height: 0;
 }
 
 .lf-comment-card {
@@ -438,7 +613,8 @@
 @media (max-width: 1100px) {
   .lf-people-layout,
   .lf-events-layout,
-  .lf-main--site-comments {
+  .lf-main--site-comments,
+  .lf-main--site.lf-main--site-comments {
     grid-template-columns: 1fr;
   }
 

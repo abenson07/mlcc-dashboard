@@ -93,7 +93,7 @@ export function NewNavigationDark({
                 height="auto"
                 loading="eager"
                 alt=""
-                src="/images/mlcc-logo.jpg"
+                src="/admin/images/mlcc-logo.jpg"
               />
             </_Builtin.NavbarBrand>
             <_Builtin.NavbarLink
@@ -155,7 +155,7 @@ export function NewNavigationDark({
               height="auto"
               loading="lazy"
               alt=""
-              src="/images/mlcc-logo.jpg"
+              src="/admin/images/mlcc-logo.jpg"
             />
           </_Builtin.NavbarBrand>
           <_Builtin.Block

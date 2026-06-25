@@ -75,11 +75,15 @@ export function Team4Section() {
 
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
-          <div className="mb-20 flex flex-col items-start gap-6 max-[991px]:mb-16 max-[767px]:gap-5">
-            <SectionLabel>The team</SectionLabel>
+          <div className="mb-20 flex max-w-[42.5rem] flex-col items-start gap-6 max-[991px]:mb-16 max-[767px]:gap-5">
+            <SectionLabel>Committee Volunteers</SectionLabel>
             <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
               Run by neighbors like you
             </h2>
+            <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
+              This committee is powered entirely by volunteers — neighbors who live right here in Maple Leaf and give
+              their time because they care about the community. There&apos;s always room for another familiar face.
+            </p>
           </div>
         </div>
       </div>

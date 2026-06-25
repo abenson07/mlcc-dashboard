@@ -4,5 +4,5 @@ type Props = { params: Promise<{ invoiceId: string }> };
 
 export default async function BillingInvoiceDetailPage({ params }: Props) {
   const { invoiceId } = await params;
-  redirect(`/sponsorship/invoices/${encodeURIComponent(invoiceId)}`);
+  redirect(`/admin/sponsorship/invoices/${encodeURIComponent(invoiceId)}`);
 }

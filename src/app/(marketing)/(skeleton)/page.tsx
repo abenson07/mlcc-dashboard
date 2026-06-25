@@ -6,7 +6,7 @@ import { HeroSection } from "@marketing/components/byq/HeroSection";
 import { ValueFeature49Section } from "@marketing/components/byq/ValueFeature49Section";
 import { ServicesMarqueeSection } from "@marketing/components/sections/ServicesMarqueeSection";
 
-export default function SkeletonHomePage() {
+export default function HomePage() {
   return (
     <main>
       <HeroSection title="Home" />

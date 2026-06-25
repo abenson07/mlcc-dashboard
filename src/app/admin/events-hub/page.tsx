@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function EventsHubRedirectPage() {
-  redirect("/events");
+  redirect("/admin/events");
 }

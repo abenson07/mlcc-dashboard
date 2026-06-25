@@ -61,7 +61,7 @@ export default function OverviewContent() {
               </span>
             </label>
           ))}
-          <Link href={leafletHref("/leaflet/todo", leafletId)} className="lf-see-all">
+          <Link href={leafletHref("/admin/leaflet/todo", leafletId)} className="lf-see-all">
             See all tasks
           </Link>
         </section>
@@ -82,7 +82,7 @@ export default function OverviewContent() {
                 <span className={route.dot === "amber" ? "lf-dot lf-dot--amber" : "lf-dot lf-dot--green"} />
               </div>
             ))}
-            <Link href={leafletHref("/leaflet/open-routes", leafletId)} className="lf-view-all-btn">
+            <Link href={leafletHref("/admin/leaflet/open-routes", leafletId)} className="lf-view-all-btn">
               <IconArrowRight />
               View all open routes
             </Link>
@@ -125,7 +125,7 @@ export default function OverviewContent() {
                 </span>
               </div>
             ))}
-            <Link href={leafletHref("/leaflet/sponsorships", leafletId)} className="lf-view-all-btn lf-view-all-btn--dark">
+            <Link href={leafletHref("/admin/leaflet/sponsorships", leafletId)} className="lf-view-all-btn lf-view-all-btn--dark">
               View full budget
             </Link>
           </section>

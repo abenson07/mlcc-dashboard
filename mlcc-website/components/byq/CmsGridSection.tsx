@@ -9,9 +9,6 @@ import {
 
 const submitStoryHref =
   "mailto:hello@mapleleafcommunity.org?subject=Leaflet%20story%20submission";
-const leafletTeamHref = "/committees/newsletter";
-const leafletTeamImage =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp";
 
 const featuredImage =
   "https://byqsupply-components.netlify.app/skeletons/cms-grid/images/patter-horizontal-new.svg";
@@ -86,32 +83,6 @@ function buildStoryGridItems(stories: LeafletStory[]) {
   return [...storyCards.slice(0, promoIndex), promoCard, ...storyCards.slice(promoIndex)];
 }
 
-function JoinLeafletTeamPromotionCard() {
-  return (
-    <Link
-      href={leafletTeamHref}
-      className="grid w-full grid-cols-[1.5fr_1fr] gap-4 text-sparkles-navy no-underline max-[767px]:grid-cols-1"
-    >
-      <div className="relative h-[20rem] w-full overflow-hidden rounded-2xl max-[767px]:h-[15rem]">
-        <img loading="lazy" src={leafletTeamImage} alt="" className="z-[1] h-full w-full object-cover" />
-      </div>
-      <div className="flex flex-col justify-center gap-4 rounded-2xl bg-sparkles-warm p-8 max-[767px]:p-6">
-        <SectionLabel>Get involved</SectionLabel>
-        <div className="font-display text-[2rem] leading-9 font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[1.75rem] max-[767px]:leading-8">
-          Join the Leaflet team
-        </div>
-        <p className="m-0 font-body text-base leading-6 text-sparkles-navy">
-          Help write, design, photograph, and deliver the neighborhood newsletter that reaches Maple Leaf door to
-          door.
-        </p>
-        <span className="font-display text-sm leading-5 font-bold uppercase text-sparkles-navy">
-          Learn about volunteering
-        </span>
-      </div>
-    </Link>
-  );
-}
-
 function StoryCard({
   story,
   featured = false,
@@ -125,7 +96,7 @@ function StoryCard({
     return (
       <Link
         href={`/leaflet/template/${story.slug}`}
-        className="grid w-full grid-cols-[1.5fr_1fr] gap-4 text-sparkles-navy no-underline max-[767px]:grid-cols-1"
+        className="grid w-full grid-cols-[1.5fr_1fr] gap-12 text-sparkles-navy no-underline max-[767px]:grid-cols-1 max-[767px]:gap-4"
       >
         <div className="relative h-[28.5rem] w-full overflow-hidden rounded-2xl max-[767px]:h-[15rem]">
           <img loading="lazy" src={image} alt="" className="z-[1] h-full w-full object-cover" />
@@ -186,7 +157,7 @@ export function CmsGridSection({
     <section className="bg-sparkles-cream text-sparkles-navy">
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
-          <div className="py-[7.5rem] max-[767px]:py-20">
+          <div className="pb-[7.5rem] pt-16 max-[767px]:py-20 max-[767px]:pt-10">
             <div className="mb-20 flex max-w-[35.25rem] flex-col gap-6 max-[767px]:max-w-none">
               <SectionLabel className="self-start">
                 {stories ? "Stories" : "Label placeholder"}
@@ -262,12 +233,6 @@ export function CmsGridSection({
                   ))}
             </div>
 
-            {stories ? (
-              <>
-                <div className="my-20 h-px w-full border-b border-sparkles-navy/16" />
-                <JoinLeafletTeamPromotionCard />
-              </>
-            ) : null}
           </div>
         </div>
       </div>

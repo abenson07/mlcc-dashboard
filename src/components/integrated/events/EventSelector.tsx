@@ -59,8 +59,8 @@ export default function EventSelector({ eventId }: { eventId: string }) {
   }, [others, search]);
 
   function navigateToEvent(id: string) {
-    const segment = pathname?.split(`/events-hub/${eventId}/`)[1] ?? "overview";
-    router.push(`/events-hub/${id}/${segment}`);
+    const segment = pathname?.split(`/admin/events-hub/${eventId}/`)[1] ?? "overview";
+    router.push(`/admin/events-hub/${id}/${segment}`);
     setOpen(false);
     setSearch("");
   }

@@ -141,7 +141,7 @@ function SponsorshipHubPane({
         No sponsorship invoices from this dashboard yet. Create one with category
         tags{" "}
         <Link
-          href="/sponsorship/invoices/new"
+          href="/admin/sponsorship/invoices/new"
           className="font-medium text-brand-600 underline dark:text-brand-400"
         >
           here
@@ -180,7 +180,7 @@ function SponsorshipHubPane({
           />
           {view === "invoices" ? (
             <Link
-              href="/sponsorship/invoices/new"
+              href="/admin/sponsorship/invoices/new"
               className="mb-2 inline-flex shrink-0 items-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-mercury-on-accent hover:bg-brand-600 hover:text-white"
             >
               New invoice
@@ -242,7 +242,7 @@ export default function SponsorshipHubContent() {
 
   const setView = (next: SponsorshipTableView) => {
     const href =
-      next === "sponsorships" ? "/sponsorship" : "/sponsorship?view=invoices";
+      next === "sponsorships" ? "/admin/sponsorship" : "/admin/sponsorship?view=invoices";
     router.replace(href);
   };
 

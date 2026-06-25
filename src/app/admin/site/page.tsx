@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import SiteWorkspaceContent from "@/components/integrated/site/SiteWorkspaceContent";
 
 export default function SitePage() {
-  redirect("/");
+  return <SiteWorkspaceContent />;
 }

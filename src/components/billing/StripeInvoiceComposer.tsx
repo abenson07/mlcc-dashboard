@@ -583,7 +583,7 @@ export default function StripeInvoiceComposer({
       if (onIssued) {
         onIssued(data.id);
       } else {
-        router.push(`/sponsorship/invoices/${encodeURIComponent(data.id)}`);
+        router.push(`/admin/sponsorship/invoices/${encodeURIComponent(data.id)}`);
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not issue invoice.");

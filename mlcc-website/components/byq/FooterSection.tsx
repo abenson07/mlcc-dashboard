@@ -103,7 +103,7 @@ export function FooterSection() {
                     </div>
 
                     <div className="font-body text-xs leading-4 font-normal text-sparkles-muted">
-                      Your information is never disclosed to third parties.
+                      Unsubscribe at any time.
                     </div>
                   </form>
                 </div>
@@ -223,12 +223,20 @@ export function FooterSection() {
                     </div>
 
                     <div className="font-body text-xs leading-4 font-normal text-sparkles-navy">
-                      © Skeletons Consulting 2024, All Rights Reserved
+                      © Maple Leaf Community Council 2026, All Rights Reserved
                     </div>
                   </div>
 
                   <div className="font-body text-xs leading-4 font-normal text-sparkles-navy">
-                    Designed and developed with LOVE by BYQ Supply
+                    Built by{" "}
+                    <a
+                      href="https://www.midwesternoriginals.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sparkles-navy underline"
+                    >
+                      MWO
+                    </a>
                   </div>
                 </div>
               </div>
@@ -236,7 +244,9 @@ export function FooterSection() {
 
             <div className="pt-8">
               <p className="m-0 font-body text-xs leading-4 font-normal text-sparkles-muted">
-                Skeletons is a registered product of BYQ Studio, operating under Portugal (Registration No. PT-987654). The product is developed and maintained in compliance with European Union digital service standards. All Skeletons collections and related assets are created under BYQ Studio&apos;s licensing framework, ensuring originality, compliance with Webflow&apos;s platform policies, and adherence to ethical digital design practices.
+                Maple Leaf Community Council is a nonprofit organization operating out of Seattle, Washington. We are
+                not affiliated with the City of Seattle, King County, or the State of Washington in any way. We aim
+                to operate in compliance with all applicable Washington state requirements for nonprofit organizations.
               </p>
             </div>
           </div>

@@ -100,7 +100,7 @@ export function NavigationBarSection() {
                 max-[479px]:flex max-[479px]:justify-between max-[479px]:items-center
               "
             >
-              <Link href="/skeleton-home" className="z-[2] flex justify-start items-center w-[6.25rem] max-[479px]:w-[5.625rem]">
+              <Link href="/" className="z-[2] flex justify-start items-center w-[6.25rem] max-[479px]:w-[5.625rem]">
                 <img
                   loading="lazy"
                   src="https://byqsupply-components.netlify.app/skeletons/navigation-bar/images/SkeletonsLogo.svg"

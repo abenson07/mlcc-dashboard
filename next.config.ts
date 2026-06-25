@@ -1,12 +1,39 @@
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-// When deployed under a mount path (e.g. Webflow Cloud at /dashboard), set BASE_PATH and
-// NEXT_PUBLIC_BASE_PATH to that path so API routes and assets are served correctly.
+// Optional BASE_PATH for legacy Webflow Cloud mounts; leave unset on Vercel (marketing at /, admin at /admin).
 const basePath = process.env.BASE_PATH || undefined;
 
 const nextConfig: NextConfig = {
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
+  async redirects() {
+    return [
+      {
+        source: "/skeleton-home",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/skeleton-events",
+        destination: "/events",
+        permanent: true,
+      },
+      {
+        source: "/skeleton-events/template",
+        destination: "/events/template",
+        permanent: true,
+      },
+    ];
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "byqsupply-components.netlify.app",
+        pathname: "/sparkles/images/**",
+      },
+    ],
+  },
   experimental: {
     serverActions: {
       // Allow public domains and Webflow/Cosmic internal host so origin vs x-forwarded-host check passes when behind their proxy.

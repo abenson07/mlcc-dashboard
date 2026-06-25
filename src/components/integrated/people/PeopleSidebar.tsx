@@ -18,10 +18,10 @@ import SidebarFooterNav from "../SidebarFooterNav";
 import { isBusinessFilter, isPeopleSubFilter, parsePeopleFilter } from "./peopleFilters";
 
 const PEOPLE_NAV = [
-  { label: "All neighbors", href: "/people", icon: IconUsers, filter: null },
+  { label: "All neighbors", href: "/admin/people", icon: IconUsers, filter: null },
   {
     label: "All businesses",
-    href: "/people?filter=businesses",
+    href: "/admin/people?filter=businesses",
     icon: IconBuilding,
     filter: "businesses",
   },
@@ -70,7 +70,7 @@ export default function PeopleSidebar() {
       <nav className="lf-sidebar-nav" aria-label="People sections">
         {PEOPLE_NAV.map(({ label, href, icon: Icon, filter }) => {
           const isActive =
-            pathname === "/people" &&
+            pathname === "/admin/people" &&
             (filter === null
               ? isAllNeighborsActive(activeFilter)
               : isAllBusinessesActive(activeFilter));
@@ -107,8 +107,8 @@ export default function PeopleSidebar() {
                 );
               }
 
-              const href = `/people?filter=${filter}`;
-              const isActive = pathname === "/people" && activeFilter === filter;
+              const href = `/admin/people?filter=${filter}`;
+              const isActive = pathname === "/admin/people" && activeFilter === filter;
               return (
                 <Link
                   key={filter}

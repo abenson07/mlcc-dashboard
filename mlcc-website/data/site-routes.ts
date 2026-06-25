@@ -24,7 +24,7 @@ export const SITE_ROUTES: RouteTrack[] = [
     label: "Home",
     layout: "complete",
     content: "in-progress",
-    polish: "not-started",
+    polish: "in-progress",
   },
   {
     path: "/events",
@@ -41,13 +41,6 @@ export const SITE_ROUTES: RouteTrack[] = [
     polish: "not-started",
   },
   ...eventRoutes,
-  {
-    path: "/skeleton-home",
-    label: "Skeleton Home",
-    layout: "complete",
-    content: "in-progress",
-    polish: "in-progress",
-  },
   {
     path: "/one-seattle-plan",
     label: "One Seattle Plan",

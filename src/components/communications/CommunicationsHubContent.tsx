@@ -27,8 +27,8 @@ function parseCommunicationsView(
 }
 
 function communicationsHref(view: CommunicationsTableView): string {
-  if (view === "email") return "/communications";
-  return `/communications?view=${view}`;
+  if (view === "email") return "/admin/communications";
+  return `/admin/communications?view=${view}`;
 }
 
 function CommunicationsViewTabs({

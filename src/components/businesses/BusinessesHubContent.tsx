@@ -154,7 +154,7 @@ export default function BusinessesHubContent() {
   const [editingBusiness, setEditingBusiness] = useState<BusinessWithDetails | null>(null);
 
   const setView = (next: BusinessTableView) => {
-    const href = next === "all" ? "/businesses" : `/businesses?view=${next}`;
+    const href = next === "all" ? "/admin/businesses" : `/admin/businesses?view=${next}`;
     router.replace(href);
   };
 

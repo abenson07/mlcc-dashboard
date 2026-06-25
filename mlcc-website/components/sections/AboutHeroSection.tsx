@@ -52,7 +52,13 @@ export function AboutHeroSection() {
   const [secondaryHovered, setSecondaryHovered] = React.useState(false);
 
   return (
-    <section className="bg-sparkles-cream py-[7.5rem] text-sparkles-navy max-[767px]:py-20">
+    <section
+      className="bg-sparkles-cream py-[7.5rem] text-sparkles-navy max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="about.hero"
+      data-editable-label="About Hero"
+    >
       <style>{`
         @keyframes about-hero-marquee {
           from { transform: translateX(0); }
@@ -68,11 +74,23 @@ export function AboutHeroSection() {
           <div className="relative z-[2] mx-auto flex w-full max-w-[42.5rem] flex-col items-center justify-start gap-6 text-center max-[479px]:mb-6 max-[479px]:items-start max-[479px]:text-left">
             <SectionLabel>About the council</SectionLabel>
 
-            <h1 className="m-0 font-display text-[3.75rem] font-bold leading-16 tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">
+            <h1
+              className="m-0 font-display text-[3.75rem] font-bold leading-16 tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]"
+              data-editable="true"
+              data-editable-type="text"
+              data-editable-id="about.hero.title"
+              data-editable-label="About headline"
+            >
               Neighbors building Maple Leaf together
             </h1>
 
-            <p className="m-0 max-w-[34rem] font-body text-base leading-6 text-sparkles-navy">
+            <p
+              className="m-0 max-w-[34rem] font-body text-base leading-6 text-sparkles-navy"
+              data-editable="true"
+              data-editable-type="text"
+              data-editable-id="about.hero.description"
+              data-editable-label="About description"
+            >
               The Maple Leaf Community Council is a volunteer-run neighborhood organization. We
               connect neighbors, host traditions, publish the Leaflet, and give Maple Leaf a voice
               at City Hall.
@@ -88,6 +106,10 @@ export function AboutHeroSection() {
                   font-display text-sm font-bold leading-5 text-sparkles-cream no-underline transition-all duration-300
                   ${primaryHovered ? "border-sparkles-navy/90 bg-sparkles-navy/90" : "border-sparkles-navy bg-sparkles-navy"}
                 `}
+                data-editable="true"
+                data-editable-type="button"
+                data-editable-id="about.hero.membership-cta"
+                data-editable-label="Become a member"
               >
                 Become a member
               </Link>
@@ -127,6 +149,10 @@ export function AboutHeroSection() {
                     src={image.src}
                     alt={image.alt}
                     className="h-full w-full object-cover"
+                    data-editable="true"
+                    data-editable-type="image"
+                    data-editable-id={`about.hero.image-${i}`}
+                    data-editable-label={`About image ${i + 1}`}
                   />
                 </div>
               ))}

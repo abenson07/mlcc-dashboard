@@ -7,7 +7,7 @@ import IntegratedTopbar from "../IntegratedTopbar";
 import SidebarFooterNav from "../SidebarFooterNav";
 
 const SETTINGS_NAV = [
-  { label: "Committee settings", href: "/settings/committee" },
+  { label: "Committee settings", href: "/admin/settings/committee" },
 ] as const;
 
 type SettingsPageShellProps = {

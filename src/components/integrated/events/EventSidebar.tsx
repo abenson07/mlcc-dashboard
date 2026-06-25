@@ -41,7 +41,7 @@ export default function EventSidebar({ eventId }: { eventId: string }) {
       <aside className="lf-sidebar">
         <nav className="lf-sidebar-nav" aria-label="Event sections">
           {navItems.map(({ label, href, icon: Icon }) => {
-            const fullHref = `/events-hub/${eventId}/${href}`;
+            const fullHref = `/admin/events-hub/${eventId}/${href}`;
             const active = pathname?.startsWith(fullHref);
             return (
               <Link

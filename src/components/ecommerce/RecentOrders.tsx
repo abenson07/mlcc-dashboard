@@ -29,7 +29,7 @@ const tableData: Product[] = [
     category: "Laptop",
     price: "$2399.00",
     status: "Delivered",
-    image: "/images/product/product-01.jpg", // Replace with actual image URL
+    image: "/admin/images/product/product-01.jpg", // Replace with actual image URL
   },
   {
     id: 2,
@@ -38,7 +38,7 @@ const tableData: Product[] = [
     category: "Watch",
     price: "$879.00",
     status: "Pending",
-    image: "/images/product/product-02.jpg", // Replace with actual image URL
+    image: "/admin/images/product/product-02.jpg", // Replace with actual image URL
   },
   {
     id: 3,
@@ -47,7 +47,7 @@ const tableData: Product[] = [
     category: "SmartPhone",
     price: "$1869.00",
     status: "Delivered",
-    image: "/images/product/product-03.jpg", // Replace with actual image URL
+    image: "/admin/images/product/product-03.jpg", // Replace with actual image URL
   },
   {
     id: 4,
@@ -56,7 +56,7 @@ const tableData: Product[] = [
     category: "Electronics",
     price: "$1699.00",
     status: "Canceled",
-    image: "/images/product/product-04.jpg", // Replace with actual image URL
+    image: "/admin/images/product/product-04.jpg", // Replace with actual image URL
   },
   {
     id: 5,
@@ -65,7 +65,7 @@ const tableData: Product[] = [
     category: "Accessories",
     price: "$240.00",
     status: "Delivered",
-    image: "/images/product/product-05.jpg", // Replace with actual image URL
+    image: "/admin/images/product/product-05.jpg", // Replace with actual image URL
   },
 ];
 

@@ -74,37 +74,20 @@ export function ContactCtaPreFooterSection({
                 </div>
 
                 <form className="flex flex-col gap-0" aria-label={copy.headline}>
-                  <div className="grid w-full grid-cols-2 gap-4 max-[479px]:grid-cols-1">
-                    <div className="flex flex-col">
-                      <label htmlFor={`${copy.idPrefix}-first-name`} className={labelClassName}>
-                        First name
-                      </label>
-                      <input
-                        className={inputClassName}
-                        maxLength={256}
-                        name="firstName"
-                        placeholder="First name"
-                        type="text"
-                        id={`${copy.idPrefix}-first-name`}
-                        autoComplete="given-name"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <label htmlFor={`${copy.idPrefix}-last-name`} className={labelClassName}>
-                        Last name
-                      </label>
-                      <input
-                        className={inputClassName}
-                        maxLength={256}
-                        name="lastName"
-                        placeholder="Last name"
-                        type="text"
-                        id={`${copy.idPrefix}-last-name`}
-                        autoComplete="family-name"
-                        required
-                      />
-                    </div>
+                  <div className="flex flex-col">
+                    <label htmlFor={`${copy.idPrefix}-name`} className={labelClassName}>
+                      Name
+                    </label>
+                    <input
+                      className={inputClassName}
+                      maxLength={256}
+                      name="name"
+                      placeholder="Name"
+                      type="text"
+                      id={`${copy.idPrefix}-name`}
+                      autoComplete="name"
+                      required
+                    />
                   </div>
 
                   <div className="flex flex-col">

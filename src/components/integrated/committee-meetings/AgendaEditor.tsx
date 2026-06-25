@@ -80,7 +80,7 @@ export default function AgendaEditor({ content, onChange, disabled = false }: Ag
               interactive: true,
               trigger: "manual",
               placement: "bottom-start",
-            })[0];
+            });
           },
           onUpdate(props: {
             clientRect?: (() => DOMRect | null) | null;

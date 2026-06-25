@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function MarketingEmailPage() {
-  redirect("/communications");
+  redirect("/admin/communications");
 }

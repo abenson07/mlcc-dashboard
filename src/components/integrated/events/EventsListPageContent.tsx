@@ -72,7 +72,7 @@ export default function EventsListPageContent() {
 
   async function handleCreate(input: Parameters<typeof create>[0]) {
     const event = await create(input);
-    router.push(`/events-hub/${event.id}/overview`);
+    router.push(`/admin/events-hub/${event.id}/overview`);
   }
 
   async function handleCreateCommitteeMeeting(
@@ -80,7 +80,7 @@ export default function EventsListPageContent() {
   ) {
     const { event } = await createCommitteeMeetingApi(input);
     await queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY });
-    router.push(`/events-hub/${event.id}/overview`);
+    router.push(`/admin/events-hub/${event.id}/overview`);
   }
 
   function openCreateModal(prefillName = "") {
@@ -185,7 +185,7 @@ export default function EventsListPageContent() {
                           return (
                             <Link
                               key={event.id}
-                              href={`/events-hub/${event.id}/overview`}
+                              href={`/admin/events-hub/${event.id}/overview`}
                               className={rowClassName}
                             >
                               <div className="lf-event-date-col">
@@ -207,7 +207,7 @@ export default function EventsListPageContent() {
                         }
 
                         return (
-                          <Link key={event.id} href={`/events?event=${event.id}`} className={rowClassName}>
+                          <Link key={event.id} href={`/admin/events?event=${event.id}`} className={rowClassName}>
                             <div className="lf-event-date-col">
                               <strong>{event.day}</strong>
                               <span>{event.month}</span>

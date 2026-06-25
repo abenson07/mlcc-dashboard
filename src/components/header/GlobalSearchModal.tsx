@@ -10,13 +10,13 @@ type GlobalSearchModalProps = {
 };
 
 const QUICK_LINKS: { label: string; href: string }[] = [
-  { label: "Neighbors", href: "/neighbors" },
-  { label: "Volunteers", href: "/volunteers" },
-  { label: "Routes", href: "/routes" },
-  { label: "Invoices", href: "/sponsorship?view=invoices" },
-  { label: "Events", href: "/events" },
-  { label: "Features dashboard", href: "/features/dashboard" },
-  { label: "Communications", href: "/communications" },
+  { label: "Neighbors", href: "/admin/neighbors" },
+  { label: "Volunteers", href: "/admin/volunteers" },
+  { label: "Routes", href: "/admin/routes" },
+  { label: "Invoices", href: "/admin/sponsorship?view=invoices" },
+  { label: "Events", href: "/admin/events" },
+  { label: "Features dashboard", href: "/admin/features/dashboard" },
+  { label: "Communications", href: "/admin/communications" },
 ];
 
 const FILTERS = ["All", "Neighbors", "Routes", "Business", "Events", "Features"];

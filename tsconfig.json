@@ -32,6 +32,9 @@
       "hooks": [
         "./hooks"
       ],
+      "hooks/*": [
+        "./hooks/*"
+      ],
       "schemas/*": [
         "./schemas/*"
       ]
