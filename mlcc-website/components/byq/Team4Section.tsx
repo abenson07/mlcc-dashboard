@@ -68,9 +68,6 @@ export function Team4Section() {
         .animate-team-4-marquee {
           animation: team-4-marquee 30s linear infinite;
         }
-        .animate-team-4-marquee:hover {
-          animation-play-state: paused;
-        }
       `}</style>
 
       <div className="px-8 max-[767px]:px-4">

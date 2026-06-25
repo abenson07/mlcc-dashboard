@@ -131,7 +131,6 @@ export function NavigationBarSection() {
                     { label: "Events", href: "/events" },
                     { label: "Leaflet", href: "/leaflet" },
                     { label: "Committees", href: "/committees" },
-                    { label: "Status", href: "/routes" },
                   ].map((item) => (
                     <a
                       key={item.label}
