@@ -1080,11 +1080,11 @@
   height: 16px;
 }
 
-.shell-footer-item-tooltip {
+.shell-tooltip {
   position: relative;
 }
 
-.shell-footer-item-tooltip::after {
+.shell-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 8px);
@@ -1104,7 +1104,7 @@
   z-index: 10;
 }
 
-.shell-footer-item-tooltip:hover::after {
+.shell-tooltip:hover::after {
   opacity: 1;
   visibility: visible;
 }

@@ -11,7 +11,7 @@ type FooterMenuItemProps = {
 export default function FooterMenuItem({ icon, label, href, onClick, tooltip }: FooterMenuItemProps) {
   if (href) {
     return (
-      <a className="shell-footer-item shell-footer-item-tooltip" href={href} data-tooltip={tooltip}>
+      <a className="shell-footer-item shell-tooltip" href={href} data-tooltip={tooltip}>
         {icon}
         <span>{label}</span>
       </a>
@@ -21,7 +21,7 @@ export default function FooterMenuItem({ icon, label, href, onClick, tooltip }: 
   return (
     <button
       type="button"
-      className="shell-footer-item shell-footer-item-tooltip"
+      className="shell-footer-item shell-tooltip"
       onClick={onClick}
       data-tooltip={tooltip}
     >
