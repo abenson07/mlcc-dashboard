@@ -24,7 +24,8 @@ export default function AdminLayoutClient({
     pathname?.startsWith("/admin/stories") ||
     pathname?.startsWith("/admin/finance") ||
     pathname?.startsWith("/admin/settings") ||
-    pathname?.startsWith("/admin/action-items");
+    pathname?.startsWith("/admin/action-items") ||
+    pathname?.startsWith("/admin/shell-preview");
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   if (isIntegratedShell) {

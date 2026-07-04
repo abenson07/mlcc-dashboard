@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { DevLinkProvider } from "@/devlink/DevLinkProvider";
 import AgentationDev from "@/components/dev/AgentationDev";
-import FeedbackFab from "@/components/feedback/FeedbackFab";
 import { GlobalSearchProvider } from "@/components/search/GlobalSearchProvider";
 
 export default function AdminProviders({
@@ -24,7 +23,6 @@ export default function AdminProviders({
         </DevLinkProvider>
       </ThemeProvider>
       <Toaster richColors position="bottom-right" />
-      <FeedbackFab />
       <AgentationDev />
     </QueryProvider>
   );

@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { getApiBase } from "@/lib/apiBase";
 import { IconBell, IconRepeat, IconSearch } from "../icons";
 import { useLeafletContext } from "../LeafletContext";
 import CommunicationPanel from "./CommunicationPanel";
 
 export default function DeliverersPageContent() {
-  const { delivererCards, commStages, sendComm, resendComm, unconfirmedCount, readOnly } =
+  const { leafletId, delivererCards, commStages, sendComm, resendComm, unconfirmedCount, readOnly } =
     useLeafletContext();
   const [search, setSearch] = useState("");
   const [remindingId, setRemindingId] = useState<string | null>(null);
@@ -90,6 +91,7 @@ export default function DeliverersPageContent() {
                     <th>Route</th>
                     <th>Households</th>
                     <th>Status</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -102,6 +104,18 @@ export default function DeliverersPageContent() {
                       <td className={route.status.includes("Awaiting") ? "lf-text-amber" : "lf-meta"}>
                         {route.status}
                       </td>
+                      {route.deliveryId && leafletId && (
+                        <td>
+                          <a
+                            className="lf-link"
+                            href={`${getApiBase()}/api/leaflets/${leafletId}/deliveries/${route.deliveryId}/cover-sheet`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Cover sheet
+                          </a>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

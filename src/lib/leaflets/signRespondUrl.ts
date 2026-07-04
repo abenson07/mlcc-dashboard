@@ -2,10 +2,13 @@ import { createHmac, timingSafeEqual } from "crypto";
 
 const DEFAULT_TTL_DAYS = 30;
 
+export type RespondMode = "confirm" | "complete";
+
 type RespondPayload = {
   leafletId: string;
   personId: string;
   deliveryId: string;
+  mode?: RespondMode;
   exp: number;
 };
 
@@ -25,13 +28,19 @@ function encodePayload(payload: RespondPayload): string {
 
 export function buildRespondUrl(
   origin: string,
-  params: { leafletId: string; personId: string; deliveryId: string },
+  params: {
+    leafletId: string;
+    personId: string;
+    deliveryId: string;
+    mode?: RespondMode;
+  },
 ): string {
   const exp = Math.floor(Date.now() / 1000) + DEFAULT_TTL_DAYS * 24 * 60 * 60;
   const payload: RespondPayload = {
     leafletId: params.leafletId,
     personId: params.personId,
     deliveryId: params.deliveryId,
+    mode: params.mode ?? "confirm",
     exp,
   };
   const encoded = encodePayload(payload);

@@ -88,6 +88,7 @@ export async function sendOpenRouteEmail(params: {
     customMessage: params.message,
     volunteerUrl,
     dashboardUrl: `${origin.replace(/\/$/, "")}/leaflet/open-routes?leaflet=${params.leafletId}`,
+    coverSheetUrl: `${origin.replace(/\/$/, "")}/api/leaflets/${params.leafletId}/deliveries/${params.deliveryId}/cover-sheet`,
   });
 
   const { error } = await resend.emails.send({

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CommSettings, Deliveries, Leaflets, People, Routes } from "@/types/database";
 import { getResend, getResendFromEmail } from "@/lib/resend";
-import { buildRespondUrl } from "@/lib/leaflets/signRespondUrl";
+import { buildRespondUrl, type RespondMode } from "@/lib/leaflets/signRespondUrl";
 import { buildLeafletCommEmailHtml } from "@/lib/leaflets/comm/buildLeafletCommEmailHtml";
 
 type DeliveryRow = Deliveries & {
@@ -19,6 +19,19 @@ const DELIVERY_STAMP_COLUMNS: Record<string, keyof Deliveries> = {
   pre_distribution_reminder: "comm_pre_distribution_reminder_sent_at",
   completion_followup: "comm_completion_followup_sent_at",
 };
+
+const COMPLETION_COMM_STEPS = new Set(["delivery_complete_prompt", "completion_followup"]);
+
+function commModeForStep(stepKey: string): RespondMode {
+  return COMPLETION_COMM_STEPS.has(stepKey) ? "complete" : "confirm";
+}
+
+function commSubject(stepKey: string, leafletTitle: string) {
+  if (COMPLETION_COMM_STEPS.has(stepKey)) {
+    return `Report delivery complete — ${leafletTitle}`;
+  }
+  return `Confirm your routes — ${leafletTitle}`;
+}
 
 function formatDate(iso: string) {
   return new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", {
@@ -103,15 +116,18 @@ async function sendToDeliverer(params: {
   origin: string;
   person: People;
   personDeliveries: DeliveryRow[];
+  stepKey: string;
 }) {
   const email = params.person.email?.trim();
   if (!email) return false;
 
   const primaryDelivery = params.personDeliveries[0]!;
-  const confirmUrl = buildRespondUrl(params.origin, {
+  const mode = commModeForStep(params.stepKey);
+  const actionUrl = buildRespondUrl(params.origin, {
     leafletId: params.leafletId,
     personId: params.person.id,
     deliveryId: primaryDelivery.id,
+    mode,
   });
   const distributionDate = formatDate(params.leaflet.distribution_date);
   const routeLines = params.personDeliveries.map((d) => {
@@ -119,16 +135,16 @@ async function sendToDeliverer(params: {
     const count = d.leaflet_count != null ? ` (${d.leaflet_count} households)` : "";
     return `${name}${count}`;
   });
-
   await sendDelivererEmail({
     to: email,
-    subject: `Confirm your routes — ${params.leaflet.title}`,
+    subject: commSubject(params.stepKey, params.leaflet.title),
     html: buildLeafletCommEmailHtml({
       delivererName: params.person.full_name,
       leafletTitle: params.leaflet.title,
       distributionDate,
       routeLines,
-      confirmUrl,
+      actionUrl,
+      variant: mode === "complete" ? "complete" : "confirm",
     }),
   });
   return true;
@@ -169,6 +185,7 @@ export async function sendLeafletComm(params: {
       origin: params.origin,
       person,
       personDeliveries,
+      stepKey: params.stepKey,
     });
     if (!didSend) continue;
 
@@ -227,6 +244,7 @@ export async function resendLeafletCommToPerson(params: {
     origin: params.origin,
     person,
     personDeliveries,
+    stepKey,
   });
   if (!didSend) throw new Error("Deliverer has no email address");
 

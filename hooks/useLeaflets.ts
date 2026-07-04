@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { getApiBase } from "@/lib/apiBase";
-import type { Leaflets, LeafletsInsert } from "@/types/database";
+import type { Leaflets, LeafletsInsert, LeafletsUpdate } from "@/types/database";
 
 export const LEAFLETS_QUERY_KEY = ["leaflets"] as const;
 
@@ -74,6 +74,22 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: LeafletsUpdate }) => {
+      const res = await fetch(`${getApiBase()}/api/leaflets/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      const data = (await res.json()) as { error?: string; leaflet?: Leaflets };
+      if (!res.ok) throw new Error(data.error ?? "Failed to update leaflet");
+      return data.leaflet!;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LEAFLETS_QUERY_KEY });
+    },
+  });
+
   return {
     leaflets,
     activeLeaflet,
@@ -86,5 +102,6 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
       createMutation.mutateAsync(input),
     activate: (id: string) => activateMutation.mutateAsync(id),
     close: (id: string) => closeMutation.mutateAsync(id),
+    update: (id: string, patch: LeafletsUpdate) => updateMutation.mutateAsync({ id, patch }),
   };
 }

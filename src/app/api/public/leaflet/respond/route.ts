@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  completeAllDeliveriesForPerson,
   confirmAllDeliveriesForPerson,
   loadRespondContext,
   removeDeliveriesForPerson,
   skipDeliveriesForPerson,
 } from "@/lib/leaflets/handleDelivererResponse";
 import {
+  renderCompleteHome,
+  renderCompleteThankYou,
   renderRespondChanges,
   renderRespondConfirmed,
   renderRespondError,
@@ -16,7 +19,7 @@ import {
   renderRespondSkipFarewell,
   respondUrl,
 } from "@/lib/leaflets/respondHtml";
-import { verifyRespondToken } from "@/lib/leaflets/signRespondUrl";
+import { verifyRespondToken, type RespondMode } from "@/lib/leaflets/signRespondUrl";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
 
 const HTML_HEADERS = { "Content-Type": "text/html; charset=utf-8" } as const;
@@ -48,6 +51,7 @@ export async function GET(request: NextRequest) {
 
   const view = request.nextUrl.searchParams.get("view");
   const { payload, p, sig } = token;
+  const mode: RespondMode = payload.mode ?? "confirm";
 
   try {
     const supabase = await getSupabaseForLeafletRoutes();
@@ -62,6 +66,19 @@ export async function GET(request: NextRequest) {
 
     if (ctx.deliveries.length === 0) {
       return new NextResponse(renderRespondFarewellAllRemoved(), { headers: HTML_HEADERS });
+    }
+
+    if (mode === "complete") {
+      return new NextResponse(
+        renderCompleteHome({
+          token: { p, sig },
+          delivererName: ctx.person.full_name,
+          leafletTitle: ctx.leaflet.title,
+          distributionDate: ctx.leaflet.distribution_date,
+          deliveries: ctx.deliveries,
+        }),
+        { headers: HTML_HEADERS },
+      );
     }
 
     return new NextResponse(
@@ -102,6 +119,15 @@ export async function POST(request: NextRequest) {
         payload.personId,
       );
       return new NextResponse(renderRespondConfirmed(confirmed.length), { headers: HTML_HEADERS });
+    }
+
+    if (action === "mark_complete_all") {
+      const completed = await completeAllDeliveriesForPerson(
+        supabase,
+        payload.leafletId,
+        payload.personId,
+      );
+      return new NextResponse(renderCompleteThankYou(completed.length), { headers: HTML_HEADERS });
     }
 
     if (action === "skip_selected") {

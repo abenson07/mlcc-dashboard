@@ -12,7 +12,9 @@ export interface Leaflets {
   activated_at: string | null;
   closed_at: string | null;
   print_cost_cents: number | null;
+  sponsorship_goal_cents: number | null;
   membership_qr_code_id: string | null;
+  open_routes_qr_code_id: string | null;
   comm_initial_confirmation_sent_at: string | null;
   comm_distribution_day_pickup_sent_at: string | null;
   comm_delivery_complete_prompt_sent_at: string | null;
@@ -27,7 +29,9 @@ export interface LeafletsInsert {
   activated_at?: string | null;
   closed_at?: string | null;
   print_cost_cents?: number | null;
+  sponsorship_goal_cents?: number | null;
   membership_qr_code_id?: string | null;
+  open_routes_qr_code_id?: string | null;
 }
 
 export interface LeafletsUpdate {
@@ -37,7 +41,9 @@ export interface LeafletsUpdate {
   activated_at?: string | null;
   closed_at?: string | null;
   print_cost_cents?: number | null;
+  sponsorship_goal_cents?: number | null;
   membership_qr_code_id?: string | null;
+  open_routes_qr_code_id?: string | null;
   comm_initial_confirmation_sent_at?: string | null;
   comm_distribution_day_pickup_sent_at?: string | null;
   comm_delivery_complete_prompt_sent_at?: string | null;

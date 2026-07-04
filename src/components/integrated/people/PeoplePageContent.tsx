@@ -15,12 +15,23 @@ import {
   parsePeopleFilter,
   peopleHookFilters,
   personStatusLabel,
+  type PeopleFilter,
 } from "./peopleFilters";
 
-export default function PeoplePageContent() {
+type PeoplePageContentProps = {
+  embedded?: boolean;
+  defaultFilter?: PeopleFilter | null;
+  basePath?: string;
+};
+
+export default function PeoplePageContent({
+  embedded = false,
+  defaultFilter = null,
+  basePath = "/admin/people",
+}: PeoplePageContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const filter = parsePeopleFilter(searchParams.get("filter"));
+  const filter = parsePeopleFilter(searchParams.get("filter")) ?? defaultFilter;
   const isBusinessesView = isBusinessFilter(filter);
 
   const [selectedId, setSelectedId] = useState<string | null>(() => searchParams.get("selected"));
@@ -76,13 +87,24 @@ export default function PeoplePageContent() {
     ? (businesses.find((b) => b.id === selectedId) ?? null)
     : null;
 
+  const buildPath = useCallback(
+    (params: URLSearchParams) => {
+      const nextParams = new URLSearchParams(params.toString());
+      if (embedded && defaultFilter != null) {
+        nextParams.delete("filter");
+      }
+      const query = nextParams.toString();
+      return query ? `${basePath}?${query}` : basePath;
+    },
+    [basePath, defaultFilter, embedded],
+  );
+
   const clearSelectedFromUrl = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (!params.has("selected")) return;
     params.delete("selected");
-    const query = params.toString();
-    router.replace(query ? `/admin/people?${query}` : "/admin/people", { scroll: false });
-  }, [router, searchParams]);
+    router.replace(buildPath(params), { scroll: false });
+  }, [buildPath, router, searchParams]);
 
   const clearSelection = useCallback(() => {
     setSelectedId(null);
@@ -142,7 +164,7 @@ export default function PeoplePageContent() {
     setSelectedId(id);
     const params = new URLSearchParams(searchParams.toString());
     params.set("selected", id);
-    router.replace(`/admin/people?${params.toString()}`, { scroll: false });
+    router.replace(buildPath(params), { scroll: false });
   }
 
   function handleSelectBusiness(id: string) {
@@ -153,33 +175,29 @@ export default function PeoplePageContent() {
 
     setSelectedId(id);
     const params = new URLSearchParams(searchParams.toString());
-    params.set("filter", "businesses");
+    if (!embedded) {
+      params.set("filter", "businesses");
+    }
     params.set("selected", id);
-    router.replace(`/admin/people?${params.toString()}`, { scroll: false });
+    router.replace(buildPath(params), { scroll: false });
   }
 
-  return (
-    <>
-      <IntegratedTopbar
-        primaryAction={
-          <button type="button" className="lf-btn lf-btn--accent">
-            <IconPlus />
-            Add neighbor
-          </button>
-        }
-      />
-      <div className="lf-main">
-        <div className="lf-sidebar-col">
-          <PeopleSidebar />
-        </div>
-        <div className="lf-content-col">
-          <main
-            className={`lf-canvas lf-canvas--white lf-people-layout${(!isBusinessesView && selected) || (isBusinessesView && selectedBusiness) ? "" : " lf-people-layout--single"}`}
-          >
-            <div className="lf-people-main">
-              <div className="lf-page-header">
-                <h1 className="lf-h1">{pageTitle(filter)}</h1>
-                <label className="lf-search">
+  const addNeighborAction = (
+    <button type="button" className="lf-btn lf-btn--accent">
+      <IconPlus />
+      Add neighbor
+    </button>
+  );
+
+  const main = (
+    <main
+      className={`lf-canvas lf-canvas--white lf-people-layout${(!isBusinessesView && selected) || (isBusinessesView && selectedBusiness) ? "" : " lf-people-layout--single"}`}
+    >
+      <div className="lf-people-main">
+        <div className="lf-page-header">
+          <h1 className="lf-h1">{pageTitle(filter)}</h1>
+          {embedded ? addNeighborAction : null}
+          <label className="lf-search">
                   <IconSearch />
                   <input
                     type="search"
@@ -295,8 +313,21 @@ export default function PeoplePageContent() {
                 </div>
               </aside>
             ) : null}
-          </main>
+    </main>
+  );
+
+  if (embedded) {
+    return main;
+  }
+
+  return (
+    <>
+      <IntegratedTopbar primaryAction={addNeighborAction} />
+      <div className="lf-main">
+        <div className="lf-sidebar-col">
+          <PeopleSidebar />
         </div>
+        <div className="lf-content-col">{main}</div>
       </div>
     </>
   );

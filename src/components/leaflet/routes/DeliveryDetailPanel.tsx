@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import type { DeliveryWithRelations } from "hooks";
+import { getApiBase } from "@/lib/apiBase";
 import { IconMail, IconMapPin, IconUser } from "../icons";
 import { openRoutesTableStatusLabel } from "../deliveryUtils";
 
 type DeliveryDetailPanelProps = {
   delivery: DeliveryWithRelations;
+  leafletId?: string | null;
   showAssign?: boolean;
   readOnly?: boolean;
   onAssign?: (personId: string) => Promise<void>;
@@ -25,6 +27,7 @@ function formatChange(change: number) {
 
 export default function DeliveryDetailPanel({
   delivery,
+  leafletId = null,
   showAssign = false,
   readOnly = false,
   onAssign,
@@ -38,6 +41,10 @@ export default function DeliveryDetailPanel({
   const person = delivery.people;
   const status = openRoutesTableStatusLabel(delivery);
   const [assigningId, setAssigningId] = useState<string | null>(null);
+  const coverSheetHref =
+    leafletId != null
+      ? `${getApiBase()}/api/leaflets/${leafletId}/deliveries/${delivery.id}/cover-sheet`
+      : null;
 
   async function handleAssign(personId: string) {
     if (!onAssign || readOnly) return;
@@ -96,6 +103,14 @@ export default function DeliveryDetailPanel({
             </div>
           )}
           <div className="lf-detail-row"><span className="lf-detail-label">Status</span><span>{status}</span></div>
+          {coverSheetHref && (
+            <div className="lf-detail-row">
+              <span className="lf-detail-label">Cover sheet</span>
+              <a className="lf-link" href={coverSheetHref} target="_blank" rel="noopener noreferrer">
+                Print cover sheet
+              </a>
+            </div>
+          )}
         </div>
       </div>
 

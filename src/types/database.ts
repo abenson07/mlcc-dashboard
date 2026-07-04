@@ -77,4 +77,6 @@ export type {
   ActionItemSource,
   CommitteeDefaultAttendees,
   CommitteeDefaultAttendeesInsert,
+  UserFavorites,
+  UserFavoritesInsert,
 } from "../../schemas";

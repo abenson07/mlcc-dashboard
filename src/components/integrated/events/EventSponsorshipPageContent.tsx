@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Modal } from "@/components/ui/modal";
-import StripeInvoiceComposer from "@/components/billing/StripeInvoiceComposer";
-import AddEventSponsorModal from "./AddEventSponsorModal";
+import InvoiceComposerModal from "@/components/billing/InvoiceComposerModal";
+import AddSponsorModal from "@/components/sponsorship/AddSponsorModal";
 import { useEventContext } from "./EventContext";
 
 type SponsorTab = "all" | "paid" | "pledged" | "invoiced";
@@ -257,26 +256,22 @@ export default function EventSponsorshipPageContent() {
         </section>
       </div>
 
-      <AddEventSponsorModal
+      <AddSponsorModal
         isOpen={sponsorModalOpen}
         onClose={() => setSponsorModalOpen(false)}
         onSubmit={createSponsorship}
       />
 
-      <Modal
+      <InvoiceComposerModal
         isOpen={invoiceModalOpen}
         onClose={() => setInvoiceModalOpen(false)}
-        className="max-w-3xl p-4 lg:p-6"
-      >
-        <StripeInvoiceComposer
-          fixedEventId={event.id}
-          fixedEventLabel={event.title}
-          onIssued={() => {
-            setInvoiceModalOpen(false);
-            void refetchAll();
-          }}
-        />
-      </Modal>
+        fixedEventId={event.id}
+        fixedEventLabel={event.title}
+        onIssued={() => {
+          setInvoiceModalOpen(false);
+          void refetchAll();
+        }}
+      />
     </div>
   );
 }

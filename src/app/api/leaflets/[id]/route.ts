@@ -48,6 +48,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (typeof o.print_cost_cents === "number") {
     patch.print_cost_cents = o.print_cost_cents;
   }
+  if (typeof o.sponsorship_goal_cents === "number") {
+    patch.sponsorship_goal_cents = o.sponsorship_goal_cents;
+  }
 
   const supabase = await getSupabaseForLeafletRoutes();
   const { data, error } = await supabase

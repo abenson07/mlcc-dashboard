@@ -94,7 +94,7 @@ export type DelivererCard = {
   name: string;
   email: string;
   status: "Confirmed" | "Not confirmed";
-  routes: { name: string; households: string; status: string; muted?: boolean }[];
+  routes: { name: string; households: string; status: string; muted?: boolean; deliveryId?: string }[];
 };
 
 export type CommStage = {
@@ -114,6 +114,7 @@ export type CommStage = {
 
 export type Substitution = {
   id: string;
+  deliveryId: string;
   route: string;
   covering: string;
   forPerson: string;

@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { getApiBase } from "@/lib/apiBase";
 import { useLeafletContext } from "../LeafletContext";
 
 export default function SubstitutionsPageContent() {
-  const { substitutions } = useLeafletContext();
+  const { leafletId, substitutions } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -20,6 +21,10 @@ export default function SubstitutionsPageContent() {
   }, [substitutions, search]);
 
   const selected = filtered.find((s) => s.id === (selectedId ?? filtered[0]?.id)) ?? null;
+  const coverSheetHref =
+    leafletId != null && selected
+      ? `${getApiBase()}/api/leaflets/${leafletId}/deliveries/${selected.deliveryId}/cover-sheet`
+      : null;
 
   return (
     <div className="lf-page-layout">
@@ -91,6 +96,14 @@ export default function SubstitutionsPageContent() {
                 <div className="lf-detail-row"><span className="lf-detail-label">Shift</span><span>{selected.route}</span></div>
                 <div className="lf-detail-row"><span className="lf-detail-label">Shift start date</span><span>{selected.date}</span></div>
                 <div className="lf-detail-row"><span className="lf-detail-label">Status</span><span>{selected.status}</span></div>
+                {coverSheetHref && (
+                  <div className="lf-detail-row">
+                    <span className="lf-detail-label">Cover sheet</span>
+                    <a className="lf-link" href={coverSheetHref} target="_blank" rel="noopener noreferrer">
+                      Print cover sheet
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </aside>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
@@ -10,19 +10,24 @@ import { useBusinesses } from "hooks";
 import { SPONSORSHIP_TIER_DEFS } from "@/components/leaflet/leafletData";
 import type { SponsorshipsInsert } from "@/types/database";
 
-type AddEventSponsorModalProps = {
+type AddSponsorModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => Promise<void>;
 };
 
-export default function AddEventSponsorModal({
+const MIN_SEARCH_LEN = 1;
+
+export default function AddSponsorModal({
   isOpen,
   onClose,
   onSubmit,
-}: AddEventSponsorModalProps) {
-  const { businesses, loading } = useBusinesses({ autoFetch: isOpen });
+}: AddSponsorModalProps) {
+  const [search, setSearch] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [businessId, setBusinessId] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
   const [tier, setTier] = useState<string>(SPONSORSHIP_TIER_DEFS[0]?.name ?? "Gold");
   const [amount, setAmount] = useState(String(SPONSORSHIP_TIER_DEFS[0]?.amount ?? 1000));
   const [status, setStatus] = useState<"pledged" | "invoiced" | "paid">("pledged");
@@ -30,13 +35,30 @@ export default function AddEventSponsorModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const businessOptions = useMemo(
-    () =>
-      businesses.map((b) => ({
-        value: b.id,
-        label: b.business_name ?? b.id,
-      })),
-    [businesses],
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(search.trim()), 200);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const canSearch = debouncedQ.length >= MIN_SEARCH_LEN;
+  const { businesses, loading } = useBusinesses({
+    autoFetch: isOpen && canSearch,
+    filters: canSearch ? { search: debouncedQ } : undefined,
+  });
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const selectedBusiness = useMemo(
+    () => businesses.find((b) => b.id === businessId),
+    [businesses, businessId],
   );
 
   const tierOptions = useMemo(
@@ -49,6 +71,7 @@ export default function AddEventSponsorModal({
   );
 
   const reset = () => {
+    setSearch("");
     setBusinessId("");
     setTier(SPONSORSHIP_TIER_DEFS[0]?.name ?? "Gold");
     setAmount(String(SPONSORSHIP_TIER_DEFS[0]?.amount ?? 1000));
@@ -100,6 +123,9 @@ export default function AddEventSponsorModal({
     }
   };
 
+  const inputRing =
+    "h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-400";
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className="max-w-md p-6">
       <form onSubmit={(e) => void handleSubmit(e)}>
@@ -110,16 +136,57 @@ export default function AddEventSponsorModal({
         {error ? <p className="lf-text-red" style={{ marginBottom: 12 }}>{error}</p> : null}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div>
+          <div ref={wrapRef} className="relative">
             <Label>Business</Label>
-            {loading ? (
-              <p className="lf-meta">Loading businesses…</p>
-            ) : (
-              <Select
-                placeholder="Select business"
-                options={businessOptions}
-                onChange={setBusinessId}
-              />
+            <input
+              type="text"
+              autoComplete="off"
+              value={businessId ? (selectedBusiness?.business_name ?? "") : search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setBusinessId("");
+                setShowDropdown(true);
+              }}
+              onFocus={() => setShowDropdown(true)}
+              placeholder="Search businesses…"
+              className={`mt-2 ${inputRing}`}
+            />
+            {showDropdown && canSearch && (
+              <ul className="absolute top-full z-50 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-900">
+                {loading ? (
+                  <li className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                    Searching…
+                  </li>
+                ) : businesses.length === 0 ? (
+                  <li className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                    No matching businesses.
+                  </li>
+                ) : (
+                  businesses.map((b) => (
+                    <li key={b.id} role="presentation">
+                      <button
+                        type="button"
+                        className="flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setBusinessId(b.id);
+                          setSearch(b.business_name ?? "");
+                          setShowDropdown(false);
+                        }}
+                      >
+                        <span className="truncate font-medium text-gray-900 dark:text-white">
+                          {b.business_name ?? "Business"}
+                        </span>
+                        {b.email ? (
+                          <span className="truncate text-xs text-gray-500 dark:text-gray-400">
+                            {b.email}
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  ))
+                )}
+              </ul>
             )}
           </div>
 
@@ -152,7 +219,7 @@ export default function AddEventSponsorModal({
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 24 }}>
+        <div className="flex items-center justify-end gap-3" style={{ marginTop: 24 }}>
           <Button type="button" size="sm" variant="outline" onClick={handleClose} disabled={submitting}>
             Cancel
           </Button>

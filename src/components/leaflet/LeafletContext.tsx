@@ -19,7 +19,7 @@ import {
 } from "hooks";
 import type { DeliveryWithRelations } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
-import type { Leaflets } from "@/types/database";
+import type { Leaflets, LeafletsUpdate, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
 import {
   buildBudget,
   buildBudgetLineItems,
@@ -59,6 +59,7 @@ type LeafletContextValue = {
   leafletId: string | null;
   leaflet: LeafletEdition | null;
   membershipQrCodeId: string | null;
+  openRoutesQrCodeId: string | null;
   readOnly: boolean;
   activeLeaflet: LeafletEdition | null;
   leaflets: LeafletEdition[];
@@ -92,6 +93,9 @@ type LeafletContextValue = {
   deliveryHistoryForRoute: (routeId: string) => { label: string; count: number }[];
   countChangeByRouteId: (routeId: string, currentCount: number | null | undefined) => number | null;
   refetchAll: () => Promise<void>;
+  createSponsorship: (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => Promise<void>;
+  updateSponsorship: (id: string, patch: SponsorshipsUpdate) => Promise<void>;
+  updateLeaflet: (patch: LeafletsUpdate) => Promise<void>;
 };
 
 const LeafletContext = createContext<LeafletContextValue | null>(null);
@@ -118,6 +122,7 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     error: leafletsError,
     create,
     close,
+    update: updateLeafletMutation,
     refetch: refetchLeaflets,
   } = useLeaflets();
 
@@ -133,6 +138,7 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
   const leaflet = selectedRow ? asEdition(selectedRow) : null;
   const leafletId = leaflet?.id ?? null;
   const membershipQrCodeId = selectedRow?.membership_qr_code_id ?? null;
+  const openRoutesQrCodeId = selectedRow?.open_routes_qr_code_id ?? null;
   const readOnly = leaflet?.status === "closed";
 
   const {
@@ -163,6 +169,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     pledgedAmount,
     loading: sponsorshipsLoading,
     refetch: refetchSponsorships,
+    createSponsorship: createSponsorshipMutation,
+    updateSponsorship: updateSponsorshipMutation,
   } = useLeafletSponsorships(leafletId);
 
   const { previousDeliveries, historyDeliveries } = useLeafletHistory(
@@ -360,6 +368,31 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     invoicesQuery,
   ]);
 
+  const createSponsorship = useCallback(
+    async (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => {
+      if (readOnly) throw new Error("Leaflet is read-only");
+      await createSponsorshipMutation(payload);
+    },
+    [readOnly, createSponsorshipMutation],
+  );
+
+  const updateSponsorship = useCallback(
+    async (id: string, patch: SponsorshipsUpdate) => {
+      if (readOnly) throw new Error("Leaflet is read-only");
+      await updateSponsorshipMutation(id, patch);
+    },
+    [readOnly, updateSponsorshipMutation],
+  );
+
+  const updateLeaflet = useCallback(
+    async (patch: LeafletsUpdate) => {
+      if (readOnly) throw new Error("Leaflet is read-only");
+      if (!leafletId) throw new Error("No leaflet selected");
+      await updateLeafletMutation(leafletId, patch);
+    },
+    [readOnly, leafletId, updateLeafletMutation],
+  );
+
   const loading =
     leafletsLoading ||
     deliveriesLoading ||
@@ -377,6 +410,7 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       leafletId,
       leaflet,
       membershipQrCodeId,
+      openRoutesQrCodeId,
       readOnly,
       activeLeaflet,
       leaflets,
@@ -410,11 +444,15 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       deliveryHistoryForRoute,
       countChangeByRouteId: countChangeFn,
       refetchAll,
+      createSponsorship,
+      updateSponsorship,
+      updateLeaflet,
     }),
     [
       leafletId,
       leaflet,
       membershipQrCodeId,
+      openRoutesQrCodeId,
       readOnly,
       activeLeaflet,
       leaflets,
@@ -446,6 +484,9 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       deliveryHistoryForRoute,
       countChangeFn,
       refetchAll,
+      createSponsorship,
+      updateSponsorship,
+      updateLeaflet,
     ],
   );
 

@@ -46,6 +46,34 @@ async function assertDeliveriesBelongToPerson(
   }
 }
 
+export async function completeAllDeliveriesForPerson(
+  supabase: SupabaseClient,
+  leafletId: string,
+  personId: string,
+) {
+  const deliveries = await loadPersonRespondDeliveries(supabase, leafletId, personId);
+  if (deliveries.length === 0) throw new Error("No routes found to complete.");
+
+  const now = new Date().toISOString();
+  const dateDelivered = now.slice(0, 10);
+
+  for (const delivery of deliveries) {
+    const { error } = await supabase
+      .from("deliveries")
+      .update({
+        date_delivered: dateDelivered,
+        leaflets_delivered: delivery.leaflet_count,
+        updated_at: now,
+      })
+      .eq("id", delivery.id)
+      .eq("leaflet_id", leafletId);
+
+    if (error) throw new Error(error.message);
+  }
+
+  return deliveries;
+}
+
 export async function confirmAllDeliveriesForPerson(
   supabase: SupabaseClient,
   leafletId: string,

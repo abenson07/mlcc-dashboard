@@ -16,7 +16,7 @@ function statusClass(label: string) {
 export default function RoutesPageContent() {
   const searchParams = useSearchParams();
   const deliveryFromUrl = searchParams.get("delivery");
-  const { deliveries, countChangeByRouteId, deliveryHistoryForRoute } = useLeafletContext();
+  const { leafletId, deliveries, countChangeByRouteId, deliveryHistoryForRoute } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -123,6 +123,7 @@ export default function RoutesPageContent() {
         {selected && (
           <DeliveryDetailPanel
             delivery={selected}
+            leafletId={leafletId}
             countChange={countChangeByRouteId(selected.route_id, selected.leaflet_count)}
             history={deliveryHistoryForRoute(selected.route_id)}
           />

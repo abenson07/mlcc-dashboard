@@ -5,6 +5,7 @@ import { IconArrowRight, IconCalendar, IconPlus } from "../icons";
 import { daysUntilDistribution, formatDistributionDate } from "../leafletData";
 import { leafletHref, useLeafletContext } from "../LeafletContext";
 import MembershipQrDownload from "./MembershipQrDownload";
+import OpenRoutesQrDownload from "./OpenRoutesQrDownload";
 
 export default function OverviewContent() {
   const {
@@ -197,6 +198,7 @@ export default function OverviewContent() {
         </section>
 
         <MembershipQrDownload />
+        <OpenRoutesQrDownload />
 
         <section className="lf-card">
           <div className="lf-card-header"><span className="lf-card-title">Delivery stats</span></div>

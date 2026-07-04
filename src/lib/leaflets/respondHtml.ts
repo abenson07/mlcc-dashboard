@@ -164,6 +164,47 @@ export function renderRespondFarewellAllRemoved() {
   return respondHtmlPage("Thank you", body);
 }
 
+export function renderCompleteHome(params: {
+  token: RespondTokenParams;
+  delivererName: string;
+  leafletTitle: string;
+  distributionDate: string;
+  deliveries: RespondDeliveryRow[];
+}) {
+  const routes = params.deliveries
+    .map((d) => `<li>${escapeHtml(routeLabel(d))}</li>`)
+    .join("");
+
+  const body = `
+    <h1>Hi ${escapeHtml(params.delivererName.split(" ")[0] ?? params.delivererName)}</h1>
+    <p class="lead">
+      Thanks for delivering the <strong>${escapeHtml(params.leafletTitle)}</strong> leaflet on
+      ${escapeHtml(formatDistributionDate(params.distributionDate))}.
+      When you&rsquo;re finished, let us know below.
+    </p>
+    <div class="card">
+      <p class="meta" style="margin-top:0">Your route${params.deliveries.length === 1 ? "" : "s"}</p>
+      <ul class="route-list">${routes}</ul>
+    </div>
+    <form method="POST">
+      ${tokenFields(params.token)}
+      <input type="hidden" name="action" value="mark_complete_all" />
+      <button type="submit" class="btn-primary">Mark delivered</button>
+    </form>
+    <a class="link" href="${respondUrl(params.token, "changes")}">Something&rsquo;s wrong</a>
+  `;
+
+  return respondHtmlPage("Report delivery complete", body);
+}
+
+export function renderCompleteThankYou(count: number) {
+  const body = `
+    <h1>Thank you!</h1>
+    <p class="lead">We recorded delivery complete for ${count} route${count === 1 ? "" : "s"}. We appreciate your help!</p>
+  `;
+  return respondHtmlPage("Delivery recorded", body);
+}
+
 export function renderRespondError(message: string) {
   return respondHtmlPage("Something went wrong", `<p class="lead">${escapeHtml(message)}</p>`);
 }

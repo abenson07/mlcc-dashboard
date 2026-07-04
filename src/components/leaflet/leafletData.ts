@@ -179,6 +179,7 @@ export function buildDelivererCards(deliveries: DeliveryWithRelations[]): Delive
               : r.response === "needs_cover"
                 ? "Pending confirmation"
                 : "Awaiting confirmation",
+          deliveryId: r.id,
         })),
       };
     });
@@ -193,6 +194,7 @@ export function buildSubstitutions(deliveries: DeliveryWithRoutePrimary[]): Subs
       const covering = d.people?.full_name ?? "Unassigned";
       return {
         id: d.id,
+        deliveryId: d.id,
         route: route?.route_name ?? "—",
         covering,
         forPerson,
@@ -383,7 +385,13 @@ export function buildBudget(
 ) {
   const printBudget = (leaflet?.print_cost_cents ?? 480_000) / 100;
   const spent = 0;
-  const sponsorshipGoal = sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0) || 15_000;
+  const goalFromField =
+    leaflet?.sponsorship_goal_cents != null && leaflet.sponsorship_goal_cents > 0
+      ? leaflet.sponsorship_goal_cents / 100
+      : null;
+  const sponsorshipGoal =
+    goalFromField ??
+    (sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0) || 15_000);
   const remaining = Math.max(0, printBudget - spent);
   const progressPct = printBudget > 0 ? Math.round((spent / printBudget) * 100) : 0;
   const sponsorshipProgressPct =
@@ -461,7 +469,7 @@ export function mapSponsors(
           ? "Pledged"
           : s.status === "invoiced"
             ? "Invoiced"
-            : "Previous",
+            : "Pledged",
   }));
 }
 

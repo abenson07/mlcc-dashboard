@@ -55,7 +55,7 @@ function ActionItemRow({
   );
 }
 
-export default function ActionItemsPageContent() {
+export default function ActionItemsPageContent({ embedded = false }: { embedded?: boolean }) {
   const searchParams = useSearchParams();
   const highlightedItemId = searchParams.get("item");
   const { groups, openCount, loading, error, toggleDone } = useAllActionItems();
@@ -86,6 +86,98 @@ export default function ActionItemsPageContent() {
     return () => window.clearTimeout(timer);
   }, [highlightedItemId, loading, groups]);
 
+  const main = (
+    <main className="lf-canvas lf-canvas--white">
+      <div className="lf-schedule-layout">
+        <header>
+          <h1 className="lf-h1">Action items</h1>
+          <p className="lf-page-desc">
+            {loading ? "Loading…" : `${openCount} open action items across committee meetings`}
+          </p>
+        </header>
+
+        {error && <p className="lf-text-red">{error}</p>}
+
+        <section className="lf-schedule-section">
+          <div className="lf-schedule-section-header">
+            <span className="lf-overview-card-title">Open items</span>
+            <button
+              type="button"
+              className="lf-link"
+              onClick={() => setShowCompleted((value) => !value)}
+            >
+              {showCompleted ? "Hide completed" : "Show completed"}
+            </button>
+          </div>
+
+          {!loading && activeGroups.length === 0 && (
+            <p className="lf-meta">No open action items.</p>
+          )}
+
+          {activeGroups.map((group) => (
+            <div key={group.key} className="lf-schedule-group">
+              <div className="lf-schedule-group-label">
+                {group.eventId ? (
+                  <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
+                    {group.label}
+                  </Link>
+                ) : (
+                  group.label
+                )}
+              </div>
+              {group.openItems.map((item) => (
+                <ActionItemRow
+                  key={item.id}
+                  item={item}
+                  highlighted={flashItemId === item.id || highlightedItemId === item.id}
+                  onToggle={(id, done) => void toggleDone(id, done)}
+                />
+              ))}
+            </div>
+          ))}
+        </section>
+
+        {showCompleted && (
+          <section className="lf-schedule-section lf-schedule-section--completed">
+            <div className="lf-schedule-section-header">
+              <span className="lf-overview-card-title">Completed</span>
+            </div>
+
+            {completedGroups.length === 0 && (
+              <p className="lf-meta">No completed action items yet.</p>
+            )}
+
+            {completedGroups.map((group) => (
+              <div key={group.key} className="lf-schedule-completed-group">
+                <div className="lf-schedule-group-label">
+                  {group.eventId ? (
+                    <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
+                      {group.label}
+                    </Link>
+                  ) : (
+                    group.label
+                  )}
+                </div>
+                {group.doneItems.map((item) => (
+                  <ActionItemRow
+                    key={item.id}
+                    item={item}
+                    highlighted={flashItemId === item.id || highlightedItemId === item.id}
+                    onToggle={(id, done) => void toggleDone(id, done)}
+                  />
+                ))}
+              </div>
+            ))}
+          </section>
+        )}
+      </div>
+    </main>
+  );
+
+  if (embedded) {
+    return main;
+  }
+
   return (
     <>
       <IntegratedTopbar />
@@ -93,93 +185,7 @@ export default function ActionItemsPageContent() {
         <div className="lf-sidebar-col">
           <EventsListSidebar />
         </div>
-        <div className="lf-content-col">
-          <main className="lf-canvas lf-canvas--white">
-            <div className="lf-schedule-layout">
-              <header>
-                <h1 className="lf-h1">Action items</h1>
-                <p className="lf-page-desc">
-                  {loading ? "Loading…" : `${openCount} open action items across committee meetings`}
-                </p>
-              </header>
-
-              {error && <p className="lf-text-red">{error}</p>}
-
-              <section className="lf-schedule-section">
-                <div className="lf-schedule-section-header">
-                  <span className="lf-overview-card-title">Open items</span>
-                  <button
-                    type="button"
-                    className="lf-link"
-                    onClick={() => setShowCompleted((value) => !value)}
-                  >
-                    {showCompleted ? "Hide completed" : "Show completed"}
-                  </button>
-                </div>
-
-                {!loading && activeGroups.length === 0 && (
-                  <p className="lf-meta">No open action items.</p>
-                )}
-
-                {activeGroups.map((group) => (
-                  <div key={group.key} className="lf-schedule-group">
-                    <div className="lf-schedule-group-label">
-                      {group.eventId ? (
-                        <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
-                          {group.label}
-                        </Link>
-                      ) : (
-                        group.label
-                      )}
-                    </div>
-                    {group.openItems.map((item) => (
-                      <ActionItemRow
-                        key={item.id}
-                        item={item}
-                        highlighted={flashItemId === item.id || highlightedItemId === item.id}
-                        onToggle={(id, done) => void toggleDone(id, done)}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </section>
-
-              {showCompleted && (
-                <section className="lf-schedule-section lf-schedule-section--completed">
-                  <div className="lf-schedule-section-header">
-                    <span className="lf-overview-card-title">Completed</span>
-                  </div>
-
-                  {completedGroups.length === 0 && (
-                    <p className="lf-meta">No completed action items yet.</p>
-                  )}
-
-                  {completedGroups.map((group) => (
-                    <div key={group.key} className="lf-schedule-completed-group">
-                      <div className="lf-schedule-group-label">
-                        {group.eventId ? (
-                          <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
-                            {group.label}
-                          </Link>
-                        ) : (
-                          group.label
-                        )}
-                      </div>
-                      {group.doneItems.map((item) => (
-                        <ActionItemRow
-                          key={item.id}
-                          item={item}
-                          highlighted={flashItemId === item.id || highlightedItemId === item.id}
-                          onToggle={(id, done) => void toggleDone(id, done)}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </section>
-              )}
-            </div>
-          </main>
-        </div>
+        <div className="lf-content-col">{main}</div>
       </div>
     </>
   );

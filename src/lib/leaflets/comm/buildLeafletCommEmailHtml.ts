@@ -11,9 +11,18 @@ export function buildLeafletCommEmailHtml(params: {
   leafletTitle: string;
   distributionDate: string;
   routeLines: string[];
-  confirmUrl: string;
+  actionUrl: string;
+  variant?: "confirm" | "complete";
 }) {
   const firstName = escapeHtml(params.delivererName.split(" ")[0] ?? params.delivererName);
+  const title = escapeHtml(params.leafletTitle);
+  const date = escapeHtml(params.distributionDate);
+  const isComplete = params.variant === "complete";
+  const heading = isComplete ? "Report delivery complete" : "Confirm your delivery routes";
+  const actionLabel = isComplete ? "Mark delivered" : "Confirm or respond";
+  const intro = isComplete
+    ? `Thanks for helping deliver the <strong>${title}</strong> leaflet on <strong>${date}</strong>. When you&rsquo;re finished, let us know using the link below.`
+    : `You&rsquo;re scheduled to help deliver the <strong>${title}</strong> leaflet on <strong>${date}</strong>.`;
   const routesHtml = params.routeLines
     .map((line) => `<li style="margin:0 0 8px">${escapeHtml(line)}</li>`)
     .join("");
@@ -28,11 +37,10 @@ export function buildLeafletCommEmailHtml(params: {
           <tr>
             <td>
               <p style="margin:0 0 8px;font-size:13px;color:#71717a;text-transform:uppercase;letter-spacing:0.04em;">Maple Leaf Community Council</p>
-              <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;">Confirm your delivery routes</h1>
+              <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;">${escapeHtml(heading)}</h1>
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#52525b;">Hi ${firstName},</p>
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#52525b;">
-                You&rsquo;re scheduled to help deliver the <strong>${escapeHtml(params.leafletTitle)}</strong> leaflet on
-                <strong>${escapeHtml(params.distributionDate)}</strong>.
+                ${intro}
               </p>
               <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#71717a;">Your route${params.routeLines.length === 1 ? "" : "s"}</p>
               <ul style="margin:0 0 24px;padding:12px 14px 12px 28px;background:#fafafa;border:1px solid #e4e4e7;border-radius:8px;font-size:14px;line-height:1.5;color:#3f3f46;">
@@ -41,13 +49,13 @@ export function buildLeafletCommEmailHtml(params: {
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 20px;">
                 <tr>
                   <td style="border-radius:8px;background:#18181b;">
-                    <a href="${escapeHtml(params.confirmUrl)}" style="display:inline-block;padding:12px 20px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Confirm or respond</a>
+                    <a href="${escapeHtml(params.actionUrl)}" style="display:inline-block;padding:12px 20px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">${actionLabel}</a>
                   </td>
                 </tr>
               </table>
               <p style="margin:0;font-size:13px;line-height:1.6;color:#71717a;">
                 If the button doesn&rsquo;t work, copy and paste this link:<br />
-                <a href="${escapeHtml(params.confirmUrl)}" style="color:#5E6AD2;word-break:break-all;">${escapeHtml(params.confirmUrl)}</a>
+                <a href="${escapeHtml(params.actionUrl)}" style="color:#5E6AD2;word-break:break-all;">${escapeHtml(params.actionUrl)}</a>
               </p>
             </td>
           </tr>

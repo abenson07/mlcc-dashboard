@@ -22,7 +22,7 @@ function calendarCells(year: number, month: number) {
   return cells;
 }
 
-export default function EventsListPageContent() {
+export default function EventsListPageContent({ embedded = false }: { embedded?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const highlightedEventId = searchParams.get("event");
@@ -70,9 +70,13 @@ export default function EventsListPageContent() {
     setSelectedDay(null);
   }
 
+  const eventsListPath = embedded ? "/admin/shell-preview/events" : "/admin/events";
+  const eventOverviewPath = (id: string) =>
+    embedded ? `/admin/shell-preview/events/${id}/overview` : `/admin/events-hub/${id}/overview`;
+
   async function handleCreate(input: Parameters<typeof create>[0]) {
     const event = await create(input);
-    router.push(`/admin/events-hub/${event.id}/overview`);
+    router.push(eventOverviewPath(event.id));
   }
 
   async function handleCreateCommitteeMeeting(
@@ -80,7 +84,7 @@ export default function EventsListPageContent() {
   ) {
     const { event } = await createCommitteeMeetingApi(input);
     await queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY });
-    router.push(`/admin/events-hub/${event.id}/overview`);
+    router.push(eventOverviewPath(event.id));
   }
 
   function openCreateModal(prefillName = "") {
@@ -94,39 +98,31 @@ export default function EventsListPageContent() {
     events.length > 0 &&
     (searchTrimmed.length > 0 || status !== "all" || selectedDay != null);
 
-  return (
-    <>
-      <IntegratedTopbar
-        primaryAction={
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              type="button"
-              className="lf-btn lf-btn--ghost"
-              onClick={() => setCommitteeCreateOpen(true)}
-            >
-              Committee meeting
-            </button>
-            <button
-              type="button"
-              className="lf-btn lf-btn--outline"
-              onClick={() => openCreateModal()}
-            >
-              <IconPlus />
-              New event
-            </button>
+  const createActions = (
+    <div style={{ display: "flex", gap: 8 }}>
+      <button
+        type="button"
+        className="lf-btn lf-btn--ghost"
+        onClick={() => setCommitteeCreateOpen(true)}
+      >
+        Committee meeting
+      </button>
+      <button type="button" className="lf-btn lf-btn--outline" onClick={() => openCreateModal()}>
+        <IconPlus />
+        New event
+      </button>
+    </div>
+  );
+
+  const main = (
+    <main className="lf-canvas lf-canvas--white">
+      <div className="lf-events-centered">
+        <div className="lf-events-list-col">
+          <div className="lf-page-header">
+            <h1 className="lf-h1">Events</h1>
+            {embedded ? createActions : null}
           </div>
-        }
-      />
-      <div className="lf-main">
-        <div className="lf-sidebar-col">
-          <EventsListSidebar />
-        </div>
-        <div className="lf-content-col">
-          <main className="lf-canvas lf-canvas--white">
-            <div className="lf-events-centered">
-              <div className="lf-events-list-col">
-                <h1 className="lf-h1">Events</h1>
-                {error && <p className="lf-text-red">{error}</p>}
+          {error && <p className="lf-text-red">{error}</p>}
                 <div className="lf-filters">
                   <label className="lf-search" style={{ flex: 1, maxWidth: 360 }}>
                     <IconSearch />
@@ -185,7 +181,7 @@ export default function EventsListPageContent() {
                           return (
                             <Link
                               key={event.id}
-                              href={`/admin/events-hub/${event.id}/overview`}
+                              href={eventOverviewPath(event.id)}
                               className={rowClassName}
                             >
                               <div className="lf-event-date-col">
@@ -207,7 +203,11 @@ export default function EventsListPageContent() {
                         }
 
                         return (
-                          <Link key={event.id} href={`/admin/events?event=${event.id}`} className={rowClassName}>
+                          <Link
+                            key={event.id}
+                            href={`${eventsListPath}?event=${event.id}`}
+                            className={rowClassName}
+                          >
                             <div className="lf-event-date-col">
                               <strong>{event.day}</strong>
                               <span>{event.month}</span>
@@ -269,8 +269,10 @@ export default function EventsListPageContent() {
               </aside>
             </div>
           </main>
-        </div>
-      </div>
+  );
+
+  const modals = (
+    <>
       <CreateEventModal
         isOpen={createOpen}
         onClose={() => setCreateOpen(false)}
@@ -282,6 +284,28 @@ export default function EventsListPageContent() {
         onClose={() => setCommitteeCreateOpen(false)}
         onCreate={handleCreateCommitteeMeeting}
       />
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <>
+        {main}
+        {modals}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <IntegratedTopbar primaryAction={createActions} />
+      <div className="lf-main">
+        <div className="lf-sidebar-col">
+          <EventsListSidebar />
+        </div>
+        <div className="lf-content-col">{main}</div>
+      </div>
+      {modals}
     </>
   );
 }

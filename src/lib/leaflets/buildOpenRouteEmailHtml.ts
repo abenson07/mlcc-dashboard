@@ -15,6 +15,7 @@ export function buildOpenRouteEmailHtml(params: {
   customMessage?: string;
   volunteerUrl: string;
   dashboardUrl: string;
+  coverSheetUrl?: string;
 }) {
   const firstName = escapeHtml(params.delivererName.split(" ")[0] ?? params.delivererName);
   const countLine =
@@ -23,6 +24,12 @@ export function buildOpenRouteEmailHtml(params: {
       : "";
   const customBlock = params.customMessage?.trim()
     ? `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#52525b;font-style:italic;">${escapeHtml(params.customMessage.trim())}</p>`
+    : "";
+  const coverSheetBlock = params.coverSheetUrl
+    ? `<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#52525b;">
+        <a href="${escapeHtml(params.coverSheetUrl)}" style="color:#5E6AD2;font-weight:600;">View cover sheet</a>
+        (route details and building contact).
+      </p>`
     : "";
 
   return `<!DOCTYPE html>
@@ -44,6 +51,7 @@ export function buildOpenRouteEmailHtml(params: {
               </p>
               ${countLine}
               ${customBlock}
+              ${coverSheetBlock}
               <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#52525b;">
                 Are you interested in delivering this route? Reply to this email and we&rsquo;ll get you set up.
               </p>

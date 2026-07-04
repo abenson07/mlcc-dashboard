@@ -2,13 +2,26 @@
 
 import * as React from "react";
 
-const inputClassName =
-  "mb-3 min-h-12 w-full rounded-lg border border-sparkles-warm bg-white px-4 py-2 font-body text-base leading-6 text-sparkles-navy/90 placeholder:text-sparkles-muted focus:border-sparkles-navy focus:text-sparkles-navy focus:outline-none";
+const CONTACT_IMAGE =
+  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6913dbb252ed363168221ae6_Maple_Leaf.jpg";
 
-const contactTiles = [
+const inputClassName =
+  "w-full rounded-lg border border-sparkles-warm bg-white px-4 py-3 font-body text-base leading-6 text-sparkles-navy/90 placeholder:text-sparkles-muted focus:border-sparkles-navy focus:text-sparkles-navy focus:outline-none";
+
+type ContactItem = {
+  id: number;
+  title: string;
+  detail: string;
+  secondaryDetail?: string;
+  href: string;
+  icon: React.ReactNode;
+};
+
+const contactItems: ContactItem[] = [
   {
-    label: "City Council",
-    value: "council@seattle.gov",
+    id: 1,
+    title: "City Council",
+    detail: "council@seattle.gov",
     href: "mailto:council@seattle.gov",
     icon: (
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -19,8 +32,9 @@ const contactTiles = [
     ),
   },
   {
-    label: "Friends of Maple Leaf Park",
-    value: "fomlp@gmail.com",
+    id: 2,
+    title: "Friends of Maple Leaf Park",
+    detail: "fomlp@gmail.com",
     href: "mailto:fomlp@gmail.com",
     icon: (
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -31,9 +45,10 @@ const contactTiles = [
     ),
   },
   {
-    label: "Parks Department",
-    value: "+1 289 876 2331",
-    secondaryValue: "parks@seattle.gov",
+    id: 3,
+    title: "Parks Department",
+    detail: "+1 289 876 2331",
+    secondaryDetail: "parks@seattle.gov",
     href: "tel:+12898762331",
     icon: (
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -44,10 +59,10 @@ const contactTiles = [
     ),
   },
   {
-    label: "Transit Department",
-    value: "Mon - Fri: 8AM - 8PM",
-    phone: "+1 289 876 2331",
-    secondaryValue: "transit@seattle.gov",
+    id: 4,
+    title: "Transit Department",
+    detail: "Mon - Fri: 8AM - 8PM",
+    secondaryDetail: "transit@seattle.gov",
     href: "tel:+12898762331",
     icon: (
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -57,8 +72,9 @@ const contactTiles = [
     ),
   },
   {
-    label: "P.O. Box",
-    value: "PO NUMBER HERE",
+    id: 5,
+    title: "P.O. Box",
+    detail: "PO NUMBER HERE",
     href: "/committees",
     icon: (
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -70,8 +86,9 @@ const contactTiles = [
     ),
   },
   {
-    label: "Email",
-    value: "hello@mapleleafcommunity.org",
+    id: 6,
+    title: "Email",
+    detail: "hello@mapleleafcommunity.org",
     href: "mailto:hello@mapleleafcommunity.org",
     icon: (
       <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -83,124 +100,235 @@ const contactTiles = [
   },
 ];
 
-export function ContactSection({ title }: { title: string }) {
+function ArrowIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path
+        d="M3.33594 7.9987L12.0026 7.9987M8.0026 3.33203L12.6693 7.9987L8.0026 12.6654"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function useInView<T extends HTMLElement>(threshold = 0.1) {
+  const ref = React.useRef<T>(null);
+  const [inView, setInView] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return [ref, inView] as const;
+}
+
+export function ContactSection({ title = "Contact" }: { title?: string }) {
+  const parallaxRef = React.useRef<HTMLImageElement>(null);
+
+  React.useEffect(() => {
+    const onScroll = () => {
+      const el = parallaxRef.current;
+      const parent = el?.parentElement;
+      if (!el || !parent) return;
+      const rect = parent.getBoundingClientRect();
+      const progress = -rect.top / window.innerHeight;
+      el.style.transform = `translateY(${progress * 60}px)`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const [cardRef, cardVisible] = useInView<HTMLDivElement>(0.1);
+  const [headlineRef, headlineVisible] = useInView<HTMLDivElement>(0.1);
+  const [listRef, listVisible] = useInView<HTMLDivElement>(0.05);
+
+  const [mapHovered, setMapHovered] = React.useState(false);
   const [submitHovered, setSubmitHovered] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [message, setMessage] = React.useState("");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const subject = encodeURIComponent("Website contact form");
+    const body = encodeURIComponent(`From: ${email}\n\n${message}`);
+    window.location.href = `mailto:hello@mapleleafcommunity.org?subject=${subject}&body=${body}`;
+  };
 
   return (
-    <section className="bg-sparkles-cream">
+    <section className="relative overflow-hidden bg-sparkles-cream">
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-[7.5rem] max-[767px]:py-20">
-            <div className="grid items-stretch gap-12 [grid-template-columns:1fr_auto_1fr] max-[991px]:grid-cols-1">
-              <div className="flex w-full flex-col gap-16">
-                <div className="flex max-w-[35.25rem] flex-col items-start justify-start gap-6 max-[767px]:w-full max-[767px]:max-w-none">
-                  <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                    Contact
-                  </h2>
-
-                  <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                    If you need something, let us know, we&apos;ll do our best to help. We&apos;re a volunteer
-                    organization, so it may take us some time to get back to you.
-                  </p>
-                  <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                    If you need more immediate help, refer to the contacts below.
-                  </p>
+            <div className="grid grid-cols-2 gap-12 max-[991px]:grid-cols-1 max-[991px]:gap-8">
+              {/* LEFT COLUMN */}
+              <div className="relative">
+                <div className="relative h-[42.5rem] overflow-hidden rounded-2xl max-[991px]:h-[30rem] max-[767px]:h-[22.5rem]">
+                  <img
+                    ref={parallaxRef}
+                    src={CONTACT_IMAGE}
+                    loading="lazy"
+                    alt="Maple Leaf neighborhood"
+                    className="-mt-10 h-[calc(100%+5rem)] w-full object-cover object-center"
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 max-[767px]:grid-cols-1">
-                  {contactTiles.map((tile) => (
+                <div
+                  className={`absolute right-6 bottom-6 left-6 rounded-2xl bg-sparkles-cream p-6 transition-all duration-700 ease-out max-[767px]:p-4 ${
+                    cardVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                  }`}
+                  style={{ transitionDelay: "200ms" }}
+                  ref={cardRef}
+                >
+                  <div className="mb-6">
+                    <div className="mb-3 flex items-center gap-2">
+                      <div className="h-2 w-2 flex-none rounded-full bg-sparkles-blue" />
+                      <span className="font-body text-xs font-bold tracking-[0.0625rem] text-sparkles-navy uppercase">
+                        Our neighborhood
+                      </span>
+                    </div>
+                    <p className="m-0 font-body text-sm leading-6 text-sparkles-navy/80">
+                      The Maple Leaf Community Council serves the Maple Leaf neighborhood in
+                      northeast Seattle — your local voice for parks, transit, and community.
+                    </p>
+                  </div>
+
+                  <div className="flex items-end justify-between gap-4">
+                    <p className="m-0 font-display text-lg leading-snug font-bold text-puget-night">
+                      Maple Leaf
+                      <br />
+                      Seattle, WA
+                    </p>
                     <a
-                      key={`${tile.label}-${tile.value}`}
-                      href={tile.href}
-                      className="flex flex-col justify-between gap-12 rounded-xl bg-sparkles-warm p-6 text-sparkles-navy no-underline"
+                      href="https://www.google.com/maps/place/Maple+Leaf,+Seattle,+WA"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex flex-none items-center gap-2 font-display text-sm font-bold text-sparkles-navy no-underline"
+                      onMouseEnter={() => setMapHovered(true)}
+                      onMouseLeave={() => setMapHovered(false)}
                     >
-                      <div className="flex h-8 w-8 flex-none items-center justify-center text-sparkles-navy">
-                        {tile.icon}
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
-                          {tile.label}
-                        </div>
-                        <div className="font-display text-2xl leading-7 font-bold tracking-[-0.03125rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-6">
-                          {tile.value}
-                        </div>
-                        {"phone" in tile && tile.phone ? (
-                          <div className="font-display text-2xl leading-7 font-bold tracking-[-0.03125rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-6">
-                            {tile.phone}
-                          </div>
-                        ) : null}
-                        {"secondaryValue" in tile && tile.secondaryValue ? (
-                          <div className="font-display text-2xl leading-7 font-bold tracking-[-0.03125rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-6">
-                            {tile.secondaryValue}
-                          </div>
-                        ) : null}
-                      </div>
+                      <span>Show on map</span>
+                      <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-sparkles-blue text-sparkles-navy">
+                        <span
+                          className="transition-transform duration-300 ease-out"
+                          style={{ transform: mapHovered ? "translateX(2rem)" : "translateX(0)" }}
+                        >
+                          <ArrowIcon />
+                        </span>
+                        <span
+                          className="absolute transition-transform duration-300 ease-out"
+                          style={{ transform: mapHovered ? "translateX(0)" : "translateX(-2rem)" }}
+                        >
+                          <ArrowIcon />
+                        </span>
+                      </span>
                     </a>
-                  ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="h-[53rem] w-px bg-sparkles-navy/16 max-[991px]:h-px max-[991px]:w-full" />
-
-              <div className="w-full max-w-[35.25rem] pt-12 max-[991px]:max-w-none">
-                <div className="mb-16 max-w-[28rem]">
-                  <h3 className="m-0 font-display text-[2.5rem] leading-[2.75rem] font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7">
-                    {title}
-                  </h3>
+              {/* RIGHT COLUMN */}
+              <div className="flex flex-col justify-center">
+                <div
+                  ref={headlineRef}
+                  className={`mb-8 transition-all duration-700 ease-out ${
+                    headlineVisible ? "translate-y-0 opacity-100 blur-0" : "translate-y-8 opacity-0 blur-sm"
+                  }`}
+                >
+                  <div className="mb-5 border-t border-sparkles-navy/16" />
+                  <div className="mb-4 flex items-center gap-2">
+                    <div className="h-2 w-2 flex-none rounded-full bg-sparkles-blue" />
+                    <span className="font-body text-xs font-bold tracking-[0.0625rem] text-sparkles-navy uppercase">
+                      {title}
+                    </span>
+                  </div>
+                  <h2 className="m-0 font-display text-[3.5rem] leading-tight font-bold tracking-[-0.125rem] text-puget-night max-[991px]:text-5xl max-[767px]:text-4xl">
+                    Let&apos;s stay in touch
+                  </h2>
                 </div>
 
-                <form id="contact-form" name="contact-form" method="get">
-                  <div className="mb-0">
-                    <div className="mb-0 grid grid-cols-2 gap-4 max-[479px]:grid-cols-1">
-                      <input
-                        className={inputClassName}
-                        maxLength={256}
-                        name="Input-Field"
-                        placeholder="First Name"
-                        type="text"
-                        id="contact-first-name"
-                      />
-                      <input
-                        className={inputClassName}
-                        maxLength={256}
-                        name="Phone"
-                        placeholder="Phone"
-                        type="tel"
-                        id="contact-phone"
-                      />
-                    </div>
-                    <input
-                      className={inputClassName}
-                      maxLength={256}
-                      name="Email"
-                      placeholder="Email"
-                      type="email"
-                      id="contact-email"
-                    />
-                  </div>
-
-                  <div className="mb-0">
-                    <textarea
-                      className={`${inputClassName} min-h-[21.375rem] resize-y pt-3`}
-                      maxLength={5000}
-                      name="Message"
-                      placeholder="Message"
-                      id="contact-message"
-                    />
-                  </div>
-
+                <form onSubmit={handleSubmit} className="mb-10 flex flex-col gap-3">
+                  <input
+                    className={inputClassName}
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    maxLength={256}
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <textarea
+                    className={`${inputClassName} min-h-[10rem] resize-y`}
+                    name="message"
+                    placeholder="Message"
+                    maxLength={5000}
+                    required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
                   <input
                     type="submit"
-                    value="Submit"
+                    value="Send message"
                     onMouseEnter={() => setSubmitHovered(true)}
                     onMouseLeave={() => setSubmitHovered(false)}
-                    className={`
-                      mt-3 cursor-pointer rounded-[2rem] border px-4 py-3 font-display text-sm leading-5 font-bold
-                      text-sparkles-cream transition-all duration-300
-                      ${submitHovered ? "border-sparkles-navy/90 bg-sparkles-navy/90" : "border-sparkles-navy bg-sparkles-navy"}
-                    `}
+                    className={`mt-1 w-fit cursor-pointer rounded-[2rem] border px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 ${
+                      submitHovered ? "border-sparkles-navy/90 bg-sparkles-navy/90" : "border-sparkles-navy bg-sparkles-navy"
+                    }`}
                   />
                 </form>
+
+                <div ref={listRef}>
+                  <div className="border-t border-sparkles-navy/16" />
+                  {contactItems.map((item, i) => (
+                    <div
+                      key={item.id}
+                      className={`transition-all duration-700 ease-out ${
+                        listVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+                      }`}
+                      style={{ transitionDelay: `${i * 80}ms` }}
+                    >
+                      <a
+                        href={item.href}
+                        className="flex items-center justify-between gap-4 py-4 no-underline"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <div className="font-display text-sm font-bold text-puget-night">
+                            {item.title}
+                          </div>
+                          <div className="font-body text-sm text-sparkles-navy/70">
+                            {item.detail}
+                            {item.secondaryDetail ? (
+                              <>
+                                <span className="px-2 opacity-50">·</span>
+                                <span>{item.secondaryDetail}</span>
+                              </>
+                            ) : null}
+                          </div>
+                        </div>
+                        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-sparkles-blue text-sparkles-navy">
+                          <div className="flex h-6 w-6 items-center justify-center">{item.icon}</div>
+                        </div>
+                      </a>
+                      <div className="border-t border-sparkles-navy/16" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -1,9 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Leaflets, LeafletsInsert } from "@/types/database";
 
-const DEFAULT_QR_URL =
-  process.env.NEXT_PUBLIC_MEMBERSHIP_JOIN_URL?.trim() ||
-  "https://mapleleafcommunity.org/join";
+const MEMBERSHIP_QR_BASE = "https://mapleleafcommunity.org/membership";
+const OPEN_ROUTES_QR_URL = "https://mapleleafcommunity.org/leaflet/open-routes";
 
 function editionSlug(title: string): string {
   return title
@@ -14,9 +13,10 @@ function editionSlug(title: string): string {
 }
 
 function membershipQrUrl(title: string): string {
-  const url = new URL(DEFAULT_QR_URL);
+  const url = new URL(MEMBERSHIP_QR_BASE);
+  url.searchParams.set("utm_source", "leaflet");
   const slug = editionSlug(title);
-  if (slug) url.searchParams.set("source", `leaflet-${slug}`);
+  if (slug) url.searchParams.set("utm_campaign", slug);
   return url.href;
 }
 
@@ -24,7 +24,7 @@ export async function createLeaflet(
   supabase: SupabaseClient,
   input: Pick<LeafletsInsert, "title" | "distribution_date">,
 ): Promise<Leaflets> {
-  const { data: qr, error: qrError } = await supabase
+  const { data: membershipQr, error: membershipQrError } = await supabase
     .from("qr_codes")
     .insert({
       name: `${input.title} membership QR`,
@@ -33,8 +33,21 @@ export async function createLeaflet(
     .select()
     .single();
 
-  if (qrError || !qr) {
-    throw new Error(qrError?.message ?? "Failed to create QR code");
+  if (membershipQrError || !membershipQr) {
+    throw new Error(membershipQrError?.message ?? "Failed to create membership QR code");
+  }
+
+  const { data: openRoutesQr, error: openRoutesQrError } = await supabase
+    .from("qr_codes")
+    .insert({
+      name: `${input.title} open routes QR`,
+      url: OPEN_ROUTES_QR_URL,
+    })
+    .select()
+    .single();
+
+  if (openRoutesQrError || !openRoutesQr) {
+    throw new Error(openRoutesQrError?.message ?? "Failed to create open routes QR code");
   }
 
   const { data: leaflet, error: leafletError } = await supabase
@@ -43,7 +56,8 @@ export async function createLeaflet(
       title: input.title,
       distribution_date: input.distribution_date,
       status: "planned",
-      membership_qr_code_id: qr.id,
+      membership_qr_code_id: membershipQr.id,
+      open_routes_qr_code_id: openRoutesQr.id,
     })
     .select()
     .single();

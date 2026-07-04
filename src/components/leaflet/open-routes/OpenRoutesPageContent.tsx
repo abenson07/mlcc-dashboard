@@ -126,6 +126,7 @@ export default function OpenRoutesPageContent() {
         {selected && (
           <DeliveryDetailPanel
             delivery={selected}
+            leafletId={leafletId}
             showAssign
             readOnly={readOnly}
             onAssign={(personId) => handleAssign(selected.id, personId)}
