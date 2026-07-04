@@ -1,22 +1,13 @@
 import { Suspense } from "react";
-import "@/components/leaflet/leaflet.css";
-import { LeafletProvider } from "@/components/leaflet/LeafletContext";
-import LeafletDashboardShell from "@/components/leaflet/LeafletDashboardShell";
 
 function LeafletLayoutFallback() {
-  return (
-    <div className="leaflet-app lf-shell" style={{ alignItems: "center", justifyContent: "center" }}>
-      <p className="lf-meta">Loading leaflet dashboard…</p>
-    </div>
-  );
+  return <p className="lf-meta">Loading leaflet…</p>;
 }
 
-export default function LeafletLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense fallback={<LeafletLayoutFallback />}>
-      <LeafletProvider>
-        <LeafletDashboardShell>{children}</LeafletDashboardShell>
-      </LeafletProvider>
-    </Suspense>
-  );
+export default function ShellPreviewLeafletLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <Suspense fallback={<LeafletLayoutFallback />}>{children}</Suspense>;
 }

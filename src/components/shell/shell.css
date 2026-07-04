@@ -689,6 +689,20 @@
   overflow-x: hidden;
 }
 
+.shell-widgets-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+}
+
+.shell-widgets-showcase > * {
+  width: 100%;
+  max-width: var(--shell-widget-width);
+}
+
 /* ── Widget cards ── */
 .shell-widget {
   display: flex;

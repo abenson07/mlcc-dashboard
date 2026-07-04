@@ -87,7 +87,7 @@ export default function VolunteersHubContent() {
   };
 
   const setTab = (next: VolunteerTabView) => {
-    router.replace(next === "roster" ? "/admin/volunteers?tab=roster" : "/admin/volunteers");
+    router.replace(next === "roster" ? "/old-admin/volunteers?tab=roster" : "/old-admin/volunteers");
   };
 
   const tabTitle = tab === "roster" ? "By event" : "Volunteer asks";

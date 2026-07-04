@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { IconChevronsUpDown } from "./icons";
 import { useLeafletContext } from "./LeafletContext";
@@ -92,6 +93,14 @@ export default function LeafletSelector() {
                 </span>
               </button>
             ))}
+            <div className="lf-selector-divider" />
+            <Link
+              href="/old-admin/leaflets"
+              className="lf-selector-item"
+              onClick={() => setOpen(false)}
+            >
+              See all leaflets
+            </Link>
           </div>
         </>
       )}

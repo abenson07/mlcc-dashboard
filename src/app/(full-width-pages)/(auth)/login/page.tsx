@@ -16,7 +16,7 @@ export default async function SignIn() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/admin/people");
+    redirect("/admin");
   }
 
   return <AccountSection />;

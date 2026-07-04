@@ -43,8 +43,8 @@ function isNavItemActive(currentRoute: string, href?: string): boolean {
   const currentPath =
     qIndex >= 0 ? normalizedCurrent.slice(0, qIndex) : normalizedCurrent;
 
-  if (normalizedHref === "/admin/shell-preview") {
-    return currentPath === "/admin/shell-preview";
+  if (normalizedHref === "/admin") {
+    return currentPath === "/admin";
   }
 
   return currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);

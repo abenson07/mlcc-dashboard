@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { IconArrowRight, IconCalendar, IconPlus } from "../icons";
 import { daysUntilDistribution, formatDistributionDate } from "../leafletData";
 import { leafletHref, useLeafletContext } from "../LeafletContext";
@@ -8,6 +9,8 @@ import MembershipQrDownload from "./MembershipQrDownload";
 import OpenRoutesQrDownload from "./OpenRoutesQrDownload";
 
 export default function OverviewContent() {
+  const pathname = usePathname();
+  const leafletBase = pathname?.startsWith("/old-admin") ? "/old-admin" : "/admin";
   const {
     leaflet,
     leafletId,
@@ -62,7 +65,7 @@ export default function OverviewContent() {
               </span>
             </label>
           ))}
-          <Link href={leafletHref("/admin/leaflet/todo", leafletId)} className="lf-see-all">
+          <Link href={leafletHref(`${leafletBase}/leaflet/todo`, leafletId)} className="lf-see-all">
             See all tasks
           </Link>
         </section>
@@ -83,7 +86,7 @@ export default function OverviewContent() {
                 <span className={route.dot === "amber" ? "lf-dot lf-dot--amber" : "lf-dot lf-dot--green"} />
               </div>
             ))}
-            <Link href={leafletHref("/admin/leaflet/open-routes", leafletId)} className="lf-view-all-btn">
+            <Link href={leafletHref(`${leafletBase}/leaflet/open-routes`, leafletId)} className="lf-view-all-btn">
               <IconArrowRight />
               View all open routes
             </Link>
@@ -126,7 +129,7 @@ export default function OverviewContent() {
                 </span>
               </div>
             ))}
-            <Link href={leafletHref("/admin/leaflet/sponsorships", leafletId)} className="lf-view-all-btn lf-view-all-btn--dark">
+            <Link href={leafletHref(`${leafletBase}/leaflet/sponsorships`, leafletId)} className="lf-view-all-btn lf-view-all-btn--dark">
               View full budget
             </Link>
           </section>

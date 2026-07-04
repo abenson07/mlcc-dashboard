@@ -69,7 +69,7 @@ export default function EventsTable({
   const toggleCheck = (id: string) => setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const openEdit = (id: string) => {
-    router.push(`/admin/events/edit/${encodeURIComponent(id)}`);
+    router.push(`/old-admin/events/edit/${encodeURIComponent(id)}`);
   };
 
   const emptyMessage =

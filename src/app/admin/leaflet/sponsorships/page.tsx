@@ -1,5 +1,5 @@
 import SponsorshipsPageContent from "@/components/leaflet/sponsorships/SponsorshipsPageContent";
 
-export default function LeafletSponsorshipsPage() {
+export default function ShellPreviewLeafletSponsorshipsPage() {
   return <SponsorshipsPageContent />;
 }

@@ -9,10 +9,10 @@ import CloseOutFlow from "./close-out/CloseOutFlow";
 import { useLeafletContext } from "./LeafletContext";
 
 const WHITE_CANVAS_ROUTES = [
-  "/admin/leaflet/routes",
-  "/admin/leaflet/open-routes",
-  "/admin/leaflet/substitutions",
-  "/admin/leaflet/sponsorships",
+  "/old-admin/leaflet/routes",
+  "/old-admin/leaflet/open-routes",
+  "/old-admin/leaflet/substitutions",
+  "/old-admin/leaflet/sponsorships",
 ];
 
 export default function LeafletDashboardShell({ children }: { children: ReactNode }) {

@@ -19,7 +19,7 @@ export default function SiteCommentsPageContent() {
           </button>
         }
         primaryAction={
-          <Link href="/admin/site" className="lf-btn lf-btn--outline">
+          <Link href="/old-admin/site" className="lf-btn lf-btn--outline">
             Hide comments
           </Link>
         }

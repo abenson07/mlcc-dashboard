@@ -42,21 +42,22 @@ export default function ShellPreviewNav() {
           type: "item" as const,
           id: leaflet.id,
           label: leaflet.title,
-          href: `/admin/shell-preview/leaflet?leaflet=${leaflet.id}`,
+          href: `/admin/leaflet?leaflet=${leaflet.id}`,
         })),
         { type: "divider" },
         {
           type: "item",
           id: "all",
           label: "See all leaflets",
-          href: "/admin/shell-preview/leaflet",
+          href: "/admin/leaflets",
         },
       ];
 
       return buildShellPreviewLeafletL2Config({
         contextLabel: activeLeaflet?.title ?? "Leaflet",
         dropdownItems,
-        activeDropdownItemId: activeLeaflet?.id ?? "current",
+        activeDropdownItemId:
+          pathname === "/admin/leaflets" ? "all" : (activeLeaflet?.id ?? "current"),
       });
     }
 
@@ -70,14 +71,14 @@ export default function ShellPreviewNav() {
             type: "item" as const,
             id: event.id,
             label: event.title,
-            href: `/admin/shell-preview/events/${event.id}/overview`,
+            href: `/admin/events/${event.id}/overview`,
           })),
         { type: "divider" },
         {
           type: "item",
           id: "all",
           label: "See all events",
-          href: "/admin/shell-preview/events",
+          href: "/admin/events",
         },
       ];
 
@@ -89,7 +90,7 @@ export default function ShellPreviewNav() {
     }
 
     return null;
-  }, [eventId, events, leaflets, showEventL2, showLeafletL2]);
+  }, [eventId, events, leaflets, pathname, showEventL2, showLeafletL2]);
 
   const panelConfig = l2Config ?? l1Config;
 

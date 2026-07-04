@@ -804,7 +804,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
         toast.success("Event created in Webflow.");
       }
       await invalidate();
-      router.push("/admin/events");
+      router.push("/old-admin/events");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -827,7 +827,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center gap-3">
         <Link
-          href="/admin/events"
+          href="/old-admin/events"
           className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400"
         >
           ← Events
@@ -1215,7 +1215,7 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
               {saving ? "Saving…" : itemId ? "Save to Webflow" : "Create in Webflow"}
             </button>
             <Link
-              href="/admin/events"
+              href="/old-admin/events"
               className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
               Cancel

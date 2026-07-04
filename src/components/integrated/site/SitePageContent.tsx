@@ -7,7 +7,7 @@ import IntegratedTopbar from "../IntegratedTopbar";
 
 export default function SitePageContent() {
   const pathname = usePathname();
-  const onComments = pathname?.startsWith("/admin/site/comments");
+  const onComments = pathname?.startsWith("/old-admin/site/comments");
 
   return (
   <>
@@ -20,7 +20,7 @@ export default function SitePageContent() {
       }
       primaryAction={
         <div className="lf-topbar-controls-inline">
-          <Link href={onComments ? "/admin/site" : "/admin/site/comments"} className="lf-btn lf-btn--outline">
+          <Link href={onComments ? "/old-admin/site" : "/old-admin/site/comments"} className="lf-btn lf-btn--outline">
             {onComments ? "Hide comments" : "Comments"}
           </Link>
         </div>

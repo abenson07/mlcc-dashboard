@@ -1,4 +1,5 @@
-.leaflet-app {
+.leaflet-app,
+.shell-app {
   --lf-bg: #f3f3f4;
   --lf-canvas: #fbfbfb;
   --lf-canvas-border: #e5e5e5;
@@ -15,7 +16,9 @@
   --lf-sidebar-width: 220px;
   --lf-detail-width: 300px;
   --lf-font: Inter, ui-sans-serif, system-ui, sans-serif;
+}
 
+.leaflet-app {
   min-height: 100vh;
   background: var(--lf-bg);
   color: var(--lf-text);
@@ -314,6 +317,8 @@
 .lf-detail-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; }
 .lf-detail-label { color: var(--lf-text-muted); }
 .lf-empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 0; text-align: center; color: var(--lf-text-muted); font-size: 13px; }
+.lf-deliverer-change-confirm { display: flex; flex-direction: column; gap: 12px; padding: 12px 0; font-size: 13px; color: var(--lf-text); }
+.lf-deliverer-change-confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 /* Sponsorships */
 .lf-sponsor-tabs { display: flex; gap: 4px; margin-bottom: 12px; }

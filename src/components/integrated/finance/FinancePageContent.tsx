@@ -7,11 +7,11 @@ import IntegratedTopbar from "../IntegratedTopbar";
 import SidebarFooterNav from "../SidebarFooterNav";
 
 const FINANCE_NAV = [
-  { label: "Overview", href: "/admin/finance" },
-  { label: "Invoices", href: "/admin/finance/invoices" },
-  { label: "Memberships", href: "/admin/finance/memberships" },
-  { label: "Sponsorships", href: "/admin/finance/sponsorships" },
-  { label: "Reports", href: "/admin/finance/reports" },
+  { label: "Overview", href: "/old-admin/finance" },
+  { label: "Invoices", href: "/old-admin/finance/invoices" },
+  { label: "Memberships", href: "/old-admin/finance/memberships" },
+  { label: "Sponsorships", href: "/old-admin/finance/sponsorships" },
+  { label: "Reports", href: "/old-admin/finance/reports" },
 ] as const;
 
 const METRICS = [

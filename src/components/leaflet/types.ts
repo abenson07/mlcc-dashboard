@@ -145,6 +145,7 @@ export type Invoice = {
 export type SponsorshipTier = {
   name: string;
   amount: number;
+  quantity: number;
   left: string;
 };
 

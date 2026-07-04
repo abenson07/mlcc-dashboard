@@ -56,6 +56,10 @@ function ActionItemRow({
 }
 
 export default function ActionItemsPageContent({ embedded = false }: { embedded?: boolean }) {
+  const eventOverviewPath = (eventId: string) =>
+    embedded
+      ? `/admin/events/${eventId}/overview`
+      : `/old-admin/events-hub/${eventId}/overview`;
   const searchParams = useSearchParams();
   const highlightedItemId = searchParams.get("item");
   const { groups, openCount, loading, error, toggleDone } = useAllActionItems();
@@ -118,7 +122,7 @@ export default function ActionItemsPageContent({ embedded = false }: { embedded?
             <div key={group.key} className="lf-schedule-group">
               <div className="lf-schedule-group-label">
                 {group.eventId ? (
-                  <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
+                  <Link href={eventOverviewPath(group.eventId)} className="lf-link">
                     {group.label}
                   </Link>
                 ) : (
@@ -151,7 +155,7 @@ export default function ActionItemsPageContent({ embedded = false }: { embedded?
               <div key={group.key} className="lf-schedule-completed-group">
                 <div className="lf-schedule-group-label">
                   {group.eventId ? (
-                    <Link href={`/admin/events-hub/${group.eventId}/overview`} className="lf-link">
+                    <Link href={eventOverviewPath(group.eventId)} className="lf-link">
                       {group.label}
                     </Link>
                   ) : (

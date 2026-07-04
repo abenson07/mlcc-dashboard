@@ -15,27 +15,27 @@ import { leafletHref, useLeafletContext } from "./LeafletContext";
 import SidebarFooterNav from "@/components/integrated/SidebarFooterNav";
 
 const DELIVERY_NAV = [
-  { label: "Deliverers", href: "/admin/leaflet/deliverers", icon: IconBike },
-  { label: "Routes", href: "/admin/leaflet/routes", icon: IconMap },
-  { label: "Open Routes", href: "/admin/leaflet/open-routes", icon: IconRoute },
-  { label: "Substitutions", href: "/admin/leaflet/substitutions", icon: IconRepeat },
+  { label: "Deliverers", href: "/old-admin/leaflet/deliverers", icon: IconBike },
+  { label: "Routes", href: "/old-admin/leaflet/routes", icon: IconMap },
+  { label: "Open Routes", href: "/old-admin/leaflet/open-routes", icon: IconRoute },
+  { label: "Substitutions", href: "/old-admin/leaflet/substitutions", icon: IconRepeat },
 ] as const;
 
 const SUPPORT_NAV = [
-  { label: "Sponsorships", href: "/admin/leaflet/sponsorships", icon: IconHandshake },
-  { label: "To-do / Schedule", href: "/admin/leaflet/todo", icon: IconCalendarCheck },
+  { label: "Sponsorships", href: "/old-admin/leaflet/sponsorships", icon: IconHandshake },
+  { label: "To-do / Schedule", href: "/old-admin/leaflet/todo", icon: IconCalendarCheck },
 ] as const;
 
 export default function LeafletSidebar() {
   const pathname = usePathname();
   const { leafletId } = useLeafletContext();
-  const overviewActive = pathname === "/admin/leaflet";
+  const overviewActive = pathname === "/old-admin/leaflet";
 
   return (
     <aside className="lf-sidebar">
       <nav className="lf-sidebar-nav" aria-label="Leaflet sections">
         <Link
-          href={leafletHref("/admin/leaflet", leafletId)}
+          href={leafletHref("/old-admin/leaflet", leafletId)}
           className={overviewActive ? "lf-nav-item lf-nav-item--active" : "lf-nav-item"}
         >
           <IconLayoutDashboard />

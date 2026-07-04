@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import type { DeliveryWithRelations } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
 import { IconMail, IconMapPin, IconUser } from "../icons";
 import { openRoutesTableStatusLabel } from "../deliveryUtils";
+import type { RouteWithPrimaryDeliverer } from "../leafletData";
+import DelivererAssignSection from "./DelivererAssignSection";
 
 type DeliveryDetailPanelProps = {
   delivery: DeliveryWithRelations;
@@ -25,6 +26,13 @@ function formatChange(change: number) {
   return "+0";
 }
 
+function primaryDelivererForDelivery(delivery: DeliveryWithRelations) {
+  const route = delivery.routes as RouteWithPrimaryDeliverer | null | undefined;
+  const primary = route?.primary_deliverer;
+  if (!primary) return null;
+  return { id: primary.id, name: primary.full_name };
+}
+
 export default function DeliveryDetailPanel({
   delivery,
   leafletId = null,
@@ -40,21 +48,22 @@ export default function DeliveryDetailPanel({
   const route = delivery.routes;
   const person = delivery.people;
   const status = openRoutesTableStatusLabel(delivery);
-  const [assigningId, setAssigningId] = useState<string | null>(null);
+  const primaryDeliverer = primaryDelivererForDelivery(delivery);
   const coverSheetHref =
     leafletId != null
       ? `${getApiBase()}/api/leaflets/${leafletId}/deliveries/${delivery.id}/cover-sheet`
       : null;
 
-  async function handleAssign(personId: string) {
-    if (!onAssign || readOnly) return;
-    setAssigningId(personId);
-    try {
-      await onAssign(personId);
-    } finally {
-      setAssigningId(null);
-    }
-  }
+  const assignSectionProps = {
+    person,
+    status,
+    readOnly,
+    onAssign,
+    onEmailPastDeliverer,
+    emailingPersonId,
+    pastDeliverers,
+    primaryDeliverer,
+  };
 
   return (
     <aside style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -64,26 +73,46 @@ export default function DeliveryDetailPanel({
         </div>
       )}
 
-      {!showAssign && person && (
+      {!showAssign && (
         <div className="lf-detail-card">
-          <div className="lf-card-header"><span className="lf-card-title">Who is delivering it</span></div>
+          <div className="lf-card-header">
+            <span className="lf-card-title">Who is delivering it</span>
+          </div>
           <div className="lf-card-body">
-            <div className="lf-detail-icon-row">
-              <span className="lf-detail-label">Name</span>
-              <span className="lf-detail-icon-value"><IconUser />{person.full_name}</span>
-            </div>
-            {person.email && (
-              <div className="lf-detail-icon-row">
-                <span className="lf-detail-label">Contact email</span>
-                <span className="lf-detail-icon-value"><IconMail />{person.email}</span>
-              </div>
-            )}
-            {person.address && (
-              <div className="lf-detail-icon-row">
-                <span className="lf-detail-label">Delivery address</span>
-                <span className="lf-detail-icon-value"><IconMapPin />{person.address}</span>
-              </div>
-            )}
+            {person ? (
+              <>
+                <div className="lf-detail-icon-row">
+                  <span className="lf-detail-label">Name</span>
+                  <span className="lf-detail-icon-value">
+                    <IconUser />
+                    {person.full_name}
+                  </span>
+                </div>
+                {person.email && (
+                  <div className="lf-detail-icon-row">
+                    <span className="lf-detail-label">Contact email</span>
+                    <span className="lf-detail-icon-value">
+                      <IconMail />
+                      {person.email}
+                    </span>
+                  </div>
+                )}
+                {person.address && (
+                  <div className="lf-detail-icon-row">
+                    <span className="lf-detail-label">Delivery address</span>
+                    <span className="lf-detail-icon-value">
+                      <IconMapPin />
+                      {person.address}
+                    </span>
+                  </div>
+                )}
+              </>
+            ) : null}
+            <DelivererAssignSection
+              {...assignSectionProps}
+              compact={!onAssign}
+              hideCurrentDeliverer={Boolean(person)}
+            />
           </div>
         </div>
       )}
@@ -119,63 +148,7 @@ export default function DeliveryDetailPanel({
           <div className="lf-detail-card">
             <div className="lf-card-header"><span className="lf-card-title">Deliverer</span></div>
             <div className="lf-card-body">
-              {person ? (
-                <div className="lf-detail-row">
-                  <span>{person.full_name}</span>
-                  <span className="lf-meta">{status}</span>
-                </div>
-              ) : (
-                <div className="lf-empty-state">
-                  <p>No deliverer assigned</p>
-                  {pastDeliverers.length > 0 && onAssign && (
-                    <button
-                      type="button"
-                      className="lf-btn lf-btn--accent"
-                      disabled={readOnly || assigningId != null}
-                      onClick={() => handleAssign(pastDeliverers[0]!.id)}
-                    >
-                      {assigningId ? "Assigning…" : `Assign ${pastDeliverers[0]!.name}`}
-                    </button>
-                  )}
-                </div>
-              )}
-              {pastDeliverers.length > 0 && (
-                <>
-                  <div style={{ height: 1, background: "var(--lf-bg)", margin: "12px 0" }} />
-                  <p className="lf-meta" style={{ fontWeight: 600, marginBottom: 8 }}>Past deliverers</p>
-                  {pastDeliverers.map((p) => (
-                    <div key={p.id} className="lf-detail-row">
-                      <span>{p.name}</span>
-                      <span style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                        {onEmailPastDeliverer && (
-                          <button
-                            type="button"
-                            className="lf-link"
-                            style={{ border: "none", background: "none", padding: 0, display: "inline-flex", alignItems: "center", gap: 4 }}
-                            disabled={readOnly || emailingPersonId === p.id}
-                            onClick={() => onEmailPastDeliverer(p.id)}
-                            title="Email past deliverer"
-                          >
-                            <IconMail />
-                            {emailingPersonId === p.id ? "Sending…" : "Email"}
-                          </button>
-                        )}
-                        {onAssign && (
-                          <button
-                            type="button"
-                            className="lf-link"
-                            style={{ border: "none", background: "none", padding: 0 }}
-                            disabled={readOnly || assigningId === p.id}
-                            onClick={() => handleAssign(p.id)}
-                          >
-                            {assigningId === p.id ? "Assigning…" : person?.id === p.id ? "Assigned" : "Assign"}
-                          </button>
-                        )}
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
+              <DelivererAssignSection {...assignSectionProps} />
             </div>
           </div>
 

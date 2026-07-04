@@ -1,11 +1,18 @@
-import AdminLayoutClient from "./AdminLayoutClient";
-import AdminProviders from "./AdminProviders";
+import "@/components/shell/shell.css";
+import "@/components/leaflet/leaflet.css";
+import "@/components/integrated/integrated.css";
+import "flatpickr/dist/flatpickr.css";
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import "flatpickr/dist/flatpickr.css";
-import React from "react";
+import AdminProviders from "./AdminProviders";
+import ShellPreviewContent from "./ShellPreviewContent";
 
 export const dynamic = "force-dynamic";
+
+function ShellPreviewFallback() {
+  return <div className="shell-preview-root shell-app" />;
+}
 
 export default async function AdminLayout({
   children,
@@ -23,7 +30,9 @@ export default async function AdminLayout({
 
   return (
     <AdminProviders>
-      <AdminLayoutClient>{children}</AdminLayoutClient>
+      <Suspense fallback={<ShellPreviewFallback />}>
+        <ShellPreviewContent>{children}</ShellPreviewContent>
+      </Suspense>
     </AdminProviders>
   );
 }

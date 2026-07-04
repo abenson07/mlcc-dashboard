@@ -10,6 +10,7 @@ import {
   Home,
   Inbox,
   LayoutDashboard,
+  LayoutGrid,
   ListTodo,
   LogOut,
   Megaphone,
@@ -31,13 +32,13 @@ import type {
 } from "./NavPanelTypes";
 
 const WORKSPACE_DROPDOWN: DropdownItem[] = [
-  { type: "item", id: "settings", label: "Settings", href: "/admin/settings" },
+  { type: "item", id: "settings", label: "Settings", href: "/old-admin/settings" },
   { type: "item", id: "invite", label: "Invite and manage members" },
   { type: "divider" },
   { type: "item", id: "logout", label: "Log out" },
 ];
 
-const SHELL_PREVIEW_BASE = "/admin/shell-preview";
+const SHELL_PREVIEW_BASE = "/admin";
 
 const SHELL_PREVIEW_WORKSPACE_DROPDOWN: DropdownItem[] = [
   { type: "item", id: "settings", label: "Settings" },
@@ -51,7 +52,7 @@ const EVENT_CONTEXT_DROPDOWN: DropdownItem[] = [
   { type: "item", id: "event-2", label: "Halloween Parade" },
   { type: "item", id: "event-3", label: "Something here" },
   { type: "divider" },
-  { type: "item", id: "all", label: "See all events", href: "/admin/events" },
+  { type: "item", id: "all", label: "See all events", href: "/old-admin/events" },
 ];
 
 const LEAFLET_CONTEXT_DROPDOWN: DropdownItem[] = [
@@ -59,7 +60,7 @@ const LEAFLET_CONTEXT_DROPDOWN: DropdownItem[] = [
   { type: "item", id: "leaflet-2", label: "February 2026" },
   { type: "item", id: "leaflet-3", label: "January 2026" },
   { type: "divider" },
-  { type: "item", id: "all", label: "See all leaflets", href: "/admin/leaflet" },
+  { type: "item", id: "all", label: "See all leaflets", href: "/old-admin/leaflets" },
 ];
 
 export const L1_CONFIG: NavPanelConfig = {
@@ -77,10 +78,10 @@ export const L1_CONFIG: NavPanelConfig = {
     {
       id: "primary",
       items: [
-        { id: "dashboard", label: "Dashboard", icon: Compass, href: "/admin" },
-        { id: "action-items", label: "Action Items", icon: ListTodo, href: "/admin/action-items" },
-        { id: "inbox", label: "Inbox", icon: Inbox, badge: "19", href: "/admin/inbox" },
-        { id: "website", label: "Website", icon: ExternalLink, href: "/admin/site" },
+        { id: "dashboard", label: "Dashboard", icon: Compass, href: "/old-admin" },
+        { id: "action-items", label: "Action Items", icon: ListTodo, href: "/old-admin/action-items" },
+        { id: "inbox", label: "Inbox", icon: Inbox, badge: "19", href: "/old-admin/inbox" },
+        { id: "website", label: "Website", icon: ExternalLink, href: "/old-admin/site" },
       ],
     },
     {
@@ -97,25 +98,25 @@ export const L1_CONFIG: NavPanelConfig = {
       id: "manage",
       header: "Manage",
       items: [
-        { id: "events", label: "Events", icon: CalendarDays, href: "/admin/events" },
-        { id: "committees", label: "Committees", icon: Users, href: "/admin/committees" },
-        { id: "leaflet", label: "Leaflet", icon: Newspaper, href: "/admin/leaflet" },
-        { id: "invoicing", label: "Invoicing & Sponsors", icon: HandCoins, href: "/admin/finance" },
+        { id: "events", label: "Events", icon: CalendarDays, href: "/old-admin/events" },
+        { id: "committees", label: "Committees", icon: Users, href: "/old-admin/committees" },
+        { id: "leaflet", label: "Leaflet", icon: Newspaper, href: "/old-admin/leaflet" },
+        { id: "invoicing", label: "Invoicing & Sponsors", icon: HandCoins, href: "/old-admin/finance" },
       ],
     },
     {
       id: "database",
       header: "Database",
       items: [
-        { id: "neighbors", label: "Neighbors", icon: Home, href: "/admin/people" },
-        { id: "members", label: "Members", icon: Handshake, href: "/admin/members" },
-        { id: "businesses", label: "Businesses", icon: Store, href: "/admin/biz" },
-        { id: "stories", label: "Stories", icon: FileText, href: "/admin/stories" },
+        { id: "neighbors", label: "Neighbors", icon: Home, href: "/old-admin/people" },
+        { id: "members", label: "Members", icon: Handshake, href: "/old-admin/members" },
+        { id: "businesses", label: "Businesses", icon: Store, href: "/old-admin/biz" },
+        { id: "stories", label: "Stories", icon: FileText, href: "/old-admin/stories" },
       ],
     },
   ],
   footer: [
-    { id: "settings", label: "Settings", icon: Settings, href: "/admin/settings" },
+    { id: "settings", label: "Settings", icon: Settings, href: "/old-admin/settings" },
     { id: "logout", label: "Logout", icon: LogOut },
   ],
 };
@@ -135,6 +136,12 @@ const SHELL_PREVIEW_L1_STATIC: Omit<NavPanelConfig, "groups"> & {
   },
   groups: [],
   footer: [
+    {
+      id: "widgets",
+      label: "Widget Panel",
+      icon: LayoutGrid,
+      href: `${SHELL_PREVIEW_BASE}/widgets`,
+    },
     { id: "settings", label: "Settings", icon: Settings, notReady: true },
     { id: "logout", label: "Logout", icon: LogOut },
   ],
@@ -189,7 +196,7 @@ const SHELL_PREVIEW_MANAGE_GROUP: NavGroupConfig = {
       id: "leaflet",
       label: "Leaflet",
       icon: Newspaper,
-      href: `${SHELL_PREVIEW_BASE}/leaflet`,
+      href: `${SHELL_PREVIEW_BASE}/leaflets`,
     },
     {
       id: "invoicing",
@@ -275,19 +282,27 @@ const SHELL_PREVIEW_BREADCRUMB_LABELS: Record<string, string> = {
   [`${SHELL_PREVIEW_BASE}/inbox`]: "Inbox",
   [`${SHELL_PREVIEW_BASE}/site`]: "Website",
   [`${SHELL_PREVIEW_BASE}/events`]: "Events",
+  [`${SHELL_PREVIEW_BASE}/leaflets`]: "Leaflets",
   [`${SHELL_PREVIEW_BASE}/leaflet`]: "Leaflet",
   [`${SHELL_PREVIEW_BASE}/invoice`]: "Invoicing & Sponsors",
   [`${SHELL_PREVIEW_BASE}/neighbors`]: "Neighbors",
   [`${SHELL_PREVIEW_BASE}/members`]: "Members",
   [`${SHELL_PREVIEW_BASE}/businesses`]: "Businesses",
   [`${SHELL_PREVIEW_BASE}/stories`]: "Stories",
+  [`${SHELL_PREVIEW_BASE}/widgets`]: "Widget Panel",
 };
 
 export function parseShellPreviewEventId(pathname: string): string | null {
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
-  const match = normalizedPath.match(/^\/admin\/shell-preview\/events\/([^/]+)/);
+  const match = normalizedPath.match(/^\/admin\/events\/([^/]+)/);
   return match?.[1] ?? null;
+}
+
+export function isShellPreviewWidgetsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/widgets`;
 }
 
 export function isShellPreviewLeafletRoute(pathname: string): boolean {
@@ -316,7 +331,7 @@ export function buildShellPreviewLeafletL2Config(options?: {
       type: "item",
       id: "all",
       label: "See all leaflets",
-      href: `${SHELL_PREVIEW_BASE}/leaflet`,
+      href: `${SHELL_PREVIEW_BASE}/leaflets`,
     },
   ];
 
@@ -474,15 +489,15 @@ export function shellPreviewBreadcrumbLabel(pathname: string): string {
 export const SETTINGS_L2_CONFIG: NavPanelConfig = {
   level: "l2",
   ariaLabel: "Settings navigation",
-  back: { label: "Back", href: "/admin" },
+  back: { label: "Back", href: "/old-admin" },
   header: "search",
   groups: [
     {
       id: "manage",
       header: "Manage",
       items: [
-        { id: "profile", label: "Profile", icon: Compass, href: "/admin/settings/profile" },
-        { id: "committees", label: "My Committees", icon: Users, href: "/admin/settings/committees" },
+        { id: "profile", label: "Profile", icon: Compass, href: "/old-admin/settings/profile" },
+        { id: "committees", label: "My Committees", icon: Users, href: "/old-admin/settings/committees" },
       ],
     },
     {
@@ -493,19 +508,19 @@ export const SETTINGS_L2_CONFIG: NavPanelConfig = {
           id: "event-templates",
           label: "Event Templates",
           icon: CalendarDays,
-          href: "/admin/settings/event-templates",
+          href: "/old-admin/settings/event-templates",
         },
         {
           id: "email-templates",
           label: "Email Templates",
           icon: Users,
-          href: "/admin/settings/email-templates",
+          href: "/old-admin/settings/email-templates",
         },
         {
           id: "user-access",
           label: "User access",
           icon: Newspaper,
-          href: "/admin/settings/user-access",
+          href: "/old-admin/settings/user-access",
         },
       ],
     },
@@ -515,7 +530,7 @@ export const SETTINGS_L2_CONFIG: NavPanelConfig = {
 export const EVENT_L2_CONFIG: NavPanelConfig = {
   level: "l2",
   ariaLabel: "Event navigation",
-  back: { label: "Back", href: "/admin/events" },
+  back: { label: "Back", href: "/old-admin/events" },
   context: {
     dropdownId: "context",
     label: "Summer Social 2026",
@@ -547,7 +562,7 @@ export const EVENT_L2_CONFIG: NavPanelConfig = {
 export const LEAFLET_L2_CONFIG: NavPanelConfig = {
   level: "l2",
   ariaLabel: "Leaflet navigation",
-  back: { label: "Back", href: "/admin/leaflet" },
+  back: { label: "Back", href: "/old-admin/leaflet" },
   context: {
     dropdownId: "context",
     label: "March 2026",
