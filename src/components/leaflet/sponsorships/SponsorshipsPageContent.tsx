@@ -27,25 +27,42 @@ export default function SponsorshipsPageContent() {
   }, [invoices, invoiceTab]);
 
   return (
-    <div className="lf-overview-layout">
+    <div className="lf-overview-layout lf-overview-layout--single">
       <div className="lf-overview-main">
         <h1 className="lf-h2">Sponsorship</h1>
 
-        <section className="lf-card">
-          <div className="lf-card-header"><span className="lf-card-title">Budget & sponsorships</span></div>
-          <div className="lf-card-body">
-            <div className="lf-metric-row">
-              <span className="lf-metric-label">Sponsorship progress</span>
-              <span>{budget.sponsorshipProgressPct}%</span>
+        <div className="lf-overview-mid-row">
+          <section className="lf-card">
+            <div className="lf-card-header"><span className="lf-card-title">Budget & sponsorships</span></div>
+            <div className="lf-card-body">
+              <div className="lf-metric-row">
+                <span className="lf-metric-label">Sponsorship progress</span>
+                <span>{budget.sponsorshipProgressPct}%</span>
+              </div>
+              <div className="lf-progress-track" style={{ marginBottom: 12 }}>
+                <div className="lf-progress-fill" style={{ width: `${budget.sponsorshipProgressPct}%` }} />
+              </div>
+              <div className="lf-metric-row"><span className="lf-metric-label">Goal</span><span>${budget.sponsorshipGoal.toLocaleString()}</span></div>
+              <div className="lf-metric-row"><span className="lf-metric-label">Raised</span><span>${budget.raised.toLocaleString()}</span></div>
+              <div className="lf-metric-row"><span className="lf-metric-label">Pledged</span><span>${budget.pledged.toLocaleString()}</span></div>
             </div>
-            <div className="lf-progress-track" style={{ marginBottom: 12 }}>
-              <div className="lf-progress-fill" style={{ width: `${budget.sponsorshipProgressPct}%` }} />
+          </section>
+
+          <section className="lf-card">
+            <div className="lf-card-header"><span className="lf-card-title">Sponsorship levels</span></div>
+            <div className="lf-card-body">
+              {sponsorshipTiers.map((tier) => (
+                <div key={tier.name} className="lf-detail-row">
+                  <div>
+                    <div style={{ fontWeight: 500 }}>{tier.name}</div>
+                    <div className="lf-meta">${tier.amount.toLocaleString()}</div>
+                  </div>
+                  <span className={tier.left === "Sold out" ? "lf-status-muted" : "lf-status-paid"}>{tier.left}</span>
+                </div>
+              ))}
             </div>
-            <div className="lf-metric-row"><span className="lf-metric-label">Goal</span><span>${budget.sponsorshipGoal.toLocaleString()}</span></div>
-            <div className="lf-metric-row"><span className="lf-metric-label">Raised</span><span>${budget.raised.toLocaleString()}</span></div>
-            <div className="lf-metric-row"><span className="lf-metric-label">Pledged</span><span>${budget.pledged.toLocaleString()}</span></div>
-          </div>
-        </section>
+          </section>
+        </div>
 
         <section className="lf-card">
           <div className="lf-card-header"><span className="lf-card-title">Sponsors</span></div>
@@ -131,23 +148,6 @@ export default function SponsorshipsPageContent() {
           </div>
         </section>
       </div>
-
-      <aside>
-        <section className="lf-card">
-          <div className="lf-card-header"><span className="lf-card-title">Sponsorship levels</span></div>
-          <div className="lf-card-body">
-            {sponsorshipTiers.map((tier) => (
-              <div key={tier.name} className="lf-detail-row">
-                <div>
-                  <div style={{ fontWeight: 500 }}>{tier.name}</div>
-                  <div className="lf-meta">${tier.amount.toLocaleString()}</div>
-                </div>
-                <span className={tier.left === "Sold out" ? "lf-status-muted" : "lf-status-paid"}>{tier.left}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </aside>
     </div>
   );
 }
