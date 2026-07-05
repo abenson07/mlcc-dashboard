@@ -72,7 +72,13 @@ export function CmsGrid13Section() {
   const handleNext = () => setSlide((prev) => Math.min(maxSlide, prev + 1));
 
   return (
-    <section className="bg-sparkles-cream overflow-hidden">
+    <section
+      className="bg-sparkles-cream overflow-hidden"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="home.local-events"
+      data-editable-label="Home CMS Grid"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="z-[2] w-full max-w-[1800px] mx-auto">
           <div className="py-[7.5rem] max-[767px]:py-20">

@@ -54,7 +54,13 @@ export function ValueFeature49Section() {
   const active = tabs[activeTab];
 
   return (
-    <section className="bg-sparkles-cream">
+    <section
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="home.get-involved"
+      data-editable-label="Home Value Feature"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="z-[2] w-full max-w-[1800px] mx-auto">
           <div className="py-40 max-[767px]:py-20">

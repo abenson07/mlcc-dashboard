@@ -10,8 +10,8 @@ export default function HomePage() {
     <main>
       <HeroSection />
       <ServicesMarqueeSection />
-      <ValueFeature49Section />
       <CmsGrid13Section />
+      <ValueFeature49Section />
       <FaqSection />
       <CtaSection />
     </main>
