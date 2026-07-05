@@ -1,6 +1,5 @@
 "use client";
 
-import { SectionLabel } from "@marketing/components/SectionLabel";
 import * as React from "react";
 
 function PrimaryButton({ href, label }: { href: string; label: string }) {
@@ -59,38 +58,54 @@ function SecondaryButton({ href, label }: { href: string; label: string }) {
   );
 }
 
-export function CtaSection() {
+export interface CtaButtonConfig {
+  label: string;
+  href: string;
+}
+
+export interface CtaSectionProps {
+  title?: string;
+  subhead?: string;
+  primaryButton?: CtaButtonConfig;
+  secondaryButton?: CtaButtonConfig;
+}
+
+export function CtaSection({
+  title = "A better neighborhood starts with you",
+  subhead = "Join us in making a better Maple Leaf for all",
+  primaryButton = { label: "Become a supporting member", href: "/membership" },
+  secondaryButton = { label: "Volunteer to help", href: "/volunteer" },
+}: CtaSectionProps) {
   return (
-    <div className="p-2 bg-sparkles-cream">
+    <div
+      className="p-2 bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="global.cta"
+      data-editable-label="Global CTA"
+    >
       <div
         className="
           relative z-[1] rounded-2xl flex justify-center items-center w-full overflow-hidden
-          h-[34.25rem] max-[991px]:h-auto max-[991px]:py-40 max-[767px]:py-24
+          bg-sparkles-accent h-[34.25rem] max-[991px]:h-auto max-[991px]:py-40 max-[767px]:py-24
         "
       >
-        <img
-          loading="lazy"
-          alt=""
-          src="https://byqsupply-components.netlify.app/skeletons/cta/images/patter-horizontal-new.svg"
-          className="absolute inset-0 z-[1] w-full h-full object-cover max-[991px]:h-auto"
-        />
-
-        <div className="absolute inset-0 z-[2] bg-sparkles-navy/8" />
-
         <div className="relative z-[3] px-8 w-full max-[767px]:px-4">
           <div className="w-full max-w-[1800px] mx-auto">
             <div className="relative z-[3] flex flex-col justify-center items-center text-center mx-auto gap-6 max-w-[42.5rem] max-[767px]:gap-5">
               <div className="flex flex-col items-center gap-4">
-                <SectionLabel>Label placeholder</SectionLabel>
-
-                <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                  Headline skeleton placeholder exists only to structure your layout
+                <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-sparkles-cream max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
+                  {title}
                 </h2>
+
+                <p className="m-0 font-body text-xl leading-7 font-normal text-sparkles-cream/90 max-[767px]:text-base max-[767px]:leading-6">
+                  {subhead}
+                </p>
               </div>
 
               <div className="flex flex-row justify-center items-center gap-2 flex-wrap">
-                <PrimaryButton href="/template/style-guide" label="Primary" />
-                <SecondaryButton href="/template/style-guide" label="Secondary" />
+                <PrimaryButton href={primaryButton.href} label={primaryButton.label} />
+                <SecondaryButton href={secondaryButton.href} label={secondaryButton.label} />
               </div>
             </div>
           </div>
