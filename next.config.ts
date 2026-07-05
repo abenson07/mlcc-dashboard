@@ -23,6 +23,97 @@ const nextConfig: NextConfig = {
         destination: "/events/template",
         permanent: true,
       },
+      // Routes not yet ready for main; keep them live on staging only.
+      {
+        source: "/about/maple-leaf",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/board",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/committees/template",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/events/template",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/join-the-board",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/join-the-board/:path*",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/leaflet/issues",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/leaflet/template",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/leaflet/issue/template",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/meeting-minutes",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/meeting-minutes/:path*",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/membership/business",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/submit-event",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/submit-event/:path*",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/submit-story",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/submit-story/:path*",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/volunteer/template",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/volunteer/:slug",
+        destination: "/",
+        permanent: false,
+      },
     ];
   },
   images: {
