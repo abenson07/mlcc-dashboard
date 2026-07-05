@@ -142,7 +142,7 @@ function InvolvementCardMobile({ title, img, imgSet }: { title: string; img: str
   );
 }
 
-export function ServicesMarqueeSection() {
+export function ServicesMarqueeSection({ pauseOnHover = false }: { pauseOnHover?: boolean }) {
   const headlineRef = React.useRef<HTMLDivElement>(null);
   const [headlineVisible, setHeadlineVisible] = React.useState(false);
 
@@ -194,12 +194,18 @@ export function ServicesMarqueeSection() {
         .animate-marquee-services {
           animation: marquee-services 45s linear infinite;
         }
-        .animate-marquee-services:hover {
+        .animate-marquee-services.pause-on-hover:hover {
           animation-play-state: paused;
         }
       `}</style>
 
-      <section className="overflow-hidden py-20 max-[767px]:py-16">
+      <section
+        className="overflow-hidden py-20 max-[767px]:py-16"
+        data-editable="true"
+        data-editable-type="section"
+        data-editable-id="home.services-marquee"
+        data-editable-label="Home Services Marquee"
+      >
         <div className="px-8 max-[767px]:px-4">
           <div className="z-[2] w-full max-w-[112.5rem] mx-auto">
             <div
@@ -220,7 +226,7 @@ export function ServicesMarqueeSection() {
 
             <div className="w-full max-[767px]:hidden">
               <div className="overflow-hidden w-full">
-                <div className="flex items-center gap-4 w-max animate-marquee-services">
+                <div className={`flex items-center gap-4 w-max animate-marquee-services${pauseOnHover ? " pause-on-hover" : ""}`}>
                   {involvementOptions.map((option, i) => (
                     <div key={`a-${i}`} className="shrink-0">
                       <InvolvementCard title={option.title} img={option.img} imgSet={option.imgSet} />
@@ -243,20 +249,15 @@ export function ServicesMarqueeSection() {
                 ${sliderVisible ? "opacity-100 blur-0 translate-y-0" : "opacity-0 blur-[12px] translate-y-5"}
               `}
             >
-              <div className="overflow-hidden mb-8 max-w-[20.75rem]">
+              <div className="overflow-hidden mb-8 w-full">
                 <div
-                  className="flex transition-transform duration-500 ease-out"
+                  className="flex gap-3 transition-transform duration-500 ease-out"
                   style={{
-                    transform: `translateX(-${(slide * 100) / totalSlides}%)`,
-                    width: `${totalSlides * 100}%`,
+                    transform: `translateX(calc(-${slide} * (20.75rem + 0.75rem)))`,
                   }}
                 >
                   {involvementOptions.map((option, i) => (
-                    <div
-                      key={i}
-                      className="shrink-0 box-border pr-3 last:pr-0"
-                      style={{ width: `${100 / totalSlides}%` }}
-                    >
+                    <div key={i} className="shrink-0">
                       <InvolvementCardMobile title={option.title} img={option.img} imgSet={option.imgSet} />
                     </div>
                   ))}
