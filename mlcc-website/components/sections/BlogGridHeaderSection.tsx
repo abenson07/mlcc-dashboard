@@ -129,7 +129,13 @@ export function BlogGridHeaderSection() {
   }, []);
 
   return (
-    <section className="py-40 bg-sparkles-cream max-[767px]:py-24">
+    <section
+      className="py-40 bg-sparkles-cream max-[767px]:py-24"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.blog-grid-header"
+      data-editable-label="Blog Grid Header (Template)"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="z-[2] w-full max-w-[1800px] mx-auto">
           <div

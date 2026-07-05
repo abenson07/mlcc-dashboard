@@ -1,21 +1,21 @@
 import { FaqSection } from "@marketing/components/byq/FaqSection";
 import { getFaqsForPage } from "@marketing/data/faqs";
 
-export async function CommitteesFaqSection() {
-  const faqs = await getFaqsForPage("committees");
+export async function HomeFaqSection() {
+  const faqs = await getFaqsForPage("home");
   if (faqs.length === 0) return null;
 
   return (
     <FaqSection
       label="FAQ"
-      headline="Common questions about getting involved"
+      headline="Frequently asked questions"
       faqs={faqs}
       data-editable="true"
       data-editable-type="section"
-      data-editable-id="committees.faq"
-      data-editable-label="Committees FAQ"
+      data-editable-id="home.faq"
+      data-editable-label="Home FAQ"
     />
   );
 }
 
-export default CommitteesFaqSection;
+export default HomeFaqSection;

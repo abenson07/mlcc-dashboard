@@ -313,6 +313,12 @@ export function isShellPreviewWidgetsRoute(pathname: string): boolean {
   return normalizedPath === `${SHELL_PREVIEW_BASE}/widgets`;
 }
 
+export function isShellPreviewFaqsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/faqs`;
+}
+
 export function isShellPreviewLeafletRoute(pathname: string): boolean {
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;

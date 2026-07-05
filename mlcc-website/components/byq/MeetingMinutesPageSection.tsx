@@ -183,7 +183,13 @@ export function MeetingMinutesPageSection({
   const showRelated = entry ? relatedMinutes.length > 0 : true;
 
   return (
-    <div className="bg-sparkles-cream text-sparkles-navy">
+    <div
+      className="bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="meeting-minutes.page"
+      data-editable-label="Meeting Minutes Page"
+    >
       <section className="bg-sparkles-cream">
         <div className="px-8 max-[767px]:px-4">
           <div className="mx-auto w-full max-w-[1800px]">

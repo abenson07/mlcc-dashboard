@@ -115,7 +115,13 @@ export function AboutWhatWeDoSection() {
   }, []);
 
   return (
-    <section className="bg-sparkles-warm text-sparkles-navy">
+    <section
+      className="bg-sparkles-warm text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="about.what-we-do"
+      data-editable-label="About What We Do"
+    >
       {/* Two-column hero layout */}
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">

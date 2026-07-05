@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation";
 import { IconArrowRight, IconCalendar, IconPlus } from "../icons";
 import { daysUntilDistribution, formatDistributionDate } from "../leafletData";
 import { leafletHref, useLeafletContext } from "../LeafletContext";
-import MembershipQrDownload from "./MembershipQrDownload";
-import OpenRoutesQrDownload from "./OpenRoutesQrDownload";
 
 export default function OverviewContent() {
   const pathname = usePathname();
@@ -22,9 +20,7 @@ export default function OverviewContent() {
     stories,
     budget,
     budgetLineItems,
-    timeline,
     deliveryStats,
-    deliveries,
   } = useLeafletContext();
 
   if (!leaflet) {
@@ -32,7 +28,7 @@ export default function OverviewContent() {
   }
 
   return (
-    <div className="lf-overview-layout">
+    <div className="lf-overview-layout lf-overview-layout--single">
       <div className="lf-overview-main">
         <div className="lf-hero">
           <h1 className="lf-h1">{leaflet.title}</h1>
@@ -165,76 +161,6 @@ export default function OverviewContent() {
           </div>
         </section>
       </div>
-
-      <aside className="lf-overview-aside">
-        <section className="lf-card">
-          <div className="lf-card-header"><span className="lf-card-title">Distribution</span></div>
-          <div className="lf-card-body">
-            <div className="lf-detail-row"><span className="lf-detail-label">Delivery date</span><span>{formatDistributionDate(leaflet.distribution_date)}</span></div>
-            <div className="lf-detail-row"><span className="lf-detail-label">Leaflets to produce</span><span>{deliveries.reduce((sum, d) => sum + (d.leaflet_count ?? 0), 0).toLocaleString()} copies</span></div>
-          </div>
-        </section>
-
-        <section className="lf-card">
-          <div className="lf-card-header"><span className="lf-card-title">Distribution progress</span></div>
-          <div className="lf-card-body">
-            <div className="lf-timeline">
-              {timeline.map((item, i) => (
-                <div key={item.stage} className="lf-timeline-item">
-                  <div className="lf-timeline-track">
-                    <div className={item.active ? "lf-timeline-dot" : "lf-timeline-dot lf-timeline-dot--muted"} />
-                    {i < timeline.length - 1 && <div className="lf-timeline-line" />}
-                  </div>
-                  <div className="lf-timeline-content">
-                    <div className="lf-timeline-top">
-                      <span className="lf-timeline-stage">{item.stage}</span>
-                      <span className="lf-timeline-counter">{item.counter}</span>
-                    </div>
-                    <span className={item.active ? "lf-status-pill lf-status-pill--blue" : "lf-status-pill lf-status-pill--gray"}>
-                      {item.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <MembershipQrDownload />
-        <OpenRoutesQrDownload />
-
-        <section className="lf-card">
-          <div className="lf-card-header"><span className="lf-card-title">Delivery stats</span></div>
-          <div className="lf-card-body">
-            <div className="lf-stats-grid">
-              <div className="lf-stats-row">
-                <div className="lf-stat-box">
-                  <div className="lf-stat-label">Open routes</div>
-                  <div className="lf-stat-value">{deliveryStats.openRoutes}</div>
-                  <div className="lf-stat-sub">need assignment</div>
-                </div>
-                <div className="lf-stat-box">
-                  <div className="lf-stat-label">Phone drops</div>
-                  <div className="lf-stat-value">{deliveryStats.phoneDrops}</div>
-                  <div className="lf-stat-sub">this cycle</div>
-                </div>
-              </div>
-              <div className="lf-stats-row">
-                <div className="lf-stat-box">
-                  <div className="lf-stat-label">Skips</div>
-                  <div className="lf-stat-value">{deliveryStats.skips}</div>
-                  <div className="lf-stat-sub">deliverer reported</div>
-                </div>
-                <div className="lf-stat-box">
-                  <div className="lf-stat-label">Ejections</div>
-                  <div className="lf-stat-value">{deliveryStats.ejections}</div>
-                  <div className="lf-stat-sub">removed from route</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </aside>
     </div>
   );
 }

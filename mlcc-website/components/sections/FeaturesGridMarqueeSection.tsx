@@ -118,7 +118,13 @@ function FeatureCard({
 
 export function FeaturesGridMarqueeSection() {
   return (
-    <div className="bg-sparkles-cream">
+    <div
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.features-grid-marquee"
+      data-editable-label="Features Grid Marquee (Template)"
+    >
       <style>{`
         @keyframes marquee-logos {
           from { transform: translateX(0); }

@@ -12,6 +12,7 @@ import CanvasContent from "@/components/shell/CanvasContent";
 import CanvasTopbar from "@/components/shell/CanvasTopbar";
 import ShellPreviewNav from "@/components/shell/ShellPreviewNav";
 import {
+  isShellPreviewFaqsRoute,
   isShellPreviewLeafletRoute,
   isShellPreviewWidgetsRoute,
   parseShellPreviewEventId,
@@ -94,10 +95,14 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
             />
             <LeafletProvider>
               <CanvasContainer
-                showWidgetPanel={widgetPanelOpen && !isShellPreviewWidgetsRoute(pathname)}
+                showWidgetPanel={
+                  widgetPanelOpen &&
+                  !isShellPreviewWidgetsRoute(pathname) &&
+                  !isShellPreviewFaqsRoute(pathname)
+                }
                 content={<CanvasContent>{children}</CanvasContent>}
                 widgetPanel={
-                  isShellPreviewWidgetsRoute(pathname) ? null : (
+                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : (
                     <>
                       <ListsForLeafletWidget />
                       {isShellPreviewLeafletRoute(pathname) && <LeafletWidgetPanel />}

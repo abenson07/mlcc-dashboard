@@ -27,7 +27,14 @@ export function BoardHeroSection() {
   }, []);
 
   return (
-    <div ref={sectionRef} className="bg-sparkles-cream p-2">
+    <div
+      ref={sectionRef}
+      className="bg-sparkles-cream p-2"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="board.hero"
+      data-editable-label="Board Hero"
+    >
       <div className="grid gap-4 [grid-template-columns:1.3fr_1fr] max-[991px]:grid-cols-1">
         <div className="relative flex flex-col items-start justify-end overflow-hidden rounded-2xl bg-sparkles-warm py-16 max-[767px]:py-40">
           <div className="px-8 max-[767px]:px-4">

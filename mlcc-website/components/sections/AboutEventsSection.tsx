@@ -44,7 +44,13 @@ export function AboutEventsSection() {
   }, []);
 
   return (
-    <section className="relative z-[2] bg-sparkles-cream py-20 text-sparkles-navy">
+    <section
+      className="relative z-[2] bg-sparkles-cream py-20 text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="about.events"
+      data-editable-label="About Events"
+    >
       <style>{`
         @keyframes about-events-marquee {
           from { transform: translateX(0); }

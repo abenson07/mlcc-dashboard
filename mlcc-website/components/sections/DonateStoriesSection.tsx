@@ -61,7 +61,13 @@ export function DonateStoriesSection() {
   const storySets = [donateStories, donateStories];
 
   return (
-    <section className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20">
+    <section
+      className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="donate.stories"
+      data-editable-label="Donate Stories"
+    >
       <style>{`
         @keyframes marquee-donate-stories {
           from { transform: translateX(0); }

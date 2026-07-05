@@ -20,7 +20,13 @@ export function StructuredData4Section({ title }: { title: string }) {
   }
 
   return (
-    <section className="bg-sparkles-cream">
+    <section
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="volunteer.structured-data"
+      data-editable-label="Volunteer Structured Data"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-40 max-[767px]:py-20">

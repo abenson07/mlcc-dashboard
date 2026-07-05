@@ -45,12 +45,14 @@ type FaqSectionProps = {
   label?: string;
   headline?: string;
   faqs?: FaqItem[];
-};
+} & React.HTMLAttributes<HTMLElement>;
 
 export function FaqSection({
   label = "Label placeholder",
   headline = "Headline skeleton placeholder",
   faqs = defaultFaqs,
+  className,
+  ...rest
 }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = React.useState<number | null>(null);
 
@@ -59,7 +61,14 @@ export function FaqSection({
   };
 
   return (
-    <section className="bg-sparkles-cream">
+    <section
+      className={`bg-sparkles-cream ${className ?? ""}`}
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="global.faq"
+      data-editable-label="Global FAQ"
+      {...rest}
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="z-[2] w-full max-w-[1800px] mx-auto">
           <div className="py-[7.5rem] max-[767px]:py-20">

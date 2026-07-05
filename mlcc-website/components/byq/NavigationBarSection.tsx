@@ -45,40 +45,8 @@ const menuSections = [
   },
 ];
 
-const megaMenuColumns = [
-  {
-    label: "Label",
-    links: [
-      { text: "Page 1", href: "/template/style-guide" },
-      { text: "Page 2", href: "/template/style-guide" },
-      { text: "Page 3", href: "/template/style-guide" },
-      { text: "Page 4", href: "/template/style-guide" },
-    ],
-  },
-  {
-    label: "Label",
-    links: [
-      { text: "Page 1", href: "/template/style-guide" },
-      { text: "Page 2", href: "/template/style-guide" },
-      { text: "Page 3", href: "/template/style-guide" },
-      { text: "Page 4", href: "/template/style-guide" },
-    ],
-  },
-  {
-    label: "Label",
-    links: [
-      { text: "Page 1", href: "/template/style-guide" },
-      { text: "Page 2", href: "/template/style-guide" },
-      { text: "Page 3", href: "/template/style-guide" },
-    ],
-  },
-];
-
-const megaMenuIcons = [{ name: "Homepage" }, { name: "About" }, { name: "Contact" }];
-
 export function NavigationBarSection() {
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const [mobileAccordion, setMobileAccordion] = React.useState<number | null>(null);
 
   const toggleMobileAccordion = (i: number) => {
@@ -87,7 +55,13 @@ export function NavigationBarSection() {
 
   return (
     <>
-      <div className="fixed left-0 right-0 top-0 z-[999] bg-sparkles-cream">
+      <div
+        className="fixed left-0 right-0 top-0 z-[999] bg-sparkles-cream"
+        data-editable="true"
+        data-editable-type="section"
+        data-editable-id="global.nav"
+        data-editable-label="Navigation Bar"
+      >
         <RotatingBanner />
 
         <div className="px-8 max-[767px]:px-4">
@@ -111,26 +85,11 @@ export function NavigationBarSection() {
 
               <nav className="max-[991px]:hidden" aria-label="Primary">
                 <div className="flex items-center gap-6">
-                  <div className="relative z-[1]">
-                    <button
-                      type="button"
-                      className="p-0 flex items-center gap-1 bg-transparent border-none cursor-pointer text-sparkles-muted"
-                      onClick={() => setDropdownOpen((v) => !v)}
-                      onBlur={() => setTimeout(() => setDropdownOpen(false), 200)}
-                    >
-                      <span className="font-body text-xs font-semibold">Menu</span>
-                      <span className="flex items-center justify-center h-6 w-6">
-                        <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="m6 9 6 6 6-6" />
-                        </svg>
-                      </span>
-                    </button>
-                  </div>
-
                   {[
                     { label: "Events", href: "/events" },
                     { label: "Leaflet", href: "/leaflet" },
                     { label: "Committees", href: "/committees" },
+                    { label: "One Seattle Plan", href: "/one-seattle-plan" },
                   ].map((item) => (
                     <a
                       key={item.label}
@@ -196,98 +155,6 @@ export function NavigationBarSection() {
           </div>
         </div>
       </div>
-
-      {dropdownOpen && (
-        <div className="fixed inset-x-0 top-0 z-[1] flex justify-center items-center w-full max-w-[1800px] mx-auto mt-12 pt-12 max-[991px]:hidden">
-          <div className="w-full bg-sparkles-warm origin-top">
-            <div className="py-8 pb-12">
-              <div className="grid gap-6 items-start justify-between px-8 max-[767px]:px-4 mx-auto max-w-[1800px] [grid-template-columns:auto_.8fr_auto]">
-                <div className="flex items-start gap-6">
-                  <div className="flex flex-col gap-6 items-start">
-                    <div className="px-4 py-2 border border-sparkles-navy/30 rounded-[2rem]">
-                      <span className="font-body text-[0.625rem] leading-3 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
-                        Label
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-6">
-                      {megaMenuIcons.map((item) => (
-                        <div key={item.name} className="flex items-start gap-4">
-                          <div className="w-5 h-5 shrink-0 text-sparkles-navy">
-                            <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="3" y="3" width="7" height="7" rx="1" />
-                              <rect x="14" y="3" width="7" height="7" rx="1" />
-                              <rect x="3" y="14" width="7" height="7" rx="1" />
-                              <rect x="14" y="14" width="7" height="7" rx="1" />
-                            </svg>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <div className="font-body text-sm font-semibold text-sparkles-navy">{item.name}</div>
-                            <div className="flex gap-1 items-center">
-                              {["Version A", "Version B", "Version C"].map((link, li) => (
-                                <React.Fragment key={link}>
-                                  <a href="/template/style-guide" className="font-body text-xs font-semibold text-sparkles-muted no-underline hover:text-sparkles-navy hover:underline transition-colors duration-200">
-                                    {link}
-                                  </a>
-                                  {li < 2 && <span className="text-xs text-sparkles-navy">·</span>}
-                                </React.Fragment>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start justify-between w-full max-w-[43.75rem] gap-4">
-                  {megaMenuColumns.map((col, i) => (
-                    <div key={i} className="flex flex-col gap-6 items-start">
-                      <div className="px-4 py-2 border border-sparkles-navy/30 rounded-[2rem]">
-                        <span className="font-body text-[0.625rem] leading-3 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
-                          {col.label}
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-2 items-start">
-                        {col.links.map((link) => (
-                          <a
-                            key={link.text}
-                            href={link.href}
-                            className="font-body text-sm font-semibold text-sparkles-navy no-underline transition-colors duration-200 hover:opacity-80"
-                          >
-                            {link.text}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <a
-                  href="https://webflow.com/templates/designers/byq-studio"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex flex-col gap-3 no-underline text-sparkles-navy"
-                >
-                  <div className="flex justify-between items-end rounded-2xl pt-4 pr-4 pl-4 bg-sparkles-panel w-[19rem] h-[11rem]">
-                    <img
-                      loading="lazy"
-                      src="https://cdn.prod.website-files.com/68a8bac34ba5bc8cee4c21c1/68a8bac34ba5bc8cee4c232c_Image%20Placeholder.svg"
-                      alt=""
-                      className="w-full rounded-tl-2xl rounded-tr-2xl"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <div className="font-display text-sm font-bold">Share your brand vision</div>
-                    <div className="font-body text-[0.625rem] leading-3 font-bold uppercase tracking-[0.0625rem]">
-                      Primary Link
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {menuOpen && (
         <div className="fixed inset-x-0 top-0 z-[998] hidden max-[991px]:block max-h-[87vh] overflow-y-auto">
