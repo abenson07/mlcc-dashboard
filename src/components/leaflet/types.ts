@@ -93,8 +93,16 @@ export type DelivererCard = {
   id: string;
   name: string;
   email: string;
+  address: string | null;
   status: "Confirmed" | "Not confirmed";
-  routes: { name: string; households: string; status: string; muted?: boolean; deliveryId?: string }[];
+  routes: {
+    name: string;
+    households: string;
+    leafletCount: number | null;
+    deliveryId?: string;
+    routeId?: string;
+    isSkipped: boolean;
+  }[];
 };
 
 export type CommStage = {

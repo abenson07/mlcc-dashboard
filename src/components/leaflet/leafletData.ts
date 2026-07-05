@@ -173,18 +173,16 @@ export function buildDelivererCards(deliveries: DeliveryWithRelations[]): Delive
         id: person.id,
         name: person.full_name,
         email: person.email ?? "",
+        address: person.address ?? null,
         status: allConfirmed ? ("Confirmed" as const) : ("Not confirmed" as const),
         routes: rows.map((r) => ({
           name: r.routes?.route_name ?? "—",
           households:
-            r.leaflet_count != null ? `${r.leaflet_count} households` : "— households",
-          status:
-            r.response === "confirmed"
-              ? "Assigned"
-              : r.response === "needs_cover"
-                ? "Pending confirmation"
-                : "Awaiting confirmation",
+            r.leaflet_count != null ? `${r.leaflet_count} leaflets` : "— leaflets",
+          leafletCount: r.leaflet_count ?? null,
           deliveryId: r.id,
+          routeId: r.route_id,
+          isSkipped: r.is_skipped,
         })),
       };
     });
