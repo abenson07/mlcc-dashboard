@@ -1,5 +1,5 @@
+import { CtaSection } from "@marketing/components/byq/CtaSection";
 import { BusinessMembershipBenefitsSection } from "@marketing/components/sections/BusinessMembershipBenefitsSection";
-import { BusinessMembershipCtaSection } from "@marketing/components/sections/BusinessMembershipCtaSection";
 import { BusinessMembershipHeroSection } from "@marketing/components/sections/BusinessMembershipHeroSection";
 import { BusinessMembershipPerksSection } from "@marketing/components/sections/BusinessMembershipPerksSection";
 import { BusinessMembershipPricingSection } from "@marketing/components/sections/BusinessMembershipPricingSection";
@@ -13,7 +13,12 @@ export default function MembershipBusinessPage() {
       <BusinessMembershipPerksSection />
       <BusinessMembershipBenefitsSection />
       <BusinessMembershipPricingSection />
-      <BusinessMembershipCtaSection />
+      <CtaSection
+        title="Stand with your neighbors. Grow with your community."
+        subhead="Business membership is $200 per year. Questions? Reach out to the Business Committee — we're happy to help."
+        primaryButton={{ label: "Join for $200/year", href: "/subscribe" }}
+        secondaryButton={{ label: "Contact us", href: "/committees/business-committee" }}
+      />
     </main>
   );
 }
