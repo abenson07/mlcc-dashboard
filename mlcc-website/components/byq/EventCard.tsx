@@ -5,43 +5,6 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 import type { Event } from "@marketing/data/events";
 import { getEventPageHref } from "@marketing/data/events";
 
-function LocationIcon() {
-  return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      stroke="currentColor"
-      strokeWidth="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-    </svg>
-  );
-}
-
-function CategoryIcon() {
-  return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 24 25"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      stroke="currentColor"
-      strokeWidth="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12.5" r="10" />
-      <circle cx="12" cy="12.5" r="3" />
-    </svg>
-  );
-}
-
 function ArrowLeftIcon() {
   return (
     <svg width="100%" height="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -159,25 +122,6 @@ export type EventCardProps = {
 function EventMeta({ event }: { event: Event }) {
   return (
     <>
-      <div className="flex h-6 flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="flex items-center gap-2">
-          <span className="flex h-4 w-4 shrink-0 items-center justify-center text-sparkles-navy">
-            <LocationIcon />
-          </span>
-          <span className="font-body text-xs font-bold uppercase leading-4 tracking-[0.0625rem] text-sparkles-navy">
-            {event.locationName}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="flex h-4 w-4 shrink-0 items-center justify-center text-sparkles-navy">
-            <CategoryIcon />
-          </span>
-          <span className="font-body text-xs font-bold uppercase leading-4 tracking-[0.0625rem] text-sparkles-navy">
-            {event.category}
-          </span>
-        </div>
-      </div>
-
       <div className="flex flex-col gap-2">
         <div className="font-display text-2xl font-bold leading-7 tracking-[-0.031rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-6">
           {event.title}
