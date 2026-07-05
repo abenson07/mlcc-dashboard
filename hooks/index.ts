@@ -48,6 +48,7 @@ export {
   type CommitteeDefaultAttendee,
 } from "./useCommitteeDefaultAttendees";
 export { useFavorites, FAVORITES_QUERY_KEY } from "./useFavorites";
+export { useFaqs, type FaqWithPages } from "./useFaqs";
 export type {
   WebflowEventsPayload,
   WebflowCollectionFieldDTO,

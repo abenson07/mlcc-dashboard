@@ -79,4 +79,9 @@ export type {
   CommitteeDefaultAttendeesInsert,
   UserFavorites,
   UserFavoritesInsert,
+  Faqs,
+  FaqsInsert,
+  FaqsUpdate,
+  FaqPageAssignments,
+  FaqPageAssignmentsInsert,
 } from "../../schemas";

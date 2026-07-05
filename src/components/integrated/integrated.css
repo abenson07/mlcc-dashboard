@@ -907,3 +907,90 @@
   max-height: 220px;
   overflow-y: auto;
 }
+
+/* FAQs — 30/70 list + detail split */
+.lf-faqs-layout {
+  display: grid;
+  grid-template-columns: 30% 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.lf-faqs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lf-faqs-detail {
+  min-width: 0;
+  border-left: 1px solid var(--lf-canvas-border);
+  padding-left: 24px;
+}
+
+.lf-faqs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.lf-faqs-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lf-text);
+  cursor: pointer;
+}
+
+.lf-faqs-nav-item:hover {
+  background: #fafafa;
+}
+
+.lf-faqs-nav-item small {
+  font-weight: 400;
+  color: var(--lf-text-muted);
+}
+
+.lf-faqs-nav-item--active {
+  border-color: var(--lf-accent, #465fff);
+  background: #f5f7ff;
+}
+
+.lf-faqs-field {
+  margin-bottom: 16px;
+}
+
+.lf-faqs-field .lf-detail-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.lf-faqs-page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .lf-faqs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lf-faqs-detail {
+    border-left: none;
+    padding-left: 0;
+  }
+}

@@ -7,6 +7,7 @@ import {
   FileText,
   HandCoins,
   Handshake,
+  HelpCircle,
   Home,
   Inbox,
   LayoutDashboard,
@@ -237,6 +238,12 @@ const SHELL_PREVIEW_DATABASE_GROUP: NavGroupConfig = {
       href: `${SHELL_PREVIEW_BASE}/stories`,
       notReady: true,
     },
+    {
+      id: "faqs",
+      label: "FAQs",
+      icon: HelpCircle,
+      href: `${SHELL_PREVIEW_BASE}/faqs`,
+    },
   ],
 };
 
@@ -289,6 +296,7 @@ const SHELL_PREVIEW_BREADCRUMB_LABELS: Record<string, string> = {
   [`${SHELL_PREVIEW_BASE}/members`]: "Members",
   [`${SHELL_PREVIEW_BASE}/businesses`]: "Businesses",
   [`${SHELL_PREVIEW_BASE}/stories`]: "Stories",
+  [`${SHELL_PREVIEW_BASE}/faqs`]: "FAQs",
   [`${SHELL_PREVIEW_BASE}/widgets`]: "Widget Panel",
 };
 
