@@ -2,6 +2,11 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabaseClient";
+import { tierPlaceholderRows } from "@/lib/leaflets/spawnLeafletSponsorshipTiers";
+import {
+  isSponsorshipTierPlaceholder,
+  type SponsorshipTierSeed,
+} from "@/lib/sponsorship/tierPlaceholders";
 import type { Sponsorships, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
 
 export function useLeafletSponsorships(leafletId: string | null) {
@@ -22,11 +27,13 @@ export function useLeafletSponsorships(leafletId: string | null) {
     enabled: Boolean(leafletId),
   });
 
-  const pledged = sponsorships.filter((s) => s.status === "pledged");
-  const paid = sponsorships.filter((s) => s.status === "paid");
+  const pledged = sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s) && s.status === "pledged");
+  const paid = sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s) && s.status === "paid");
   const raised = paid.reduce((sum, s) => sum + (s.amount ?? 0), 0);
   const pledgedAmount = pledged.reduce((sum, s) => sum + (s.amount ?? 0), 0);
-  const goal = sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0);
+  const goal = sponsorships
+    .filter((s) => !isSponsorshipTierPlaceholder(s))
+    .reduce((sum, s) => sum + (s.amount ?? 0), 0);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ["sponsorships", "leaflet"] });
@@ -61,6 +68,40 @@ export function useLeafletSponsorships(leafletId: string | null) {
     onSuccess: () => invalidate(),
   });
 
+  const saveTiersMutation = useMutation({
+    mutationFn: async (tiers: SponsorshipTierSeed[]) => {
+      if (!supabaseClient || !leafletId) {
+        throw new Error("Supabase client is not initialized");
+      }
+
+      const { data: existing, error: fetchError } = await supabaseClient
+        .from("sponsorships")
+        .select("id, business_id, memo")
+        .eq("leaflet_id", leafletId);
+      if (fetchError) throw fetchError;
+
+      const placeholderIds = (existing ?? [])
+        .filter((s) => isSponsorshipTierPlaceholder(s))
+        .map((s) => s.id);
+
+      if (placeholderIds.length) {
+        const { error: deleteError } = await supabaseClient
+          .from("sponsorships")
+          .delete()
+          .in("id", placeholderIds);
+        if (deleteError) throw deleteError;
+      }
+
+      if (tiers.length) {
+        const { error: insertError } = await supabaseClient
+          .from("sponsorships")
+          .insert(tierPlaceholderRows(leafletId, tiers));
+        if (insertError) throw insertError;
+      }
+    },
+    onSuccess: () => invalidate(),
+  });
+
   return {
     sponsorships,
     pledged,
@@ -77,5 +118,7 @@ export function useLeafletSponsorships(leafletId: string | null) {
       createMutation.mutateAsync(payload),
     updateSponsorship: (id: string, patch: SponsorshipsUpdate) =>
       updateMutation.mutateAsync({ id, patch }),
+    saveSponsorshipTiers: (tiers: SponsorshipTierSeed[]) =>
+      saveTiersMutation.mutateAsync(tiers),
   };
 }

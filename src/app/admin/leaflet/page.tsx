@@ -4,7 +4,7 @@ import NoActiveLeaflet from "@/components/leaflet/overview/NoActiveLeaflet";
 import OverviewContent from "@/components/leaflet/overview/OverviewContent";
 import { useLeafletContext } from "@/components/leaflet/LeafletContext";
 
-export default function LeafletOverviewPage() {
+export default function ShellPreviewLeafletPage() {
   const { activeLeaflet, leaflet, loading, error } = useLeafletContext();
 
   if (loading) {

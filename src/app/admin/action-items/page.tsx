@@ -1,6 +1,10 @@
+import { Suspense } from "react";
 import ActionItemsPageContent from "@/components/integrated/action-items/ActionItemsPageContent";
-import "@/components/integrated/integrated.css";
 
-export default function ActionItemsPage() {
-  return <ActionItemsPageContent />;
+export default function ShellPreviewActionItemsPage() {
+  return (
+    <Suspense fallback={<p className="lf-meta">Loading action items…</p>}>
+      <ActionItemsPageContent embedded />
+    </Suspense>
+  );
 }

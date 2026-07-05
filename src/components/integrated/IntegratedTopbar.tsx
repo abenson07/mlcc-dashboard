@@ -17,10 +17,10 @@ import {
 export type DashboardMode = "People" | "Events" | "Leaflets" | "Stories";
 
 const MODE_TABS: { label: DashboardMode; href: string; dividerAfter: boolean }[] = [
-  { label: "People", href: "/admin/people", dividerAfter: false },
-  { label: "Events", href: "/admin/events", dividerAfter: true },
-  { label: "Leaflets", href: "/admin/leaflet", dividerAfter: true },
-  { label: "Stories", href: "/admin/stories", dividerAfter: false },
+  { label: "People", href: "/old-admin/people", dividerAfter: false },
+  { label: "Events", href: "/old-admin/events", dividerAfter: true },
+  { label: "Leaflets", href: "/old-admin/leaflet", dividerAfter: true },
+  { label: "Stories", href: "/old-admin/stories", dividerAfter: false },
 ];
 
 const PROMO_ITEMS = [
@@ -30,15 +30,15 @@ const PROMO_ITEMS = [
 
 function isIntegratedEventsPath(pathname: string | null) {
   if (!pathname) return false;
-  if (pathname === "/admin/events" || pathname.startsWith("/admin/events?")) return true;
-  return pathname.startsWith("/admin/events-hub");
+  if (pathname === "/old-admin/events" || pathname.startsWith("/old-admin/events?")) return true;
+  return pathname.startsWith("/old-admin/events-hub");
 }
 
 function modeFromPath(pathname: string | null): DashboardMode | null {
-  if (pathname?.startsWith("/admin/people") || pathname?.startsWith("/admin/biz")) return "People";
+  if (pathname?.startsWith("/old-admin/people") || pathname?.startsWith("/old-admin/biz")) return "People";
   if (isIntegratedEventsPath(pathname)) return "Events";
-  if (pathname?.startsWith("/admin/leaflet")) return "Leaflets";
-  if (pathname?.startsWith("/admin/stories")) return "Stories";
+  if (pathname?.startsWith("/old-admin/leaflet")) return "Leaflets";
+  if (pathname?.startsWith("/old-admin/stories")) return "Stories";
   return null;
 }
 
@@ -99,8 +99,8 @@ export default function IntegratedTopbar({ center, primaryAction }: IntegratedTo
         </button>
         <ActionItemsTopbarMenu />
         <Link
-          href="/admin/finance"
-          className={`lf-icon-btn${pathname?.startsWith("/admin/finance") ? " lf-icon-btn--active" : ""}`}
+          href="/old-admin/finance"
+          className={`lf-icon-btn${pathname?.startsWith("/old-admin/finance") ? " lf-icon-btn--active" : ""}`}
           aria-label="Revenue dashboard"
         >
           <IconDollar />

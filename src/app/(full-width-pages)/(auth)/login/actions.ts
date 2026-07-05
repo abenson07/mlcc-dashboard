@@ -113,5 +113,5 @@ export async function verifyLoginCode(
     return { error: error.message };
   }
 
-  redirect("/admin/people");
+  redirect("/admin");
 }

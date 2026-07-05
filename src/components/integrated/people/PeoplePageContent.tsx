@@ -27,7 +27,7 @@ type PeoplePageContentProps = {
 export default function PeoplePageContent({
   embedded = false,
   defaultFilter = null,
-  basePath = "/admin/people",
+  basePath = "/old-admin/people",
 }: PeoplePageContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();

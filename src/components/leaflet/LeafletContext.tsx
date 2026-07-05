@@ -19,6 +19,7 @@ import {
 } from "hooks";
 import type { DeliveryWithRelations } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
+import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 import type { Leaflets, LeafletsUpdate, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
 import {
   buildBudget,
@@ -37,6 +38,7 @@ import {
   mapTasksForUi,
   unassignedOpenCount,
 } from "./leafletData";
+import { resolveSponsorshipTierSeeds } from "@/lib/sponsorship/tierPlaceholders";
 import type {
   CommStage,
   DelivererCard,
@@ -95,6 +97,8 @@ type LeafletContextValue = {
   refetchAll: () => Promise<void>;
   createSponsorship: (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => Promise<void>;
   updateSponsorship: (id: string, patch: SponsorshipsUpdate) => Promise<void>;
+  saveSponsorshipTiers: (tiers: SponsorshipTierSeed[]) => Promise<void>;
+  sponsorshipTierSeeds: SponsorshipTierSeed[];
   updateLeaflet: (patch: LeafletsUpdate) => Promise<void>;
 };
 
@@ -171,6 +175,7 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     refetch: refetchSponsorships,
     createSponsorship: createSponsorshipMutation,
     updateSponsorship: updateSponsorshipMutation,
+    saveSponsorshipTiers: saveSponsorshipTiersMutation,
   } = useLeafletSponsorships(leafletId);
 
   const { previousDeliveries, historyDeliveries } = useLeafletHistory(
@@ -324,6 +329,11 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     [sponsorships],
   );
 
+  const sponsorshipTierSeeds = useMemo(
+    () => resolveSponsorshipTierSeeds(sponsorships),
+    [sponsorships],
+  );
+
   const timeline = useMemo(() => buildTimeline(deliveryRows), [deliveryRows]);
   const deliveryStats = useMemo(() => buildDeliveryStats(deliveryRows), [deliveryRows]);
   const openRoutePreviews = useMemo(
@@ -382,6 +392,14 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       await updateSponsorshipMutation(id, patch);
     },
     [readOnly, updateSponsorshipMutation],
+  );
+
+  const saveSponsorshipTiers = useCallback(
+    async (tiers: SponsorshipTierSeed[]) => {
+      if (readOnly) throw new Error("Leaflet is read-only");
+      await saveSponsorshipTiersMutation(tiers);
+    },
+    [readOnly, saveSponsorshipTiersMutation],
   );
 
   const updateLeaflet = useCallback(
@@ -446,6 +464,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       refetchAll,
       createSponsorship,
       updateSponsorship,
+      saveSponsorshipTiers,
+      sponsorshipTierSeeds,
       updateLeaflet,
     }),
     [
@@ -486,6 +506,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       refetchAll,
       createSponsorship,
       updateSponsorship,
+      saveSponsorshipTiers,
+      sponsorshipTierSeeds,
       updateLeaflet,
     ],
   );

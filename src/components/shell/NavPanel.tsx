@@ -43,8 +43,8 @@ function isNavItemActive(currentRoute: string, href?: string): boolean {
   const currentPath =
     qIndex >= 0 ? normalizedCurrent.slice(0, qIndex) : normalizedCurrent;
 
-  if (normalizedHref === "/admin/shell-preview") {
-    return currentPath === "/admin/shell-preview";
+  if (normalizedHref === "/admin") {
+    return currentPath === "/admin";
   }
 
   return currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
@@ -245,12 +245,13 @@ function NavItemRow({
   const className = [
     "shell-nav-item",
     active ? "shell-nav-item--active" : "",
-    item.notReady ? "shell-nav-item--not-ready" : "",
+    item.notReady ? "shell-nav-item--not-ready shell-tooltip" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   const label = item.notReady ? <em>{item.label}</em> : item.label;
+  const tooltipProps = item.notReady ? { "data-tooltip": "Coming soon" } : {};
 
   const content = (
     <>
@@ -268,7 +269,7 @@ function NavItemRow({
   if (item.href) {
     return (
       <li className="shell-nav-list-item">
-        <Link href={item.href} className={className} data-active={active || undefined}>
+        <Link href={item.href} className={className} data-active={active || undefined} {...tooltipProps}>
           {content}
         </Link>
       </li>
@@ -277,7 +278,7 @@ function NavItemRow({
 
   return (
     <li className="shell-nav-list-item">
-      <button type="button" className={className}>
+      <button type="button" className={className} {...tooltipProps}>
         {content}
       </button>
     </li>

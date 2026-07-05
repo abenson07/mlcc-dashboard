@@ -6,6 +6,7 @@ import Label from "@/components/form/Label";
 import { Modal } from "@/components/ui/modal";
 import InvoiceComposerModal from "@/components/billing/InvoiceComposerModal";
 import AddSponsorModal from "@/components/sponsorship/AddSponsorModal";
+import EditSponsorshipTiersModal from "@/components/sponsorship/EditSponsorshipTiersModal";
 import { useLeafletContext } from "../LeafletContext";
 
 type SponsorTab = "all" | "paid" | "pledged" | "invoiced";
@@ -18,9 +19,11 @@ export default function SponsorshipsPageContent() {
     invoices,
     budget,
     sponsorshipTiers,
+    sponsorshipTierSeeds,
     readOnly,
     createSponsorship,
     updateSponsorship,
+    saveSponsorshipTiers,
     updateLeaflet,
     refetchAll,
   } = useLeafletContext();
@@ -28,6 +31,7 @@ export default function SponsorshipsPageContent() {
   const [invoiceTab, setInvoiceTab] = useState<InvoiceTab>("all");
   const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [tiersModalOpen, setTiersModalOpen] = useState(false);
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [goalInput, setGoalInput] = useState(String(budget.sponsorshipGoal));
   const [goalSaving, setGoalSaving] = useState(false);
@@ -150,13 +154,22 @@ export default function SponsorshipsPageContent() {
           </section>
 
           <section className="lf-card">
-            <div className="lf-card-header"><span className="lf-card-title">Sponsorship levels</span></div>
+            <div className="lf-card-header">
+              <span className="lf-card-title">Sponsorship levels</span>
+              {!readOnly && (
+                <button type="button" className="lf-link" onClick={() => setTiersModalOpen(true)}>
+                  Edit levels
+                </button>
+              )}
+            </div>
             <div className="lf-card-body">
               {sponsorshipTiers.map((tier) => (
                 <div key={tier.name} className="lf-detail-row">
                   <div>
                     <div style={{ fontWeight: 500 }}>{tier.name}</div>
-                    <div className="lf-meta">${tier.amount.toLocaleString()}</div>
+                    <div className="lf-meta">
+                      ${tier.amount.toLocaleString()} · qty {tier.quantity}
+                    </div>
                   </div>
                   <span className={tier.left === "Sold out" ? "lf-status-muted" : "lf-status-paid"}>{tier.left}</span>
                 </div>
@@ -299,6 +312,17 @@ export default function SponsorshipsPageContent() {
         isOpen={sponsorModalOpen}
         onClose={() => setSponsorModalOpen(false)}
         onSubmit={createSponsorship}
+        tierOptions={sponsorshipTierSeeds}
+      />
+
+      <EditSponsorshipTiersModal
+        isOpen={tiersModalOpen}
+        onClose={() => setTiersModalOpen(false)}
+        initialTiers={sponsorshipTierSeeds}
+        onSave={async (tiers) => {
+          await saveSponsorshipTiers(tiers);
+          await refetchAll();
+        }}
       />
 
       <InvoiceComposerModal

@@ -1321,7 +1321,7 @@ function OriginalInvoiceRowView({
   const { primary: duePrimary, secondary: dueSecondary } = originalInvoiceDueStack(row);
   const customer = customerFromEmail(row.customer_email);
   const invLabel = row.number ?? row.id.slice(0, 14);
-  const detailHref = `/admin/sponsorship/invoices/${encodeURIComponent(row.id)}`;
+  const detailHref = `/old-admin/sponsorship/invoices/${encodeURIComponent(row.id)}`;
   const overdue = isOpenPastDue(row);
 
   const menuItems = [
@@ -1399,7 +1399,7 @@ export function InvoiceSidebar({
 }) {
   const { dollars, cents } = splitCurrency(inv.amount_due / 100);
   const invLabel = inv.number ?? inv.id.slice(0, 14);
-  const detailHref = `/admin/sponsorship/invoices/${encodeURIComponent(inv.id)}`;
+  const detailHref = `/old-admin/sponsorship/invoices/${encodeURIComponent(inv.id)}`;
   const displayStatus = mercuryInvoiceDisplayStatus(inv);
   const overdue = isOpenPastDue(inv);
 

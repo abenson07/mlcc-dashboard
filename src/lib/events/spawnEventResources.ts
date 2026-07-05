@@ -1,30 +1,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Events } from "@/types/database";
-import { SPONSORSHIP_TIER_DEFS } from "@/components/leaflet/leafletData";
+import {
+  defaultSponsorshipTierSeeds,
+  SPONSORSHIP_TIER_PLACEHOLDER_MEMO,
+  type SponsorshipTierSeed,
+} from "@/lib/sponsorship/tierPlaceholders";
 
-export type SponsorshipTierSeed = {
-  name: string;
-  amount: number;
-  quantity: number;
-};
+export type { SponsorshipTierSeed };
 
 export function parseSponsorshipTiersFromFieldData(
   fieldData: Record<string, unknown> | null | undefined,
 ): SponsorshipTierSeed[] {
   const raw = fieldData?.sponsorship_tiers;
   if (!Array.isArray(raw) || raw.length === 0) {
-    return SPONSORSHIP_TIER_DEFS.map((tier) => ({
-      name: tier.name,
-      amount: tier.amount,
-      quantity:
-        tier.name === "Platinum"
-          ? 1
-          : tier.name === "Gold"
-            ? 2
-            : tier.name === "Silver"
-              ? 4
-              : 8,
-    }));
+    return defaultSponsorshipTierSeeds();
   }
 
   const tiers: SponsorshipTierSeed[] = [];
@@ -42,20 +31,7 @@ export function parseSponsorshipTiersFromFieldData(
     });
   }
 
-  return tiers.length > 0
-    ? tiers
-    : SPONSORSHIP_TIER_DEFS.map((tier) => ({
-        name: tier.name,
-        amount: tier.amount,
-        quantity:
-          tier.name === "Platinum"
-            ? 1
-            : tier.name === "Gold"
-              ? 2
-              : tier.name === "Silver"
-                ? 4
-                : 8,
-      }));
+  return tiers.length > 0 ? tiers : defaultSponsorshipTierSeeds();
 }
 
 export async function spawnEventTasks(
@@ -122,7 +98,7 @@ export async function spawnEventSponsorshipTiers(
     amount: tier.amount,
     quantity: tier.quantity,
     status: null,
-    memo: "Tier placeholder",
+    memo: SPONSORSHIP_TIER_PLACEHOLDER_MEMO,
   }));
 
   const { error: insertError } = await supabase.from("sponsorships").insert(rows);

@@ -1,4 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isSponsorshipTierPlaceholder } from "@/lib/sponsorship/tierPlaceholders";
+import {
+  spawnLeafletSponsorshipTiers,
+  tierPlaceholderRows,
+} from "@/lib/leaflets/spawnLeafletSponsorshipTiers";
 import type { Leaflets, LeafletsInsert } from "@/types/database";
 
 const MEMBERSHIP_QR_BASE = "https://mapleleafcommunity.org/membership";
@@ -139,26 +144,45 @@ export async function createLeaflet(
       .eq("leaflet_id", prevClosed.id);
 
     if (prevSponsorships?.length) {
-      const copied = prevSponsorships.map((s) => ({
-        business_id: s.business_id,
-        leaflet_id: leaflet.id,
-        event_id: null,
-        amount: s.amount,
-        status: "pledged" as const,
-        memo: s.memo,
-        description: s.description,
-        image_url: s.image_url,
-        quantity: s.quantity ?? 1,
-      }));
+      const tierPlaceholders = prevSponsorships.filter(isSponsorshipTierPlaceholder);
+      const actualSponsors = prevSponsorships.filter(
+        (s) => !isSponsorshipTierPlaceholder(s) && s.business_id,
+      );
 
-      const { error: sponsorError } = await supabase
-        .from("sponsorships")
-        .insert(copied);
-
-      if (sponsorError) {
-        throw new Error(sponsorError.message);
+      if (tierPlaceholders.length) {
+        const { error: tierError } = await supabase
+          .from("sponsorships")
+          .insert(tierPlaceholderRows(leaflet.id, tierPlaceholders.map((s) => ({
+            name: s.description ?? "Sponsor",
+            amount: s.amount ?? 0,
+            quantity: s.quantity ?? 1,
+          }))));
+        if (tierError) throw new Error(tierError.message);
+      } else {
+        await spawnLeafletSponsorshipTiers(supabase, leaflet.id);
       }
+
+      if (actualSponsors.length) {
+        const copied = actualSponsors.map((s) => ({
+          business_id: s.business_id,
+          leaflet_id: leaflet.id,
+          event_id: null,
+          amount: s.amount,
+          status: "pledged" as const,
+          memo: s.memo,
+          description: s.description,
+          image_url: s.image_url,
+          quantity: s.quantity ?? 1,
+        }));
+
+        const { error: sponsorError } = await supabase.from("sponsorships").insert(copied);
+        if (sponsorError) throw new Error(sponsorError.message);
+      }
+    } else {
+      await spawnLeafletSponsorshipTiers(supabase, leaflet.id);
     }
+  } else {
+    await spawnLeafletSponsorshipTiers(supabase, leaflet.id);
   }
 
   return leaflet;

@@ -103,7 +103,7 @@ export default function InvoiceDetailBody({
           <p>We could not load this invoice.</p>
           <button
             type="button"
-            onClick={() => router.push("/admin/sponsorship?view=invoices")}
+            onClick={() => router.push("/old-admin/sponsorship?view=invoices")}
             className="font-medium text-brand-600 underline dark:text-brand-400"
           >
             Back to list
@@ -201,7 +201,7 @@ export default function InvoiceDetailBody({
           </dl>
           <p>
             <Link
-              href="/admin/sponsorship?view=invoices"
+              href="/old-admin/sponsorship?view=invoices"
               className="font-medium text-brand-600 underline dark:text-brand-400"
             >
               All invoices

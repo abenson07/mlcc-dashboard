@@ -70,9 +70,9 @@ export default function EventsListPageContent({ embedded = false }: { embedded?:
     setSelectedDay(null);
   }
 
-  const eventsListPath = embedded ? "/admin/shell-preview/events" : "/admin/events";
+  const eventsListPath = embedded ? "/admin/events" : "/old-admin/events";
   const eventOverviewPath = (id: string) =>
-    embedded ? `/admin/shell-preview/events/${id}/overview` : `/admin/events-hub/${id}/overview`;
+    embedded ? `/admin/events/${id}/overview` : `/old-admin/events-hub/${id}/overview`;
 
   async function handleCreate(input: Parameters<typeof create>[0]) {
     const event = await create(input);

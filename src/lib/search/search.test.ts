@@ -17,8 +17,8 @@ describe("global search helpers", () => {
   });
 
   it("detects integrated shell paths", () => {
-    expect(isIntegratedShellPath("/admin/people")).toBe(true);
-    expect(isIntegratedShellPath("/admin/neighbors")).toBe(false);
-    expect(isIntegratedShellPath("/admin/events-hub/abc/overview")).toBe(true);
+    expect(isIntegratedShellPath("/old-admin/people")).toBe(true);
+    expect(isIntegratedShellPath("/old-admin/neighbors")).toBe(false);
+    expect(isIntegratedShellPath("/old-admin/events-hub/abc/overview")).toBe(true);
   });
 });

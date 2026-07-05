@@ -1,5 +1,5 @@
 import OpenRoutesPageContent from "@/components/leaflet/open-routes/OpenRoutesPageContent";
 
-export default function LeafletOpenRoutesPage() {
+export default function ShellPreviewLeafletOpenRoutesPage() {
   return <OpenRoutesPageContent />;
 }

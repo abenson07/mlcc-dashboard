@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { routesTableStatusLabel, exportDeliveriesCsv } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
 import DeliveryDetailPanel from "./DeliveryDetailPanel";
-import type { DeliveryWithRelations } from "hooks";
 
 function statusClass(label: string) {
   if (label === "Open" || label === "Skipped") return "lf-text-amber";
@@ -16,7 +16,15 @@ function statusClass(label: string) {
 export default function RoutesPageContent() {
   const searchParams = useSearchParams();
   const deliveryFromUrl = searchParams.get("delivery");
-  const { leafletId, deliveries, countChangeByRouteId, deliveryHistoryForRoute } = useLeafletContext();
+  const {
+    leafletId,
+    deliveries,
+    countChangeByRouteId,
+    deliveryHistoryForRoute,
+    pastDeliverersForRoute,
+    updateDelivery,
+    readOnly,
+  } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -50,6 +58,18 @@ export default function RoutesPageContent() {
   }, [deliveries, search, typeFilter, statusFilter]);
 
   const selected = filtered.find((d) => d.id === (selectedId ?? filtered[0]?.id)) ?? null;
+
+  const handleAssign = useCallback(
+    async (deliveryId: string, personId: string) => {
+      await updateDelivery(deliveryId, {
+        person_id: personId,
+        is_skipped: false,
+        response: "pending",
+      });
+      toast.success("Deliverer assigned");
+    },
+    [updateDelivery],
+  );
 
   function handleExport() {
     exportDeliveriesCsv(filtered, [
@@ -124,6 +144,9 @@ export default function RoutesPageContent() {
           <DeliveryDetailPanel
             delivery={selected}
             leafletId={leafletId}
+            readOnly={readOnly}
+            onAssign={(personId) => handleAssign(selected.id, personId)}
+            pastDeliverers={pastDeliverersForRoute(selected.route_id, selected.person_id)}
             countChange={countChangeByRouteId(selected.route_id, selected.leaflet_count)}
             history={deliveryHistoryForRoute(selected.route_id)}
           />

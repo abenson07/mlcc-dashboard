@@ -19,8 +19,8 @@ function parseRoutesView(sp: URLSearchParams | null): RoutesTableView {
 }
 
 function routesHref(view: RoutesTableView): string {
-  if (view === "claimed") return "/admin/routes";
-  return `/admin/routes?view=${view}`;
+  if (view === "claimed") return "/old-admin/routes";
+  return `/old-admin/routes?view=${view}`;
 }
 
 function routesViewTitle(view: RoutesTableView): string {

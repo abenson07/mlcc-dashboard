@@ -7,13 +7,15 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
 import { useBusinesses } from "hooks";
-import { SPONSORSHIP_TIER_DEFS } from "@/components/leaflet/leafletData";
+import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
+import { defaultSponsorshipTierSeeds } from "@/lib/sponsorship/tierPlaceholders";
 import type { SponsorshipsInsert } from "@/types/database";
 
 type AddSponsorModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => Promise<void>;
+  tierOptions?: SponsorshipTierSeed[];
 };
 
 const MIN_SEARCH_LEN = 1;
@@ -22,14 +24,16 @@ export default function AddSponsorModal({
   isOpen,
   onClose,
   onSubmit,
+  tierOptions,
 }: AddSponsorModalProps) {
+  const tiers = tierOptions?.length ? tierOptions : defaultSponsorshipTierSeeds();
   const [search, setSearch] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [businessId, setBusinessId] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const [tier, setTier] = useState<string>(SPONSORSHIP_TIER_DEFS[0]?.name ?? "Gold");
-  const [amount, setAmount] = useState(String(SPONSORSHIP_TIER_DEFS[0]?.amount ?? 1000));
+  const [tier, setTier] = useState<string>(tiers[0]?.name ?? "Gold");
+  const [amount, setAmount] = useState(String(tiers[0]?.amount ?? 1000));
   const [status, setStatus] = useState<"pledged" | "invoiced" | "paid">("pledged");
   const [memo, setMemo] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -39,6 +43,12 @@ export default function AddSponsorModal({
     const t = setTimeout(() => setDebouncedQ(search.trim()), 200);
     return () => clearTimeout(t);
   }, [search]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setTier(tiers[0]?.name ?? "Gold");
+    setAmount(String(tiers[0]?.amount ?? 1000));
+  }, [isOpen, tiers]);
 
   const canSearch = debouncedQ.length >= MIN_SEARCH_LEN;
   const { businesses, loading } = useBusinesses({
@@ -61,20 +71,20 @@ export default function AddSponsorModal({
     [businesses, businessId],
   );
 
-  const tierOptions = useMemo(
+  const tierSelectOptions = useMemo(
     () =>
-      SPONSORSHIP_TIER_DEFS.map((t) => ({
+      tiers.map((t) => ({
         value: t.name,
         label: `${t.name} ($${t.amount.toLocaleString()})`,
       })),
-    [],
+    [tiers],
   );
 
   const reset = () => {
     setSearch("");
     setBusinessId("");
-    setTier(SPONSORSHIP_TIER_DEFS[0]?.name ?? "Gold");
-    setAmount(String(SPONSORSHIP_TIER_DEFS[0]?.amount ?? 1000));
+    setTier(tiers[0]?.name ?? "Gold");
+    setAmount(String(tiers[0]?.amount ?? 1000));
     setStatus("pledged");
     setMemo("");
     setError(null);
@@ -87,7 +97,7 @@ export default function AddSponsorModal({
 
   const handleTierChange = (name: string) => {
     setTier(name);
-    const def = SPONSORSHIP_TIER_DEFS.find((t) => t.name === name);
+    const def = tiers.find((t) => t.name === name);
     if (def) setAmount(String(def.amount));
   };
 
@@ -192,7 +202,7 @@ export default function AddSponsorModal({
 
           <div>
             <Label>Sponsorship level</Label>
-            <Select options={tierOptions} defaultValue={tier} onChange={handleTierChange} />
+            <Select options={tierSelectOptions} defaultValue={tier} onChange={handleTierChange} />
           </div>
 
           <div>

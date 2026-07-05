@@ -14,7 +14,7 @@ export default function EventMarketingContent() {
     return (
       <div className="lf-empty-page">
         <h1 className="lf-h2">Event not found</h1>
-        <Link href="/admin/events" className="lf-link">Back to events</Link>
+        <Link href="/old-admin/events" className="lf-link">Back to events</Link>
       </div>
     );
   }

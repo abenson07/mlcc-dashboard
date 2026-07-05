@@ -53,7 +53,7 @@ export default function EventsHub() {
               { value: "past", label: "Past Events" },
             ]}
           />
-          <Link href="/admin/events/new" className="mb-2 shrink-0">
+          <Link href="/old-admin/events/new" className="mb-2 shrink-0">
             <Button
               size="sm"
               className="!min-h-8 !px-3 !py-1.5 !text-xs sm:!min-h-8"

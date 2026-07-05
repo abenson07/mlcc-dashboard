@@ -9,6 +9,11 @@ import type {
   Sponsorships,
   Tasks,
 } from "@/types/database";
+import {
+  defaultSponsorshipTierSeeds,
+  isSponsorshipTierPlaceholder,
+  resolveSponsorshipTierSeeds,
+} from "@/lib/sponsorship/tierPlaceholders";
 import type {
   CommStage,
   DelivererCard,
@@ -389,9 +394,10 @@ export function buildBudget(
     leaflet?.sponsorship_goal_cents != null && leaflet.sponsorship_goal_cents > 0
       ? leaflet.sponsorship_goal_cents / 100
       : null;
+  const actualSponsors = sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s));
   const sponsorshipGoal =
     goalFromField ??
-    (sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0) || 15_000);
+    (actualSponsors.reduce((sum, s) => sum + (s.amount ?? 0), 0) || 15_000);
   const remaining = Math.max(0, printBudget - spent);
   const progressPct = printBudget > 0 ? Math.round((spent / printBudget) * 100) : 0;
   const sponsorshipProgressPct =
@@ -427,23 +433,26 @@ export function buildBudgetLineItems(leaflet: Leaflets | null) {
   ];
 }
 
-export const SPONSORSHIP_TIER_DEFS = [
-  { name: "Platinum", amount: 2500 },
-  { name: "Gold", amount: 1000 },
-  { name: "Silver", amount: 500 },
-  { name: "Bronze", amount: 250 },
-] as const;
+export const SPONSORSHIP_TIER_DEFS = defaultSponsorshipTierSeeds().map((tier) => ({
+  name: tier.name,
+  amount: tier.amount,
+}));
 
 export function buildSponsorshipTiers(sponsorships: Sponsorships[]) {
-  return SPONSORSHIP_TIER_DEFS.map((tier) => {
-    const taken = sponsorships.filter(
-      (s) => s.amount === tier.amount && (s.status === "paid" || s.status === "pledged"),
+  const tiers = resolveSponsorshipTierSeeds(sponsorships);
+  const actualSponsors = sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s));
+
+  return tiers.map((tier) => {
+    const taken = actualSponsors.filter(
+      (s) =>
+        s.amount === tier.amount &&
+        (s.status === "paid" || s.status === "pledged" || s.status === "invoiced"),
     ).length;
-    const maxSlots = tier.name === "Platinum" ? 1 : tier.name === "Gold" ? 2 : tier.name === "Silver" ? 4 : 8;
-    const left = maxSlots - taken;
+    const left = tier.quantity - taken;
     return {
       name: tier.name,
       amount: tier.amount,
+      quantity: tier.quantity,
       left: left <= 0 ? "Sold out" : `${left} left`,
     };
   });
@@ -454,12 +463,13 @@ export function mapSponsors(
     businesses?: { business_name: string | null; email: string | null } | null;
   })[],
 ): Sponsor[] {
-  return sponsorships.map((s) => ({
+  const tierSeeds = resolveSponsorshipTierSeeds(sponsorships);
+  return sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s)).map((s) => ({
     id: s.id,
     business: s.businesses?.business_name ?? s.description ?? "—",
     contact: s.businesses?.email ?? s.memo ?? "—",
     level:
-      SPONSORSHIP_TIER_DEFS.find((t) => t.amount === s.amount)?.name ??
+      tierSeeds.find((t) => t.amount === s.amount)?.name ??
       (s.amount != null ? `$${s.amount}` : "—"),
     amount: s.amount ?? 0,
     status:
