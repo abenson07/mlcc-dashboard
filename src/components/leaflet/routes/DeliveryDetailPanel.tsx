@@ -74,7 +74,7 @@ export default function DeliveryDetailPanel({
       )}
 
       {!showAssign && (
-        <div className="lf-detail-card">
+        <div className="lf-detail-card" data-lf-card="who-is-delivering-it">
           <div className="lf-card-header">
             <span className="lf-card-title">Who is delivering it</span>
           </div>
@@ -117,7 +117,7 @@ export default function DeliveryDetailPanel({
         </div>
       )}
 
-      <div className="lf-detail-card">
+      <div className="lf-detail-card" data-lf-card="route-details">
         <div className="lf-card-header"><span className="lf-card-title">Route details</span></div>
         <div className="lf-card-body">
           <div className="lf-detail-row"><span className="lf-detail-label">Route name</span><span>{route?.route_name ?? "—"}</span></div>
@@ -145,14 +145,14 @@ export default function DeliveryDetailPanel({
 
       {showAssign && (
         <>
-          <div className="lf-detail-card">
+          <div className="lf-detail-card" data-lf-card="deliverer">
             <div className="lf-card-header"><span className="lf-card-title">Deliverer</span></div>
             <div className="lf-card-body">
               <DelivererAssignSection {...assignSectionProps} />
             </div>
           </div>
 
-          <div className="lf-detail-card">
+          <div className="lf-detail-card" data-lf-card="building-contact">
             <div className="lf-card-header"><span className="lf-card-title">Building contact</span></div>
             <div className="lf-card-body">
               <p className="lf-meta" style={{ marginBottom: 8 }}>Building monitor who handles delivery</p>
@@ -165,7 +165,7 @@ export default function DeliveryDetailPanel({
       )}
 
       {!showAssign && history.length > 0 && (
-        <div className="lf-detail-card">
+        <div className="lf-detail-card" data-lf-card="delivery-history">
           <div className="lf-card-header">
             <span className="lf-card-title">Delivery history</span>
             <button type="button" className="lf-link" style={{ border: "none", background: "none", padding: 0 }}>See all</button>

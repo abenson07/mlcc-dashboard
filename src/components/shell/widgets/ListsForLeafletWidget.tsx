@@ -55,7 +55,7 @@ export default function ListsForLeafletWidget() {
             type="button"
             className="shell-widget-dropdown-trigger"
             onClick={() => setDropdownOpen((o) => !o)}
-            onBlur={() => setDropdownOpen(false)}
+            onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
           >
             <span className="shell-widget-dropdown-label">
               {view === "members" ? "Business Members" : "Upcoming Events"}

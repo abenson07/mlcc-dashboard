@@ -87,7 +87,7 @@ export default function FaqDetailPanel({ faq, onClose, onDeleted }: FaqDetailPan
         />
       </div>
 
-      <section className="lf-detail-card">
+      <section className="lf-detail-card" data-lf-card="show-on-pages">
         <div className="lf-card-header">
           <span className="lf-card-title">Show on pages</span>
         </div>

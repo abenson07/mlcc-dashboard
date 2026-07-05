@@ -129,7 +129,7 @@ function EventMeta({ event }: { event: Event }) {
         <div className="font-body text-base leading-6 text-sparkles-navy">
           <span>{event.locationName}</span>
           <span className="px-2">·</span>
-          <span>{event.category}</span>
+          <span>{event.date}</span>
         </div>
       </div>
     </>

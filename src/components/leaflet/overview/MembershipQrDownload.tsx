@@ -56,7 +56,7 @@ export default function MembershipQrDownload() {
 
   if (isLoading) {
     return (
-      <section className="lf-card">
+      <section className="lf-card" data-lf-card="membership-qr">
         <div className="lf-card-header"><span className="lf-card-title">Membership QR</span></div>
         <div className="lf-card-body"><p className="lf-meta">Loading QR code…</p></div>
       </section>
@@ -65,7 +65,7 @@ export default function MembershipQrDownload() {
 
   if (!qr) {
     return (
-      <section className="lf-card">
+      <section className="lf-card" data-lf-card="membership-qr">
         <div className="lf-card-header"><span className="lf-card-title">Membership QR</span></div>
         <div className="lf-card-body"><p className="lf-meta">No membership QR linked to this leaflet.</p></div>
       </section>
@@ -77,7 +77,7 @@ export default function MembershipQrDownload() {
   }
 
   return (
-    <section className="lf-card">
+    <section className="lf-card" data-lf-card="membership-qr">
       <div className="lf-card-header"><span className="lf-card-title">Membership QR</span></div>
       <div className="lf-card-body">
         <div className="lf-qr-block">

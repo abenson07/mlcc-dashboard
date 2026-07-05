@@ -121,7 +121,7 @@ export default function SponsorshipsPageContent() {
         </div>
 
         <div className="lf-overview-mid-row">
-          <section className="lf-card">
+          <section className="lf-card" data-lf-card="budget-and-sponsorships">
             <div className="lf-card-header">
               <span className="lf-card-title">Budget & sponsorships</span>
               {!readOnly && (
@@ -153,7 +153,7 @@ export default function SponsorshipsPageContent() {
             </div>
           </section>
 
-          <section className="lf-card">
+          <section className="lf-card" data-lf-card="sponsorship-levels">
             <div className="lf-card-header">
               <span className="lf-card-title">Sponsorship levels</span>
               {!readOnly && (
@@ -178,7 +178,7 @@ export default function SponsorshipsPageContent() {
           </section>
         </div>
 
-        <section className="lf-card">
+        <section className="lf-card" data-lf-card="sponsors">
           <div className="lf-card-header"><span className="lf-card-title">Sponsors</span></div>
           <div className="lf-card-body">
             <div className="lf-sponsor-tabs">
@@ -251,7 +251,7 @@ export default function SponsorshipsPageContent() {
           </div>
         </section>
 
-        <section className="lf-card">
+        <section className="lf-card" data-lf-card="invoices">
           <div className="lf-card-header"><span className="lf-card-title">Invoices</span></div>
           <div className="lf-card-body">
             <div className="lf-sponsor-tabs">

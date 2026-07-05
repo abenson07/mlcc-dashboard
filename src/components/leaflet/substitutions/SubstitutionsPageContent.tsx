@@ -84,7 +84,7 @@ export default function SubstitutionsPageContent() {
         {selected && (
           <aside>
             <div style={{ fontWeight: 600, marginBottom: 12 }}>{selected.route}</div>
-            <div className="lf-detail-card">
+            <div className="lf-detail-card" data-lf-card="substitution-details">
               <div className="lf-card-header"><span className="lf-card-title">Substitution details</span></div>
               <div className="lf-card-body">
                 <p className="lf-meta" style={{ fontWeight: 600, marginBottom: 8 }}>Covering</p>

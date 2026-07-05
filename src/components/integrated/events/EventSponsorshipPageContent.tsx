@@ -73,7 +73,7 @@ export default function EventSponsorshipPageContent() {
         </div>
 
         <div className="lf-overview-mid-row">
-          <section className="lf-card">
+          <section className="lf-card" data-lf-card="budget-and-sponsorships">
             <div className="lf-card-header">
               <span className="lf-card-title">Budget & sponsorships</span>
             </div>

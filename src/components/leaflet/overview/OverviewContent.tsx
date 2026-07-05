@@ -41,14 +41,14 @@ export default function OverviewContent() {
           </div>
         </div>
 
-        <section className="lf-overview-card">
+        <section className="lf-overview-card" data-lf-card="tasks">
           <div className="lf-overview-card-header">
             <span className="lf-overview-card-title">Tasks</span>
             <span className="lf-meta">{tasksOpenTotal} open tasks</span>
           </div>
           <p className="lf-task-group-label">Before distribution</p>
           {tasks.map((task) => (
-            <label key={task.id} className="lf-task-box">
+            <label key={task.id} className="lf-task-box" data-lf-card={`task-${task.id}`}>
               <input
                 type="checkbox"
                 checked={task.is_complete}
@@ -67,13 +67,13 @@ export default function OverviewContent() {
         </section>
 
         <div className="lf-overview-mid-row">
-          <section className="lf-overview-card">
+          <section className="lf-overview-card" data-lf-card="open-routes">
             <div className="lf-overview-card-header">
               <span className="lf-overview-card-title">Open routes</span>
               <span className="lf-meta">{deliveryStats.openRoutes} unassigned</span>
             </div>
             {openRoutePreviews.map((route) => (
-              <div key={route.id} className="lf-open-route">
+              <div key={route.id} className="lf-open-route" data-lf-card={`open-route-${route.id}`}>
                 <span className="lf-avatar">{route.initials}</span>
                 <div className="lf-open-route-info">
                   <div className="lf-open-route-name">{route.name}</div>
@@ -88,7 +88,7 @@ export default function OverviewContent() {
             </Link>
           </section>
 
-          <section className="lf-overview-card">
+          <section className="lf-overview-card" data-lf-card="budget-and-finances">
             <div className="lf-overview-card-header">
               <span className="lf-overview-card-title">Budget & finances</span>
             </div>
@@ -115,7 +115,7 @@ export default function OverviewContent() {
             </div>
             <p className="lf-line-items-label">Line items</p>
             {budgetLineItems.map((item) => (
-              <div key={item.name} className="lf-line-item">
+              <div key={item.name} className="lf-line-item" data-lf-card={`line-item-${item.name}`}>
                 <div>
                   <div style={{ fontWeight: 500, fontSize: 13 }}>{item.name}</div>
                   <div className="lf-meta">{item.amount}</div>
@@ -131,7 +131,7 @@ export default function OverviewContent() {
           </section>
         </div>
 
-        <section className="lf-overview-card">
+        <section className="lf-overview-card" data-lf-card="stories">
           <div className="lf-overview-card-header">
             <div>
               <div className="lf-overview-card-title">Stories</div>
@@ -144,7 +144,7 @@ export default function OverviewContent() {
           </div>
           <div className="lf-story-list">
             {stories.map((story) => (
-              <div key={story.id} className="lf-story-row">
+              <div key={story.id} className="lf-story-row" data-lf-card={`story-${story.id}`}>
                 <div className="lf-story-date">
                   <div style={{ fontWeight: 600, fontSize: 12 }}>{story.date}</div>
                   <div className="lf-meta" style={{ fontSize: 11 }}>{story.time}</div>

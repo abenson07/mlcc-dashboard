@@ -307,13 +307,13 @@ function NavGroup({
   collapsed,
   onToggleCollapse,
   resolveActiveFromPathname,
-  currentRoute,
+  activeHref,
 }: {
   group: NavGroupConfig;
   collapsed: boolean;
   onToggleCollapse: () => void;
   resolveActiveFromPathname: boolean;
-  currentRoute: string;
+  activeHref?: string;
 }) {
   return (
     <section className="shell-nav-group" data-collapsible={group.collapsible || undefined}>
@@ -346,7 +346,7 @@ function NavGroup({
               item={item}
               active={
                 resolveActiveFromPathname
-                  ? isNavItemActive(currentRoute, item.href)
+                  ? Boolean(item.href) && item.href === activeHref
                   : Boolean(item.active)
               }
             />
@@ -394,6 +394,15 @@ export default function NavPanel({
 
   const hasTopBlock = config.back || config.header === "search" || config.context;
 
+  const activeHref = useMemo(() => {
+    if (!resolveActiveFromPathname) return undefined;
+    const allHrefs = [
+      ...config.groups.flatMap((group) => group.items.map((item) => item.href)),
+      ...(config.footer ?? []).map((item) => item.href),
+    ];
+    return getBestMatchingHref(currentRoute, allHrefs);
+  }, [resolveActiveFromPathname, config.groups, config.footer, currentRoute]);
+
   return (
     <nav
       className={`shell-nav shell-nav--${config.level}`}
@@ -430,7 +439,7 @@ export default function NavPanel({
                 group={group}
                 collapsed={collapsedGroups[group.id] ?? false}
                 resolveActiveFromPathname={resolveActiveFromPathname}
-                currentRoute={currentRoute}
+                activeHref={activeHref}
                 onToggleCollapse={() =>
                   setCollapsedGroups((prev) => ({
                     ...prev,
@@ -451,7 +460,7 @@ export default function NavPanel({
                 item={item}
                 active={
                   resolveActiveFromPathname
-                    ? isNavItemActive(currentRoute, item.href)
+                    ? Boolean(item.href) && item.href === activeHref
                     : Boolean(item.active)
                 }
               />
