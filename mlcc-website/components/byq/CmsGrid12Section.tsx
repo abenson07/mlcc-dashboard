@@ -1,8 +1,9 @@
-import { events, getEventPageHref, groupEventsByMonth } from "@marketing/data/events";
+import { getEventPageHref, groupEventsByMonth, getUpcomingEvents } from "@marketing/data/events";
 import { EventCard } from "@marketing/components/byq/EventCard";
 import { SectionLabel } from "@marketing/components/SectionLabel";
 
-const [featuredEvent, ...moreEvents] = events;
+const upcomingEvents = getUpcomingEvents();
+const [featuredEvent, ...moreEvents] = upcomingEvents;
 const eventsByMonth = groupEventsByMonth(moreEvents);
 
 export function CmsGrid12Section({ title }: { title: string }) {

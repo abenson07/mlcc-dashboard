@@ -163,6 +163,11 @@ export function groupEventsByMonth(eventList: Event[]): EventsByMonth[] {
     }));
 }
 
+export function getUpcomingEvents(eventList: Event[] = events): Event[] {
+  const now = Date.now();
+  return eventList.filter((event) => new Date(event.dateIso).getTime() >= now);
+}
+
 export const events: Event[] = [
   event({
     slug: "silent-book-club-at-watershed-pub",
