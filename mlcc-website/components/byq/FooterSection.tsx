@@ -18,8 +18,6 @@ const linkColumns = [
       { name: "Events", href: "/events" },
       { name: "Leaflet", href: "/leaflet" },
       { name: "About", href: "/about" },
-      { name: "Board", href: "/board" },
-      { name: "Meeting Minutes", href: "/meeting-minutes" },
       { name: "Contact", href: "/contact" },
     ],
   },
@@ -27,11 +25,7 @@ const linkColumns = [
     label: "Get Involved",
     links: [
       { name: "Volunteer", href: "/volunteer" },
-      { name: "Join the Board", href: "/join-the-board" },
-      { name: "Submit a Story", href: "/submit-story" },
-      { name: "Submit an Event", href: "/submit-event" },
       { name: "Support", href: "/membership" },
-      { name: "Business Membership", href: "/membership/business" },
     ],
   },
 ];
