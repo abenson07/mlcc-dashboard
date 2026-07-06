@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { routesTableStatusLabel, exportDeliveriesCsv } from "../deliveryUtils";
+import { routesTableStatusLabel } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
-import DeliveryDetailPanel from "./DeliveryDetailPanel";
+import DelivererPicker from "./DelivererPicker";
 
 function statusClass(label: string) {
   if (label === "Open" || label === "Skipped") return "lf-text-amber";
@@ -16,18 +16,12 @@ function statusClass(label: string) {
 export default function RoutesPageContent() {
   const searchParams = useSearchParams();
   const deliveryFromUrl = searchParams.get("delivery");
-  const {
-    deliveries,
-    deliveryHistoryForRoute,
-    pastDeliverersForRoute,
-    updateDelivery,
-    readOnly,
-    setSelectedDeliveryId,
-  } = useLeafletContext();
+  const { deliveries, updateDelivery, setSelectedDeliveryId } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(() => deliveryFromUrl);
+  const [pickerOpenId, setPickerOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     if (deliveryFromUrl) {
@@ -56,40 +50,43 @@ export default function RoutesPageContent() {
     });
   }, [deliveries, search, typeFilter, statusFilter]);
 
-  const selected = filtered.find((d) => d.id === (selectedId ?? filtered[0]?.id)) ?? null;
+  const effectiveSelectedId = selectedId ?? filtered[0]?.id ?? null;
+  const selected = filtered.find((d) => d.id === effectiveSelectedId) ?? null;
 
   useEffect(() => {
     setSelectedDeliveryId(selected?.id ?? null);
     return () => setSelectedDeliveryId(null);
   }, [selected, setSelectedDeliveryId]);
 
-  const handleAssign = useCallback(
-    async (deliveryId: string, personId: string) => {
-      await updateDelivery(deliveryId, {
-        person_id: personId,
+  const handleInlineAssign = useCallback(
+    async (delivery: (typeof deliveries)[number], person: { id: string; name: string }) => {
+      const previous = {
+        person_id: delivery.person_id,
+        is_skipped: delivery.is_skipped,
+        response: delivery.response,
+      };
+      setPickerOpenId(null);
+      await updateDelivery(delivery.id, {
+        person_id: person.id,
         is_skipped: false,
         response: "pending",
       });
-      toast.success("Deliverer assigned");
+      toast.success(`${person.name} assigned`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void updateDelivery(delivery.id, previous);
+          },
+        },
+      });
     },
     [updateDelivery],
   );
-
-  function handleExport() {
-    exportDeliveriesCsv(filtered, [
-      { header: "Route", value: (d) => d.routes?.route_name ?? "" },
-      { header: "Deliverer", value: (d) => d.people?.full_name ?? "" },
-      { header: "Type", value: (d) => d.routes?.route_type ?? "" },
-      { header: "Count", value: (d) => String(d.leaflet_count ?? "") },
-      { header: "Status", value: routesTableStatusLabel },
-    ]);
-  }
 
   return (
     <div className="lf-page-layout">
       <div className="lf-page-header">
         <h1 className="lf-h2">Routes</h1>
-        <button type="button" className="lf-small-btn" onClick={handleExport}>Export</button>
       </div>
 
       <div className="lf-filters">
@@ -106,51 +103,74 @@ export default function RoutesPageContent() {
         </select>
       </div>
 
-      <div className="lf-master-detail">
-        <div className="lf-table-wrap">
-          <table className="lf-table">
-            <thead>
-              <tr>
-                <th>Route name</th>
-                <th>Deliverer</th>
-                <th>Count</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((d) => {
-                const status = routesTableStatusLabel(d);
-                return (
-                  <tr
-                    key={d.id}
-                    className={selected?.id === d.id ? "selected" : undefined}
-                    onClick={() => setSelectedId(d.id)}
-                  >
-                    <td>
-                      <span className="lf-table-title">{d.routes?.route_name ?? "—"}</span>
-                      {d.routes?.route_type ? (
-                        <span className="lf-table-subtitle">{d.routes.route_type}</span>
-                      ) : null}
-                    </td>
-                    <td className="lf-meta">{d.people?.full_name ?? "—"}</td>
-                    <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
-                    <td className={statusClass(status)}>{status}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {selected && (
-          <DeliveryDetailPanel
-            delivery={selected}
-            readOnly={readOnly}
-            onAssign={(personId) => handleAssign(selected.id, personId)}
-            pastDeliverers={pastDeliverersForRoute(selected.route_id, selected.person_id)}
-            history={deliveryHistoryForRoute(selected.route_id)}
-          />
-        )}
+      <div className="lf-table-wrap">
+        <table className="lf-table">
+          <thead>
+            <tr>
+              <th>Route name</th>
+              <th>Deliverer</th>
+              <th>Count</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((d) => {
+              const status = routesTableStatusLabel(d);
+              return (
+                <tr
+                  key={d.id}
+                  className={effectiveSelectedId === d.id ? "selected" : undefined}
+                  onClick={() => setSelectedId(d.id)}
+                >
+                  <td>
+                    <span className="lf-table-title">{d.routes?.route_name ?? "—"}</span>
+                    {d.routes?.route_type ? (
+                      <span className="lf-table-subtitle">{d.routes.route_type}</span>
+                    ) : null}
+                  </td>
+                  <td>
+                    <div className="lf-selector">
+                      <button
+                        type="button"
+                        className={`lf-table-deliverer-trigger${d.people ? "" : " lf-table-deliverer-placeholder"}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPickerOpenId((cur) => (cur === d.id ? null : d.id));
+                        }}
+                      >
+                        {d.people?.full_name ?? "Assign deliverer"}
+                      </button>
+                      {pickerOpenId === d.id && (
+                        <>
+                          <div
+                            className="lf-selector-backdrop"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPickerOpenId(null);
+                            }}
+                          />
+                          <div
+                            className="lf-selector-menu"
+                            style={{ width: 260, padding: 8 }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <DelivererPicker
+                              excludePersonId={d.person_id}
+                              onSelect={(person) => handleInlineAssign(d, person)}
+                              onCancel={() => setPickerOpenId(null)}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                  <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
+                  <td className={statusClass(status)}>{status}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

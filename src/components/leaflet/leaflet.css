@@ -290,6 +290,12 @@
 .lf-mini-table tr:last-child td { border-bottom: none; }
 .lf-mini-table tr.muted { opacity: 0.55; background: #f5f5f5; }
 .lf-text-amber { color: #f59e0b; }
+.lf-add-route-anchor { position: relative; margin-top: 4px; }
+.lf-add-route-row { opacity: 0; transition: opacity .15s; }
+.lf-deliverer-card:hover .lf-add-route-row { opacity: 1; }
+.lf-add-route-link { display: block; width: 100%; text-align: left; padding: 10px 12px; font-size: 13px; font-weight: 500; color: var(--lf-text-muted); background: none; border: none; cursor: pointer; }
+.lf-add-route-link:hover { background: #fafafa; color: var(--lf-text); }
+.lf-add-route-link:disabled { opacity: 0.5; cursor: default; }
 
 /* Master-detail pages */
 .lf-page-layout { display: flex; min-height: 0; flex: 1; flex-direction: column; gap: 16px; }
@@ -299,8 +305,6 @@
 .lf-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 13px; }
 .lf-search input::placeholder { color: var(--lf-text-subtle); }
 .lf-select { border: 1px solid var(--lf-canvas-border); border-radius: 6px; background: var(--lf-card); padding: 6px 10px; font-size: 13px; color: var(--lf-text-muted); }
-.lf-master-detail { display: grid; gap: 24px; grid-template-columns: 1fr var(--lf-detail-width); min-height: 400px; }
-.lf-master-detail--wide { --lf-detail-width: 320px; }
 .lf-table-wrap { overflow: auto; }
 .lf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .lf-table thead th { padding: 8px 4px; text-align: left; font-size: 12px; font-weight: 400; color: var(--lf-text-subtle); }

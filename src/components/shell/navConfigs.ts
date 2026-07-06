@@ -332,19 +332,26 @@ export function isShellPreviewEventDetailRoute(pathname: string): boolean {
   return parseShellPreviewEventId(pathname) !== null;
 }
 
+export function isShellPreviewLeafletDeliverersRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/deliverers`;
+}
+
+export function isShellPreviewLeafletSponsorshipsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/sponsorships`;
+}
+
 export function isShellPreviewLeafletRouteDetailsRoute(pathname: string): boolean {
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
   return (
     normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/routes` ||
-    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes`
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes` ||
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/substitutions`
   );
-}
-
-export function isShellPreviewOpenRoutesRoute(pathname: string): boolean {
-  const normalizedPath =
-    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
-  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes`;
 }
 
 export function buildShellPreviewLeafletL2Config(options?: {
@@ -417,7 +424,7 @@ export function buildShellPreviewLeafletL2Config(options?: {
           },
           {
             id: "substitutions",
-            label: "Substitutions",
+            label: "Skipped Routes",
             icon: ArrowLeftRight,
             href: `${SHELL_PREVIEW_BASE}/leaflet/substitutions`,
           },
@@ -620,7 +627,7 @@ export const LEAFLET_L2_CONFIG: NavPanelConfig = {
         { id: "deliverers", label: "Deliverers", icon: Bike, href: "#" },
         { id: "routes", label: "Routes", icon: Route, href: "#" },
         { id: "open-routes", label: "Open Routes", icon: RouteOff, href: "#" },
-        { id: "substitutions", label: "Substitutions", icon: ArrowLeftRight, href: "#" },
+        { id: "substitutions", label: "Skipped Routes", icon: ArrowLeftRight, href: "#" },
       ],
     },
     {

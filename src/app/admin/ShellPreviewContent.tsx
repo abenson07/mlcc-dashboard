@@ -10,12 +10,14 @@ import CanvasArea from "@/components/shell/CanvasArea";
 import CanvasContainer from "@/components/shell/CanvasContainer";
 import CanvasContent from "@/components/shell/CanvasContent";
 import CanvasTopbar from "@/components/shell/CanvasTopbar";
+import CanvasTooling from "@/components/shell/CanvasTooling";
 import ShellPreviewNav from "@/components/shell/ShellPreviewNav";
 import {
   isShellPreviewFaqsRoute,
+  isShellPreviewLeafletDeliverersRoute,
   isShellPreviewLeafletRoute,
   isShellPreviewLeafletRouteDetailsRoute,
-  isShellPreviewOpenRoutesRoute,
+  isShellPreviewLeafletSponsorshipsRoute,
   isShellPreviewWidgetsRoute,
   parseShellPreviewEventId,
   shellPreviewBreadcrumbLabel,
@@ -27,6 +29,10 @@ import LeafletWidgetPanel from "@/components/shell/widgets/LeafletWidgetPanel";
 import RouteDetailsWidget from "@/components/shell/widgets/RouteDetailsWidget";
 import DelivererWidget from "@/components/shell/widgets/DelivererWidget";
 import BuildingContactWidget from "@/components/shell/widgets/BuildingContactWidget";
+import CommunicationStagesWidget from "@/components/shell/widgets/CommunicationStagesWidget";
+import CoverSheetsWidget from "@/components/shell/widgets/CoverSheetsWidget";
+import BudgetSponsorshipsWidget from "@/components/shell/widgets/BudgetSponsorshipsWidget";
+import SponsorshipLevelsWidget from "@/components/shell/widgets/SponsorshipLevelsWidget";
 
 type ShellPreviewContentProps = {
   children: ReactNode;
@@ -97,6 +103,21 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
                   return next;
                 })
               }
+              tooling={
+                isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
+                  <CanvasTooling
+                    widgetPanelOpen={widgetPanelOpen}
+                    onToggleWidgetPanel={() =>
+                      setWidgetPanelOpen((open) => {
+                        const next = !open;
+                        localStorage.setItem("widget-panel-open", String(next));
+                        return next;
+                      })
+                    }
+                    links={[{ label: "+ Add sponsor" }, { label: "Issue invoice" }]}
+                  />
+                ) : undefined
+              }
             />
             <LeafletProvider>
               <CanvasContainer
@@ -107,18 +128,25 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
                 }
                 content={<CanvasContent>{children}</CanvasContent>}
                 widgetPanel={
-                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewOpenRoutesRoute(pathname) ? (
+                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
                     <>
                       <DelivererWidget />
                       <RouteDetailsWidget />
                       <BuildingContactWidget />
                     </>
+                  ) : isShellPreviewLeafletDeliverersRoute(pathname) ? (
+                    <>
+                      <CommunicationStagesWidget />
+                      <CoverSheetsWidget />
+                    </>
+                  ) : isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
+                    <>
+                      <BudgetSponsorshipsWidget />
+                      <SponsorshipLevelsWidget />
+                    </>
                   ) : (
                     <>
                       <ListsForLeafletWidget />
-                      {isShellPreviewLeafletRouteDetailsRoute(pathname) && <DelivererWidget />}
-                      {isShellPreviewLeafletRouteDetailsRoute(pathname) && <RouteDetailsWidget />}
-                      {isShellPreviewLeafletRouteDetailsRoute(pathname) && <BuildingContactWidget />}
                       {isShellPreviewLeafletRoute(pathname) && <LeafletWidgetPanel />}
                     </>
                   )

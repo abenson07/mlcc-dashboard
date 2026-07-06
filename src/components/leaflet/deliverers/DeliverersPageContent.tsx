@@ -3,9 +3,11 @@
 import { useMemo, useState } from "react";
 import { ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
+import type { DeliveryWithRelations } from "hooks";
 import { IconCopy, IconMapPin, IconSearch } from "../icons";
 import { useLeafletContext } from "../LeafletContext";
 import type { DelivererCard } from "../types";
+import AddRoutePicker from "./AddRoutePicker";
 import SkipRouteModal, { type CoveringPerson } from "./SkipRouteModal";
 
 type SkipTarget = {
@@ -20,6 +22,12 @@ export default function DeliverersPageContent() {
   const [search, setSearch] = useState("");
   const [skipTarget, setSkipTarget] = useState<SkipTarget | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [addRouteOpenId, setAddRouteOpenId] = useState<string | null>(null);
+
+  const openDeliveries = useMemo(
+    () => deliveries.filter((d) => !d.person_id || d.is_skipped),
+    [deliveries],
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -62,6 +70,28 @@ export default function DeliverersPageContent() {
       routeLabel: route.name,
       routeId: route.routeId ?? null,
       excludePersonId: card.id,
+    });
+  }
+
+  async function handleAssignRoute(card: DelivererCard, delivery: DeliveryWithRelations) {
+    const previous = {
+      person_id: delivery.person_id,
+      is_skipped: delivery.is_skipped,
+      response: delivery.response,
+    };
+    setAddRouteOpenId(null);
+    await updateDelivery(delivery.id, {
+      person_id: card.id,
+      is_skipped: false,
+      response: "pending",
+    });
+    toast.success(`${delivery.routes?.route_name ?? "Route"} assigned to ${card.name}`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          void updateDelivery(delivery.id, previous);
+        },
+      },
     });
   }
 
@@ -223,6 +253,33 @@ export default function DeliverersPageContent() {
                 ))}
               </tbody>
             </table>
+            <div className="lf-add-route-anchor">
+              <button
+                type="button"
+                className="lf-add-route-link lf-add-route-row"
+                disabled={readOnly}
+                onClick={() =>
+                  setAddRouteOpenId((cur) => (cur === card.id ? null : card.id))
+                }
+              >
+                + Add route
+              </button>
+              {addRouteOpenId === card.id && (
+                <>
+                  <div
+                    className="lf-selector-backdrop"
+                    onClick={() => setAddRouteOpenId(null)}
+                  />
+                  <div className="lf-selector-menu" style={{ top: "100%", marginTop: 4 }}>
+                    <AddRoutePicker
+                      openDeliveries={openDeliveries}
+                      onSelect={(delivery) => handleAssignRoute(card, delivery)}
+                      onCancel={() => setAddRouteOpenId(null)}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </article>
           );
         })}

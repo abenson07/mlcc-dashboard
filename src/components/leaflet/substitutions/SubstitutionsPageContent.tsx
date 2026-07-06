@@ -1,113 +1,152 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { getApiBase } from "@/lib/apiBase";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { substitutionTableStatusClass, substitutionTableStatusLabel } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
+import DelivererPicker from "../routes/DelivererPicker";
 
 export default function SubstitutionsPageContent() {
-  const { leafletId, substitutions } = useLeafletContext();
+  const { deliveries, updateDelivery, setSelectedDeliveryId } = useLeafletContext();
   const [search, setSearch] = useState("");
+  const [pickerOpenId, setPickerOpenId] = useState<string | null>(null);
+
+  const skippedDeliveries = useMemo(
+    () => deliveries.filter((d) => d.is_skipped),
+    [deliveries],
+  );
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const effectiveSelectedId = selectedId ?? skippedDeliveries[0]?.id ?? null;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return substitutions;
-    return substitutions.filter(
-      (s) =>
-        s.route.toLowerCase().includes(q) ||
-        s.covering.toLowerCase().includes(q) ||
-        s.forPerson.toLowerCase().includes(q),
-    );
-  }, [substitutions, search]);
+    return skippedDeliveries.filter((d) => {
+      const name = d.routes?.route_name?.toLowerCase() ?? "";
+      return !q || name.includes(q);
+    });
+  }, [skippedDeliveries, search]);
 
-  const selected = filtered.find((s) => s.id === (selectedId ?? filtered[0]?.id)) ?? null;
-  const coverSheetHref =
-    leafletId != null && selected
-      ? `${getApiBase()}/api/leaflets/${leafletId}/deliveries/${selected.deliveryId}/cover-sheet`
-      : null;
+  const selected = filtered.find((d) => d.id === effectiveSelectedId) ?? null;
+
+  useEffect(() => {
+    setSelectedDeliveryId(selected?.id ?? null);
+    return () => setSelectedDeliveryId(null);
+  }, [selected, setSelectedDeliveryId]);
+
+  const handleInlineAssign = useCallback(
+    async (delivery: (typeof skippedDeliveries)[number], person: { id: string; name: string }) => {
+      const previous = {
+        person_id: delivery.person_id,
+        is_skipped: delivery.is_skipped,
+        response: delivery.response,
+      };
+      setPickerOpenId(null);
+      await updateDelivery(delivery.id, {
+        person_id: person.id,
+        is_skipped: false,
+        response: "pending",
+      });
+      toast.success(`${person.name} assigned`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void updateDelivery(delivery.id, previous);
+          },
+        },
+      });
+    },
+    [updateDelivery],
+  );
 
   return (
     <div className="lf-page-layout">
-      <div>
-        <h1 className="lf-h2">Substitutions</h1>
-        <p className="lf-page-desc">
-          Records of substitutions: who is covering which route, and for whom.
-        </p>
+      <div className="lf-page-header">
+        <h1 className="lf-h2">Skipped Routes</h1>
       </div>
 
       <div className="lf-filters">
         <label className="lf-search">
-          <input type="search" placeholder="Search substitutions..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="search" placeholder="Search routes..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </label>
       </div>
 
-      <div className="lf-master-detail lf-master-detail--wide">
-        <div className="lf-table-wrap">
-          <table className="lf-table">
-            <thead>
+      <div className="lf-table-wrap">
+        <table className="lf-table">
+          <thead>
+            <tr>
+              <th>Route name</th>
+              <th>Deliverer</th>
+              <th>Count</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
               <tr>
-                <th>Route</th>
-                <th>Covering</th>
-                <th>For</th>
-                <th>Date</th>
-                <th>Status</th>
+                <td colSpan={4} className="lf-meta" style={{ padding: 24 }}>
+                  No skipped routes for this leaflet.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="lf-meta" style={{ padding: 24 }}>
-                    No skipped routes for this leaflet.
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((s) => (
+            ) : (
+              filtered.map((d) => {
+                const status = substitutionTableStatusLabel(d);
+                return (
                   <tr
-                    key={s.id}
-                    className={selected?.id === s.id ? "selected" : undefined}
-                    onClick={() => setSelectedId(s.id)}
+                    key={d.id}
+                    className={effectiveSelectedId === d.id ? "selected" : undefined}
+                    onClick={() => setSelectedId(d.id)}
                   >
-                    <td style={{ fontWeight: 500 }}>{s.route}</td>
-                    <td className="lf-meta">{s.covering}</td>
-                    <td className="lf-meta">{s.forPerson}</td>
-                    <td className="lf-meta">{s.date}</td>
-                    <td className={s.status === "Pending" ? "lf-text-amber" : s.status === "Scheduled" ? "lf-text-green" : "lf-meta"}>
-                      {s.status}
+                    <td>
+                      <span className="lf-table-title">{d.routes?.route_name ?? "—"}</span>
+                      {d.routes?.route_type ? (
+                        <span className="lf-table-subtitle">{d.routes.route_type}</span>
+                      ) : null}
                     </td>
+                    <td>
+                      <div className="lf-selector">
+                        <button
+                          type="button"
+                          className={`lf-table-deliverer-trigger${d.people ? "" : " lf-table-deliverer-placeholder"}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPickerOpenId((cur) => (cur === d.id ? null : d.id));
+                          }}
+                        >
+                          {d.people?.full_name ?? "Assign deliverer"}
+                        </button>
+                        {pickerOpenId === d.id && (
+                          <>
+                            <div
+                              className="lf-selector-backdrop"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPickerOpenId(null);
+                              }}
+                            />
+                            <div
+                              className="lf-selector-menu"
+                              style={{ width: 260, padding: 8 }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <DelivererPicker
+                                excludePersonId={d.person_id}
+                                onSelect={(person) => handleInlineAssign(d, person)}
+                                onCancel={() => setPickerOpenId(null)}
+                              />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                    <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
+                    <td className={substitutionTableStatusClass(status)}>{status}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {selected && (
-          <aside>
-            <div style={{ fontWeight: 600, marginBottom: 12 }}>{selected.route}</div>
-            <div className="lf-detail-card" data-lf-card="substitution-details">
-              <div className="lf-card-header"><span className="lf-card-title">Substitution details</span></div>
-              <div className="lf-card-body">
-                <p className="lf-meta" style={{ fontWeight: 600, marginBottom: 8 }}>Covering</p>
-                <div className="lf-detail-row"><span className="lf-detail-label">Name</span><span>{selected.covering}</span></div>
-                <div className="lf-detail-row"><span className="lf-detail-label">Email address</span><span>{selected.coveringEmail ?? "—"}</span></div>
-                <div className="lf-detail-row"><span className="lf-detail-label">Phone number</span><span>{selected.coveringPhone ?? "—"}</span></div>
-                <p className="lf-meta" style={{ fontWeight: 600, margin: "16px 0 8px" }}>For whom</p>
-                <div className="lf-detail-row"><span className="lf-detail-label">Substitute</span><span>{selected.forPerson}</span></div>
-                <div className="lf-detail-row"><span className="lf-detail-label">Shift</span><span>{selected.route}</span></div>
-                <div className="lf-detail-row"><span className="lf-detail-label">Shift start date</span><span>{selected.date}</span></div>
-                <div className="lf-detail-row"><span className="lf-detail-label">Status</span><span>{selected.status}</span></div>
-                {coverSheetHref && (
-                  <div className="lf-detail-row">
-                    <span className="lf-detail-label">Cover sheet</span>
-                    <a className="lf-link" href={coverSheetHref} target="_blank" rel="noopener noreferrer">
-                      Print cover sheet
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </aside>
-        )}
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -651,6 +651,21 @@
   height: 12px;
 }
 
+.shell-canvas-tooling-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lf-accent, #5e6ad2);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.shell-canvas-tooling-link:hover {
+  text-decoration: underline;
+}
+
 /* Canvas Container */
 .shell-canvas-container {
   display: flex;

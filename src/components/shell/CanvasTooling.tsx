@@ -2,17 +2,34 @@
 
 import { Download, PanelRightClose } from "lucide-react";
 
+type CanvasToolingLink = {
+  label: string;
+  onClick?: () => void;
+};
+
 type CanvasToolingProps = {
   onToggleWidgetPanel?: () => void;
   widgetPanelOpen?: boolean;
+  links?: CanvasToolingLink[];
 };
 
 export default function CanvasTooling({
   onToggleWidgetPanel,
   widgetPanelOpen = true,
+  links,
 }: CanvasToolingProps) {
   return (
     <div className="shell-canvas-tooling">
+      {links?.map((link) => (
+        <button
+          key={link.label}
+          type="button"
+          className="shell-canvas-tooling-link"
+          onClick={link.onClick}
+        >
+          {link.label}
+        </button>
+      ))}
       <button type="button" className="shell-canvas-tooling-btn" aria-label="Download">
         <Download size={16} strokeWidth={1.5} />
       </button>

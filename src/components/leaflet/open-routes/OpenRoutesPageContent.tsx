@@ -62,7 +62,6 @@ export default function OpenRoutesPageContent() {
     <div className="lf-page-layout">
       <div className="lf-page-header">
         <h1 className="lf-h2">Open Routes</h1>
-        <button type="button" className="lf-small-btn">Export</button>
       </div>
 
       <div className="lf-filters">
