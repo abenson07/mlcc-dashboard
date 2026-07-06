@@ -2,10 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
 import { routesTableStatusLabel } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
+import SkipRouteModal, { type CoveringPerson } from "../deliverers/SkipRouteModal";
 import DelivererPicker from "./DelivererPicker";
+
+type SkipTarget = {
+  deliveryId: string;
+  routeLabel: string;
+  routeId?: string | null;
+  excludePersonId?: string | null;
+};
 
 function statusClass(label: string) {
   if (label === "Open" || label === "Skipped") return "lf-text-amber";
@@ -16,12 +25,16 @@ function statusClass(label: string) {
 export default function RoutesPageContent() {
   const searchParams = useSearchParams();
   const deliveryFromUrl = searchParams.get("delivery");
-  const { deliveries, updateDelivery, setSelectedDeliveryId } = useLeafletContext();
+  const { deliveries, updateDelivery, setSelectedDeliveryId, readOnly } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(() => deliveryFromUrl);
   const [pickerOpenId, setPickerOpenId] = useState<string | null>(null);
+  const [editingCountId, setEditingCountId] = useState<string | null>(null);
+  const [countDraft, setCountDraft] = useState("");
+  const [skipTarget, setSkipTarget] = useState<SkipTarget | null>(null);
+  const [skipSubmitting, setSkipSubmitting] = useState(false);
 
   useEffect(() => {
     if (deliveryFromUrl) {
@@ -83,6 +96,72 @@ export default function RoutesPageContent() {
     [updateDelivery],
   );
 
+  const handleSaveCount = useCallback(
+    async (delivery: (typeof deliveries)[number], raw: string) => {
+      const trimmed = raw.trim();
+      const value = Number(trimmed);
+      if (trimmed === "" || !Number.isInteger(value) || value < 0) {
+        toast.error("Leaflet count must be a non-negative whole number");
+        return;
+      }
+      setEditingCountId(null);
+      if (value === delivery.leaflet_count) return;
+      try {
+        await updateDelivery(delivery.id, { leaflet_count: value });
+      } catch {
+        toast.error("Failed to update leaflet count");
+      }
+    },
+    [updateDelivery],
+  );
+
+  function openSkipModal(delivery: (typeof deliveries)[number]) {
+    setSkipTarget({
+      deliveryId: delivery.id,
+      routeLabel: delivery.routes?.route_name ?? "this route",
+      routeId: delivery.route_id,
+      excludePersonId: delivery.person_id,
+    });
+  }
+
+  async function handleConfirmSkip(coveringPerson: CoveringPerson | null) {
+    if (!skipTarget) return;
+    const { deliveryId, routeLabel } = skipTarget;
+    const row = deliveries.find((d) => d.id === deliveryId);
+    const previous = {
+      person_id: row?.person_id ?? null,
+      is_skipped: row?.is_skipped ?? false,
+      response: row?.response ?? "pending",
+    };
+    setSkipSubmitting(true);
+    try {
+      await updateDelivery(
+        deliveryId,
+        coveringPerson
+          ? { is_skipped: true, person_id: coveringPerson.id, response: "confirmed" }
+          : { is_skipped: true, response: "needs_cover" },
+      );
+      setSkipTarget(null);
+      toast.success(
+        coveringPerson
+          ? `${coveringPerson.name} is now covering ${routeLabel}`
+          : `${routeLabel} marked as needing a substitute`,
+        {
+          action: {
+            label: "Undo",
+            onClick: () => {
+              void updateDelivery(deliveryId, previous);
+            },
+          },
+        },
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to skip route");
+    } finally {
+      setSkipSubmitting(false);
+    }
+  }
+
   return (
     <div className="lf-page-layout">
       <div className="lf-page-header">
@@ -111,6 +190,7 @@ export default function RoutesPageContent() {
               <th>Deliverer</th>
               <th>Count</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -164,14 +244,75 @@ export default function RoutesPageContent() {
                       )}
                     </div>
                   </td>
-                  <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
+                  <td className="lf-meta">
+                    {editingCountId === d.id ? (
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        className="lf-count-input"
+                        autoFocus
+                        value={countDraft}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => setCountDraft(e.target.value)}
+                        onBlur={() => handleSaveCount(d, countDraft)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.currentTarget.blur();
+                          } else if (e.key === "Escape") {
+                            setEditingCountId(null);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        className="lf-count-trigger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCountDraft(d.leaflet_count != null ? String(d.leaflet_count) : "");
+                          setEditingCountId(d.id);
+                        }}
+                      >
+                        {d.leaflet_count ?? "—"}
+                      </button>
+                    )}
+                  </td>
                   <td className={statusClass(status)}>{status}</td>
+                  <td>
+                    {d.person_id && !d.is_skipped && (
+                      <button
+                        type="button"
+                        className="lf-icon-btn lf-row-skip-btn"
+                        disabled={readOnly}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openSkipModal(d);
+                        }}
+                        aria-label={`Skip ${d.routes?.route_name ?? "route"}`}
+                        title="Skip this deliverer"
+                      >
+                        <ArrowLeftRight size={13} />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+
+      {skipTarget && (
+        <SkipRouteModal
+          routeLabel={skipTarget.routeLabel}
+          routeId={skipTarget.routeId}
+          excludePersonId={skipTarget.excludePersonId}
+          submitting={skipSubmitting}
+          onConfirm={handleConfirmSkip}
+          onCancel={() => setSkipTarget(null)}
+        />
+      )}
     </div>
   );
 }

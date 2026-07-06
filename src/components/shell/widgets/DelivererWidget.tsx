@@ -29,13 +29,44 @@ export default function DelivererWidget() {
   const primaryDeliverer = primary ? { id: primary.id, name: primary.full_name } : null;
 
   const deliveryId = delivery.id;
+  const previousAssignment = {
+    person_id: delivery.person_id,
+    is_skipped: delivery.is_skipped,
+    response: delivery.response,
+  };
+
   async function handleAssign(personId: string) {
+    const previous = previousAssignment;
     await updateDelivery(deliveryId, {
       person_id: personId,
       is_skipped: false,
       response: "pending",
     });
-    toast.success("Deliverer assigned");
+    toast.success("Deliverer assigned", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          void updateDelivery(deliveryId, previous);
+        },
+      },
+    });
+  }
+
+  async function handleRemove() {
+    const previous = previousAssignment;
+    await updateDelivery(deliveryId, {
+      person_id: null,
+      is_skipped: false,
+      response: "pending",
+    });
+    toast.success("Deliverer removed", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          void updateDelivery(deliveryId, previous);
+        },
+      },
+    });
   }
 
   return (
@@ -74,6 +105,7 @@ export default function DelivererWidget() {
         status={status}
         readOnly={readOnly}
         onAssign={handleAssign}
+        onRemove={person ? handleRemove : undefined}
         pastDeliverers={pastDeliverersForRoute(delivery.route_id, delivery.person_id)}
         primaryDeliverer={primaryDeliverer}
         hideCurrentDeliverer={Boolean(person)}

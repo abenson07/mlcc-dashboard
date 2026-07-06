@@ -319,6 +319,9 @@
 .lf-table-deliverer-trigger { background: none; border: none; padding: 0; margin: 0; font: inherit; text-align: left; color: inherit; cursor: pointer; }
 .lf-table-deliverer-trigger:hover { text-decoration: underline; }
 .lf-table-deliverer-placeholder { color: var(--lf-text-muted); font-style: italic; }
+.lf-count-trigger { background: none; border: none; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
+.lf-count-trigger:hover { text-decoration: underline; }
+.lf-count-input { width: 64px; font: inherit; color: inherit; padding: 2px 6px; border: 1px solid var(--lf-canvas-border); border-radius: 6px; background: var(--lf-canvas); }
 .lf-text-green { color: var(--lf-green); }
 .lf-text-red { color: var(--lf-red); }
 .lf-detail-card { border: 1px solid var(--lf-canvas-border); border-radius: 8px; background: var(--lf-card); margin-bottom: 12px; }

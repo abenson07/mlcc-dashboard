@@ -9,10 +9,30 @@ export default function OpenRoutesPageContent() {
   const { deliveries, updateDelivery, setSelectedDeliveryId } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [pickerOpenId, setPickerOpenId] = useState<string | null>(null);
+  const [editingCountId, setEditingCountId] = useState<string | null>(null);
+  const [countDraft, setCountDraft] = useState("");
+
+  // Once a route appears in this list, keep it visible for the rest of this
+  // page visit even after it gets assigned, so the row doesn't abruptly
+  // disappear out from under the admin — it just reflects the new deliverer.
+  const [stickyIds, setStickyIds] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    setStickyIds((prev) => {
+      let changed = false;
+      const next = new Set(prev);
+      for (const d of deliveries) {
+        if ((!d.person_id || d.is_skipped) && !next.has(d.id)) {
+          next.add(d.id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [deliveries]);
 
   const openDeliveries = useMemo(
-    () => deliveries.filter((d) => !d.person_id || d.is_skipped),
-    [deliveries],
+    () => deliveries.filter((d) => stickyIds.has(d.id)),
+    [deliveries, stickyIds],
   );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -54,6 +74,25 @@ export default function OpenRoutesPageContent() {
           },
         },
       });
+    },
+    [updateDelivery],
+  );
+
+  const handleSaveCount = useCallback(
+    async (delivery: (typeof openDeliveries)[number], raw: string) => {
+      const trimmed = raw.trim();
+      const value = Number(trimmed);
+      if (trimmed === "" || !Number.isInteger(value) || value < 0) {
+        toast.error("Leaflet count must be a non-negative whole number");
+        return;
+      }
+      setEditingCountId(null);
+      if (value === delivery.leaflet_count) return;
+      try {
+        await updateDelivery(delivery.id, { leaflet_count: value });
+      } catch {
+        toast.error("Failed to update leaflet count");
+      }
     },
     [updateDelivery],
   );
@@ -129,7 +168,40 @@ export default function OpenRoutesPageContent() {
                       )}
                     </div>
                   </td>
-                  <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
+                  <td className="lf-meta">
+                    {editingCountId === d.id ? (
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        className="lf-count-input"
+                        autoFocus
+                        value={countDraft}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => setCountDraft(e.target.value)}
+                        onBlur={() => handleSaveCount(d, countDraft)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.currentTarget.blur();
+                          } else if (e.key === "Escape") {
+                            setEditingCountId(null);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        className="lf-count-trigger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCountDraft(d.leaflet_count != null ? String(d.leaflet_count) : "");
+                          setEditingCountId(d.id);
+                        }}
+                      >
+                        {d.leaflet_count ?? "—"}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               );
             })}

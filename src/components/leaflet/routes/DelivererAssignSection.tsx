@@ -12,6 +12,7 @@ type DelivererAssignSectionProps = {
   status: string;
   readOnly?: boolean;
   onAssign?: (personId: string) => Promise<void>;
+  onRemove?: () => Promise<void>;
   onEmailPastDeliverer?: (personId: string) => Promise<void>;
   emailingPersonId?: string | null;
   pastDeliverers?: PastDeliverer[];
@@ -25,6 +26,7 @@ export default function DelivererAssignSection({
   status,
   readOnly = false,
   onAssign,
+  onRemove,
   onEmailPastDeliverer,
   emailingPersonId = null,
   pastDeliverers = [],
@@ -35,8 +37,11 @@ export default function DelivererAssignSection({
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [pendingChange, setPendingChange] = useState<PastDeliverer | null>(null);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const canAssign = Boolean(onAssign) && !readOnly;
+  const canRemove = Boolean(onRemove) && !readOnly;
   const showPrimary =
     primaryDeliverer &&
     primaryDeliverer.id !== person?.id &&
@@ -56,16 +61,23 @@ export default function DelivererAssignSection({
 
   function requestAssign(next: PastDeliverer) {
     if (!canAssign || next.id === person?.id) return;
-    if (person) {
-      setPendingChange(next);
-      setPicking(false);
-      return;
-    }
-    void handleAssign(next.id);
+    setPendingChange(next);
+    setPicking(false);
   }
 
   function cancelPendingChange() {
     setPendingChange(null);
+  }
+
+  async function handleRemove() {
+    if (!onRemove || readOnly) return;
+    setRemoving(true);
+    try {
+      await onRemove();
+      setConfirmingRemove(false);
+    } finally {
+      setRemoving(false);
+    }
   }
 
   if (!canAssign && !person) {
@@ -76,12 +88,20 @@ export default function DelivererAssignSection({
     );
   }
 
-  if (pendingChange && person) {
+  if (pendingChange) {
     return (
       <div className="lf-deliverer-change-confirm">
         <p>
-          Replace <strong>{person.full_name}</strong> with{" "}
-          <strong>{pendingChange.name}</strong>?
+          {person ? (
+            <>
+              Replace <strong>{person.full_name}</strong> with{" "}
+              <strong>{pendingChange.name}</strong>?
+            </>
+          ) : (
+            <>
+              Assign <strong>{pendingChange.name}</strong> to this route?
+            </>
+          )}
         </p>
         <div className="lf-deliverer-change-confirm-actions">
           <button
@@ -98,7 +118,35 @@ export default function DelivererAssignSection({
             disabled={assigningId != null}
             onClick={() => void handleAssign(pendingChange.id)}
           >
-            {assigningId != null ? "Changing…" : "Confirm change"}
+            {assigningId != null ? (person ? "Changing…" : "Assigning…") : person ? "Confirm change" : "Confirm assignment"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (confirmingRemove && person) {
+    return (
+      <div className="lf-deliverer-change-confirm">
+        <p>
+          Remove <strong>{person.full_name}</strong> from this route?
+        </p>
+        <div className="lf-deliverer-change-confirm-actions">
+          <button
+            type="button"
+            className="lf-btn lf-btn--outline"
+            disabled={removing}
+            onClick={() => setConfirmingRemove(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="lf-btn lf-btn--outline lf-text-red"
+            disabled={removing}
+            onClick={() => void handleRemove()}
+          >
+            {removing ? "Removing…" : "Confirm remove"}
           </button>
         </div>
       </div>
@@ -163,17 +211,30 @@ export default function DelivererAssignSection({
         />
       )}
 
-      {canAssign && person && !picking && (
-        <div style={{ marginTop: person ? 8 : 0 }}>
-          <button
-            type="button"
-            className="lf-btn lf-btn--outline"
-            style={{ width: compact ? "100%" : undefined }}
-            disabled={assigningId != null}
-            onClick={() => setPicking(true)}
-          >
-            Change deliverer
-          </button>
+      {(canAssign || canRemove) && person && !picking && (
+        <div style={{ marginTop: 8, display: "flex", gap: 8, flexDirection: compact ? "column" : "row" }}>
+          {canAssign && (
+            <button
+              type="button"
+              className="lf-btn lf-btn--outline"
+              style={{ width: compact ? "100%" : undefined }}
+              disabled={assigningId != null}
+              onClick={() => setPicking(true)}
+            >
+              Change deliverer
+            </button>
+          )}
+          {canRemove && (
+            <button
+              type="button"
+              className="lf-btn lf-btn--outline lf-text-red"
+              style={{ width: compact ? "100%" : undefined }}
+              disabled={assigningId != null}
+              onClick={() => setConfirmingRemove(true)}
+            >
+              Remove deliverer
+            </button>
+          )}
         </div>
       )}
 
