@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useState,
   type ReactNode,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -72,6 +73,8 @@ type LeafletContextValue = {
   closeLeaflet: () => Promise<void>;
   deliveries: DeliveryWithRelations[];
   updateDelivery: ReturnType<typeof useDeliveries>["update"];
+  selectedDeliveryId: string | null;
+  setSelectedDeliveryId: (id: string | null) => void;
   tasks: Task[];
   tasksOpenTotal: number;
   openCount: number;
@@ -118,6 +121,7 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
 
   const {
     leaflets: leafletRows,
@@ -439,6 +443,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       closeLeaflet,
       deliveries: deliveryRows,
       updateDelivery,
+      selectedDeliveryId,
+      setSelectedDeliveryId,
       tasks,
       tasksOpenTotal: openCount,
       openCount,
@@ -483,6 +489,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       closeLeaflet,
       deliveryRows,
       updateDelivery,
+      selectedDeliveryId,
+      setSelectedDeliveryId,
       tasks,
       openCount,
       toggleTask,

@@ -332,6 +332,21 @@ export function isShellPreviewEventDetailRoute(pathname: string): boolean {
   return parseShellPreviewEventId(pathname) !== null;
 }
 
+export function isShellPreviewLeafletRouteDetailsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return (
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/routes` ||
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes`
+  );
+}
+
+export function isShellPreviewOpenRoutesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes`;
+}
+
 export function buildShellPreviewLeafletL2Config(options?: {
   contextLabel?: string;
   dropdownItems?: DropdownItem[];

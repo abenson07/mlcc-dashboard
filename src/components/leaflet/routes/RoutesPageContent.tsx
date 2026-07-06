@@ -17,13 +17,12 @@ export default function RoutesPageContent() {
   const searchParams = useSearchParams();
   const deliveryFromUrl = searchParams.get("delivery");
   const {
-    leafletId,
     deliveries,
-    countChangeByRouteId,
     deliveryHistoryForRoute,
     pastDeliverersForRoute,
     updateDelivery,
     readOnly,
+    setSelectedDeliveryId,
   } = useLeafletContext();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -58,6 +57,11 @@ export default function RoutesPageContent() {
   }, [deliveries, search, typeFilter, statusFilter]);
 
   const selected = filtered.find((d) => d.id === (selectedId ?? filtered[0]?.id)) ?? null;
+
+  useEffect(() => {
+    setSelectedDeliveryId(selected?.id ?? null);
+    return () => setSelectedDeliveryId(null);
+  }, [selected, setSelectedDeliveryId]);
 
   const handleAssign = useCallback(
     async (deliveryId: string, personId: string) => {
@@ -109,29 +113,27 @@ export default function RoutesPageContent() {
               <tr>
                 <th>Route name</th>
                 <th>Deliverer</th>
-                <th>Type</th>
                 <th>Count</th>
-                <th>Change</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((d) => {
                 const status = routesTableStatusLabel(d);
-                const change = countChangeByRouteId(d.route_id, d.leaflet_count);
                 return (
                   <tr
                     key={d.id}
                     className={selected?.id === d.id ? "selected" : undefined}
                     onClick={() => setSelectedId(d.id)}
                   >
-                    <td style={{ fontWeight: 500 }}>{d.routes?.route_name ?? "—"}</td>
-                    <td className="lf-meta">{d.people?.full_name ?? "—"}</td>
-                    <td className="lf-meta">{d.routes?.route_type ?? "—"}</td>
-                    <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
-                    <td className={change != null && change < 0 ? "lf-text-red" : "lf-text-green"}>
-                      {change == null ? "—" : change > 0 ? `+${change}` : change === 0 ? "+0" : `−${Math.abs(change)}`}
+                    <td>
+                      <span className="lf-table-title">{d.routes?.route_name ?? "—"}</span>
+                      {d.routes?.route_type ? (
+                        <span className="lf-table-subtitle">{d.routes.route_type}</span>
+                      ) : null}
                     </td>
+                    <td className="lf-meta">{d.people?.full_name ?? "—"}</td>
+                    <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
                     <td className={statusClass(status)}>{status}</td>
                   </tr>
                 );
@@ -143,11 +145,9 @@ export default function RoutesPageContent() {
         {selected && (
           <DeliveryDetailPanel
             delivery={selected}
-            leafletId={leafletId}
             readOnly={readOnly}
             onAssign={(personId) => handleAssign(selected.id, personId)}
             pastDeliverers={pastDeliverersForRoute(selected.route_id, selected.person_id)}
-            countChange={countChangeByRouteId(selected.route_id, selected.leaflet_count)}
             history={deliveryHistoryForRoute(selected.route_id)}
           />
         )}

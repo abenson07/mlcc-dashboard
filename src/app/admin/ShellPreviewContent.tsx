@@ -14,6 +14,8 @@ import ShellPreviewNav from "@/components/shell/ShellPreviewNav";
 import {
   isShellPreviewFaqsRoute,
   isShellPreviewLeafletRoute,
+  isShellPreviewLeafletRouteDetailsRoute,
+  isShellPreviewOpenRoutesRoute,
   isShellPreviewWidgetsRoute,
   parseShellPreviewEventId,
   shellPreviewBreadcrumbLabel,
@@ -22,6 +24,9 @@ import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import Shell from "@/components/shell/Shell";
 import ListsForLeafletWidget from "@/components/shell/widgets/ListsForLeafletWidget";
 import LeafletWidgetPanel from "@/components/shell/widgets/LeafletWidgetPanel";
+import RouteDetailsWidget from "@/components/shell/widgets/RouteDetailsWidget";
+import DelivererWidget from "@/components/shell/widgets/DelivererWidget";
+import BuildingContactWidget from "@/components/shell/widgets/BuildingContactWidget";
 
 type ShellPreviewContentProps = {
   children: ReactNode;
@@ -102,9 +107,18 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
                 }
                 content={<CanvasContent>{children}</CanvasContent>}
                 widgetPanel={
-                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : (
+                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewOpenRoutesRoute(pathname) ? (
+                    <>
+                      <DelivererWidget />
+                      <RouteDetailsWidget />
+                      <BuildingContactWidget />
+                    </>
+                  ) : (
                     <>
                       <ListsForLeafletWidget />
+                      {isShellPreviewLeafletRouteDetailsRoute(pathname) && <DelivererWidget />}
+                      {isShellPreviewLeafletRouteDetailsRoute(pathname) && <RouteDetailsWidget />}
+                      {isShellPreviewLeafletRouteDetailsRoute(pathname) && <BuildingContactWidget />}
                       {isShellPreviewLeafletRoute(pathname) && <LeafletWidgetPanel />}
                     </>
                   )
