@@ -36,7 +36,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
     query = query.eq("is_skipped", true);
   }
 
-  const { data, error } = await query.order("created_at", { ascending: true });
+  const { data, error } = await query
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useStories } from "hooks";
+import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import { IconArrowRight, IconCalendar, IconPlus } from "../icons";
 import { daysUntilDistribution, formatDistributionDate } from "../leafletData";
 import { leafletHref, useLeafletContext } from "../LeafletContext";
 
 export default function OverviewContent() {
   const pathname = usePathname();
+  const router = useRouter();
   const leafletBase = pathname?.startsWith("/old-admin") ? "/old-admin" : "/admin";
   const {
     leaflet,
@@ -22,6 +26,24 @@ export default function OverviewContent() {
     budgetLineItems,
     deliveryStats,
   } = useLeafletContext();
+  const { create: createStory } = useStories({ autoFetch: false });
+  const [addingStory, setAddingStory] = useState(false);
+
+  async function handleAddStory() {
+    setAddingStory(true);
+    try {
+      const authorId = await getCurrentPersonId();
+      const story = await createStory({
+        title: "",
+        author_id: authorId,
+        leaflet_id: leafletId,
+        publish_date: new Date().toISOString().slice(0, 10),
+      });
+      if (story) router.push(`/admin/stories?selected=${story.id}`);
+    } finally {
+      setAddingStory(false);
+    }
+  }
 
   if (!leaflet) {
     return <p className="lf-meta">Select a leaflet edition.</p>;
@@ -137,27 +159,41 @@ export default function OverviewContent() {
               <div className="lf-overview-card-title">Stories</div>
               <div className="lf-meta">Draft blog posts scheduled for release</div>
             </div>
-            <button type="button" className="lf-small-btn">
+            <button
+              type="button"
+              className="lf-small-btn"
+              disabled={addingStory}
+              onClick={() => void handleAddStory()}
+            >
               <IconPlus />
-              Add story
+              {addingStory ? "Adding…" : "Add story"}
             </button>
           </div>
           <div className="lf-story-list">
-            {stories.map((story) => (
-              <div key={story.id} className="lf-story-row" data-lf-card={`story-${story.id}`}>
-                <div className="lf-story-date">
-                  <div style={{ fontWeight: 600, fontSize: 12 }}>{story.date}</div>
-                  <div className="lf-meta" style={{ fontSize: 11 }}>{story.time}</div>
-                </div>
-                <span className="lf-story-badge" style={{ color: story.badgeColor, background: story.badgeBg }}>
-                  {story.type}
-                </span>
-                <div>
-                  <div style={{ fontWeight: 500, fontSize: 13 }}>{story.title}</div>
-                  <div className="lf-meta" style={{ fontSize: 11 }}>{story.status}</div>
-                </div>
-              </div>
-            ))}
+            {stories.length === 0 ? (
+              <p className="lf-meta">No stories yet.</p>
+            ) : (
+              stories.map((story) => (
+                <Link
+                  key={story.id}
+                  href={`/admin/stories?selected=${story.id}`}
+                  className="lf-story-row"
+                  data-lf-card={`story-${story.id}`}
+                >
+                  <div className="lf-story-date">
+                    <div style={{ fontWeight: 600, fontSize: 12 }}>{story.date}</div>
+                    <div className="lf-meta" style={{ fontSize: 11 }}>{story.time}</div>
+                  </div>
+                  <span className="lf-story-badge" style={{ color: story.badgeColor, background: story.badgeBg }}>
+                    {story.type}
+                  </span>
+                  <div>
+                    <div style={{ fontWeight: 500, fontSize: 13 }}>{story.title}</div>
+                    <div className="lf-meta" style={{ fontSize: 11 }}>{story.status}</div>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </section>
       </div>

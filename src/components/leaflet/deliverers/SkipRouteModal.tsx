@@ -3,6 +3,7 @@
 import { useState } from "react";
 import DelivererPicker from "../routes/DelivererPicker";
 import { useLeafletContext } from "../LeafletContext";
+import { linkBtnStyle, primaryBtnStyle } from "./actionButtonStyles";
 
 export type CoveringPerson = { id: string; name: string };
 
@@ -25,7 +26,6 @@ export default function SkipRouteModal({
 }: SkipRouteModalProps) {
   const { pastDeliverersForRoute } = useLeafletContext();
   const [selected, setSelected] = useState<CoveringPerson | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
 
   const pastDeliverers = routeId ? pastDeliverersForRoute(routeId, excludePersonId) : [];
 
@@ -63,22 +63,13 @@ export default function SkipRouteModal({
               <button
                 type="button"
                 className="lf-link"
+                style={linkBtnStyle}
                 disabled={submitting}
                 onClick={() => setSelected(null)}
               >
                 Change
               </button>
             </div>
-          ) : showSearch ? (
-            <DelivererPicker
-              excludePersonId={excludePersonId}
-              disabled={submitting}
-              onSelect={(p) => {
-                setSelected(p);
-                setShowSearch(false);
-              }}
-              onCancel={() => setShowSearch(false)}
-            />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {pastDeliverers.length > 0 && (
@@ -102,22 +93,20 @@ export default function SkipRouteModal({
                   </div>
                 </div>
               )}
-              <button
-                type="button"
-                className="lf-btn lf-btn--outline"
-                style={{ alignSelf: "flex-start" }}
+              <DelivererPicker
+                excludePersonId={excludePersonId}
                 disabled={submitting}
-                onClick={() => setShowSearch(true)}
-              >
-                Search for someone else
-              </button>
+                placeholder="Search for someone else…"
+                onSelect={(p) => setSelected(p)}
+              />
             </div>
           )}
         </div>
         <div className="lf-modal-footer">
           <button
             type="button"
-            className="lf-btn lf-btn--outline"
+            className="lf-link"
+            style={linkBtnStyle}
             onClick={onCancel}
             disabled={submitting}
           >
@@ -126,6 +115,7 @@ export default function SkipRouteModal({
           <button
             type="button"
             className="lf-btn lf-btn--primary"
+            style={primaryBtnStyle}
             onClick={() => onConfirm(selected)}
             disabled={submitting}
           >

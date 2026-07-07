@@ -4,6 +4,12 @@ import { useState } from "react";
 import type { People } from "@/types/database";
 import { IconMail } from "../icons";
 import DelivererPicker from "./DelivererPicker";
+import {
+  destructiveBtnStyle,
+  linkBtnStyle,
+  outlineBtnStyle,
+  primaryBtnStyle,
+} from "../deliverers/actionButtonStyles";
 
 type PastDeliverer = { id: string; name: string };
 
@@ -19,6 +25,7 @@ type DelivererAssignSectionProps = {
   primaryDeliverer?: PastDeliverer | null;
   compact?: boolean;
   hideCurrentDeliverer?: boolean;
+  hideChangeRemoveActions?: boolean;
 };
 
 export default function DelivererAssignSection({
@@ -33,6 +40,7 @@ export default function DelivererAssignSection({
   primaryDeliverer = null,
   compact = false,
   hideCurrentDeliverer = false,
+  hideChangeRemoveActions = false,
 }: DelivererAssignSectionProps) {
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
@@ -106,7 +114,8 @@ export default function DelivererAssignSection({
         <div className="lf-deliverer-change-confirm-actions">
           <button
             type="button"
-            className="lf-btn lf-btn--outline"
+            className="lf-link"
+            style={linkBtnStyle}
             disabled={assigningId != null}
             onClick={cancelPendingChange}
           >
@@ -114,7 +123,8 @@ export default function DelivererAssignSection({
           </button>
           <button
             type="button"
-            className="lf-btn lf-btn--accent"
+            className="lf-btn lf-btn--primary"
+            style={primaryBtnStyle}
             disabled={assigningId != null}
             onClick={() => void handleAssign(pendingChange.id)}
           >
@@ -134,7 +144,8 @@ export default function DelivererAssignSection({
         <div className="lf-deliverer-change-confirm-actions">
           <button
             type="button"
-            className="lf-btn lf-btn--outline"
+            className="lf-link"
+            style={linkBtnStyle}
             disabled={removing}
             onClick={() => setConfirmingRemove(false)}
           >
@@ -143,6 +154,7 @@ export default function DelivererAssignSection({
           <button
             type="button"
             className="lf-btn lf-btn--outline lf-text-red"
+            style={destructiveBtnStyle}
             disabled={removing}
             onClick={() => void handleRemove()}
           >
@@ -170,7 +182,8 @@ export default function DelivererAssignSection({
               {pastDeliverers.length > 0 && (
                 <button
                   type="button"
-                  className="lf-btn lf-btn--accent"
+                  className="lf-btn lf-btn--primary"
+                  style={primaryBtnStyle}
                   disabled={assigningId != null}
                   onClick={() => requestAssign(pastDeliverers[0]!)}
                 >
@@ -181,6 +194,7 @@ export default function DelivererAssignSection({
                 <button
                   type="button"
                   className="lf-btn lf-btn--outline"
+                  style={outlineBtnStyle}
                   disabled={assigningId != null}
                   onClick={() => requestAssign(primaryDeliverer!)}
                 >
@@ -191,7 +205,8 @@ export default function DelivererAssignSection({
               )}
               <button
                 type="button"
-                className="lf-btn lf-btn--accent"
+                className="lf-btn lf-btn--primary"
+                style={primaryBtnStyle}
                 disabled={assigningId != null}
                 onClick={() => setPicking(true)}
               >
@@ -211,13 +226,13 @@ export default function DelivererAssignSection({
         />
       )}
 
-      {(canAssign || canRemove) && person && !picking && (
+      {!hideChangeRemoveActions && (canAssign || canRemove) && person && !picking && (
         <div style={{ marginTop: 8, display: "flex", gap: 8, flexDirection: compact ? "column" : "row" }}>
           {canAssign && (
             <button
               type="button"
               className="lf-btn lf-btn--outline"
-              style={{ width: compact ? "100%" : undefined }}
+              style={{ ...outlineBtnStyle, width: compact ? "100%" : undefined }}
               disabled={assigningId != null}
               onClick={() => setPicking(true)}
             >
@@ -228,7 +243,7 @@ export default function DelivererAssignSection({
             <button
               type="button"
               className="lf-btn lf-btn--outline lf-text-red"
-              style={{ width: compact ? "100%" : undefined }}
+              style={{ ...destructiveBtnStyle, width: compact ? "100%" : undefined }}
               disabled={assigningId != null}
               onClick={() => setConfirmingRemove(true)}
             >
@@ -253,7 +268,7 @@ export default function DelivererAssignSection({
               <button
                 type="button"
                 className="lf-link"
-                style={{ border: "none", background: "none", padding: 0 }}
+                style={linkBtnStyle}
                 disabled={assigningId === primaryDeliverer!.id}
                 onClick={() => requestAssign(primaryDeliverer!)}
               >
@@ -269,14 +284,7 @@ export default function DelivererAssignSection({
                   <button
                     type="button"
                     className="lf-link"
-                    style={{
-                      border: "none",
-                      background: "none",
-                      padding: 0,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
+                    style={{ ...linkBtnStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
                     disabled={emailingPersonId === p.id}
                     onClick={() => onEmailPastDeliverer(p.id)}
                     title="Email past deliverer"
@@ -288,7 +296,7 @@ export default function DelivererAssignSection({
                 <button
                   type="button"
                   className="lf-link"
-                  style={{ border: "none", background: "none", padding: 0 }}
+                  style={linkBtnStyle}
                   disabled={assigningId === p.id || person?.id === p.id}
                   onClick={() => requestAssign(p)}
                 >

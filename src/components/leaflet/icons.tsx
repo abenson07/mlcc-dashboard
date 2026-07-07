@@ -211,3 +211,13 @@ export function IconMail() {
 export function IconMapPin() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 21s7-4.5 7-11a7 7 0 10-14 0c0 6.5 7 11 7 11z" stroke="currentColor" strokeWidth="1.75"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.75"/></svg>;
 }
+
+export function IconMoreVertical() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="5" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="19" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}

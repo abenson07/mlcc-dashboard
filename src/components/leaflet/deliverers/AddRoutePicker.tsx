@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DeliveryWithRelations } from "hooks";
+
+const MAX_RESULTS = 5;
 
 type AddRoutePickerProps = {
   openDeliveries: DeliveryWithRelations[];
@@ -21,16 +23,28 @@ export default function AddRoutePicker({
   const [search, setSearch] = useState("");
   const trimmed = search.trim().toLowerCase();
 
+  useEffect(() => {
+    if (!onCancel) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onCancel]);
+
   const candidates = useMemo(() => {
     const filtered = trimmed
       ? openDeliveries.filter((d) => (d.routes?.route_name ?? "").toLowerCase().includes(trimmed))
       : openDeliveries;
-    return filtered.slice(0, 12);
+    return filtered.slice(0, MAX_RESULTS);
   }, [openDeliveries, trimmed]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <label className="lf-search" style={{ width: "100%" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "10px 12px" }}>
+      <label
+        className="lf-search"
+        style={{ width: "100%", position: "sticky", top: 0, zIndex: 1, background: "var(--lf-card)" }}
+      >
         <input
           type="search"
           placeholder="Search open routes…"
@@ -52,7 +66,7 @@ export default function AddRoutePicker({
             key={d.id}
             type="button"
             className="lf-selector-item"
-            style={{ borderRadius: 6 }}
+            style={{ borderRadius: 6, padding: "8px 10px" }}
             disabled={disabled || selecting}
             onClick={() => void onSelect(d)}
           >
@@ -63,17 +77,6 @@ export default function AddRoutePicker({
           </button>
         ))}
       </div>
-      {onCancel && (
-        <button
-          type="button"
-          className="lf-btn lf-btn--outline"
-          style={{ alignSelf: "flex-start" }}
-          disabled={disabled || selecting}
-          onClick={onCancel}
-        >
-          Cancel
-        </button>
-      )}
     </div>
   );
 }

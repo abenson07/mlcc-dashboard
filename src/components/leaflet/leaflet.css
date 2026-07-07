@@ -276,9 +276,11 @@
 .lf-status-badge--green { background: rgba(16,185,129,0.1); color: #10b981; }
 .lf-status-badge--amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
 .lf-card-actions { display: flex; align-items: center; gap: 8px; }
+.lf-card-status-slot { position: relative; }
 .lf-small-btn { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--lf-canvas-border); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 500; color: var(--lf-text-muted); background: var(--lf-card); cursor: pointer; }
-.lf-card-skip-btn { opacity: 0; transition: opacity .15s; }
-.lf-deliverer-card:hover .lf-card-skip-btn { opacity: 1; }
+.lf-card-skip-btn { position: absolute; top: 0; right: 0; opacity: 0; visibility: hidden; transition: opacity .15s; white-space: nowrap; }
+.lf-deliverer-card:hover .lf-card-skip-btn { opacity: 1; visibility: visible; }
+.lf-deliverer-card:hover .lf-card-status-badge { opacity: 0; visibility: hidden; }
 .lf-icon-btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--lf-canvas-border); border-radius: 6px; padding: 5px; color: var(--lf-text-muted); background: var(--lf-card); cursor: pointer; }
 .lf-icon-btn:disabled { opacity: 0.5; cursor: default; }
 .lf-row-skip-btn { opacity: 0; transition: opacity .15s; }
@@ -293,8 +295,7 @@
 .lf-add-route-anchor { position: relative; margin-top: 4px; }
 .lf-add-route-row { opacity: 0; transition: opacity .15s; }
 .lf-deliverer-card:hover .lf-add-route-row { opacity: 1; }
-.lf-add-route-link { display: block; width: 100%; text-align: left; padding: 10px 12px; font-size: 13px; font-weight: 500; color: var(--lf-text-muted); background: none; border: none; cursor: pointer; }
-.lf-add-route-link:hover { background: #fafafa; color: var(--lf-text); }
+.lf-add-route-link { display: block; width: 100%; text-align: left; padding: 16px 12px; font-size: 13px; font-weight: 500; color: var(--lf-text-muted); background: none; border: none; cursor: pointer; }
 .lf-add-route-link:disabled { opacity: 0.5; cursor: default; }
 
 /* Master-detail pages */
@@ -314,9 +315,9 @@
 .lf-table tbody tr.selected { background: #ebebec; }
 .lf-table td { padding: 8px 4px; }
 .lf-table td:first-child { padding-left: 28px; }
-.lf-table-title { font-weight: 500; }
+.lf-table-title { font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-table-subtitle { display: block; font-size: 12px; font-weight: 400; color: var(--lf-text-muted); margin-top: 2px; }
-.lf-table-deliverer-trigger { background: none; border: none; padding: 0; margin: 0; font: inherit; text-align: left; color: inherit; cursor: pointer; }
+.lf-table-deliverer-trigger { background: none; border: none; padding: 0; margin: 0; font: inherit; text-align: left; color: inherit; cursor: pointer; display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-table-deliverer-trigger:hover { text-decoration: underline; }
 .lf-table-deliverer-placeholder { color: var(--lf-text-muted); font-style: italic; }
 .lf-count-trigger { background: none; border: none; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
@@ -329,14 +330,14 @@
 .lf-detail-label { color: var(--lf-text-muted); }
 .lf-empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 0; text-align: center; color: var(--lf-text-muted); font-size: 13px; }
 .lf-deliverer-change-confirm { display: flex; flex-direction: column; gap: 12px; padding: 12px 0; font-size: 13px; color: var(--lf-text); }
-.lf-deliverer-change-confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.lf-deliverer-change-confirm-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
 .lf-modal-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: rgba(24,24,27,0.4); }
 .lf-modal { width: 100%; max-width: 380px; border-radius: 10px; background: var(--lf-card); box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
 .lf-modal-header { border-bottom: 1px solid var(--lf-canvas-border); padding: 14px 16px; }
 .lf-modal-title { font-size: 14px; font-weight: 600; color: var(--lf-text); }
 .lf-modal-body { padding: 16px; }
-.lf-modal-footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--lf-canvas-border); padding: 12px 16px; }
+.lf-modal-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid var(--lf-canvas-border); padding: 12px 16px; }
 
 /* Sponsorships */
 .lf-sponsor-tabs { display: flex; gap: 4px; margin-bottom: 12px; }

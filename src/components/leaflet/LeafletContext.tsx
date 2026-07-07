@@ -16,6 +16,7 @@ import {
   useLeafletHistory,
   useLeaflets,
   useLeafletSponsorships,
+  useStories,
   useTasks,
 } from "hooks";
 import type { DeliveryWithRelations } from "hooks";
@@ -186,6 +187,31 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     selectedRow,
     leafletRows,
     Boolean(leafletId),
+  );
+
+  const { stories: storyRows } = useStories({
+    autoFetch: Boolean(leafletId),
+    filters: { leafletId },
+  });
+
+  const stories = useMemo<StoryItem[]>(
+    () =>
+      storyRows.map((story) => ({
+        id: story.id,
+        date: story.publish_date
+          ? new Date(`${story.publish_date}T12:00:00`).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })
+          : "No date",
+        time: "",
+        type: story.status === "published" ? "Published" : "Draft",
+        title: story.title || "Untitled story",
+        status: story.status === "published" ? "Published" : "Draft",
+        badgeColor: story.status === "published" ? "#166534" : "#92400e",
+        badgeBg: story.status === "published" ? "#dcfce7" : "#fef3c7",
+      })),
+    [storyRows],
   );
 
   const invoicesQuery = useQuery({
@@ -450,7 +476,7 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       openCount,
       toggleTask,
       openRoutePreviews,
-      stories: [],
+      stories,
       delivererCards,
       commStages,
       sendComm,
@@ -495,6 +521,7 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       openCount,
       toggleTask,
       openRoutePreviews,
+      stories,
       delivererCards,
       commStages,
       sendComm,

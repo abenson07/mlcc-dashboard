@@ -7,7 +7,10 @@ import { toast } from "sonner";
 import { routesTableStatusLabel } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
 import SkipRouteModal, { type CoveringPerson } from "../deliverers/SkipRouteModal";
-import DelivererPicker from "./DelivererPicker";
+import DelivererCell from "./DelivererCell";
+import EditableCountCell from "./EditableCountCell";
+import RouteNameCell from "./RouteNameCell";
+import RouteTable from "./RouteTable";
 
 type SkipTarget = {
   deliveryId: string;
@@ -182,126 +185,66 @@ export default function RoutesPageContent() {
         </select>
       </div>
 
-      <div className="lf-table-wrap">
-        <table className="lf-table">
-          <thead>
-            <tr>
-              <th>Route name</th>
-              <th>Deliverer</th>
-              <th>Count</th>
-              <th>Status</th>
-              <th></th>
+      <RouteTable
+        columns={[
+          { key: "route", label: "Route name" },
+          { key: "deliverer", label: "Deliverer", width: 200 },
+          { key: "count", label: "Count", width: 72 },
+          { key: "status", label: "Status", width: 100 },
+          { key: "actions", label: "", width: 36 },
+        ]}
+      >
+        {filtered.map((d) => {
+          const status = routesTableStatusLabel(d);
+          return (
+            <tr
+              key={d.id}
+              className={effectiveSelectedId === d.id ? "selected" : undefined}
+              onClick={() => setSelectedId(d.id)}
+            >
+              <RouteNameCell routeName={d.routes?.route_name} routeType={d.routes?.route_type} />
+              <DelivererCell
+                personName={d.people?.full_name}
+                excludePersonId={d.person_id}
+                isOpen={pickerOpenId === d.id}
+                onToggle={() => setPickerOpenId((cur) => (cur === d.id ? null : d.id))}
+                onClose={() => setPickerOpenId(null)}
+                onSelect={(person) => handleInlineAssign(d, person)}
+              />
+              <EditableCountCell
+                value={d.leaflet_count}
+                isEditing={editingCountId === d.id}
+                draft={countDraft}
+                onStartEdit={(initial) => {
+                  setCountDraft(initial);
+                  setEditingCountId(d.id);
+                }}
+                onDraftChange={setCountDraft}
+                onSave={() => handleSaveCount(d, countDraft)}
+                onCancel={() => setEditingCountId(null)}
+              />
+              <td className={statusClass(status)}>{status}</td>
+              <td>
+                {d.person_id && !d.is_skipped && (
+                  <button
+                    type="button"
+                    className="lf-icon-btn lf-row-skip-btn"
+                    disabled={readOnly}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openSkipModal(d);
+                    }}
+                    aria-label={`Skip ${d.routes?.route_name ?? "route"}`}
+                    title="Skip this deliverer"
+                  >
+                    <ArrowLeftRight size={13} />
+                  </button>
+                )}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {filtered.map((d) => {
-              const status = routesTableStatusLabel(d);
-              return (
-                <tr
-                  key={d.id}
-                  className={effectiveSelectedId === d.id ? "selected" : undefined}
-                  onClick={() => setSelectedId(d.id)}
-                >
-                  <td>
-                    <span className="lf-table-title">{d.routes?.route_name ?? "—"}</span>
-                    {d.routes?.route_type ? (
-                      <span className="lf-table-subtitle">{d.routes.route_type}</span>
-                    ) : null}
-                  </td>
-                  <td>
-                    <div className="lf-selector">
-                      <button
-                        type="button"
-                        className={`lf-table-deliverer-trigger${d.people ? "" : " lf-table-deliverer-placeholder"}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPickerOpenId((cur) => (cur === d.id ? null : d.id));
-                        }}
-                      >
-                        {d.people?.full_name ?? "Assign deliverer"}
-                      </button>
-                      {pickerOpenId === d.id && (
-                        <>
-                          <div
-                            className="lf-selector-backdrop"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPickerOpenId(null);
-                            }}
-                          />
-                          <div
-                            className="lf-selector-menu"
-                            style={{ width: 260, padding: 8 }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <DelivererPicker
-                              excludePersonId={d.person_id}
-                              onSelect={(person) => handleInlineAssign(d, person)}
-                              onCancel={() => setPickerOpenId(null)}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                  <td className="lf-meta">
-                    {editingCountId === d.id ? (
-                      <input
-                        type="number"
-                        min={0}
-                        step={1}
-                        className="lf-count-input"
-                        autoFocus
-                        value={countDraft}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => setCountDraft(e.target.value)}
-                        onBlur={() => handleSaveCount(d, countDraft)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.currentTarget.blur();
-                          } else if (e.key === "Escape") {
-                            setEditingCountId(null);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        className="lf-count-trigger"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCountDraft(d.leaflet_count != null ? String(d.leaflet_count) : "");
-                          setEditingCountId(d.id);
-                        }}
-                      >
-                        {d.leaflet_count ?? "—"}
-                      </button>
-                    )}
-                  </td>
-                  <td className={statusClass(status)}>{status}</td>
-                  <td>
-                    {d.person_id && !d.is_skipped && (
-                      <button
-                        type="button"
-                        className="lf-icon-btn lf-row-skip-btn"
-                        disabled={readOnly}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openSkipModal(d);
-                        }}
-                        aria-label={`Skip ${d.routes?.route_name ?? "route"}`}
-                        title="Skip this deliverer"
-                      >
-                        <ArrowLeftRight size={13} />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+          );
+        })}
+      </RouteTable>
 
       {skipTarget && (
         <SkipRouteModal

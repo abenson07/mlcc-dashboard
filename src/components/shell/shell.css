@@ -730,6 +730,13 @@
   border: 0.5px solid var(--shell-border);
 }
 
+.shell-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .shell-widget-title {
   font-size: 10px;
   font-weight: 500;
@@ -1056,6 +1063,224 @@
   font-size: 12px;
   font-weight: 400;
   line-height: normal;
+}
+
+/* ── Linear-style property rows (Route Details / Deliverer widgets) ── */
+.shell-widget-property-row {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  align-items: center;
+  column-gap: 8px;
+  width: 100%;
+  min-height: 28px;
+}
+
+.shell-widget-property-label {
+  font-size: 12px;
+  font-weight: 450;
+  color: rgba(0, 0, 0, 0.55);
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell-widget-property-static {
+  font-size: 12px;
+  font-weight: 400;
+  color: inherit;
+  cursor: default;
+  padding: 4px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell-app button.shell-widget-property-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell-app button.shell-widget-property-trigger:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.shell-app button.shell-widget-property-trigger--placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.shell-widget-property-edit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.shell-widget-property-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--shell-border);
+  border-radius: 4px;
+  background: var(--shell-card);
+  font: inherit;
+  font-size: 12px;
+  color: inherit;
+}
+
+.shell-widget-property-input:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+.shell-app button.shell-widget-property-confirm-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.shell-app button.shell-widget-property-confirm-btn:hover {
+  background: #333;
+}
+
+.shell-app button.shell-widget-property-confirm-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Popover (Route type select, Deliverer combobox) — portaled into the nearest .shell-app ancestor
+   (not document.body) so --shell-* custom properties and the .shell-app button reset still cascade
+   to it, positioned via inline top/bottom/left/width computed from the trigger's bounding rect (with
+   viewport-edge clamping/flipping) so it floats free of any scrollable ancestor's overflow/clipping
+   box instead of being laid out inside it. */
+.shell-widget-popover-anchor {
+  width: 100%;
+}
+
+.shell-widget-popover {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  background: var(--shell-card, #ffffff);
+  border: 0.5px solid #d9d9d9;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.shell-widget-popover-search {
+  flex-shrink: 0;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 0.5px solid var(--shell-border, rgba(0, 0, 0, 0.2));
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: inherit;
+}
+
+.shell-widget-popover-search:focus {
+  outline: none;
+}
+
+.shell-widget-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  overflow-y: auto;
+}
+
+.shell-widget-popover-group-header {
+  padding: 6px 8px 2px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.shell-widget-popover-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell-widget-popover-item-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell-widget-popover-item:hover,
+.shell-widget-popover-item[data-selected="true"] {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.shell-widget-popover-item--danger {
+  color: #b42318;
+}
+
+.shell-widget-popover-item--static {
+  cursor: default;
+}
+
+.shell-widget-popover-item--static:hover {
+  background: none;
+}
+
+.shell-widget-popover-item-check {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: #000;
+}
+
+.shell-widget-popover-empty,
+.shell-widget-popover-hint {
+  padding: 10px 8px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
 }
 
 /* ── Canvas Footer ── */

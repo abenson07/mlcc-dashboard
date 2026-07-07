@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { substitutionTableStatusClass, substitutionTableStatusLabel } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
-import DelivererPicker from "../routes/DelivererPicker";
+import DelivererCell from "../routes/DelivererCell";
+import RouteNameCell from "../routes/RouteNameCell";
+import RouteTable from "../routes/RouteTable";
 
 export default function SubstitutionsPageContent() {
   const { deliveries, updateDelivery, setSelectedDeliveryId } = useLeafletContext();
@@ -71,83 +73,45 @@ export default function SubstitutionsPageContent() {
         </label>
       </div>
 
-      <div className="lf-table-wrap">
-        <table className="lf-table">
-          <thead>
-            <tr>
-              <th>Route name</th>
-              <th>Deliverer</th>
-              <th>Count</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="lf-meta" style={{ padding: 24 }}>
-                  No skipped routes for this leaflet.
-                </td>
+      <RouteTable
+        columns={[
+          { key: "route", label: "Route name" },
+          { key: "deliverer", label: "Deliverer", width: 200 },
+          { key: "count", label: "Count", width: 72 },
+          { key: "status", label: "Status", width: 100 },
+        ]}
+      >
+        {filtered.length === 0 ? (
+          <tr>
+            <td colSpan={4} className="lf-meta" style={{ padding: 24 }}>
+              No skipped routes for this leaflet.
+            </td>
+          </tr>
+        ) : (
+          filtered.map((d) => {
+            const status = substitutionTableStatusLabel(d);
+            return (
+              <tr
+                key={d.id}
+                className={effectiveSelectedId === d.id ? "selected" : undefined}
+                onClick={() => setSelectedId(d.id)}
+              >
+                <RouteNameCell routeName={d.routes?.route_name} routeType={d.routes?.route_type} />
+                <DelivererCell
+                  personName={d.people?.full_name}
+                  excludePersonId={d.person_id}
+                  isOpen={pickerOpenId === d.id}
+                  onToggle={() => setPickerOpenId((cur) => (cur === d.id ? null : d.id))}
+                  onClose={() => setPickerOpenId(null)}
+                  onSelect={(person) => handleInlineAssign(d, person)}
+                />
+                <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
+                <td className={substitutionTableStatusClass(status)}>{status}</td>
               </tr>
-            ) : (
-              filtered.map((d) => {
-                const status = substitutionTableStatusLabel(d);
-                return (
-                  <tr
-                    key={d.id}
-                    className={effectiveSelectedId === d.id ? "selected" : undefined}
-                    onClick={() => setSelectedId(d.id)}
-                  >
-                    <td>
-                      <span className="lf-table-title">{d.routes?.route_name ?? "—"}</span>
-                      {d.routes?.route_type ? (
-                        <span className="lf-table-subtitle">{d.routes.route_type}</span>
-                      ) : null}
-                    </td>
-                    <td>
-                      <div className="lf-selector">
-                        <button
-                          type="button"
-                          className={`lf-table-deliverer-trigger${d.people ? "" : " lf-table-deliverer-placeholder"}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPickerOpenId((cur) => (cur === d.id ? null : d.id));
-                          }}
-                        >
-                          {d.people?.full_name ?? "Assign deliverer"}
-                        </button>
-                        {pickerOpenId === d.id && (
-                          <>
-                            <div
-                              className="lf-selector-backdrop"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPickerOpenId(null);
-                              }}
-                            />
-                            <div
-                              className="lf-selector-menu"
-                              style={{ width: 260, padding: 8 }}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <DelivererPicker
-                                excludePersonId={d.person_id}
-                                onSelect={(person) => handleInlineAssign(d, person)}
-                                onCancel={() => setPickerOpenId(null)}
-                              />
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                    <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
-                    <td className={substitutionTableStatusClass(status)}>{status}</td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+            );
+          })
+        )}
+      </RouteTable>
     </div>
   );
 }

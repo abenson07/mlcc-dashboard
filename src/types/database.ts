@@ -84,4 +84,8 @@ export type {
   FaqsUpdate,
   FaqPageAssignments,
   FaqPageAssignmentsInsert,
+  Stories,
+  StoriesInsert,
+  StoriesUpdate,
+  StoryStatus,
 } from "../../schemas";

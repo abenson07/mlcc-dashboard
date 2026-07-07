@@ -994,3 +994,126 @@
     padding-left: 0;
   }
 }
+
+/* Stories — rich text body editor */
+.lf-story-editor {
+  border: 1px solid var(--lf-canvas-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lf-story-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  border-bottom: 1px solid var(--lf-canvas-border);
+  background: #fafafa;
+}
+
+.lf-small-btn--active {
+  border-color: var(--lf-accent, #465fff);
+  color: var(--lf-accent, #465fff);
+}
+
+.lf-story-editor-body {
+  min-height: 280px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lf-story-editor-body:focus {
+  outline: none;
+}
+
+.lf-story-editor-body h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0.6em 0 0.3em;
+}
+
+.lf-story-editor-body h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0.6em 0 0.3em;
+}
+
+.lf-story-editor-body ul,
+.lf-story-editor-body ol {
+  padding-left: 1.4em;
+}
+
+.lf-story-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.lf-story-link {
+  color: var(--lf-accent, #465fff);
+  text-decoration: underline;
+}
+
+.lf-story-cover-preview {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 8px;
+  border: 1px solid var(--lf-canvas-border);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.lf-story-bubble-menu {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #18181b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+}
+
+.lf-story-bubble-btn {
+  border: none;
+  background: transparent;
+  color: #e4e4e7;
+  border-radius: 5px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lf-story-bubble-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lf-story-bubble-btn--active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.lf-story-floating-menu {
+  z-index: 40;
+}
+
+.lf-story-floating-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--lf-canvas-border);
+  background: var(--lf-card);
+  color: var(--lf-text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lf-story-floating-add:hover {
+  background: #f4f4f5;
+  color: var(--lf-text);
+}

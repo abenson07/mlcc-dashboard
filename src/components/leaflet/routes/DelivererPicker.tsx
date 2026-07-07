@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { usePeople } from "hooks";
+import { outlineBtnStyle } from "../deliverers/actionButtonStyles";
 
 type DelivererPickerProps = {
-  onSelect: (person: { id: string; name: string }) => void | Promise<void>;
+  onSelect: (person: { id: string; name: string; email: string | null }) => void | Promise<void>;
   onCancel?: () => void;
   disabled?: boolean;
   excludePersonId?: string | null;
   selecting?: boolean;
+  placeholder?: string;
 };
 
 export default function DelivererPicker({
@@ -17,6 +19,7 @@ export default function DelivererPicker({
   disabled = false,
   excludePersonId = null,
   selecting = false,
+  placeholder = "Search people…",
 }: DelivererPickerProps) {
   const [search, setSearch] = useState("");
   const trimmed = search.trim();
@@ -35,7 +38,7 @@ export default function DelivererPicker({
       <label className="lf-search" style={{ width: "100%" }}>
         <input
           type="search"
-          placeholder="Search people…"
+          placeholder={placeholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
@@ -54,7 +57,7 @@ export default function DelivererPicker({
             className="lf-selector-item"
             style={{ borderRadius: 6 }}
             disabled={disabled || selecting}
-            onClick={() => void onSelect({ id: p.id, name: p.full_name })}
+            onClick={() => void onSelect({ id: p.id, name: p.full_name, email: p.email })}
           >
             <span>
               {p.full_name}
@@ -70,7 +73,7 @@ export default function DelivererPicker({
         <button
           type="button"
           className="lf-btn lf-btn--outline"
-          style={{ alignSelf: "flex-start" }}
+          style={{ ...outlineBtnStyle, alignSelf: "flex-start" }}
           disabled={disabled || selecting}
           onClick={onCancel}
         >

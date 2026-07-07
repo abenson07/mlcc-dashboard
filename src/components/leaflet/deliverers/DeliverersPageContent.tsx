@@ -198,7 +198,7 @@ export default function DeliverersPageContent() {
                   {card.address ?? "No address on file"}
                 </div>
               </div>
-              <div className="lf-card-actions">
+              <div className="lf-card-actions lf-card-status-slot">
                 <button
                   type="button"
                   className="lf-small-btn lf-card-skip-btn"
@@ -212,8 +212,8 @@ export default function DeliverersPageContent() {
                 <span
                   className={
                     card.status === "Confirmed"
-                      ? "lf-status-badge lf-status-badge--green"
-                      : "lf-status-badge lf-status-badge--amber"
+                      ? "lf-status-badge lf-status-badge--green lf-card-status-badge"
+                      : "lf-status-badge lf-status-badge--amber lf-card-status-badge"
                   }
                 >
                   {card.status}
