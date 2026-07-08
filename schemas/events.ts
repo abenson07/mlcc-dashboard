@@ -8,6 +8,8 @@
  * - qr_code_id, webflow_item_id (migration bridge)
  */
 
+export type EventPublishStatus = "draft" | "published";
+
 export interface Events {
   id: string;
   name: string | null;
@@ -17,6 +19,7 @@ export interface Events {
   ends_at: string | null;
   slug: string | null;
   field_data: Record<string, unknown>;
+  publish_status: EventPublishStatus;
   created_at: string;
   updated_at: string;
 }
@@ -29,6 +32,7 @@ export interface EventsInsert {
   ends_at?: string | null;
   slug?: string | null;
   field_data?: Record<string, unknown>;
+  publish_status?: EventPublishStatus;
 }
 
 export interface EventsUpdate {
@@ -39,4 +43,5 @@ export interface EventsUpdate {
   ends_at?: string | null;
   slug?: string | null;
   field_data?: Record<string, unknown>;
+  publish_status?: EventPublishStatus;
 }

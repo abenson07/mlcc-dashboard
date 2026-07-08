@@ -68,6 +68,8 @@ type EventContextValue = {
   updateSponsorship: (id: string, patch: SponsorshipsUpdate) => Promise<void>;
   refetchAll: () => Promise<void>;
   updateEvent: (patch: EventsUpdate) => Promise<void>;
+  publishEvent: () => Promise<void>;
+  unpublishEvent: () => Promise<void>;
 };
 
 const EventContext = createContext<EventContextValue | null>(null);
@@ -87,6 +89,8 @@ export function EventProvider({
     error: eventError,
     refetch: refetchEvent,
     update,
+    publish,
+    unpublish,
   } = useEvent(eventId);
 
   const readOnly = eventRow ? isEventReadOnly(eventRow, event?.fieldData ?? {}) : false;
@@ -270,6 +274,14 @@ export function EventProvider({
     [readOnly, update],
   );
 
+  const publishEvent = useCallback(async () => {
+    await publish();
+  }, [publish]);
+
+  const unpublishEvent = useCallback(async () => {
+    await unpublish();
+  }, [unpublish]);
+
   const loading =
     listLoading ||
     eventLoading ||
@@ -308,6 +320,8 @@ export function EventProvider({
       updateSponsorship,
       refetchAll,
       updateEvent,
+      publishEvent,
+      unpublishEvent,
     }),
     [
       eventId,
@@ -331,6 +345,8 @@ export function EventProvider({
       updateSponsorship,
       refetchAll,
       updateEvent,
+      publishEvent,
+      unpublishEvent,
     ],
   );
 

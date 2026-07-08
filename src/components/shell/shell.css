@@ -1120,17 +1120,8 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
-.shell-widget-property-edit {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-}
-
 .shell-widget-property-input {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
   padding: 4px 6px;
   border: 1px solid var(--shell-border);
   border-radius: 4px;
@@ -1143,30 +1134,6 @@
 .shell-widget-property-input:focus {
   outline: none;
   border-color: rgba(0, 0, 0, 0.4);
-}
-
-.shell-app button.shell-widget-property-confirm-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  background: #000;
-  color: #fff;
-  font-size: 12px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.shell-app button.shell-widget-property-confirm-btn:hover {
-  background: #333;
-}
-
-.shell-app button.shell-widget-property-confirm-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 /* Popover (Route type select, Deliverer combobox) — portaled into the nearest .shell-app ancestor

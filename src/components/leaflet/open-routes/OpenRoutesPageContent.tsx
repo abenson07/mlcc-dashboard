@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { evaluateCountExpression } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
 import DelivererCell from "../routes/DelivererCell";
 import EditableCountCell from "../routes/EditableCountCell";
@@ -84,8 +85,8 @@ export default function OpenRoutesPageContent() {
   const handleSaveCount = useCallback(
     async (delivery: (typeof openDeliveries)[number], raw: string) => {
       const trimmed = raw.trim();
-      const value = Number(trimmed);
-      if (trimmed === "" || !Number.isInteger(value) || value < 0) {
+      const value = trimmed === "" ? NaN : (evaluateCountExpression(trimmed) ?? NaN);
+      if (!Number.isInteger(value) || value < 0) {
         toast.error("Leaflet count must be a non-negative whole number");
         return;
       }

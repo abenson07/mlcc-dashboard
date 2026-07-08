@@ -46,6 +46,50 @@ Events, blog/story posts, and volunteer opportunities are all managed directly t
 
 *For more technical details, see Appendix A (platform), Appendix B (payments/Stripe).*
 
+## Milestones (Adoption Plan)
+
+This is the rollout order for launching the site and admin, milestone by milestone. Dates are targets, not guarantees, and later milestones can shift if earlier ones need more time.
+
+### Website
+
+**Core Website Launch — July 13**
+The main public site goes live, including: Home, About, Contact, Donate, Subscribe, Events, Event Detail, Membership (Individual, Household, Student, Senior), One Seattle Plan, Volunteer, Volunteer Template, Leaflet, Leaflet Article, Leaflet Story, Leaflet Template, Committees (Advocacy, Business, Communications, Emergency Hub, Newsletter), and the Bylaws page.
+
+**Business Membership — July 24**
+The Business Membership page goes live, extending membership signup to local businesses alongside individuals and households.
+
+**Leaflet Distribution Pages — August 21**
+Adds Leaflet Issues, Leaflet Issue Template, and the Maple Leaf page, giving each leaflet run its own public-facing page.
+
+**Board Info / Meeting Minutes — August 5**
+Adds Board, Join the Board, Join the Board Confirmation, Meeting Minutes, and Meeting Minutes Detail/Template — making board membership and meeting minutes publicly visible.
+
+**Community Stories and Events — September 11**
+Adds Submit an Event, Submit Event Confirmation, Submit Story, and Submit Story Confirmation — letting the community submit content for board review.
+
+### Admin
+
+**Leaflet Core Functionality — July 9**
+Builds the foundational admin tools other admin features depend on: base dashboard workflows and core data management.
+
+**Manage Events — July 17**
+Admin workflows for creating, editing, and organizing events used across the platform.
+
+**Invoicing + Payment Tracking — July 24**
+Adds invoice and payment-status tracking so MLCC can manage billing and follow up on outstanding amounts.
+
+**Sponsorship Management — July 31**
+Admin tools for managing sponsor records, status tracking, and sponsorship workflows.
+
+**Refunds + Reminders — August 7**
+Admin workflows for issuing refunds and sending reminders for payments, participation, and other time-sensitive follow-ups.
+
+**Volunteer Management — August 14**
+Admin tools for organizing volunteer information and coordination workflows.
+
+**Inbox — September 11**
+An admin inbox for viewing and responding to shared MLCC email directly in the dashboard, without needing direct Gmail access.
+
 ---
 
 # Appendices

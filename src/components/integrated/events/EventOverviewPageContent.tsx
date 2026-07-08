@@ -4,6 +4,7 @@ import Link from "next/link";
 import { IconCalendar, IconPlus } from "@/components/leaflet/icons";
 import { formatEventTimeRange } from "@/lib/events/eventData";
 import { useEventContext } from "./EventContext";
+import PublishEventButton from "./PublishEventButton";
 
 export default function EventOverviewPageContent() {
   const {
@@ -60,6 +61,7 @@ export default function EventOverviewPageContent() {
         event_template_id: event.event_template_id,
         slug: event.slug,
         field_data: event.fieldData,
+        publish_status: event.publishStatus,
         created_at: "",
         updated_at: "",
       })
@@ -77,6 +79,7 @@ export default function EventOverviewPageContent() {
               {event.distributionLabel}
             </span>
           </div>
+          <PublishEventButton />
         </div>
 
         <section className="lf-overview-card">

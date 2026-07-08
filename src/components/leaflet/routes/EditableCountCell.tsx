@@ -21,9 +21,8 @@ export default function EditableCountCell({
     <td className="lf-meta">
       {isEditing ? (
         <input
-          type="number"
-          min={0}
-          step={1}
+          type="text"
+          inputMode="numeric"
           className="lf-count-input"
           autoFocus
           value={draft}
@@ -32,7 +31,8 @@ export default function EditableCountCell({
           onBlur={onSave}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              e.currentTarget.blur();
+              e.preventDefault();
+              onSave();
             } else if (e.key === "Escape") {
               onCancel();
             }

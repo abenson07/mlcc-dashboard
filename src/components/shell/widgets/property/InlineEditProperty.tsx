@@ -69,8 +69,12 @@ export default function InlineEditProperty({
       onChange={(e) => setDraft(e.target.value)}
       onBlur={confirm}
       onKeyDown={(e) => {
-        if (e.key === "Enter") e.currentTarget.blur();
-        else if (e.key === "Escape") cancel();
+        if (e.key === "Enter") {
+          e.preventDefault();
+          void confirm();
+        } else if (e.key === "Escape") {
+          cancel();
+        }
       }}
     />
   );

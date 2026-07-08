@@ -104,6 +104,10 @@ type LeafletContextValue = {
   saveSponsorshipTiers: (tiers: SponsorshipTierSeed[]) => Promise<void>;
   sponsorshipTierSeeds: SponsorshipTierSeed[];
   updateLeaflet: (patch: LeafletsUpdate) => Promise<void>;
+  sponsorModalOpen: boolean;
+  setSponsorModalOpen: (open: boolean) => void;
+  invoiceModalOpen: boolean;
+  setInvoiceModalOpen: (open: boolean) => void;
 };
 
 const LeafletContext = createContext<LeafletContextValue | null>(null);
@@ -123,6 +127,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
+  const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
   const {
     leaflets: leafletRows,
@@ -499,6 +505,10 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       saveSponsorshipTiers,
       sponsorshipTierSeeds,
       updateLeaflet,
+      sponsorModalOpen,
+      setSponsorModalOpen,
+      invoiceModalOpen,
+      setInvoiceModalOpen,
     }),
     [
       leafletId,
@@ -544,6 +554,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       saveSponsorshipTiers,
       sponsorshipTierSeeds,
       updateLeaflet,
+      sponsorModalOpen,
+      invoiceModalOpen,
     ],
   );
 

@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useRoutes } from "hooks";
 import { useLeafletContext } from "@/components/leaflet/LeafletContext";
-import { openRoutesTableStatusLabel } from "@/components/leaflet/deliveryUtils";
+import { evaluateCountExpression, openRoutesTableStatusLabel } from "@/components/leaflet/deliveryUtils";
 import { getApiBase } from "@/lib/apiBase";
 import ShellWidget from "./ShellWidget";
 import PropertyRow from "./property/PropertyRow";
@@ -87,8 +87,8 @@ export default function RouteDetailsWidget() {
   async function handleSaveCount(raw: string) {
     if (!delivery) return;
     const trimmed = raw.trim();
-    const value = Number(trimmed);
-    if (trimmed === "" || !Number.isInteger(value) || value < 0) {
+    const value = trimmed === "" ? NaN : (evaluateCountExpression(trimmed) ?? NaN);
+    if (!Number.isInteger(value) || value < 0) {
       toast.error("Leaflet count must be a non-negative whole number");
       throw new Error("validation");
     }

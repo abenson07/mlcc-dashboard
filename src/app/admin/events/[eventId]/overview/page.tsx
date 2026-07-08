@@ -8,7 +8,7 @@ export default function ShellPreviewEventOverviewPage() {
   const { event } = useEventContext();
 
   if (event?.kind === "committee_meeting") {
-    return <CommitteeMeetingOverviewContent />;
+    return <CommitteeMeetingOverviewContent embedded />;
   }
 
   return <EventOverviewPageContent />;

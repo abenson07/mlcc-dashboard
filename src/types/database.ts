@@ -46,6 +46,7 @@ export type {
   Events,
   EventsInsert,
   EventsUpdate,
+  EventPublishStatus,
   VolunteerAsks,
   VolunteerAsksInsert,
   VolunteerAsksUpdate,

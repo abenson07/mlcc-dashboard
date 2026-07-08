@@ -18,11 +18,13 @@ export default function SponsorshipsPageContent() {
     createSponsorship,
     updateSponsorship,
     refetchAll,
+    sponsorModalOpen,
+    setSponsorModalOpen,
+    invoiceModalOpen,
+    setInvoiceModalOpen,
   } = useLeafletContext();
   const [sponsorTab, setSponsorTab] = useState<SponsorTab>("all");
   const [invoiceTab, setInvoiceTab] = useState<InvoiceTab>("all");
-  const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
-  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
   const filteredSponsors = useMemo(() => {
     if (sponsorTab === "paid") return sponsors.filter((s) => s.status === "Paid");

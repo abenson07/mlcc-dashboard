@@ -33,6 +33,7 @@ export default function EventDetailsContent() {
     event_template_id: event.event_template_id,
     slug: event.slug,
     field_data: fd,
+    publish_status: event.publishStatus,
     created_at: "",
     updated_at: "",
   });

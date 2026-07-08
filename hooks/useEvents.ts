@@ -14,7 +14,7 @@ import type { Events, EventsUpdate } from "@/types/database";
 export const EVENTS_QUERY_KEY = ["events"] as const;
 
 const EVENTS_SELECT =
-  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, created_at, updated_at";
+  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, publish_status, created_at, updated_at";
 
 async function fetchEventsRows(): Promise<Events[]> {
   if (!supabaseClient) {
@@ -140,6 +140,42 @@ export function useEvent(eventId: string | null, { autoFetch = true } = {}) {
     },
   });
 
+  const publishMutation = useMutation({
+    mutationFn: async () => {
+      if (!eventId) throw new Error("No event selected");
+
+      const res = await fetch(`${getApiBase()}/api/events/${encodeURIComponent(eventId)}/publish`, {
+        method: "POST",
+      });
+
+      const body = (await res.json()) as { error?: string; event?: Events };
+      if (!res.ok) throw new Error(body.error ?? "Failed to publish event");
+      return body.event!;
+    },
+    onSuccess: (event) => {
+      queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: [...EVENTS_QUERY_KEY, event.id] });
+    },
+  });
+
+  const unpublishMutation = useMutation({
+    mutationFn: async () => {
+      if (!eventId) throw new Error("No event selected");
+
+      const res = await fetch(`${getApiBase()}/api/events/${encodeURIComponent(eventId)}/unpublish`, {
+        method: "POST",
+      });
+
+      const body = (await res.json()) as { error?: string; event?: Events };
+      if (!res.ok) throw new Error(body.error ?? "Failed to unpublish event");
+      return body.event!;
+    },
+    onSuccess: (event) => {
+      queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: [...EVENTS_QUERY_KEY, event.id] });
+    },
+  });
+
   const event: EventEdition | null = data ? mapEventEdition(data) : null;
 
   return {
@@ -151,5 +187,7 @@ export function useEvent(eventId: string | null, { autoFetch = true } = {}) {
       await refetch();
     },
     update: (patch: EventsUpdate) => updateMutation.mutateAsync(patch),
+    publish: () => publishMutation.mutateAsync(),
+    unpublish: () => unpublishMutation.mutateAsync(),
   };
 }

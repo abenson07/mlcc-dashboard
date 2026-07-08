@@ -41,6 +41,15 @@ export function substitutionTableStatusClass(label: string): string {
   return "text-zinc-500 font-medium";
 }
 
+/** Evaluates simple add/subtract expressions typed into a leaflet count field, e.g. "54-5" -> 49. */
+export function evaluateCountExpression(raw: string): number | null {
+  const compact = raw.replace(/\s+/g, "");
+  if (!/^-?\d+([+-]\d+)*$/.test(compact)) return null;
+  const tokens = compact.match(/[+-]?\d+/g);
+  if (!tokens) return null;
+  return tokens.reduce((sum, token) => sum + Number(token), 0);
+}
+
 export function formatCountChange(delta: number | null | undefined): {
   text: string;
   className: string;

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEvents, useFavorites, useLeaflets } from "hooks";
-import { LeafletProvider } from "@/components/leaflet/LeafletContext";
+import { LeafletProvider, useLeafletContext } from "@/components/leaflet/LeafletContext";
 import Canvas from "@/components/shell/Canvas";
 import CanvasArea from "@/components/shell/CanvasArea";
 import CanvasContainer from "@/components/shell/CanvasContainer";
@@ -13,6 +13,7 @@ import CanvasTopbar from "@/components/shell/CanvasTopbar";
 import CanvasTooling from "@/components/shell/CanvasTooling";
 import ShellPreviewNav from "@/components/shell/ShellPreviewNav";
 import {
+  isShellPreviewEventDetailRoute,
   isShellPreviewFaqsRoute,
   isShellPreviewLeafletDeliverersRoute,
   isShellPreviewLeafletRoute,
@@ -22,6 +23,7 @@ import {
   parseShellPreviewEventId,
   shellPreviewBreadcrumbLabel,
 } from "@/components/shell/navConfigs";
+import AttendanceWidget from "@/components/shell/widgets/AttendanceWidget";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import Shell from "@/components/shell/Shell";
 import ListsForLeafletWidget from "@/components/shell/widgets/ListsForLeafletWidget";
@@ -37,6 +39,26 @@ import SponsorshipLevelsWidget from "@/components/shell/widgets/SponsorshipLevel
 type ShellPreviewContentProps = {
   children: ReactNode;
 };
+
+function LeafletSponsorshipTooling({
+  widgetPanelOpen,
+  onToggleWidgetPanel,
+}: {
+  widgetPanelOpen: boolean;
+  onToggleWidgetPanel: () => void;
+}) {
+  const { setSponsorModalOpen, setInvoiceModalOpen } = useLeafletContext();
+  return (
+    <CanvasTooling
+      widgetPanelOpen={widgetPanelOpen}
+      onToggleWidgetPanel={onToggleWidgetPanel}
+      links={[
+        { label: "+ Add sponsor", onClick: () => setSponsorModalOpen(true) },
+        { label: "Issue invoice", onClick: () => setInvoiceModalOpen(true) },
+      ]}
+    />
+  );
+}
 
 export default function ShellPreviewContent({ children }: ShellPreviewContentProps) {
   const pathname = usePathname() ?? "";
@@ -55,6 +77,11 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
     const search = searchParams.toString();
     return normalizeRoute(search ? `${pathname}?${search}` : pathname);
   }, [pathname, searchParams]);
+
+  const currentEventId = parseShellPreviewEventId(pathname);
+  const currentEvent = currentEventId
+    ? events.find((item) => item.id === currentEventId)
+    : null;
 
   const breadcrumbs = useMemo(() => {
     const eventId = parseShellPreviewEventId(pathname);
@@ -91,35 +118,34 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
       <Shell nav={<ShellPreviewNav />}>
         <CanvasArea>
           <Canvas>
-            <CanvasTopbar
-              breadcrumbs={breadcrumbs}
-              isFavorite={isFavorite(currentRoute)}
-              onFavoriteToggle={handleFavoriteToggle}
-              widgetPanelOpen={widgetPanelOpen}
-              onToggleWidgetPanel={() =>
-                setWidgetPanelOpen((open) => {
-                  const next = !open;
-                  localStorage.setItem("widget-panel-open", String(next));
-                  return next;
-                })
-              }
-              tooling={
-                isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
-                  <CanvasTooling
-                    widgetPanelOpen={widgetPanelOpen}
-                    onToggleWidgetPanel={() =>
-                      setWidgetPanelOpen((open) => {
-                        const next = !open;
-                        localStorage.setItem("widget-panel-open", String(next));
-                        return next;
-                      })
-                    }
-                    links={[{ label: "+ Add sponsor" }, { label: "Issue invoice" }]}
-                  />
-                ) : undefined
-              }
-            />
             <LeafletProvider>
+              <CanvasTopbar
+                breadcrumbs={breadcrumbs}
+                isFavorite={isFavorite(currentRoute)}
+                onFavoriteToggle={handleFavoriteToggle}
+                widgetPanelOpen={widgetPanelOpen}
+                onToggleWidgetPanel={() =>
+                  setWidgetPanelOpen((open) => {
+                    const next = !open;
+                    localStorage.setItem("widget-panel-open", String(next));
+                    return next;
+                  })
+                }
+                tooling={
+                  isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
+                    <LeafletSponsorshipTooling
+                      widgetPanelOpen={widgetPanelOpen}
+                      onToggleWidgetPanel={() =>
+                        setWidgetPanelOpen((open) => {
+                          const next = !open;
+                          localStorage.setItem("widget-panel-open", String(next));
+                          return next;
+                        })
+                      }
+                    />
+                  ) : undefined
+                }
+              />
               <CanvasContainer
                 showWidgetPanel={
                   widgetPanelOpen &&
@@ -128,7 +154,9 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
                 }
                 content={<CanvasContent>{children}</CanvasContent>}
                 widgetPanel={
-                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
+                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewEventDetailRoute(pathname) && currentEvent?.kind === "committee_meeting" ? (
+                    <AttendanceWidget eventId={currentEvent.id} />
+                  ) : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
                     <>
                       <DelivererWidget />
                       <RouteDetailsWidget />

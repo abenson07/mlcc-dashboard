@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
-import { routesTableStatusLabel } from "../deliveryUtils";
+import { evaluateCountExpression, routesTableStatusLabel } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
 import SkipRouteModal, { type CoveringPerson } from "../deliverers/SkipRouteModal";
 import DelivererCell from "./DelivererCell";
@@ -102,8 +102,8 @@ export default function RoutesPageContent() {
   const handleSaveCount = useCallback(
     async (delivery: (typeof deliveries)[number], raw: string) => {
       const trimmed = raw.trim();
-      const value = Number(trimmed);
-      if (trimmed === "" || !Number.isInteger(value) || value < 0) {
+      const value = trimmed === "" ? NaN : (evaluateCountExpression(trimmed) ?? NaN);
+      if (!Number.isInteger(value) || value < 0) {
         toast.error("Leaflet count must be a non-negative whole number");
         return;
       }
