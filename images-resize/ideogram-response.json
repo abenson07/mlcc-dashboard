@@ -1,0 +1,14 @@
+{
+  "created": "2026-07-08T16:39:04.164998+00:00",
+  "data": [
+    {
+      "is_image_safe": true,
+      "prompt": "A promotional poster for an event titled 'SUMMER SOCIAL' scheduled for July 15th from 5:30 to 8 PM. The event is hosted by the 'MAPLE LEAF COMMUNITY COUNCIL' and is set to take place at 'MAPLE LEAF PARK BY THE PLAYGROUND'. The poster is colorful, with dominant shades of orange, yellow, and blue. It lists several features of the event, including 'FREE ICE CREAM' provided by 'ACEHARDWARE', 'MUSIC', 'GIVEAWAYS', and 'COMMUNITY'. There's also a QR code on the bottom right, possibly for more information or to access an online platform related to the event.",
+      "resolution": "768x1216",
+      "seed": 1591619785,
+      "style_type": "GENERAL",
+      "upscaled_resolution": null,
+      "url": "https://ideogram.ai/api/images/ephemeral/jT4UufBOXUiaQHu6k_p_fg.png?exp=1783615166&sig=66c8120633354d1d436d054c3f7e788209d933eb7c523617a9c75fa433278d3d"
+    }
+  ]
+}

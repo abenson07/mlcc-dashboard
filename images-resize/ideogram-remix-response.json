@@ -1,0 +1,14 @@
+{
+  "created": "2026-07-08T18:01:10.212929+00:00",
+  "data": [
+    {
+      "is_image_safe": true,
+      "prompt": "Fill the space. Extend the background naturally to fill empty areas. Preserve the original poster design, text, and layout exactly.",
+      "resolution": "768x1216",
+      "seed": 173679302,
+      "style_type": "GENERAL",
+      "upscaled_resolution": null,
+      "url": "https://ideogram.ai/api/images/ephemeral/nvJTl9pPVXit4pXx0yW6cw.png?exp=1783620076&sig=e64a8f842e03e4044b721cd99fcc87b083e9107cd30886406c89c04a9918c031"
+    }
+  ]
+}
