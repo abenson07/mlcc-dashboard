@@ -19,6 +19,7 @@ import {
   isShellPreviewLeafletRoute,
   isShellPreviewLeafletRouteDetailsRoute,
   isShellPreviewLeafletSponsorshipsRoute,
+  isShellPreviewLeafletTodoRoute,
   isShellPreviewWidgetsRoute,
   parseShellPreviewEventId,
   shellPreviewBreadcrumbLabel,
@@ -27,9 +28,9 @@ import AttendanceWidget from "@/components/shell/widgets/AttendanceWidget";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import Shell from "@/components/shell/Shell";
 import ListsForLeafletWidget from "@/components/shell/widgets/ListsForLeafletWidget";
-import LeafletWidgetPanel from "@/components/shell/widgets/LeafletWidgetPanel";
+import QrCodesWidget from "@/components/shell/widgets/QrCodesWidget";
+import DistributionDetailsWidget from "@/components/shell/widgets/DistributionDetailsWidget";
 import RouteDetailsWidget from "@/components/shell/widgets/RouteDetailsWidget";
-import DelivererWidget from "@/components/shell/widgets/DelivererWidget";
 import BuildingContactWidget from "@/components/shell/widgets/BuildingContactWidget";
 import CommunicationStagesWidget from "@/components/shell/widgets/CommunicationStagesWidget";
 import CoverSheetsWidget from "@/components/shell/widgets/CoverSheetsWidget";
@@ -158,7 +159,6 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
                     <AttendanceWidget eventId={currentEvent.id} />
                   ) : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
                     <>
-                      <DelivererWidget />
                       <RouteDetailsWidget />
                       <BuildingContactWidget />
                     </>
@@ -169,13 +169,21 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
                     </>
                   ) : isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
                     <>
-                      <BudgetSponsorshipsWidget />
                       <SponsorshipLevelsWidget />
+                      <BudgetSponsorshipsWidget />
+                    </>
+                  ) : isShellPreviewLeafletTodoRoute(pathname) ? (
+                    <>
+                      <DistributionDetailsWidget />
+                      <ListsForLeafletWidget />
+                      <QrCodesWidget />
                     </>
                   ) : (
                     <>
+                      <DistributionDetailsWidget />
+                      <CommunicationStagesWidget />
                       <ListsForLeafletWidget />
-                      {isShellPreviewLeafletRoute(pathname) && <LeafletWidgetPanel />}
+                      <QrCodesWidget />
                     </>
                   )
                 }

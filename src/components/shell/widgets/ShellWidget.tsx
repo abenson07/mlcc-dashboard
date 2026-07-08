@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 type ShellWidgetProps = {
   title: string;
   children: ReactNode;
-  cardId?: string;
+  widgetId?: string;
   headerAction?: ReactNode;
 };
 
-export default function ShellWidget({ title, children, cardId, headerAction }: ShellWidgetProps) {
+export default function ShellWidget({ title, children, widgetId, headerAction }: ShellWidgetProps) {
   return (
-    <section className="shell-widget" data-lf-card={cardId}>
+    <section className="shell-widget" data-widget-id={widgetId}>
       <div className="shell-widget-header">
         <h2 className="shell-widget-title">{title}</h2>
         {headerAction}

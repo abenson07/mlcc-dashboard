@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Command } from "cmdk";
 import { usePeople } from "hooks";
 import PropertyPopover from "./property/PropertyPopover";
+import { IconSwap } from "./widgetIcons";
 
 export type PickedPerson = { id: string; name: string; email: string | null };
 
@@ -12,6 +13,7 @@ type DelivererNameFieldProps = {
   hasPerson: boolean;
   readOnly?: boolean;
   excludePersonId?: string | null;
+  statusLabel?: string;
   onPickPerson: (person: PickedPerson) => void;
   onSkip: () => void;
   onRemove: () => void;
@@ -22,6 +24,7 @@ export default function DelivererNameField({
   hasPerson,
   readOnly = false,
   excludePersonId = null,
+  statusLabel,
   onPickPerson,
   onSkip,
   onRemove,
@@ -51,22 +54,29 @@ export default function DelivererNameField({
         className={`shell-widget-property-static${hasPerson ? "" : " shell-widget-property-trigger--placeholder"}`}
       >
         {personName ?? "Unassigned"}
+        {hasPerson && statusLabel && <span className="shell-widget-deliverer-status"> · {statusLabel}</span>}
       </span>
     );
   }
 
   return (
-    <div style={{ flex: 1, minWidth: 0 }}>
+    <div className="shell-widget-deliverer-field" style={{ flex: 1, minWidth: 0 }}>
       <PropertyPopover
         open={open}
         onClose={close}
         trigger={
           <button
             type="button"
-            className={`shell-widget-property-trigger${hasPerson ? "" : " shell-widget-property-trigger--placeholder"}`}
+            className={`shell-widget-property-trigger shell-widget-deliverer-trigger${hasPerson ? "" : " shell-widget-property-trigger--placeholder"}`}
             onClick={() => setOpen((o) => !o)}
           >
-            {personName ?? "Add deliverer"}
+            <span className="shell-widget-deliverer-trigger-label">
+              {personName ?? "Add deliverer"}
+              {hasPerson && statusLabel && <span className="shell-widget-deliverer-status"> · {statusLabel}</span>}
+            </span>
+            <span className="shell-widget-deliverer-swap-icon">
+              <IconSwap />
+            </span>
           </button>
         }
       >
@@ -82,7 +92,10 @@ export default function DelivererNameField({
             <div className="shell-widget-popover-list">
               {hasPerson && (
                 <div className="shell-widget-popover-item shell-widget-popover-item--static" aria-disabled="true">
-                  <span className="shell-widget-popover-item-label">{personName}</span>
+                  <span className="shell-widget-popover-item-label">
+                    {personName}
+                    {statusLabel && <span className="shell-widget-deliverer-status"> · {statusLabel}</span>}
+                  </span>
                   <span className="shell-widget-popover-item-check">✓</span>
                 </div>
               )}

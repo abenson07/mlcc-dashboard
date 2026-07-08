@@ -113,6 +113,7 @@ export type CommStage = {
   sentDate?: string;
   timing?: string;
   description?: string;
+  sentCount?: number;
   yes?: number;
   unresponsive?: number;
   no?: number;
@@ -155,6 +156,7 @@ export type SponsorshipTier = {
   amount: number;
   quantity: number;
   left: string;
+  remaining: number;
 };
 
 export type PastDeliverer = {

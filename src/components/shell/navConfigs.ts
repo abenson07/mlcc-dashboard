@@ -255,6 +255,7 @@ export type ShellPreviewFavorite = {
 
 export function buildShellPreviewL1Config(
   favorites: ShellPreviewFavorite[] = [],
+  options?: { onRemoveFavorite?: (favorite: ShellPreviewFavorite) => void },
 ): NavPanelConfig {
   const groups: NavGroupConfig[] = [SHELL_PREVIEW_PRIMARY_GROUP];
 
@@ -268,6 +269,9 @@ export function buildShellPreviewL1Config(
         label: favorite.name,
         icon: Star,
         href: favorite.route,
+        onRemove: options?.onRemoveFavorite
+          ? () => options.onRemoveFavorite!(favorite)
+          : undefined,
       })),
     });
   }
@@ -336,6 +340,12 @@ export function isShellPreviewLeafletDeliverersRoute(pathname: string): boolean 
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
   return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/deliverers`;
+}
+
+export function isShellPreviewLeafletTodoRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/todo`;
 }
 
 export function isShellPreviewLeafletSponsorshipsRoute(pathname: string): boolean {

@@ -9,6 +9,7 @@ import {
   ChevronsUpDown,
   PencilLine,
   Search,
+  X,
 } from "lucide-react";
 import type {
   DropdownItem,
@@ -280,6 +281,28 @@ function NavItemRow({
       ) : null}
       <span className="shell-nav-item-label">{label}</span>
       {item.badge ? <span className="shell-nav-badge">{item.badge}</span> : null}
+      {item.onRemove ? (
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={`Remove ${item.label}`}
+          className="shell-nav-item-remove"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            item.onRemove?.();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              item.onRemove?.();
+            }
+          }}
+        >
+          <X size={12} strokeWidth={1.5} />
+        </span>
+      ) : null}
     </>
   );
 

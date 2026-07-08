@@ -4,16 +4,32 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useLeafletContext } from "@/components/leaflet/LeafletContext";
 import SendConfirmationModal from "@/components/leaflet/deliverers/SendConfirmationModal";
+import CloseOutReviewModal from "@/components/leaflet/close-out/CloseOutReviewModal";
+import CloseOutConfirmedModal from "@/components/leaflet/close-out/CloseOutConfirmedModal";
+import type { CloseOutMetrics } from "@/lib/leaflets/getCloseOutMetrics";
 import ShellWidget from "./ShellWidget";
+import {
+  IconStatusConfirmed,
+  IconStatusUnresponsive,
+  IconStatusDeclined,
+  IconStatusSwapNeeded,
+} from "./widgetIcons";
 
 export default function CommunicationStagesWidget() {
-  const { commStages, unconfirmedCount, sendComm } = useLeafletContext();
+  const { leafletId, commStages, unconfirmedCount, sendComm, closeLeaflet, refetchAll } =
+    useLeafletContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [endReviewOpen, setEndReviewOpen] = useState(false);
+  const [endConfirmedOpen, setEndConfirmedOpen] = useState(false);
+  const [endedMetrics, setEndedMetrics] = useState<CloseOutMetrics | null>(null);
 
-  if (!commStages || commStages.length === 0) return null;
+  if (!commStages || commStages.length === 0 || !leafletId) return null;
 
   const activeStage = commStages.find((s) => s.state === "active");
+  const allCompleted = commStages.every((s) => s.state === "completed");
+  const statsStage = commStages.find((s) => s.yes != null);
+  const lastStage = commStages[commStages.length - 1];
 
   async function handleSend() {
     if (!activeStage?.stepKey) return;
@@ -29,12 +45,27 @@ export default function CommunicationStagesWidget() {
     }
   }
 
+  async function handleEndLeaflet() {
+    await closeLeaflet();
+    await refetchAll();
+  }
+
+  function handleEnded(metrics: CloseOutMetrics) {
+    setEndReviewOpen(false);
+    setEndedMetrics(metrics);
+    setEndConfirmedOpen(true);
+    toast.success("Leaflet closed");
+  }
+
   return (
-    <ShellWidget title="Communication Stages">
+    <ShellWidget title="Communication Stages" widgetId="communication-stages">
       {commStages.map((stage) => {
-        const isCompleted = stage.state === "completed";
         const isActive = stage.state === "active";
         const isUpcoming = stage.state === "upcoming";
+        const isStatsStage = stage === statsStage;
+        const isFinalMetricsRow =
+          allCompleted && stage === lastStage && statsStage != null && stage !== statsStage;
+        const isBold = isActive || isFinalMetricsRow;
 
         return (
           <div
@@ -49,44 +80,74 @@ export default function CommunicationStagesWidget() {
               <span
                 className={
                   "shell-widget-item-label" +
-                  (isCompleted ? "" : isActive ? "" : " shell-widget-item-label--muted")
+                  (isBold ? "" : " shell-widget-item-label--muted")
                 }
               >
                 {stage.name}
               </span>
 
-              {isCompleted && stage.yes != null && (
+              {isStatsStage && !allCompleted && stage.yes != null && (
                 <div className="shell-widget-comm-stats">
                   <span className="shell-widget-comm-stat">
-                    <PeopleIcon />
+                    <IconStatusConfirmed />
                     {stage.yes}
                   </span>
                   <span className="shell-widget-comm-stat">
-                    <MailIcon />
+                    <IconStatusUnresponsive />
                     {stage.unresponsive}
                   </span>
                   <span className="shell-widget-comm-stat">
-                    <CheckIcon />
+                    <IconStatusDeclined />
                     {stage.no}
                   </span>
                   <span className="shell-widget-comm-stat" title={`${stage.noSkipped ?? 0} skipped, ${stage.noRemoved ?? 0} removed`}>
-                    <SwapIcon />
+                    <IconStatusSwapNeeded />
                     {stage.noSkipped ?? 0}
-                  </span>
-                  <span className="shell-widget-comm-sent">
-                    {((stage.yes ?? 0) + (stage.unresponsive ?? 0) + (stage.no ?? 0))} Sent
                   </span>
                 </div>
               )}
 
-              {isActive && stage.timing && (
-                <span className="shell-widget-comm-timing">{stage.timing}</span>
+              {isStatsStage && allCompleted && stage.yes != null && (
+                <span className="shell-widget-comm-timing">
+                  {(stage.yes ?? 0) + (stage.unresponsive ?? 0) + (stage.no ?? 0)} sent, {stage.yes} confirmed
+                </span>
               )}
 
-              {isUpcoming && stage.timing && (
+              {isFinalMetricsRow && (
+                <div className="shell-widget-comm-stats">
+                  <span className="shell-widget-comm-stat">
+                    <IconStatusConfirmed />
+                    {statsStage?.yes}
+                  </span>
+                  <span className="shell-widget-comm-stat">
+                    <IconStatusUnresponsive />
+                    {statsStage?.unresponsive}
+                  </span>
+                  <span className="shell-widget-comm-stat">
+                    <IconStatusDeclined />
+                    {statsStage?.no}
+                  </span>
+                  <span className="shell-widget-comm-stat" title={`${statsStage?.noSkipped ?? 0} skipped, ${statsStage?.noRemoved ?? 0} removed`}>
+                    <IconStatusSwapNeeded />
+                    {statsStage?.noSkipped ?? 0}
+                  </span>
+                </div>
+              )}
+
+              {stage.state === "completed" && !isStatsStage && !isFinalMetricsRow && (
+                <span className="shell-widget-comm-timing">{stage.sentCount} sent</span>
+              )}
+
+              {(isActive || isUpcoming) && stage.timing && (
                 <span className="shell-widget-comm-timing">{stage.timing}</span>
               )}
             </div>
+
+            {isStatsStage && !allCompleted && stage.yes != null && (
+              <span className="shell-widget-comm-sent">
+                {(stage.yes ?? 0) + (stage.unresponsive ?? 0) + (stage.no ?? 0)} Sent
+              </span>
+            )}
 
             {isActive && (
               <button
@@ -110,6 +171,16 @@ export default function CommunicationStagesWidget() {
         );
       })}
 
+      {allCompleted && (
+        <button
+          type="button"
+          className="shell-widget-close-run-btn"
+          onClick={() => setEndReviewOpen(true)}
+        >
+          Close leaflet run
+        </button>
+      )}
+
       <SendConfirmationModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -117,45 +188,20 @@ export default function CommunicationStagesWidget() {
         onSend={handleSend}
         sending={sending}
       />
+
+      <CloseOutReviewModal
+        isOpen={endReviewOpen}
+        leafletId={leafletId}
+        onClose={() => setEndReviewOpen(false)}
+        onClosed={handleEnded}
+        onCloseLeaflet={handleEndLeaflet}
+      />
+      <CloseOutConfirmedModal
+        isOpen={endConfirmedOpen}
+        leafletId={leafletId}
+        metrics={endedMetrics}
+        onDone={() => setEndConfirmedOpen(false)}
+      />
     </ShellWidget>
-  );
-}
-
-function PeopleIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="5" cy="4" r="2.5" />
-      <path d="M1 12c0-2.2 1.8-4 4-4s4 1.8 4 4" />
-      <circle cx="10" cy="5" r="2" />
-      <path d="M9 12c0-1.3.7-2.5 1.8-3.2" />
-    </svg>
-  );
-}
-
-function MailIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="2.5" width="12" height="9" rx="1.5" />
-      <path d="M1 3.5l6 4.5 6-4.5" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 4L5.5 10 3 7.5" />
-    </svg>
-  );
-}
-
-function SwapIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 1.5L1.5 4 4 6.5" />
-      <path d="M10 7.5L12.5 10 10 12.5" />
-      <path d="M1.5 4h8" />
-      <path d="M12.5 10H4.5" />
-    </svg>
   );
 }

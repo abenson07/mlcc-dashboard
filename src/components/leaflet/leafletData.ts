@@ -264,6 +264,9 @@ export function buildCommStages(
   deliveries: DeliveryWithRelations[],
 ): CommStage[] {
   const counts = responseCounts(deliveries);
+  const recipientCount = deliveries.filter(
+    (d) => d.person_id && d.people?.email,
+  ).length;
   let foundActive = false;
 
   return settings.map((s, index) => {
@@ -314,6 +317,8 @@ export function buildCommStages(
         stage.no = counts.no;
         stage.noSkipped = counts.noSkipped;
         stage.noRemoved = counts.noRemoved;
+      } else {
+        stage.sentCount = recipientCount;
       }
     }
 
@@ -324,14 +329,18 @@ export function buildCommStages(
           : s.name;
     }
 
-    if (state === "upcoming" && s.offset_days != null) {
-      stage.timing =
-        s.offset_days < 0
-          ? `Send in ${Math.abs(s.offset_days)} days`
-          : s.offset_days > 0
-            ? `Send in ${s.offset_days} days`
-            : "Send on distribution day";
-      stage.description = s.name;
+    if (state === "active" || state === "upcoming") {
+      if (s.offset_days != null) {
+        stage.timing =
+          s.offset_days < 0
+            ? `Send in ${Math.abs(s.offset_days)} days`
+            : s.offset_days > 0
+              ? `Send in ${s.offset_days} days`
+              : "Send on distribution day";
+      } else if (state === "active") {
+        stage.timing = "Send in today";
+      }
+      stage.description ??= s.name;
     }
 
     if (index === settings.length - 1 && state === "upcoming") {
@@ -400,6 +409,12 @@ export function buildBudget(
   const progressPct = printBudget > 0 ? Math.round((spent / printBudget) * 100) : 0;
   const sponsorshipProgressPct =
     sponsorshipGoal > 0 ? Math.round((raised / sponsorshipGoal) * 100) : 0;
+  const sponsorshipCommitted = raised + pledgedAmount;
+  const membershipAmount = Math.max(0, sponsorshipGoal - sponsorshipCommitted);
+  const sponsorshipPctOfGoal =
+    sponsorshipGoal > 0 ? Math.round((sponsorshipCommitted / sponsorshipGoal) * 100) : 0;
+  const membershipPctOfGoal =
+    sponsorshipGoal > 0 ? Math.round((membershipAmount / sponsorshipGoal) * 100) : 0;
 
   return {
     printBudget,
@@ -410,6 +425,10 @@ export function buildBudget(
     raised,
     pledged: pledgedAmount,
     sponsorshipProgressPct,
+    sponsorshipCommitted,
+    membershipAmount,
+    sponsorshipPctOfGoal,
+    membershipPctOfGoal,
   };
 }
 
@@ -441,17 +460,17 @@ export function buildSponsorshipTiers(sponsorships: Sponsorships[]) {
   const actualSponsors = sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s));
 
   return tiers.map((tier) => {
-    const taken = actualSponsors.filter(
-      (s) =>
-        s.amount === tier.amount &&
-        (s.status === "paid" || s.status === "pledged" || s.status === "invoiced"),
+    const matchingSponsors = actualSponsors.filter((s) => s.amount === tier.amount);
+    const taken = matchingSponsors.filter(
+      (s) => s.status === "paid" || s.status === "pledged" || s.status === "invoiced",
     ).length;
-    const left = tier.quantity - taken;
+    const remaining = Math.max(0, tier.quantity - taken);
     return {
       name: tier.name,
       amount: tier.amount,
       quantity: tier.quantity,
-      left: left <= 0 ? "Sold out" : `${left} left`,
+      left: remaining <= 0 ? "Sold out" : `${remaining} Remaining`,
+      remaining,
     };
   });
 }

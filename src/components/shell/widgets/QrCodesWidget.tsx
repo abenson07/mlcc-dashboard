@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useLeafletQr } from "hooks";
 import { downloadQrPng, generateQrPngDataUrl, qrDownloadFilename } from "@/lib/qr";
 import { useLeafletContext } from "@/components/leaflet/LeafletContext";
+import { IconDownload } from "./widgetIcons";
 import ShellWidget from "./ShellWidget";
 
 export default function QrCodesWidget() {
@@ -12,7 +13,7 @@ export default function QrCodesWidget() {
 
   if (!leaflet) return null;
   return (
-    <ShellWidget title="QR Codes">
+    <ShellWidget title="QR Codes" widgetId="qr-codes">
       <QrCodeRow
         label="Membership QR Code"
         subtitle="Place in leaflet"
@@ -41,10 +42,10 @@ function QrCodeRow({
 
   if (!qrCodeId || isLoading) {
     return (
-      <div className="shell-widget-row">
-        <div className="shell-widget-qr-thumb" />
-        <div className="shell-widget-qr-info">
-          <span className="shell-widget-item-label">{label}</span>
+      <div className="shell-widget-media-row">
+        <div className="shell-widget-media-thumb" />
+        <div className="shell-widget-media-info">
+          <span className="shell-widget-media-label">{label}</span>
           {subtitle && <span className="shell-widget-item-sub">{subtitle}</span>}
         </div>
       </div>
@@ -53,10 +54,10 @@ function QrCodeRow({
 
   if (!qr?.url) {
     return (
-      <div className="shell-widget-row">
-        <div className="shell-widget-qr-thumb" />
-        <div className="shell-widget-qr-info">
-          <span className="shell-widget-item-label">{label}</span>
+      <div className="shell-widget-media-row">
+        <div className="shell-widget-media-thumb" />
+        <div className="shell-widget-media-info">
+          <span className="shell-widget-media-label">{label}</span>
           {subtitle && <span className="shell-widget-item-sub">{subtitle}</span>}
         </div>
       </div>
@@ -81,27 +82,25 @@ function QrCodeRow({
   }
 
   return (
-    <div className="shell-widget-row">
+    <div className="shell-widget-media-row">
       {previewUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={previewUrl} alt={label} className="shell-widget-qr-thumb" />
+        <img src={previewUrl} alt={label} className="shell-widget-media-thumb" />
       ) : (
-        <div className="shell-widget-qr-thumb" />
+        <div className="shell-widget-media-thumb" />
       )}
-      <div className="shell-widget-qr-info">
-        <span className="shell-widget-item-label">{label}</span>
+      <div className="shell-widget-media-info">
+        <span className="shell-widget-media-label">{label}</span>
         {subtitle && <span className="shell-widget-item-sub">{subtitle}</span>}
       </div>
       <button
         type="button"
-        className="shell-widget-row-action"
+        className="shell-widget-media-download"
         onClick={handleDownload}
         disabled={downloading}
         aria-label={`Download ${label}`}
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M7 1.5v8M3.5 6.5L7 10l3.5-3.5M1.5 10v2.5h11V10" />
-        </svg>
+        <IconDownload />
       </button>
     </div>
   );

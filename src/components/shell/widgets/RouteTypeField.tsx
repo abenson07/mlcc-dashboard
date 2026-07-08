@@ -3,8 +3,14 @@
 import { useState } from "react";
 import { Command } from "cmdk";
 import PropertyPopover from "./property/PropertyPopover";
+import { IconApartment, IconBusiness, IconCareFacility, IconHouse } from "./routeTypeIcons";
 
-export const ROUTE_TYPE_OPTIONS = ["Single family residences", "Apartments/Condos", "Businesses"];
+export const ROUTE_TYPE_OPTIONS = [
+  { label: "Single family residences", icon: IconHouse },
+  { label: "Condo/apartment", icon: IconApartment },
+  { label: "Retirement home/care facility", icon: IconCareFacility },
+  { label: "Business", icon: IconBusiness },
+];
 
 type RouteTypeFieldProps = {
   value: string | null;
@@ -42,18 +48,21 @@ export default function RouteTypeField({ value, readOnly = false, onRequestChang
           />
           <Command.List className="shell-widget-popover-list">
             <Command.Empty className="shell-widget-popover-empty">No matching types</Command.Empty>
-            {ROUTE_TYPE_OPTIONS.map((option) => (
+            {ROUTE_TYPE_OPTIONS.map(({ label, icon: Icon }) => (
               <Command.Item
-                key={option}
-                value={option}
+                key={label}
+                value={label}
                 className="shell-widget-popover-item"
                 onSelect={() => {
                   setOpen(false);
-                  if (option !== value) onRequestChange(option);
+                  if (label !== value) onRequestChange(label);
                 }}
               >
-                <span className="shell-widget-popover-item-label">{option}</span>
-                {value === option && <span className="shell-widget-popover-item-check">✓</span>}
+                <span className="shell-widget-popover-item-label">
+                  <Icon />
+                  {label}
+                </span>
+                {value === label && <span className="shell-widget-popover-item-check">✓</span>}
               </Command.Item>
             ))}
           </Command.List>

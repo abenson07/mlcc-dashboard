@@ -19,15 +19,18 @@ export default function ShellPreviewNav() {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { events } = useEvents();
   const { leaflets } = useLeaflets();
-  const { favorites } = useFavorites();
+  const { favorites, removeFavorite } = useFavorites();
 
   const eventId = parseShellPreviewEventId(pathname);
   const showLeafletL2 = isShellPreviewLeafletRoute(pathname);
   const showEventL2 = isShellPreviewEventDetailRoute(pathname);
 
   const l1Config = useMemo(
-    () => buildShellPreviewL1Config(favorites),
-    [favorites],
+    () =>
+      buildShellPreviewL1Config(favorites, {
+        onRemoveFavorite: (favorite) => void removeFavorite(favorite.route),
+      }),
+    [favorites, removeFavorite],
   );
 
   const l2Config = useMemo(() => {

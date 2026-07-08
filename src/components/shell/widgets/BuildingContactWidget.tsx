@@ -32,7 +32,7 @@ export default function BuildingContactWidget() {
   }, [delivery?.route_id]);
 
   if (!delivery) return null;
-  if (route?.route_type !== "Apartments/Condos") return null;
+  if (route?.route_type !== "Condo/apartment") return null;
 
   const hasContact = Boolean(
     route?.building_contact_name || route?.building_contact_phone || route?.building_contact_email,
@@ -69,7 +69,7 @@ export default function BuildingContactWidget() {
 
   if (editing) {
     return (
-      <ShellWidget title="Building Contact" cardId="building-contact">
+      <ShellWidget title="Building Contact" widgetId="building-contact">
         <div className="shell-widget-detail-row">
           <span className="shell-widget-detail-label">Name</span>
           <input
@@ -116,7 +116,7 @@ export default function BuildingContactWidget() {
   }
 
   return (
-    <ShellWidget title="Building Contact" cardId="building-contact">
+    <ShellWidget title="Building Contact" widgetId="building-contact">
       <p className="lf-meta" style={{ marginBottom: 8 }}>Building monitor who handles delivery</p>
       {hasContact ? (
         <>

@@ -25,7 +25,7 @@ export default function AttendanceWidget({ eventId }: AttendanceWidgetProps) {
   return (
     <ShellWidget
       title="In attendance"
-      cardId="attendance"
+      widgetId="attendance"
       headerAction={<span className="lf-meta">{meeting.attendees.length} people</span>}
     >
       <AttendanceFields attendees={meeting.attendees} onChange={handleChange} />

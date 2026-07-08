@@ -6,6 +6,13 @@ import Label from "@/components/form/Label";
 import { Modal } from "@/components/ui/modal";
 import { useLeafletContext } from "@/components/leaflet/LeafletContext";
 import ShellWidget from "./ShellWidget";
+import SegmentedBar from "./charts/SegmentedBar";
+import { IconColorSwatch } from "./widgetIcons";
+import WidgetFooterButton from "./WidgetFooterButton";
+
+const SPONSORSHIP_PLEDGED_COLOR = "#337af5";
+const SPONSORSHIP_PAID_COLOR = "#94b9fa";
+const MEMBERSHIP_COLOR = "#3da1a9";
 
 export default function BudgetSponsorshipsWidget() {
   const { budget, readOnly, updateLeaflet, refetchAll } = useLeafletContext();
@@ -57,31 +64,47 @@ export default function BudgetSponsorshipsWidget() {
 
   return (
     <>
-      <ShellWidget title="Budget & sponsorships" cardId="budget-and-sponsorships">
-        <div className="lf-metric-row">
-          <span className="lf-metric-label">Sponsorship progress</span>
-          <span>{budget.sponsorshipProgressPct}%</span>
+      <ShellWidget title="Budget & sponsorships" widgetId="budget-and-sponsorships">
+        <div className="shell-widget-headline-group">
+          <div className="shell-widget-headline">${budget.sponsorshipCommitted.toLocaleString()}</div>
+          <div className="shell-widget-headline-sub">Goal: ${budget.sponsorshipGoal.toLocaleString()}</div>
         </div>
-        <div className="lf-progress-track" style={{ marginBottom: 12 }}>
-          <div className="lf-progress-fill" style={{ width: `${budget.sponsorshipProgressPct}%` }} />
+
+        <SegmentedBar
+          total={budget.sponsorshipGoal}
+          groups={[
+            {
+              key: "sponsorships",
+              segments: [
+                { value: budget.pledged, color: SPONSORSHIP_PLEDGED_COLOR },
+                { value: budget.raised, color: SPONSORSHIP_PAID_COLOR },
+              ],
+            },
+            {
+              key: "membership",
+              segments: [{ value: budget.membershipAmount, color: MEMBERSHIP_COLOR }],
+            },
+          ]}
+        />
+
+        <div className="shell-widget-legend">
+          <div className="shell-widget-legend-item">
+            <IconColorSwatch color={SPONSORSHIP_PLEDGED_COLOR} />
+            <div>
+              <div className="shell-widget-legend-label">Sponsorships</div>
+              <div className="shell-widget-legend-sublabel">{budget.sponsorshipPctOfGoal}% of goal</div>
+            </div>
+          </div>
+          <div className="shell-widget-legend-item">
+            <IconColorSwatch color={MEMBERSHIP_COLOR} />
+            <div>
+              <div className="shell-widget-legend-label">Membership</div>
+              <div className="shell-widget-legend-sublabel">{budget.membershipPctOfGoal}% of goal</div>
+            </div>
+          </div>
         </div>
-        <div className="lf-metric-row">
-          <span className="lf-metric-label">Goal</span>
-          <span>${budget.sponsorshipGoal.toLocaleString()}</span>
-        </div>
-        <div className="lf-metric-row">
-          <span className="lf-metric-label">Raised</span>
-          <span>${budget.raised.toLocaleString()}</span>
-        </div>
-        <div className="lf-metric-row">
-          <span className="lf-metric-label">Pledged</span>
-          <span>${budget.pledged.toLocaleString()}</span>
-        </div>
-        {!readOnly && (
-          <button type="button" className="lf-link" style={{ marginTop: 8 }} onClick={openGoalModal}>
-            Edit goal
-          </button>
-        )}
+
+        {!readOnly && <WidgetFooterButton onClick={openGoalModal}>Edit Goal</WidgetFooterButton>}
       </ShellWidget>
 
       <Modal isOpen={goalModalOpen} onClose={() => setGoalModalOpen(false)} className="max-w-md p-6">
