@@ -18,7 +18,7 @@ const DELIVERY_NAV = [
   { label: "Deliverers", href: "/old-admin/leaflet/deliverers", icon: IconBike },
   { label: "Routes", href: "/old-admin/leaflet/routes", icon: IconMap },
   { label: "Open Routes", href: "/old-admin/leaflet/open-routes", icon: IconRoute },
-  { label: "Substitutions", href: "/old-admin/leaflet/substitutions", icon: IconRepeat },
+  { label: "Skipped Routes", href: "/old-admin/leaflet/substitutions", icon: IconRepeat },
 ] as const;
 
 const SUPPORT_NAV = [

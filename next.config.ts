@@ -114,6 +114,11 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: false,
       },
+      {
+        source: "/admin/leaflet/substitutions",
+        destination: "/admin/leaflet/skipped-routes",
+        permanent: true,
+      },
     ];
   },
   images: {

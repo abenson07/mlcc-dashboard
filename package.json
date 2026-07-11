@@ -27,7 +27,8 @@
     "migrate:qr-codes": "tsx scripts/apply-qr-codes-migration.ts",
     "db:export:list": "tsx scripts/db-export/01-list-tables.ts",
     "db:export:dump": "tsx scripts/db-export/02-export-schema-and-data.ts",
-    "stripe:setup-commerce": "node scripts/stripe-setup-commerce-products.mjs"
+    "stripe:setup-commerce": "node scripts/stripe-setup-commerce-products.mjs",
+    "stripe:fundraiser-totals": "node scripts/stripe-fundraiser-totals.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.0",
@@ -40,10 +41,12 @@
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/world": "^1.1.2",
     "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.93.3",
+    "@supabase/supabase-js": "^2.110.1",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query": "^5.90.20",
+    "@tiptap/extension-bubble-menu": "^3.22.5",
+    "@tiptap/extension-floating-menu": "^3.22.5",
     "@tiptap/extension-image": "^3.22.5",
     "@tiptap/extension-link": "^3.22.5",
     "@tiptap/extension-mention": "^3.22.5",
@@ -51,6 +54,9 @@
     "@tiptap/react": "^3.22.5",
     "@tiptap/starter-kit": "^3.22.5",
     "@tiptap/suggestion": "^3.22.5",
+    "@visx/group": "^4.0.0",
+    "@visx/scale": "^4.0.0",
+    "@visx/shape": "^4.0.0",
     "apexcharts": "^4.7.0",
     "autoprefixer": "^10.4.22",
     "cmdk": "^1.1.1",
@@ -91,7 +97,7 @@
     "pg": "^8.20.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
-    "tsx": "^4.21.0",
+    "tsx": "^4.23.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",
     "wrangler": "^4.11.1"

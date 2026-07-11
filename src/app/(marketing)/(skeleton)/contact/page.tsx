@@ -1,12 +1,12 @@
 import { ContactSection } from "@marketing/components/byq/ContactSection";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
-import { FaqSection } from "@marketing/components/byq/FaqSection";
+import { ContactFaqSection } from "@marketing/components/sections/ContactFaqSection";
 
 export default function ContactPage() {
   return (
     <main>
       <ContactSection title="Contact" />
-      <FaqSection />
+      <ContactFaqSection />
       <CtaSection />
     </main>
   );

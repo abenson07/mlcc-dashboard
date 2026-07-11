@@ -1,4 +1,4 @@
-import type { Events, Sponsorships } from "@/types/database";
+import type { Events, EventPublishStatus, Sponsorships } from "@/types/database";
 import { buildSponsorshipTiers } from "@/components/leaflet/leafletData";
 
 export type EventKind = "council" | "external" | "committee_meeting";
@@ -16,6 +16,7 @@ export type EventFieldData = {
   webflow_item_id?: string;
   address?: string;
   sponsorship_goal_cents?: number;
+  marketing?: { shortDescription: string; body: string; generatedAt: string };
 };
 
 export type EventListItem = {
@@ -31,6 +32,7 @@ export type EventListItem = {
   distributionLabel: string;
   kind: EventKind;
   committee?: string;
+  publishStatus: EventPublishStatus;
 };
 
 export type EventEdition = {
@@ -47,6 +49,7 @@ export type EventEdition = {
   daysUntilLabel: string;
   status: string;
   kind: EventKind;
+  publishStatus: EventPublishStatus;
 };
 
 export function parseEventFieldData(raw: Record<string, unknown> | null | undefined): EventFieldData {
@@ -72,6 +75,10 @@ export function parseEventFieldData(raw: Record<string, unknown> | null | undefi
     address: typeof fd.address === "string" ? fd.address : undefined,
     sponsorship_goal_cents:
       typeof fd.sponsorship_goal_cents === "number" ? fd.sponsorship_goal_cents : undefined,
+    marketing:
+      fd.marketing && typeof fd.marketing === "object"
+        ? (fd.marketing as EventFieldData["marketing"])
+        : undefined,
   };
 }
 
@@ -164,6 +171,7 @@ export function mapEventListItem(row: Events): EventListItem {
     distributionLabel: formatEventDateRange(row),
     kind: fieldData.kind ?? "council",
     committee: fieldData.committee,
+    publishStatus: row.publish_status,
   };
 }
 
@@ -184,6 +192,7 @@ export function mapEventEdition(row: Events): EventEdition {
     daysUntilLabel: daysUntilEventLabel(iso),
     status: deriveEventStatus(row, fieldData),
     kind: fieldData.kind ?? "council",
+    publishStatus: row.publish_status,
   };
 }
 

@@ -48,7 +48,13 @@ function CommitteeCard({ slug }: { slug: (typeof committeeSlugs)[number] }) {
 
 export function SubmitEventGetInvolvedSection() {
   return (
-    <section className="bg-sparkles-cream text-sparkles-navy">
+    <section
+      className="bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="submit-event.get-involved"
+      data-editable-label="Submit Event Get Involved"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-[7.5rem] max-[767px]:py-20">

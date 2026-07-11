@@ -1,20 +1,18 @@
 import { CmsGrid13Section } from "@marketing/components/byq/CmsGrid13Section";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
-import { FaqSection } from "@marketing/components/byq/FaqSection";
-import { FeatureIntroWithVideoCardsSection } from "@marketing/components/byq/FeatureIntroWithVideoCardsSection";
 import { HeroSection } from "@marketing/components/byq/HeroSection";
-import { ValueFeature49Section } from "@marketing/components/byq/ValueFeature49Section";
+import { HomeFaqSection } from "@marketing/components/sections/HomeFaqSection";
+import { MembershipPricingSection } from "@marketing/components/sections/MembershipPricingSection";
 import { ServicesMarqueeSection } from "@marketing/components/sections/ServicesMarqueeSection";
 
 export default function HomePage() {
   return (
     <main>
-      <HeroSection title="Home" />
-      <FeatureIntroWithVideoCardsSection />
+      <HeroSection />
       <ServicesMarqueeSection />
-      <ValueFeature49Section />
       <CmsGrid13Section />
-      <FaqSection />
+      <MembershipPricingSection />
+      <HomeFaqSection />
       <CtaSection />
     </main>
   );

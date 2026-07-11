@@ -130,7 +130,13 @@ export function CmsPage6Section({
   }
 
   return (
-    <div className="overflow-clip bg-sparkles-cream text-sparkles-navy">
+    <div
+      className="overflow-clip bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="volunteer.cms-page"
+      data-editable-label="Volunteer CMS Page"
+    >
       <section>
         <div className="px-8 max-[767px]:px-4">
           <div className="mx-auto w-full max-w-[1800px]">

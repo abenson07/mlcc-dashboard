@@ -43,7 +43,13 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="pt-20 pb-[7.5rem] max-[767px]:pt-12 max-[767px]:pb-20">
+    <section
+      className="pt-20 pb-[7.5rem] max-[767px]:pt-12 max-[767px]:pb-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.hero"
+      data-editable-label="Hero (Template)"
+    >
       <style>{`
         @keyframes textSwap {
           0%, 18% { transform: translateY(0); }

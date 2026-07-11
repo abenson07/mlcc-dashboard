@@ -68,7 +68,13 @@ export function CmsPageSection({
   const heroImage = story?.image ?? skeletonHeroImage;
 
   return (
-    <div className="bg-sparkles-cream text-sparkles-navy">
+    <div
+      className="bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="leaflet.cms-page"
+      data-editable-label="Leaflet CMS Page"
+    >
       <section className="bg-sparkles-cream">
         <div className="px-8 max-[767px]:px-4">
           <div className="mx-auto w-full max-w-[1800px]">

@@ -38,7 +38,13 @@ export function BusinessMembershipHeroSection() {
   const images = useInView();
 
   return (
-    <section className="relative bg-sparkles-cream text-sparkles-navy">
+    <section
+      className="relative bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="membership-business.hero"
+      data-editable-label="Business Membership Hero"
+    >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[37.5rem] bg-sparkles-warm" />
 
       <div className="relative z-[1] px-8 max-[767px]:px-4">

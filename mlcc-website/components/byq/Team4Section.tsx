@@ -59,7 +59,13 @@ function TeamCard({ card }: { card: (typeof cards)[number] }) {
 
 export function Team4Section() {
   return (
-    <section className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20">
+    <section
+      className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.team-4"
+      data-editable-label="Team 4 (Template)"
+    >
       <style>{`
         @keyframes team-4-marquee {
           from { transform: translateX(0); }

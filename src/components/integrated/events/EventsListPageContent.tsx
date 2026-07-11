@@ -44,7 +44,11 @@ export default function EventsListPageContent({ embedded = false }: { embedded?:
         !q ||
         e.title.toLowerCase().includes(q) ||
         e.location.toLowerCase().includes(q);
-      const matchesStatus = status === "all" || e.status.toLowerCase() === status;
+      const matchesStatus =
+        status === "all" ||
+        (status === "published" || status === "draft"
+          ? e.publishStatus === status
+          : e.status.toLowerCase() === status);
       const matchesHighlight = !highlightedEventId || e.id === highlightedEventId;
       const y = calendarMonth.getFullYear();
       const m = calendarMonth.getMonth();
@@ -195,6 +199,11 @@ export default function EventsListPageContent({ embedded = false }: { embedded?:
                                     <span className="lf-committee-badge">Meeting</span>
                                   )}
                                   <span className="lf-event-status-tag">{event.status}</span>
+                                  {event.publishStatus === "draft" && (
+                                    <span className="lf-event-status-tag lf-event-status-tag--draft">
+                                      Draft
+                                    </span>
+                                  )}
                                 </div>
                                 <p className="lf-meta">{event.location}</p>
                               </div>
@@ -216,6 +225,11 @@ export default function EventsListPageContent({ embedded = false }: { embedded?:
                               <div className="lf-event-row-title">
                                 {event.title}
                                 <span className="lf-event-status-tag">{event.status}</span>
+                                {event.publishStatus === "draft" && (
+                                  <span className="lf-event-status-tag lf-event-status-tag--draft">
+                                    Draft
+                                  </span>
+                                )}
                               </div>
                               <p className="lf-meta">{event.location}</p>
                             </div>

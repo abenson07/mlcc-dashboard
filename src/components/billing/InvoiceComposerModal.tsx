@@ -10,6 +10,8 @@ type InvoiceComposerModalProps = {
   fixedEventLabel?: string;
   defaultLeafletId?: string;
   defaultLeafletLabel?: string;
+  defaultDueDate?: string;
+  titleOverride?: string;
   onIssued?: (invoiceId: string) => void;
 };
 
@@ -20,6 +22,8 @@ export default function InvoiceComposerModal({
   fixedEventLabel,
   defaultLeafletId,
   defaultLeafletLabel,
+  defaultDueDate,
+  titleOverride,
   onIssued,
 }: InvoiceComposerModalProps) {
   return (
@@ -27,7 +31,7 @@ export default function InvoiceComposerModal({
       isOpen={isOpen}
       onClose={onClose}
       isFullscreen
-      showCloseButton
+      showCloseButton={false}
       className="overflow-hidden p-0"
     >
       <StripeInvoiceComposer
@@ -37,6 +41,8 @@ export default function InvoiceComposerModal({
         fixedEventLabel={fixedEventLabel}
         defaultLeafletId={defaultLeafletId}
         defaultLeafletLabel={defaultLeafletLabel}
+        defaultDueDate={defaultDueDate}
+        titleOverride={titleOverride}
         onIssued={onIssued}
       />
     </Modal>

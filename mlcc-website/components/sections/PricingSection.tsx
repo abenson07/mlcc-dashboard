@@ -119,7 +119,13 @@ export function PricingSection() {
   const tabsAnim = useInView(0.1);
 
   return (
-    <section className="w-full py-[7.5rem] bg-[#fdf8f1] max-[767px]:py-20">
+    <section
+      className="w-full py-[7.5rem] bg-[#fdf8f1] max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.pricing"
+      data-editable-label="Pricing (Template)"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="w-full max-w-[1800px] mx-auto relative z-[2]">
           <div className="w-full py-[7.5rem] px-8 pb-20 rounded-3xl bg-[#f2ece5] max-[767px]:py-12 max-[767px]:px-4 max-[767px]:pb-12">

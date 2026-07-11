@@ -61,7 +61,13 @@ export function MembershipStoriesSection() {
   const storySets = [membershipStories, membershipStories];
 
   return (
-    <section className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20">
+    <section
+      className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="membership.stories"
+      data-editable-label="Membership Stories"
+    >
       <style>{`
         @keyframes marquee-membership-stories {
           from { transform: translateX(0); }

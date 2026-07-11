@@ -39,7 +39,13 @@ const tiles = [
 
 export function CmsGrid6Section() {
   return (
-    <section className="bg-sparkles-cream">
+    <section
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.cms-grid-6"
+      data-editable-label="CMS Grid 6 (Template)"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-[7.5rem] max-[767px]:py-20">

@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useState,
   type ReactNode,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -15,10 +16,12 @@ import {
   useLeafletHistory,
   useLeaflets,
   useLeafletSponsorships,
+  useStories,
   useTasks,
 } from "hooks";
 import type { DeliveryWithRelations } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
+import { supabaseClient } from "@/lib/supabaseClient";
 import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 import type { Leaflets, LeafletsUpdate, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
 import {
@@ -28,6 +31,7 @@ import {
   buildDelivererCards,
   buildDeliveryHistory,
   buildDeliveryStats,
+  buildNetLeafletCountChange,
   buildOpenRoutePreviews,
   buildPastDeliverers,
   buildSponsorshipTiers,
@@ -72,10 +76,15 @@ type LeafletContextValue = {
   closeLeaflet: () => Promise<void>;
   deliveries: DeliveryWithRelations[];
   updateDelivery: ReturnType<typeof useDeliveries>["update"];
+  selectedDeliveryId: string | null;
+  setSelectedDeliveryId: (id: string | null) => void;
   tasks: Task[];
   tasksOpenTotal: number;
   openCount: number;
   toggleTask: (taskId: string) => void;
+  createTask: (input: { title: string; dueDate: string }) => Promise<void>;
+  skipTask: (taskId: string) => Promise<void>;
+  removeTaskPermanently: (task: Task) => Promise<void>;
   openRoutePreviews: OpenRoutePreview[];
   stories: StoryItem[];
   delivererCards: DelivererCard[];
@@ -94,12 +103,15 @@ type LeafletContextValue = {
   pastDeliverersForRoute: (routeId: string, excludePersonId?: string | null) => PastDeliverer[];
   deliveryHistoryForRoute: (routeId: string) => { label: string; count: number }[];
   countChangeByRouteId: (routeId: string, currentCount: number | null | undefined) => number | null;
+  netLeafletCountChange: number;
   refetchAll: () => Promise<void>;
   createSponsorship: (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => Promise<void>;
   updateSponsorship: (id: string, patch: SponsorshipsUpdate) => Promise<void>;
   saveSponsorshipTiers: (tiers: SponsorshipTierSeed[]) => Promise<void>;
   sponsorshipTierSeeds: SponsorshipTierSeed[];
   updateLeaflet: (patch: LeafletsUpdate) => Promise<void>;
+  invoiceModalOpen: boolean;
+  setInvoiceModalOpen: (open: boolean) => void;
 };
 
 const LeafletContext = createContext<LeafletContextValue | null>(null);
@@ -109,6 +121,8 @@ function asEdition(leaflet: Leaflets): LeafletEdition {
     id: leaflet.id,
     title: leaflet.title,
     distribution_date: leaflet.distribution_date,
+    sponsorship_due_date: leaflet.sponsorship_due_date,
+    delivery_date: leaflet.delivery_date,
     status: leaflet.status,
     comm_initial_confirmation_sent_at: leaflet.comm_initial_confirmation_sent_at,
   };
@@ -118,6 +132,8 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
   const {
     leaflets: leafletRows,
@@ -158,6 +174,9 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     openCount,
     loading: tasksLoading,
     toggleComplete,
+    createTaskFull,
+    update: updateTaskMutation,
+    remove: removeTaskMutation,
     refetch: refetchTasks,
   } = useTasks({
     context: "leaflet",
@@ -182,6 +201,31 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     selectedRow,
     leafletRows,
     Boolean(leafletId),
+  );
+
+  const { stories: storyRows } = useStories({
+    autoFetch: Boolean(leafletId),
+    filters: { leafletId },
+  });
+
+  const stories = useMemo<StoryItem[]>(
+    () =>
+      storyRows.map((story) => ({
+        id: story.id,
+        date: story.publish_date
+          ? new Date(`${story.publish_date}T12:00:00`).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })
+          : "No date",
+        time: "",
+        type: story.status === "published" ? "Published" : "Draft",
+        title: story.title || "Untitled story",
+        status: story.status === "published" ? "Published" : "Draft",
+        badgeColor: story.status === "published" ? "#166534" : "#92400e",
+        badgeBg: story.status === "published" ? "#dcfce7" : "#fef3c7",
+      })),
+    [storyRows],
   );
 
   const invoicesQuery = useQuery({
@@ -225,6 +269,59 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
     [taskRows, readOnly, toggleComplete],
   );
 
+  const createTask = useCallback(
+    async ({ title, dueDate }: { title: string; dueDate: string }) => {
+      if (readOnly || !leaflet) throw new Error("Leaflet is read-only");
+      if (!supabaseClient) throw new Error("Supabase client is not initialized");
+      const offset_days = Math.round(
+        (new Date(`${dueDate}T00:00:00`).getTime() -
+          new Date(`${leaflet.distribution_date}T00:00:00`).getTime()) /
+          86_400_000,
+      );
+      const { data: template, error: templateError } = await supabaseClient
+        .from("task_templates")
+        .insert({
+          context: "leaflet",
+          event_template_id: null,
+          title,
+          offset_days,
+          is_active: true,
+        })
+        .select()
+        .single();
+      if (templateError) throw new Error(templateError.message);
+      await createTaskFull({
+        title,
+        offset_days,
+        template_id: template?.id ?? null,
+      });
+    },
+    [readOnly, leaflet, createTaskFull],
+  );
+
+  const skipTask = useCallback(
+    async (taskId: string) => {
+      if (readOnly) throw new Error("Leaflet is read-only");
+      await updateTaskMutation(taskId, { is_skipped: true });
+    },
+    [readOnly, updateTaskMutation],
+  );
+
+  const removeTaskPermanently = useCallback(
+    async (task: Task) => {
+      if (readOnly) throw new Error("Leaflet is read-only");
+      if (task.template_id && supabaseClient) {
+        const { error: templateDeleteError } = await supabaseClient
+          .from("task_templates")
+          .delete()
+          .eq("id", task.template_id);
+        if (templateDeleteError) throw new Error(templateDeleteError.message);
+      }
+      await removeTaskMutation(task.id);
+    },
+    [readOnly, removeTaskMutation],
+  );
+
   const sendComm = useCallback(
     async (stepKey: string) => {
       if (!leafletId) throw new Error("No leaflet selected");
@@ -262,6 +359,11 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
 
   const countChangeFn = useMemo(
     () => countChangeMap(deliveryRows, previousDeliveries),
+    [deliveryRows, previousDeliveries],
+  );
+
+  const netLeafletCountChange = useMemo(
+    () => buildNetLeafletCountChange(deliveryRows, previousDeliveries),
     [deliveryRows, previousDeliveries],
   );
 
@@ -439,12 +541,17 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       closeLeaflet,
       deliveries: deliveryRows,
       updateDelivery,
+      selectedDeliveryId,
+      setSelectedDeliveryId,
       tasks,
       tasksOpenTotal: openCount,
       openCount,
       toggleTask,
+      createTask,
+      skipTask,
+      removeTaskPermanently,
       openRoutePreviews,
-      stories: [],
+      stories,
       delivererCards,
       commStages,
       sendComm,
@@ -461,12 +568,15 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       pastDeliverersForRoute,
       deliveryHistoryForRoute,
       countChangeByRouteId: countChangeFn,
+      netLeafletCountChange,
       refetchAll,
       createSponsorship,
       updateSponsorship,
       saveSponsorshipTiers,
       sponsorshipTierSeeds,
       updateLeaflet,
+      invoiceModalOpen,
+      setInvoiceModalOpen,
     }),
     [
       leafletId,
@@ -483,10 +593,16 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       closeLeaflet,
       deliveryRows,
       updateDelivery,
+      selectedDeliveryId,
+      setSelectedDeliveryId,
       tasks,
       openCount,
       toggleTask,
+      createTask,
+      skipTask,
+      removeTaskPermanently,
       openRoutePreviews,
+      stories,
       delivererCards,
       commStages,
       sendComm,
@@ -503,12 +619,14 @@ export function LeafletProvider({ children }: { children: ReactNode }) {
       pastDeliverersForRoute,
       deliveryHistoryForRoute,
       countChangeFn,
+      netLeafletCountChange,
       refetchAll,
       createSponsorship,
       updateSponsorship,
       saveSponsorshipTiers,
       sponsorshipTierSeeds,
       updateLeaflet,
+      invoiceModalOpen,
     ],
   );
 

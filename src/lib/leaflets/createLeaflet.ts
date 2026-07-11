@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { isSponsorshipTierPlaceholder } from "@/lib/sponsorship/tierPlaceholders";
+import { isSponsorshipTierPlaceholder, type SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 import {
   spawnLeafletSponsorshipTiers,
   tierPlaceholderRows,
@@ -27,7 +27,12 @@ function membershipQrUrl(title: string): string {
 
 export async function createLeaflet(
   supabase: SupabaseClient,
-  input: Pick<LeafletsInsert, "title" | "distribution_date">,
+  input: Pick<LeafletsInsert, "title" | "distribution_date"> & {
+    sponsorship_due_date?: string | null;
+    delivery_date?: string | null;
+    sponsorship_goal_cents?: number | null;
+    tierOverrides?: SponsorshipTierSeed[];
+  },
 ): Promise<Leaflets> {
   const { data: membershipQr, error: membershipQrError } = await supabase
     .from("qr_codes")
@@ -60,6 +65,9 @@ export async function createLeaflet(
     .insert({
       title: input.title,
       distribution_date: input.distribution_date,
+      sponsorship_due_date: input.sponsorship_due_date ?? null,
+      delivery_date: input.delivery_date ?? null,
+      sponsorship_goal_cents: input.sponsorship_goal_cents ?? null,
       status: "planned",
       membership_qr_code_id: membershipQr.id,
       open_routes_qr_code_id: openRoutesQr.id,
@@ -149,7 +157,12 @@ export async function createLeaflet(
         (s) => !isSponsorshipTierPlaceholder(s) && s.business_id,
       );
 
-      if (tierPlaceholders.length) {
+      if (input.tierOverrides?.length) {
+        const { error: tierError } = await supabase
+          .from("sponsorships")
+          .insert(tierPlaceholderRows(leaflet.id, input.tierOverrides));
+        if (tierError) throw new Error(tierError.message);
+      } else if (tierPlaceholders.length) {
         const { error: tierError } = await supabase
           .from("sponsorships")
           .insert(tierPlaceholderRows(leaflet.id, tierPlaceholders.map((s) => ({
@@ -159,7 +172,7 @@ export async function createLeaflet(
           }))));
         if (tierError) throw new Error(tierError.message);
       } else {
-        await spawnLeafletSponsorshipTiers(supabase, leaflet.id);
+        await spawnLeafletSponsorshipTiers(supabase, leaflet.id, input.tierOverrides);
       }
 
       if (actualSponsors.length) {
@@ -179,10 +192,10 @@ export async function createLeaflet(
         if (sponsorError) throw new Error(sponsorError.message);
       }
     } else {
-      await spawnLeafletSponsorshipTiers(supabase, leaflet.id);
+      await spawnLeafletSponsorshipTiers(supabase, leaflet.id, input.tierOverrides);
     }
   } else {
-    await spawnLeafletSponsorshipTiers(supabase, leaflet.id);
+    await spawnLeafletSponsorshipTiers(supabase, leaflet.id, input.tierOverrides);
   }
 
   return leaflet;

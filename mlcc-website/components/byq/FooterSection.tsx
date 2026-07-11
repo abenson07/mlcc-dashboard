@@ -34,7 +34,13 @@ export function FooterSection() {
   const [socialHover, setSocialHover] = React.useState<number | null>(null);
 
   return (
-    <footer className="bg-sparkles-cream">
+    <footer
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="global.footer"
+      data-editable-label="Footer"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="z-[2] w-full max-w-[1800px] mx-auto">
           <div className="py-[7.5rem] max-[767px]:py-20">

@@ -26,7 +26,13 @@ function BoardMemberCard({ member }: { member: (typeof BOARD_MEMBERS)[number] })
 
 export function BoardMembersSection() {
   return (
-    <section className="w-full bg-sparkles-cream text-sparkles-navy">
+    <section
+      className="w-full bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="board.members"
+      data-editable-label="Board Members"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-20 max-[767px]:py-16">

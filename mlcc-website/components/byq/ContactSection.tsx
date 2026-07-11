@@ -171,7 +171,13 @@ export function ContactSection({ title = "Contact" }: { title?: string }) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-sparkles-cream">
+    <section
+      className="relative overflow-hidden bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="contact.main"
+      data-editable-label="Contact"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-[7.5rem] max-[767px]:py-20">

@@ -2,7 +2,13 @@ import Link from "next/link";
 
 export function BoardCouncilIntroSection() {
   return (
-    <section className="bg-sparkles-cream text-sparkles-navy">
+    <section
+      className="bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="board.council-intro"
+      data-editable-label="Board Council Intro"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="border-t border-sparkles-warm py-16 max-[767px]:py-12">

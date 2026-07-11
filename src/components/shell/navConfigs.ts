@@ -7,6 +7,7 @@ import {
   FileText,
   HandCoins,
   Handshake,
+  HelpCircle,
   Home,
   Inbox,
   LayoutDashboard,
@@ -237,6 +238,12 @@ const SHELL_PREVIEW_DATABASE_GROUP: NavGroupConfig = {
       href: `${SHELL_PREVIEW_BASE}/stories`,
       notReady: true,
     },
+    {
+      id: "faqs",
+      label: "FAQs",
+      icon: HelpCircle,
+      href: `${SHELL_PREVIEW_BASE}/faqs`,
+    },
   ],
 };
 
@@ -248,6 +255,7 @@ export type ShellPreviewFavorite = {
 
 export function buildShellPreviewL1Config(
   favorites: ShellPreviewFavorite[] = [],
+  options?: { onRemoveFavorite?: (favorite: ShellPreviewFavorite) => void },
 ): NavPanelConfig {
   const groups: NavGroupConfig[] = [SHELL_PREVIEW_PRIMARY_GROUP];
 
@@ -261,6 +269,9 @@ export function buildShellPreviewL1Config(
         label: favorite.name,
         icon: Star,
         href: favorite.route,
+        onRemove: options?.onRemoveFavorite
+          ? () => options.onRemoveFavorite!(favorite)
+          : undefined,
       })),
     });
   }
@@ -289,6 +300,7 @@ const SHELL_PREVIEW_BREADCRUMB_LABELS: Record<string, string> = {
   [`${SHELL_PREVIEW_BASE}/members`]: "Members",
   [`${SHELL_PREVIEW_BASE}/businesses`]: "Businesses",
   [`${SHELL_PREVIEW_BASE}/stories`]: "Stories",
+  [`${SHELL_PREVIEW_BASE}/faqs`]: "FAQs",
   [`${SHELL_PREVIEW_BASE}/widgets`]: "Widget Panel",
 };
 
@@ -305,6 +317,12 @@ export function isShellPreviewWidgetsRoute(pathname: string): boolean {
   return normalizedPath === `${SHELL_PREVIEW_BASE}/widgets`;
 }
 
+export function isShellPreviewFaqsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/faqs`;
+}
+
 export function isShellPreviewLeafletRoute(pathname: string): boolean {
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
@@ -314,8 +332,66 @@ export function isShellPreviewLeafletRoute(pathname: string): boolean {
   );
 }
 
+export function isShellPreviewLeafletsListRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflets`;
+}
+
 export function isShellPreviewEventDetailRoute(pathname: string): boolean {
   return parseShellPreviewEventId(pathname) !== null;
+}
+
+export function isShellPreviewLeafletDeliverersRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/deliverers`;
+}
+
+export function isShellPreviewLeafletRoutesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/routes`;
+}
+
+export function isShellPreviewLeafletTodoRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/todo`;
+}
+
+export function isShellPreviewLeafletSponsorshipsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/sponsorships`;
+}
+
+export function isShellPreviewLeafletInvoicesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/invoices`;
+}
+
+export function isShellPreviewLeafletRouteDetailsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return (
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/routes` ||
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes` ||
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/skipped-routes`
+  );
+}
+
+export function isShellPreviewLeafletOpenRoutesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes`;
+}
+
+export function isShellPreviewLeafletSkippedRoutesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/skipped-routes`;
 }
 
 export function buildShellPreviewLeafletL2Config(options?: {
@@ -388,9 +464,9 @@ export function buildShellPreviewLeafletL2Config(options?: {
           },
           {
             id: "substitutions",
-            label: "Substitutions",
+            label: "Skipped Routes",
             icon: ArrowLeftRight,
-            href: `${SHELL_PREVIEW_BASE}/leaflet/substitutions`,
+            href: `${SHELL_PREVIEW_BASE}/leaflet/skipped-routes`,
           },
         ],
       },
@@ -403,6 +479,12 @@ export function buildShellPreviewLeafletL2Config(options?: {
             label: "Sponsorships",
             icon: HandCoins,
             href: `${SHELL_PREVIEW_BASE}/leaflet/sponsorships`,
+          },
+          {
+            id: "invoices",
+            label: "Invoices",
+            icon: Receipt,
+            href: `${SHELL_PREVIEW_BASE}/leaflet/invoices`,
           },
         ],
       },
@@ -591,7 +673,7 @@ export const LEAFLET_L2_CONFIG: NavPanelConfig = {
         { id: "deliverers", label: "Deliverers", icon: Bike, href: "#" },
         { id: "routes", label: "Routes", icon: Route, href: "#" },
         { id: "open-routes", label: "Open Routes", icon: RouteOff, href: "#" },
-        { id: "substitutions", label: "Substitutions", icon: ArrowLeftRight, href: "#" },
+        { id: "substitutions", label: "Skipped Routes", icon: ArrowLeftRight, href: "#" },
       ],
     },
     {

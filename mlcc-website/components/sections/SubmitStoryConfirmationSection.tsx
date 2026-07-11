@@ -58,7 +58,13 @@ function SecondaryButton({ href, label }: { href: string; label: string }) {
 
 export function SubmitStoryConfirmationSection() {
   return (
-    <section className="bg-sparkles-cream py-20 max-[767px]:py-16">
+    <section
+      className="bg-sparkles-cream py-20 max-[767px]:py-16"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="submit-story.confirmation"
+      data-editable-label="Submit Story Confirmation"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="flex flex-col items-center justify-center rounded-2xl bg-sparkles-blue px-8 py-32 max-[767px]:px-4 max-[767px]:py-24">

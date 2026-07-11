@@ -117,7 +117,13 @@ export function AboutFutureSection() {
   }, []);
 
   return (
-    <section className="bg-sparkles-cream text-sparkles-navy">
+    <section
+      className="bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="about.future"
+      data-editable-label="About Future"
+    >
       <AboutFutureIntroSection />
 
       {/* Two-column icon features grid */}

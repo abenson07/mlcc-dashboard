@@ -6,7 +6,13 @@ export function IntroText12Section({
   body?: string;
 }) {
   return (
-    <section className="bg-sparkles-cream">
+    <section
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="one-seattle-plan.intro-text-1"
+      data-editable-label="Intro Text 1"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="w-full max-w-[1800px] mx-auto">
           <div className="py-40 max-[767px]:py-20">

@@ -46,14 +46,14 @@ export default function NoActiveLeaflet() {
         </button>
 
         {pastLeaflets.length > 0 && (
-          <section className="lf-card lf-past-list">
+          <section className="lf-card lf-past-list" data-lf-card="past-leaflets">
             <div className="lf-card-header">
               <span className="lf-card-title">Past leaflets</span>
               <span className="lf-meta">Read-only</span>
             </div>
             <div className="lf-card-body">
               {pastLeaflets.map((item) => (
-                <div key={item.id} className="lf-past-item">
+                <div key={item.id} className="lf-past-item" data-lf-card={`past-leaflet-${item.id}`}>
                   <div>
                     <div style={{ fontWeight: 500 }}>{item.title}</div>
                     <div className="lf-meta">

@@ -25,6 +25,8 @@ export type NavItemConfig = {
   notReady?: boolean;
   /** Optional affordance icon (e.g. swap on leaflet overview) */
   affordanceIcon?: NavIcon;
+  /** Shows a remove (x) button on the row, e.g. to unfavorite */
+  onRemove?: () => void;
 };
 
 export type NavGroupConfig = {

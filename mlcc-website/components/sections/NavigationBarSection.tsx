@@ -41,7 +41,13 @@ export function NavigationBarSection() {
   const [bookHovered, setBookHovered] = React.useState(false);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[999]">
+    <div
+      className="fixed top-0 left-0 right-0 z-[999]"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.nav"
+      data-editable-label="Navigation Bar (Template)"
+    >
       <nav
         role="banner"
         className="relative z-[5] py-4 px-8 max-[767px]:py-3 max-[767px]:px-4 flex items-center justify-between gap-6 bg-[#fdf8f1] w-full"

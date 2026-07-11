@@ -154,7 +154,13 @@ export function CmsGridSection({
   const gridStories = sortedStories?.filter((story) => story.slug !== featuredStory?.slug) ?? null;
 
   return (
-    <section className="bg-sparkles-cream text-sparkles-navy">
+    <section
+      className="bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="leaflet.cms-grid"
+      data-editable-label="Leaflet CMS Grid"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="pb-[7.5rem] pt-16 max-[767px]:py-20 max-[767px]:pt-10">

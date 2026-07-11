@@ -94,7 +94,14 @@ export function DonateMarqueeSection() {
   };
 
   return (
-    <section id="give" className="relative overflow-hidden bg-sparkles-cream text-sparkles-navy">
+    <section
+      id="give"
+      className="relative overflow-hidden bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="donate.marquee"
+      data-editable-label="Donate Marquee"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="grid items-start gap-12 py-20 [grid-template-columns:minmax(0,1.3fr)_minmax(0,1fr)] max-[991px]:grid-cols-1 max-[991px]:gap-16 max-[767px]:py-16">

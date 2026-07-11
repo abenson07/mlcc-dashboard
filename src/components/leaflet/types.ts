@@ -6,6 +6,8 @@ export type LeafletEdition = {
   id: string;
   title: string;
   distribution_date: string;
+  sponsorship_due_date?: string | null;
+  delivery_date?: string | null;
   status: LeafletStatus;
   comm_initial_confirmation_sent_at?: string | null;
 };
@@ -48,6 +50,8 @@ export type Task = {
   title: string;
   offset_days: number;
   is_complete: boolean;
+  is_skipped: boolean;
+  template_id: string | null;
   group: string;
   dueLabel: string;
   isOverdue?: boolean;
@@ -93,8 +97,16 @@ export type DelivererCard = {
   id: string;
   name: string;
   email: string;
+  address: string | null;
   status: "Confirmed" | "Not confirmed";
-  routes: { name: string; households: string; status: string; muted?: boolean; deliveryId?: string }[];
+  routes: {
+    name: string;
+    households: string;
+    leafletCount: number | null;
+    deliveryId?: string;
+    routeId?: string;
+    isSkipped: boolean;
+  }[];
 };
 
 export type CommStage = {
@@ -105,6 +117,7 @@ export type CommStage = {
   sentDate?: string;
   timing?: string;
   description?: string;
+  sentCount?: number;
   yes?: number;
   unresponsive?: number;
   no?: number;
@@ -147,6 +160,7 @@ export type SponsorshipTier = {
   amount: number;
   quantity: number;
   left: string;
+  remaining: number;
 };
 
 export type PastDeliverer = {

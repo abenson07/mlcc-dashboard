@@ -29,7 +29,7 @@ export const INTEGRATED_PAGE_INDEX: PageIndexEntry[] = [
   { id: "leaflet-routes", label: "Leaflet routes", href: "/old-admin/leaflet/routes" },
   { id: "leaflet-deliverers", label: "Leaflet deliverers", href: "/old-admin/leaflet/deliverers" },
   { id: "leaflet-open-routes", label: "Open routes", href: "/old-admin/leaflet/open-routes" },
-  { id: "leaflet-substitutions", label: "Substitutions", href: "/old-admin/leaflet/substitutions" },
+  { id: "leaflet-substitutions", label: "Skipped Routes", href: "/old-admin/leaflet/substitutions" },
   { id: "leaflet-sponsorships", label: "Leaflet sponsorships", href: "/old-admin/leaflet/sponsorships" },
   { id: "leaflet-todo", label: "Leaflet to-do", href: "/old-admin/leaflet/todo" },
 ];

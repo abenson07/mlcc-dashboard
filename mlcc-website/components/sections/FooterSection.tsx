@@ -201,7 +201,13 @@ const serviceLinks = [
 
 export function FooterSection() {
   return (
-    <footer className="bg-[#fdf8f1] font-[family-name:var(--font-bricolage)]">
+    <footer
+      className="bg-[#fdf8f1] font-[family-name:var(--font-bricolage)]"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.footer"
+      data-editable-label="Footer (Template)"
+    >
       <section className="bg-[#fdf8f1] pt-20 max-[767px]:pt-3">
         <div className="px-8 max-[767px]:px-4">
           <div className="z-[2] w-full max-w-[1800px] mx-auto">

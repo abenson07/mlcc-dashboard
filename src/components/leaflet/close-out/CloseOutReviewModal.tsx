@@ -127,7 +127,7 @@ export default function CloseOutReviewModal({
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 20 }}>
-            <Button variant="outline" onClick={onClose} disabled={closing}>Cancel</Button>
+            <Button variant="ghost" onClick={onClose} disabled={closing}>Cancel</Button>
             <Button disabled={confirmText !== "confirm" || closing} onClick={handleClose}>
               {closing ? "Closing…" : "Close leaflet"}
             </Button>

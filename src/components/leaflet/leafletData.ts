@@ -42,6 +42,16 @@ export function formatDistributionDate(iso: string) {
   });
 }
 
+export function defaultSponsorshipDueDate(distributionDate: string): string {
+  const d = new Date(`${distributionDate}T12:00:00`);
+  d.setDate(d.getDate() - 30);
+  return d.toISOString().slice(0, 10);
+}
+
+export function defaultDeliveryDate(distributionDate: string): string {
+  return distributionDate;
+}
+
 export function daysUntilDistribution(iso: string) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -102,6 +112,8 @@ export function mapTasksForUi(tasks: Tasks[], distributionDate: string | null): 
       title: t.title,
       offset_days: t.offset_days,
       is_complete: t.is_complete,
+      is_skipped: t.is_skipped,
+      template_id: t.template_id,
       group: isOverdue ? "Past due" : scheduleGroupForOffset(t.offset_days),
       dueLabel: formatTaskDueLabel(t, due, isOverdue),
       isOverdue,
@@ -109,22 +121,25 @@ export function mapTasksForUi(tasks: Tasks[], distributionDate: string | null): 
   });
 }
 
-export function groupScheduleTasks(tasks: Task[], complete: boolean) {
-  const filtered = tasks.filter((t) => t.is_complete === complete);
+export function groupScheduleTasks(tasks: Task[], mode: "active" | "complete" | "skipped") {
+  const filtered = tasks.filter((t) =>
+    mode === "skipped"
+      ? t.is_skipped
+      : mode === "complete"
+        ? t.is_complete && !t.is_skipped
+        : !t.is_complete && !t.is_skipped,
+  );
   const groups = new Map<ScheduleGroupLabel, Task[]>();
 
   for (const task of filtered) {
-    const label: ScheduleGroupLabel = complete
-      ? scheduleGroupForOffset(task.offset_days)
-      : (task.group as ScheduleGroupLabel);
+    const label: ScheduleGroupLabel =
+      mode === "active" ? (task.group as ScheduleGroupLabel) : scheduleGroupForOffset(task.offset_days);
     const list = groups.get(label) ?? [];
     list.push(task);
     groups.set(label, list);
   }
 
-  const order = complete
-    ? SCHEDULE_GROUP_ORDER.filter((g) => g !== "Past due")
-    : SCHEDULE_GROUP_ORDER;
+  const order = mode === "active" ? SCHEDULE_GROUP_ORDER : SCHEDULE_GROUP_ORDER.filter((g) => g !== "Past due");
 
   return order
     .filter((label) => groups.has(label))
@@ -173,18 +188,16 @@ export function buildDelivererCards(deliveries: DeliveryWithRelations[]): Delive
         id: person.id,
         name: person.full_name,
         email: person.email ?? "",
+        address: person.address ?? null,
         status: allConfirmed ? ("Confirmed" as const) : ("Not confirmed" as const),
         routes: rows.map((r) => ({
           name: r.routes?.route_name ?? "—",
           households:
-            r.leaflet_count != null ? `${r.leaflet_count} households` : "— households",
-          status:
-            r.response === "confirmed"
-              ? "Assigned"
-              : r.response === "needs_cover"
-                ? "Pending confirmation"
-                : "Awaiting confirmation",
+            r.leaflet_count != null ? `${r.leaflet_count} leaflets` : "— leaflets",
+          leafletCount: r.leaflet_count ?? null,
           deliveryId: r.id,
+          routeId: r.route_id,
+          isSkipped: r.is_skipped,
         })),
       };
     });
@@ -266,6 +279,9 @@ export function buildCommStages(
   deliveries: DeliveryWithRelations[],
 ): CommStage[] {
   const counts = responseCounts(deliveries);
+  const recipientCount = deliveries.filter(
+    (d) => d.person_id && d.people?.email,
+  ).length;
   let foundActive = false;
 
   return settings.map((s, index) => {
@@ -310,6 +326,7 @@ export function buildCommStages(
           year: "numeric",
         });
       }
+      stage.sentCount = recipientCount;
       if (s.step_key === "initial_confirmation") {
         stage.yes = counts.yes;
         stage.unresponsive = counts.unresponsive;
@@ -326,14 +343,18 @@ export function buildCommStages(
           : s.name;
     }
 
-    if (state === "upcoming" && s.offset_days != null) {
-      stage.timing =
-        s.offset_days < 0
-          ? `Send in ${Math.abs(s.offset_days)} days`
-          : s.offset_days > 0
-            ? `Send in ${s.offset_days} days`
-            : "Send on distribution day";
-      stage.description = s.name;
+    if (state === "active" || state === "upcoming") {
+      if (s.offset_days != null) {
+        stage.timing =
+          s.offset_days < 0
+            ? `Send in ${Math.abs(s.offset_days)} days`
+            : s.offset_days > 0
+              ? `Send in ${s.offset_days} days`
+              : "Send on distribution day";
+      } else if (state === "active") {
+        stage.timing = "Send in today";
+      }
+      stage.description ??= s.name;
     }
 
     if (index === settings.length - 1 && state === "upcoming") {
@@ -402,6 +423,12 @@ export function buildBudget(
   const progressPct = printBudget > 0 ? Math.round((spent / printBudget) * 100) : 0;
   const sponsorshipProgressPct =
     sponsorshipGoal > 0 ? Math.round((raised / sponsorshipGoal) * 100) : 0;
+  const sponsorshipCommitted = raised + pledgedAmount;
+  const membershipAmount = Math.max(0, sponsorshipGoal - sponsorshipCommitted);
+  const sponsorshipPctOfGoal =
+    sponsorshipGoal > 0 ? Math.round((sponsorshipCommitted / sponsorshipGoal) * 100) : 0;
+  const membershipPctOfGoal =
+    sponsorshipGoal > 0 ? Math.round((membershipAmount / sponsorshipGoal) * 100) : 0;
 
   return {
     printBudget,
@@ -412,6 +439,10 @@ export function buildBudget(
     raised,
     pledged: pledgedAmount,
     sponsorshipProgressPct,
+    sponsorshipCommitted,
+    membershipAmount,
+    sponsorshipPctOfGoal,
+    membershipPctOfGoal,
   };
 }
 
@@ -443,17 +474,17 @@ export function buildSponsorshipTiers(sponsorships: Sponsorships[]) {
   const actualSponsors = sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s));
 
   return tiers.map((tier) => {
-    const taken = actualSponsors.filter(
-      (s) =>
-        s.amount === tier.amount &&
-        (s.status === "paid" || s.status === "pledged" || s.status === "invoiced"),
+    const matchingSponsors = actualSponsors.filter((s) => s.amount === tier.amount);
+    const taken = matchingSponsors.filter(
+      (s) => s.status === "paid" || s.status === "pledged" || s.status === "invoiced",
     ).length;
-    const left = tier.quantity - taken;
+    const remaining = Math.max(0, tier.quantity - taken);
     return {
       name: tier.name,
       amount: tier.amount,
       quantity: tier.quantity,
-      left: left <= 0 ? "Sold out" : `${left} left`,
+      left: remaining <= 0 ? "Sold out" : `${remaining} Remaining`,
+      remaining,
     };
   });
 }
@@ -493,6 +524,19 @@ export function countChangeMap(
     if (prev == null || currentCount == null) return null;
     return currentCount - prev;
   };
+}
+
+export function buildNetLeafletCountChange(
+  current: DeliveryWithRelations[],
+  previous: DeliveryWithRelations[],
+): number {
+  const prevByRoute = new Map(previous.map((d) => [d.route_id, d.leaflet_count]));
+  let total = 0;
+  for (const d of current) {
+    const prev = prevByRoute.get(d.route_id);
+    if (prev != null && d.leaflet_count != null) total += d.leaflet_count - prev;
+  }
+  return total;
 }
 
 export function buildPastDeliverers(

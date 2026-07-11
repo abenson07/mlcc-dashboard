@@ -37,7 +37,13 @@ export function Hero35Section({ title, image }: { title: string; image?: string 
   }, []);
 
   return (
-    <section className="relative py-[7.5rem] bg-sparkles-cream max-[767px]:py-20">
+    <section
+      className="relative py-[7.5rem] bg-sparkles-cream max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.hero-35"
+      data-editable-label="Hero 35 (Template)"
+    >
       <div className="absolute inset-x-0 top-0 z-0 h-[37.5rem] bg-sparkles-warm" />
 
       <div className="px-8 max-[767px]:px-4">

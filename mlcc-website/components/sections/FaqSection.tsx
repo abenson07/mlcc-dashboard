@@ -66,7 +66,13 @@ export function FaqSection() {
   const [btnHovered, setBtnHovered] = React.useState(false);
 
   return (
-    <section className="py-20 bg-sparkles-cream max-[767px]:py-12">
+    <section
+      className="py-20 bg-sparkles-cream max-[767px]:py-12"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.faq"
+      data-editable-label="FAQ (Template)"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="z-[2] w-full max-w-[1800px] mx-auto">
           <div className="rounded-3xl bg-sparkles-warm px-8 py-[7.5rem] max-[767px]:rounded-[1.25rem] max-[767px]:px-4 max-[767px]:py-24">

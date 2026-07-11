@@ -40,7 +40,13 @@ export function AboutBoardSection() {
   }, []);
 
   return (
-    <section className="bg-sparkles-warm text-sparkles-navy">
+    <section
+      className="bg-sparkles-warm text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="about.board"
+      data-editable-label="About Board"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-[7.5rem] max-[767px]:py-20">

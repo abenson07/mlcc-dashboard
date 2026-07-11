@@ -8,6 +8,8 @@ export interface Leaflets {
   id: string;
   title: string;
   distribution_date: string;
+  sponsorship_due_date: string | null;
+  delivery_date: string | null;
   status: LeafletStatus;
   activated_at: string | null;
   closed_at: string | null;
@@ -25,6 +27,8 @@ export interface Leaflets {
 export interface LeafletsInsert {
   title: string;
   distribution_date: string;
+  sponsorship_due_date?: string | null;
+  delivery_date?: string | null;
   status?: LeafletStatus;
   activated_at?: string | null;
   closed_at?: string | null;
@@ -37,6 +41,8 @@ export interface LeafletsInsert {
 export interface LeafletsUpdate {
   title?: string;
   distribution_date?: string;
+  sponsorship_due_date?: string | null;
+  delivery_date?: string | null;
   status?: LeafletStatus;
   activated_at?: string | null;
   closed_at?: string | null;

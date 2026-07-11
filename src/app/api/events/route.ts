@@ -4,7 +4,7 @@ import { createEvent } from "@/lib/events/createEvent";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
 
 const EVENTS_SELECT =
-  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, created_at, updated_at";
+  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, publish_status, created_at, updated_at";
 
 export async function GET() {
   const session = await requireSession();

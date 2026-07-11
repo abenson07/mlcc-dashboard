@@ -100,7 +100,13 @@ function ParallaxImage() {
 
 export function ValueFeature33Section() {
   return (
-    <section className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20">
+    <section
+      className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.value-feature-33"
+      data-editable-label="Value Feature 33 (Template)"
+    >
       <style>{`
         @keyframes value-feature-marquee {
           from { transform: translateX(0); }

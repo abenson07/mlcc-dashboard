@@ -2,16 +2,17 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useBusinesses, useEvents } from "hooks";
-import { ChevronDown } from "lucide-react";
 import { IconCopy } from "@/components/leaflet/icons";
 import { toast } from "sonner";
 import ShellWidget from "./ShellWidget";
 
 type View = "members" | "events";
 
+const BUSINESS_LIST_CAP = 8;
+
 export default function ListsForLeafletWidget() {
   const [view, setView] = useState<View>("members");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [membersExpanded, setMembersExpanded] = useState(false);
 
   const { businesses, loading: membersLoading } = useBusinesses({
     filters: { isMember: true },
@@ -32,9 +33,11 @@ export default function ListsForLeafletWidget() {
     [view, names, displayedEvents],
   );
 
-  const countLabel = loading
-    ? "Loading…"
-    : `${lines.length} ${view === "members" ? "member" : "event"}${lines.length === 1 ? "" : "s"}`;
+  const visibleNames = useMemo(
+    () => (membersExpanded ? names : names.slice(0, BUSINESS_LIST_CAP)),
+    [names, membersExpanded],
+  );
+  const hiddenNameCount = names.length - visibleNames.length;
 
   const onCopy = useCallback(async () => {
     if (lines.length === 0) return;
@@ -46,65 +49,88 @@ export default function ListsForLeafletWidget() {
     }
   }, [lines, view]);
 
+  const onCopyEvent = useCallback(async (event: { title: string; date: string }) => {
+    try {
+      await navigator.clipboard.writeText(formatEventLine(event));
+      toast.success(`Copied ${event.title}`);
+    } catch {
+      toast.error("Could not copy to clipboard");
+    }
+  }, []);
+
   return (
-    <ShellWidget title="Lists for leaflet">
-      {/* Dropdown + copy row */}
-      <div className="shell-widget-dropdown-row">
-        <div className="shell-widget-dropdown-wrap">
-          <button
-            type="button"
-            className="shell-widget-dropdown-trigger"
-            onClick={() => setDropdownOpen((o) => !o)}
-            onBlur={() => setDropdownOpen(false)}
-          >
-            <span className="shell-widget-dropdown-label">
-              {view === "members" ? "Business Members" : "Upcoming Events"}
-            </span>
-            <ChevronDown size={12} strokeWidth={1.5} className="shell-widget-dropdown-chevron" />
-          </button>
-          {dropdownOpen && (
-            <div className="shell-widget-dropdown-menu">
-              <button
-                type="button"
-                className={`shell-widget-dropdown-item${view === "members" ? " shell-widget-dropdown-item--active" : ""}`}
-                onClick={() => {
-                  setView("members");
-                  setDropdownOpen(false);
-                }}
-              >
-                Business Members
-              </button>
-              <button
-                type="button"
-                className={`shell-widget-dropdown-item${view === "events" ? " shell-widget-dropdown-item--active" : ""}`}
-                onClick={() => {
-                  setView("events");
-                  setDropdownOpen(false);
-                }}
-              >
-                Upcoming Events
-              </button>
-            </div>
-          )}
-        </div>
+    <ShellWidget
+      title="Lists for leaflet"
+      widgetId="lists-for-leaflet"
+      headerAction={
         <button
           type="button"
-          className="shell-widget-copy-btn"
-          onClick={onCopy}
+          className="lf-copy-btn"
+          style={{ opacity: 1 }}
+          onClick={() => void onCopy()}
           disabled={loading || lines.length === 0}
-          aria-label="Copy list to clipboard"
-          title="Copy list"
+          aria-label="Copy list"
+          title="Copy to clipboard"
         >
           <IconCopy />
+        </button>
+      }
+    >
+      {/* Segmented toggle */}
+      <div className="shell-widget-segment-row">
+        <button
+          type="button"
+          className={`shell-widget-segment${view === "members" ? " shell-widget-segment--active" : ""}`}
+          onClick={() => setView("members")}
+        >
+          Business List
+        </button>
+        <button
+          type="button"
+          className={`shell-widget-segment${view === "events" ? " shell-widget-segment--active" : ""}`}
+          onClick={() => setView("events")}
+        >
+          Upcoming Events
         </button>
       </div>
 
       {/* List */}
-      {loading ? null : (
+      {loading ? null : view === "members" ? (
         <ul className="shell-widget-list">
-          {lines.map((line, i) => (
-            <li key={view === "members" ? names[i] : displayedEvents[i]?.id ?? i} className="shell-widget-list-item">
-              {line}
+          {visibleNames.map((name, i) => (
+            <li key={name ?? i} className="shell-widget-list-item">
+              {name}
+            </li>
+          ))}
+          {hiddenNameCount > 0 && (
+            <li className="shell-widget-list-item">
+              <button
+                type="button"
+                className="shell-widget-list-more"
+                onClick={() => setMembersExpanded(true)}
+              >
+                {hiddenNameCount} more
+              </button>
+            </li>
+          )}
+        </ul>
+      ) : (
+        <ul className="shell-widget-list">
+          {displayedEvents.map((event) => (
+            <li key={event.id} className="shell-widget-event-row">
+              <div className="shell-widget-event-info">
+                <span className="shell-widget-event-title">{event.title}</span>
+                <span className="shell-widget-event-date">{formatEventDate(event.date)}</span>
+              </div>
+              <button
+                type="button"
+                className="shell-widget-event-copy"
+                onClick={() => onCopyEvent(event)}
+                aria-label={`Copy ${event.title}`}
+                title="Copy event"
+              >
+                <IconCopy />
+              </button>
             </li>
           ))}
         </ul>
@@ -113,14 +139,18 @@ export default function ListsForLeafletWidget() {
   );
 }
 
-function formatEventLine(event: { title: string; date: string }): string {
-  if (!event.date) return event.title;
-  const formatted = new Date(`${event.date}T12:00:00`).toLocaleDateString("en-US", {
+function formatEventDate(date: string): string {
+  if (!date) return "";
+  return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
-  return `${event.title} — ${formatted}`;
+}
+
+function formatEventLine(event: { title: string; date: string }): string {
+  const formatted = formatEventDate(event.date);
+  return formatted ? `${event.title} — ${formatted}` : event.title;
 }
 
 function selectUpcomingEvents(

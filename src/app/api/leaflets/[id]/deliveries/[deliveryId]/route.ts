@@ -23,7 +23,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     patch.person_id = o.person_id;
   }
   if (typeof o.is_skipped === "boolean") patch.is_skipped = o.is_skipped;
-  if (typeof o.leaflet_count === "number") patch.leaflet_count = o.leaflet_count;
+  if (typeof o.leaflet_count === "number") {
+    if (!Number.isInteger(o.leaflet_count) || o.leaflet_count < 0) {
+      return NextResponse.json({ error: "leaflet_count must be a non-negative integer" }, { status: 400 });
+    }
+    patch.leaflet_count = o.leaflet_count;
+  }
   if (typeof o.response === "string") patch.response = o.response;
   if (typeof o.responded_at === "string") patch.responded_at = o.responded_at;
 

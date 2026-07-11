@@ -55,7 +55,13 @@ function CtaButton({
 
 export function CtaSection() {
   return (
-    <section className="py-[7.5rem] bg-[#fdf8f1] max-[767px]:py-20">
+    <section
+      className="py-[7.5rem] bg-[#fdf8f1] max-[767px]:py-20"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.cta"
+      data-editable-label="CTA (Template)"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="z-[2] w-full max-w-[1800px] mx-auto">
           <div className="flex flex-col justify-center items-center py-40 px-8 rounded-3xl bg-sparkles-blue max-[767px]:py-24 max-[767px]:px-4">

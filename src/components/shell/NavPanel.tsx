@@ -9,6 +9,7 @@ import {
   ChevronsUpDown,
   PencilLine,
   Search,
+  X,
 } from "lucide-react";
 import type {
   DropdownItem,
@@ -29,25 +30,42 @@ type NavPanelProps = {
   resolveActiveFromPathname?: boolean;
 };
 
-function isNavItemActive(currentRoute: string, href?: string): boolean {
-  if (!href || href === "#") return false;
-
+/**
+ * Finds the href among `hrefs` that best matches `currentRoute`. When multiple
+ * hrefs match (e.g. an "Overview" item at the section root and a sibling item
+ * one level deeper), the most specific (longest) match wins so ancestor
+ * entries don't stay highlighted once a more specific sibling is selected.
+ */
+function getBestMatchingHref(
+  currentRoute: string,
+  hrefs: (string | undefined)[],
+): string | undefined {
   const normalizedCurrent = normalizeRoute(currentRoute);
-  const normalizedHref = normalizeRoute(href);
-
-  if (normalizedCurrent === normalizedHref) return true;
-
-  if (normalizedHref.includes("?")) return false;
-
   const qIndex = normalizedCurrent.indexOf("?");
   const currentPath =
     qIndex >= 0 ? normalizedCurrent.slice(0, qIndex) : normalizedCurrent;
 
-  if (normalizedHref === "/admin") {
-    return currentPath === "/admin";
+  let bestHref: string | undefined;
+  let bestLength = -1;
+
+  for (const href of hrefs) {
+    if (!href || href === "#") continue;
+
+    const normalizedHref = normalizeRoute(href);
+
+    if (normalizedCurrent === normalizedHref) return href;
+    if (normalizedHref.includes("?")) continue;
+
+    const matches =
+      currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
+
+    if (matches && normalizedHref.length > bestLength) {
+      bestHref = href;
+      bestLength = normalizedHref.length;
+    }
   }
 
-  return currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
+  return bestHref;
 }
 
 function NavDropdown({
@@ -263,6 +281,28 @@ function NavItemRow({
       ) : null}
       <span className="shell-nav-item-label">{label}</span>
       {item.badge ? <span className="shell-nav-badge">{item.badge}</span> : null}
+      {item.onRemove ? (
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={`Remove ${item.label}`}
+          className="shell-nav-item-remove"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            item.onRemove?.();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              item.onRemove?.();
+            }
+          }}
+        >
+          <X size={12} strokeWidth={1.5} />
+        </span>
+      ) : null}
     </>
   );
 
@@ -290,13 +330,13 @@ function NavGroup({
   collapsed,
   onToggleCollapse,
   resolveActiveFromPathname,
-  currentRoute,
+  activeHref,
 }: {
   group: NavGroupConfig;
   collapsed: boolean;
   onToggleCollapse: () => void;
   resolveActiveFromPathname: boolean;
-  currentRoute: string;
+  activeHref?: string;
 }) {
   return (
     <section className="shell-nav-group" data-collapsible={group.collapsible || undefined}>
@@ -329,7 +369,7 @@ function NavGroup({
               item={item}
               active={
                 resolveActiveFromPathname
-                  ? isNavItemActive(currentRoute, item.href)
+                  ? Boolean(item.href) && item.href === activeHref
                   : Boolean(item.active)
               }
             />
@@ -377,6 +417,15 @@ export default function NavPanel({
 
   const hasTopBlock = config.back || config.header === "search" || config.context;
 
+  const activeHref = useMemo(() => {
+    if (!resolveActiveFromPathname) return undefined;
+    const allHrefs = [
+      ...config.groups.flatMap((group) => group.items.map((item) => item.href)),
+      ...(config.footer ?? []).map((item) => item.href),
+    ];
+    return getBestMatchingHref(currentRoute, allHrefs);
+  }, [resolveActiveFromPathname, config.groups, config.footer, currentRoute]);
+
   return (
     <nav
       className={`shell-nav shell-nav--${config.level}`}
@@ -413,7 +462,7 @@ export default function NavPanel({
                 group={group}
                 collapsed={collapsedGroups[group.id] ?? false}
                 resolveActiveFromPathname={resolveActiveFromPathname}
-                currentRoute={currentRoute}
+                activeHref={activeHref}
                 onToggleCollapse={() =>
                   setCollapsedGroups((prev) => ({
                     ...prev,
@@ -434,7 +483,7 @@ export default function NavPanel({
                 item={item}
                 active={
                   resolveActiveFromPathname
-                    ? isNavItemActive(currentRoute, item.href)
+                    ? Boolean(item.href) && item.href === activeHref
                     : Boolean(item.active)
                 }
               />

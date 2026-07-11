@@ -87,7 +87,12 @@ export function CenteredTextImageCardsSection() {
   }, []);
 
   return (
-    <div>
+    <div
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.centered-text-image-cards"
+      data-editable-label="Centered Text Image Cards (Template)"
+    >
       <section className="bg-[#fdf8f1] pt-[7.5rem] pb-20 max-[767px]:pt-20 max-[767px]:pb-12">
         <div className="px-8 max-[767px]:px-4">
           <div className="z-[2] w-full max-w-[1800px] mx-auto">

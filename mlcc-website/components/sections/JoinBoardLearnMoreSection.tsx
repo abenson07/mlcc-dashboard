@@ -74,7 +74,13 @@ function ResourceCard({
 
 export function JoinBoardLearnMoreSection() {
   return (
-    <section className="bg-sparkles-cream text-sparkles-navy">
+    <section
+      className="bg-sparkles-cream text-sparkles-navy"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="join-the-board.learn-more"
+      data-editable-label="Join The Board Learn More"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-[7.5rem] max-[767px]:py-20">

@@ -13,7 +13,14 @@ import ActionItemsTable from "../committee-meetings/ActionItemsTable";
 import BulkActionItemsModal from "../committee-meetings/BulkActionItemsModal";
 import { showMeetLink } from "../committee-meetings/MeetingLocationTypeTabs";
 
-export default function CommitteeMeetingOverviewContent() {
+type CommitteeMeetingOverviewContentProps = {
+  /** When true, the "In attendance" panel lives in the shell widget sidepanel instead of this page's aside. */
+  embedded?: boolean;
+};
+
+export default function CommitteeMeetingOverviewContent({
+  embedded = false,
+}: CommitteeMeetingOverviewContentProps) {
   const { eventId, event, loading: eventLoading, error: eventError } = useEventContext();
   const {
     meeting,
@@ -204,10 +211,12 @@ export default function CommitteeMeetingOverviewContent() {
       </div>
 
       <aside className="lf-overview-aside">
-        <AttendancePanel
-          attendees={meeting.attendees}
-          onChange={handleAttendeesChange}
-        />
+        {!embedded && (
+          <AttendancePanel
+            attendees={meeting.attendees}
+            onChange={handleAttendeesChange}
+          />
+        )}
         {showMeetLink(meeting.location_type) && meeting.google_calendar_url && (
           <section className="lf-overview-card">
             <div className="lf-overview-card-header">

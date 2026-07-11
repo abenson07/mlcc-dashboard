@@ -48,7 +48,7 @@ export default function PersonDetailPanel({ person, onClose, onUpdated }: Person
         </button>
       </div>
 
-      <section className="lf-detail-card">
+      <section className="lf-detail-card" data-lf-card="contact-information">
         <div className="lf-card-header">
           <span className="lf-card-title">Contact information</span>
         </div>
@@ -74,7 +74,7 @@ export default function PersonDetailPanel({ person, onClose, onUpdated }: Person
         </div>
       </section>
 
-      <section className="lf-detail-card">
+      <section className="lf-detail-card" data-lf-card="membership-info">
         <div className="lf-card-header">
           <span className="lf-card-title">Membership info</span>
         </div>
@@ -98,7 +98,7 @@ export default function PersonDetailPanel({ person, onClose, onUpdated }: Person
         </div>
       </section>
 
-      <section className="lf-detail-card">
+      <section className="lf-detail-card" data-lf-card="council-roles">
         <div className="lf-card-header">
           <span className="lf-card-title">Council roles</span>
         </div>
@@ -124,7 +124,7 @@ export default function PersonDetailPanel({ person, onClose, onUpdated }: Person
       </section>
 
       {routesLoading ? null : routes.length > 0 ? (
-        <section className="lf-detail-card">
+        <section className="lf-detail-card" data-lf-card="leaflet-routes">
           <div className="lf-card-header">
             <span className="lf-card-title">Leaflet routes</span>
           </div>

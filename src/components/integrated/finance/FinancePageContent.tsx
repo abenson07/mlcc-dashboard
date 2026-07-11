@@ -78,7 +78,7 @@ export default function FinancePageContent() {
 
             <div className="lf-finance-layout" style={{ marginTop: 20 }}>
               <div>
-                <section className="lf-card" style={{ marginBottom: 16 }}>
+                <section className="lf-card" style={{ marginBottom: 16 }} data-lf-card="spending-by-category">
                   <div className="lf-card-header"><span className="lf-card-title">Spending by category</span></div>
                   <div className="lf-card-body">
                     <div className="lf-donut-wrap">
@@ -101,7 +101,7 @@ export default function FinancePageContent() {
                   </div>
                 </section>
 
-                <section className="lf-card">
+                <section className="lf-card" data-lf-card="recent-transactions">
                   <div className="lf-card-header">
                     <span className="lf-card-title">Recent transactions</span>
                     <button type="button" className="lf-link">View all</button>
@@ -134,14 +134,14 @@ export default function FinancePageContent() {
               </div>
 
               <aside className="lf-overview-aside">
-                <section className="lf-card">
+                <section className="lf-card" data-lf-card="upcoming-bills">
                   <div className="lf-card-header"><span className="lf-card-title">Upcoming bills</span></div>
                   <div className="lf-card-body">
                     <div className="lf-detail-row"><span>Rent</span><span>Jan 15 · $1,500</span></div>
                     <div className="lf-detail-row"><span>Utilities</span><span>Jan 18 · $180</span></div>
                   </div>
                 </section>
-                <section className="lf-card">
+                <section className="lf-card" data-lf-card="savings-goals">
                   <div className="lf-card-header"><span className="lf-card-title">Savings goals</span></div>
                   <div className="lf-card-body">
                     {[

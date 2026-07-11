@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useLeaflets } from "hooks";
 import { IconPlus, IconSearch } from "@/components/leaflet/icons";
-import CreateLeafletModal from "@/components/leaflet/overview/CreateLeafletModal";
+import CreateLeafletModal, { type CreateLeafletInput } from "@/components/leaflet/overview/CreateLeafletModal";
 import type { LeafletStatus } from "@/components/leaflet/types";
 import type { Leaflets } from "@/types/database";
 
@@ -61,10 +61,7 @@ export default function LeafletsListPageContent({
       ? `/admin/leaflet?leaflet=${id}`
       : `/old-admin/leaflet?leaflet=${id}`;
 
-  async function handleCreate(input: {
-    title: string;
-    distribution_date: string;
-  }) {
+  async function handleCreate(input: CreateLeafletInput) {
     const created = await create(input);
     router.push(leafletOverviewPath(created.id));
   }
@@ -88,7 +85,7 @@ export default function LeafletsListPageContent({
 
   return (
     <>
-      <main className="lf-canvas lf-canvas--white">
+      <main>
         <div className="lf-events-centered">
           <div className="lf-events-list-col">
             <div className="lf-page-header">

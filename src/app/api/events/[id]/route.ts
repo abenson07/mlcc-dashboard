@@ -4,7 +4,7 @@ import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRo
 import type { EventsUpdate } from "@/types/database";
 
 const EVENTS_SELECT =
-  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, created_at, updated_at";
+  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, publish_status, created_at, updated_at";
 
 type RouteContext = { params: Promise<{ id: string }> };
 

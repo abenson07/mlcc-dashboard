@@ -1,28 +1,44 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { getApiBase } from "@/lib/apiBase";
-import { openRoutesTableStatusLabel } from "../deliveryUtils";
+import { evaluateCountExpression } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
-import DeliveryDetailPanel from "../routes/DeliveryDetailPanel";
+import { ROUTE_TYPE_OPTIONS } from "@/components/shell/widgets/RouteTypeField";
+import DelivererCell from "../routes/DelivererCell";
+import EditableCountCell from "../routes/EditableCountCell";
+import RouteNameCell from "../routes/RouteNameCell";
+import RouteTable from "../routes/RouteTable";
 
 export default function OpenRoutesPageContent() {
-  const {
-    leafletId,
-    deliveries,
-    countChangeByRouteId,
-    pastDeliverersForRoute,
-    deliveryHistoryForRoute,
-    updateDelivery,
-    readOnly,
-  } = useLeafletContext();
+  const { deliveries, updateDelivery, setSelectedDeliveryId } = useLeafletContext();
   const [search, setSearch] = useState("");
-  const [emailingPersonId, setEmailingPersonId] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState("");
+  const [pickerOpenId, setPickerOpenId] = useState<string | null>(null);
+  const [editingCountId, setEditingCountId] = useState<string | null>(null);
+  const [countDraft, setCountDraft] = useState("");
+
+  // Once a route appears in this list, keep it visible for the rest of this
+  // page visit even after it gets assigned, so the row doesn't abruptly
+  // disappear out from under the admin — it just reflects the new deliverer.
+  const [stickyIds, setStickyIds] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    setStickyIds((prev) => {
+      let changed = false;
+      const next = new Set(prev);
+      for (const d of deliveries) {
+        if ((!d.person_id || d.is_skipped) && !next.has(d.id)) {
+          next.add(d.id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [deliveries]);
 
   const openDeliveries = useMemo(
-    () => deliveries.filter((d) => !d.person_id || d.is_skipped),
-    [deliveries],
+    () => deliveries.filter((d) => stickyIds.has(d.id)),
+    [deliveries, stickyIds],
   );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -32,112 +48,117 @@ export default function OpenRoutesPageContent() {
     const q = search.trim().toLowerCase();
     return openDeliveries.filter((d) => {
       const name = d.routes?.route_name?.toLowerCase() ?? "";
-      return !q || name.includes(q);
+      if (q && !name.includes(q)) return false;
+      if (typeFilter && d.routes?.route_type !== typeFilter) return false;
+      return true;
     });
-  }, [openDeliveries, search]);
+  }, [openDeliveries, search, typeFilter]);
 
   const selected = filtered.find((d) => d.id === effectiveSelectedId) ?? null;
 
-  const handleAssign = useCallback(
-    async (deliveryId: string, personId: string) => {
-      await updateDelivery(deliveryId, {
-        person_id: personId,
+  useEffect(() => {
+    setSelectedDeliveryId(selected?.id ?? null);
+    return () => setSelectedDeliveryId(null);
+  }, [selected, setSelectedDeliveryId]);
+
+  const handleInlineAssign = useCallback(
+    async (delivery: (typeof openDeliveries)[number], person: { id: string; name: string }) => {
+      const previous = {
+        person_id: delivery.person_id,
+        is_skipped: delivery.is_skipped,
+        response: delivery.response,
+      };
+      setPickerOpenId(null);
+      await updateDelivery(delivery.id, {
+        person_id: person.id,
         is_skipped: false,
         response: "pending",
       });
-      toast.success("Deliverer assigned");
+      toast.success(`${person.name} assigned`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void updateDelivery(delivery.id, previous);
+          },
+        },
+      });
     },
     [updateDelivery],
   );
 
-  const handleEmailPastDeliverer = useCallback(
-    async (deliveryId: string, personId: string) => {
-      if (!leafletId) return;
-      setEmailingPersonId(personId);
+  const handleSaveCount = useCallback(
+    async (delivery: (typeof openDeliveries)[number], raw: string) => {
+      const trimmed = raw.trim();
+      const value = trimmed === "" ? NaN : (evaluateCountExpression(trimmed) ?? NaN);
+      if (!Number.isInteger(value) || value < 0) {
+        toast.error("Leaflet count must be a non-negative whole number");
+        return;
+      }
+      setEditingCountId(null);
+      if (value === delivery.leaflet_count) return;
       try {
-        const res = await fetch(`${getApiBase()}/api/leaflets/${leafletId}/open-routes/email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deliveryId, personId }),
-        });
-        const data = (await res.json()) as { error?: string; to?: string };
-        if (!res.ok) throw new Error(data.error ?? "Failed to send email");
-        toast.success(`Email sent to ${data.to ?? "deliverer"}`);
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to send email");
-      } finally {
-        setEmailingPersonId(null);
+        await updateDelivery(delivery.id, { leaflet_count: value });
+      } catch {
+        toast.error("Failed to update leaflet count");
       }
     },
-    [leafletId],
+    [updateDelivery],
   );
 
   return (
     <div className="lf-page-layout">
       <div className="lf-page-header">
         <h1 className="lf-h2">Open Routes</h1>
-        <button type="button" className="lf-small-btn">Export</button>
       </div>
 
       <div className="lf-filters">
         <label className="lf-search">
           <input type="search" placeholder="Search routes..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </label>
+        <select className="lf-select" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+          <option value="">All types</option>
+          {ROUTE_TYPE_OPTIONS.map(({ label }) => <option key={label} value={label}>{label}</option>)}
+        </select>
       </div>
 
-      <div className="lf-master-detail lf-master-detail--wide">
-        <div className="lf-table-wrap">
-          <table className="lf-table">
-            <thead>
-              <tr>
-                <th>Route name</th>
-                <th>Deliverer</th>
-                <th>Type</th>
-                <th>Count</th>
-                <th>Change</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((d) => {
-                const change = countChangeByRouteId(d.route_id, d.leaflet_count);
-                const status = openRoutesTableStatusLabel(d);
-                return (
-                  <tr
-                    key={d.id}
-                    className={effectiveSelectedId === d.id ? "selected" : undefined}
-                    onClick={() => setSelectedId(d.id)}
-                  >
-                    <td style={{ fontWeight: 500 }}>{d.routes?.route_name ?? "—"}</td>
-                    <td className="lf-meta">{d.people?.full_name ?? "—"}</td>
-                    <td className="lf-meta">{d.routes?.route_type ?? "—"}</td>
-                    <td className="lf-meta">{d.leaflet_count ?? "—"}</td>
-                    <td className={change != null && change < 0 ? "lf-text-red" : "lf-text-green"}>
-                      {change == null ? "—" : change > 0 ? `+${change}` : `−${Math.abs(change)}`}
-                    </td>
-                    <td className={status === "Skipped" ? "lf-text-amber" : "lf-meta"}>{status}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {selected && (
-          <DeliveryDetailPanel
-            delivery={selected}
-            leafletId={leafletId}
-            showAssign
-            readOnly={readOnly}
-            onAssign={(personId) => handleAssign(selected.id, personId)}
-            onEmailPastDeliverer={(personId) => handleEmailPastDeliverer(selected.id, personId)}
-            emailingPersonId={emailingPersonId}
-            countChange={countChangeByRouteId(selected.route_id, selected.leaflet_count)}
-            pastDeliverers={pastDeliverersForRoute(selected.route_id, selected.person_id)}
-            history={deliveryHistoryForRoute(selected.route_id)}
-          />
-        )}
-      </div>
+      <RouteTable
+        columns={[
+          { key: "route", label: "Route name" },
+          { key: "deliverer", label: "Deliverer", width: 200 },
+          { key: "count", label: "Count", width: 72 },
+        ]}
+      >
+        {filtered.map((d) => (
+          <tr
+            key={d.id}
+            className={effectiveSelectedId === d.id ? "selected" : undefined}
+            onClick={() => setSelectedId(d.id)}
+          >
+            <RouteNameCell routeName={d.routes?.route_name} routeType={d.routes?.route_type} />
+            <DelivererCell
+              personName={d.people?.full_name}
+              personAddress={d.people?.address}
+              excludePersonId={d.person_id}
+              isOpen={pickerOpenId === d.id}
+              onToggle={() => setPickerOpenId((cur) => (cur === d.id ? null : d.id))}
+              onClose={() => setPickerOpenId(null)}
+              onSelect={(person) => handleInlineAssign(d, person)}
+            />
+            <EditableCountCell
+              value={d.leaflet_count}
+              isEditing={editingCountId === d.id}
+              draft={countDraft}
+              onStartEdit={(initial) => {
+                setCountDraft(initial);
+                setEditingCountId(d.id);
+              }}
+              onDraftChange={setCountDraft}
+              onSave={() => handleSaveCount(d, countDraft)}
+              onCancel={() => setEditingCountId(null)}
+            />
+          </tr>
+        ))}
+      </RouteTable>
     </div>
   );
 }

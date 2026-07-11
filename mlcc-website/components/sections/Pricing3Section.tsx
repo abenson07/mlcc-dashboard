@@ -224,7 +224,14 @@ export function Pricing3Section({ compactTop = false }: { compactTop?: boolean }
   const cards = activeTab === 0 ? monthlyCards : annualCards;
 
   return (
-    <div id="pricing" className="bg-sparkles-cream">
+    <div
+      id="pricing"
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.pricing-3"
+      data-editable-label="Pricing 3 (Template)"
+    >
       <style>{`
         @keyframes marquee-pricing-partners {
           from { transform: translateX(0); }

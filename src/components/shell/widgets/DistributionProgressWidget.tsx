@@ -9,7 +9,7 @@ export default function DistributionProgressWidget() {
   if (!timeline || timeline.length === 0) return null;
 
   return (
-    <ShellWidget title="Distribution Progress">
+    <ShellWidget title="Distribution Progress" widgetId="distribution-progress">
       {timeline.map((item) => (
         <div
           key={item.stage}

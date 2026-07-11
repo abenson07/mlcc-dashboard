@@ -9,7 +9,13 @@ type ValueFeature48SectionProps = {
 
 export function ValueFeature48Section({ label, headline, cards }: ValueFeature48SectionProps) {
   return (
-    <section className="bg-sparkles-cream">
+    <section
+      className="bg-sparkles-cream"
+      data-editable="true"
+      data-editable-type="section"
+      data-editable-id="template.value-feature-48"
+      data-editable-label="Value Feature 48 (Template)"
+    >
       <div className="px-8 max-[767px]:px-4">
         <div className="w-full max-w-[1800px] mx-auto">
           <div className="py-[7.5rem] max-[767px]:py-20">

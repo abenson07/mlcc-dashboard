@@ -5,17 +5,18 @@ import { usePeople } from "hooks";
 import type { MeetingAttendee } from "hooks/useCommitteeMeeting";
 import { IconPlus } from "@/components/leaflet/icons";
 
-type AttendancePanelProps = {
+type AttendanceFieldsProps = {
   attendees: MeetingAttendee[];
   onChange: (personIds: string[]) => void;
   disabled?: boolean;
 };
 
-export default function AttendancePanel({
+/** Attendee list + add/remove search, with no outer card wrapper — reused by AttendancePanel (lf-overview-card) and AttendanceWidget (shell widget panel). */
+export function AttendanceFields({
   attendees,
   onChange,
   disabled = false,
-}: AttendancePanelProps) {
+}: AttendanceFieldsProps) {
   const [search, setSearch] = useState("");
   const [adding, setAdding] = useState(false);
 
@@ -46,12 +47,7 @@ export default function AttendancePanel({
   }
 
   return (
-    <section className="lf-overview-card">
-      <div className="lf-overview-card-header">
-        <span className="lf-overview-card-title">In attendance</span>
-        <span className="lf-meta">{attendees.length} people</span>
-      </div>
-
+    <>
       {attendees.length === 0 && (
         <p className="lf-meta">
           No attendees yet. Defaults come from Settings → Committee, or search to add others.
@@ -129,6 +125,21 @@ export default function AttendancePanel({
           )}
         </>
       )}
+    </>
+  );
+}
+
+type AttendancePanelProps = AttendanceFieldsProps;
+
+/** Card-styled attendance panel for the old-admin (non-shell) events aside. */
+export default function AttendancePanel(props: AttendancePanelProps) {
+  return (
+    <section className="lf-overview-card">
+      <div className="lf-overview-card-header">
+        <span className="lf-overview-card-title">In attendance</span>
+        <span className="lf-meta">{props.attendees.length} people</span>
+      </div>
+      <AttendanceFields {...props} />
     </section>
   );
 }

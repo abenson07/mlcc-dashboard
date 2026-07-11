@@ -33,6 +33,7 @@ export interface Tasks {
   description: string | null;
   offset_days: number;
   is_complete: boolean;
+  is_skipped: boolean;
   completed_at: string | null;
   created_at: string;
 }
@@ -45,6 +46,7 @@ export interface TasksInsert {
   description?: string | null;
   offset_days: number;
   is_complete?: boolean;
+  is_skipped?: boolean;
 }
 
 export interface TasksUpdate {
@@ -52,5 +54,6 @@ export interface TasksUpdate {
   description?: string | null;
   offset_days?: number;
   is_complete?: boolean;
+  is_skipped?: boolean;
   completed_at?: string | null;
 }

@@ -4,27 +4,162 @@ import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEvents, useFavorites, useLeaflets } from "hooks";
-import { LeafletProvider } from "@/components/leaflet/LeafletContext";
+import { LeafletProvider, useLeafletContext } from "@/components/leaflet/LeafletContext";
 import Canvas from "@/components/shell/Canvas";
 import CanvasArea from "@/components/shell/CanvasArea";
 import CanvasContainer from "@/components/shell/CanvasContainer";
 import CanvasContent from "@/components/shell/CanvasContent";
 import CanvasTopbar from "@/components/shell/CanvasTopbar";
+import CanvasTooling from "@/components/shell/CanvasTooling";
 import ShellPreviewNav from "@/components/shell/ShellPreviewNav";
 import {
+  isShellPreviewEventDetailRoute,
+  isShellPreviewFaqsRoute,
+  isShellPreviewLeafletDeliverersRoute,
   isShellPreviewLeafletRoute,
+  isShellPreviewLeafletInvoicesRoute,
+  isShellPreviewLeafletOpenRoutesRoute,
+  isShellPreviewLeafletRouteDetailsRoute,
+  isShellPreviewLeafletRoutesRoute,
+  isShellPreviewLeafletSkippedRoutesRoute,
+  isShellPreviewLeafletsListRoute,
+  isShellPreviewLeafletSponsorshipsRoute,
+  isShellPreviewLeafletTodoRoute,
   isShellPreviewWidgetsRoute,
   parseShellPreviewEventId,
   shellPreviewBreadcrumbLabel,
 } from "@/components/shell/navConfigs";
+import AttendanceWidget from "@/components/shell/widgets/AttendanceWidget";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import Shell from "@/components/shell/Shell";
 import ListsForLeafletWidget from "@/components/shell/widgets/ListsForLeafletWidget";
-import LeafletWidgetPanel from "@/components/shell/widgets/LeafletWidgetPanel";
+import QrCodesWidget from "@/components/shell/widgets/QrCodesWidget";
+import DistributionDetailsWidget from "@/components/shell/widgets/DistributionDetailsWidget";
+import RouteDetailsWidget from "@/components/shell/widgets/RouteDetailsWidget";
+import BuildingContactWidget from "@/components/shell/widgets/BuildingContactWidget";
+import CommunicationStagesWidget from "@/components/shell/widgets/CommunicationStagesWidget";
+import CoverSheetsWidget from "@/components/shell/widgets/CoverSheetsWidget";
+import BudgetSponsorshipsWidget from "@/components/shell/widgets/BudgetSponsorshipsWidget";
+import SponsorshipLevelsWidget from "@/components/shell/widgets/SponsorshipLevelsWidget";
 
 type ShellPreviewContentProps = {
   children: ReactNode;
 };
+
+type LeafletShellBodyProps = {
+  pathname: string;
+  breadcrumbs: { label: string }[];
+  isFavorite: boolean;
+  onFavoriteToggle: () => void;
+  widgetPanelOpen: boolean;
+  onToggleWidgetPanel: () => void;
+  currentEvent: { id: string; kind?: string } | null | undefined;
+  children: ReactNode;
+};
+
+function LeafletShellBody({
+  pathname,
+  breadcrumbs,
+  isFavorite,
+  onFavoriteToggle,
+  widgetPanelOpen,
+  onToggleWidgetPanel,
+  currentEvent,
+  children,
+}: LeafletShellBodyProps) {
+  const { selectedDeliveryId } = useLeafletContext();
+  const routesSelectionSatisfied = isShellPreviewLeafletRoutesRoute(pathname)
+    ? selectedDeliveryId != null
+    : true;
+
+  return (
+    <>
+      <CanvasTopbar
+        breadcrumbs={breadcrumbs}
+        isFavorite={isFavorite}
+        onFavoriteToggle={onFavoriteToggle}
+        widgetPanelOpen={widgetPanelOpen}
+        onToggleWidgetPanel={onToggleWidgetPanel}
+        tooling={
+          isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
+            <LeafletSponsorshipTooling
+              widgetPanelOpen={widgetPanelOpen}
+              onToggleWidgetPanel={onToggleWidgetPanel}
+            />
+          ) : (
+            <CanvasTooling
+              showDownload={false}
+              widgetPanelOpen={widgetPanelOpen}
+              onToggleWidgetPanel={onToggleWidgetPanel}
+            />
+          )
+        }
+      />
+      <CanvasContainer
+        showWidgetPanel={
+          widgetPanelOpen &&
+          !isShellPreviewWidgetsRoute(pathname) &&
+          !isShellPreviewFaqsRoute(pathname) &&
+          !isShellPreviewLeafletsListRoute(pathname) &&
+          !isShellPreviewLeafletTodoRoute(pathname) &&
+          routesSelectionSatisfied
+        }
+        content={<CanvasContent>{children}</CanvasContent>}
+        widgetPanel={
+          isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewEventDetailRoute(pathname) && currentEvent?.kind === "committee_meeting" ? (
+            <AttendanceWidget eventId={currentEvent.id} />
+          ) : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
+            <>
+              <RouteDetailsWidget />
+              <BuildingContactWidget />
+            </>
+          ) : isShellPreviewLeafletDeliverersRoute(pathname) ? (
+            <>
+              <CommunicationStagesWidget />
+              <CoverSheetsWidget />
+            </>
+          ) : isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
+            <>
+              <SponsorshipLevelsWidget />
+              <BudgetSponsorshipsWidget />
+            </>
+          ) : isShellPreviewLeafletTodoRoute(pathname) ? (
+            <>
+              <DistributionDetailsWidget />
+              <ListsForLeafletWidget />
+              <QrCodesWidget />
+            </>
+          ) : (
+            <>
+              <DistributionDetailsWidget />
+              <CommunicationStagesWidget />
+              <ListsForLeafletWidget />
+              <QrCodesWidget />
+            </>
+          )
+        }
+      />
+    </>
+  );
+}
+
+function LeafletSponsorshipTooling({
+  widgetPanelOpen,
+  onToggleWidgetPanel,
+}: {
+  widgetPanelOpen: boolean;
+  onToggleWidgetPanel: () => void;
+}) {
+  const { setInvoiceModalOpen } = useLeafletContext();
+  return (
+    <CanvasTooling
+      showDownload={false}
+      widgetPanelOpen={widgetPanelOpen}
+      onToggleWidgetPanel={onToggleWidgetPanel}
+      links={[{ label: "+ Add sponsor", onClick: () => setInvoiceModalOpen(true) }]}
+    />
+  );
+}
 
 export default function ShellPreviewContent({ children }: ShellPreviewContentProps) {
   const pathname = usePathname() ?? "";
@@ -44,6 +179,11 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
     return normalizeRoute(search ? `${pathname}?${search}` : pathname);
   }, [pathname, searchParams]);
 
+  const currentEventId = parseShellPreviewEventId(pathname);
+  const currentEvent = currentEventId
+    ? events.find((item) => item.id === currentEventId)
+    : null;
+
   const breadcrumbs = useMemo(() => {
     const eventId = parseShellPreviewEventId(pathname);
     if (eventId) {
@@ -60,7 +200,14 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
         leaflets[0];
 
       if (leaflet) {
-        return [{ label: "Leaflet" }, { label: leaflet.title }];
+        const segments = [{ label: "Leaflet" }, { label: leaflet.title }];
+        if (isShellPreviewLeafletTodoRoute(pathname)) segments.push({ label: "Tasks" });
+        else if (isShellPreviewLeafletRoutesRoute(pathname)) segments.push({ label: "Routes" });
+        else if (isShellPreviewLeafletOpenRoutesRoute(pathname)) segments.push({ label: "Open Routes" });
+        else if (isShellPreviewLeafletSkippedRoutesRoute(pathname)) segments.push({ label: "Skipped Routes" });
+        else if (isShellPreviewLeafletSponsorshipsRoute(pathname)) segments.push({ label: "Sponsorships" });
+        else if (isShellPreviewLeafletInvoicesRoute(pathname)) segments.push({ label: "Invoices" });
+        return segments;
       }
       return [{ label: "Leaflet" }];
     }
@@ -79,32 +226,24 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
       <Shell nav={<ShellPreviewNav />}>
         <CanvasArea>
           <Canvas>
-            <CanvasTopbar
-              breadcrumbs={breadcrumbs}
-              isFavorite={isFavorite(currentRoute)}
-              onFavoriteToggle={handleFavoriteToggle}
-              widgetPanelOpen={widgetPanelOpen}
-              onToggleWidgetPanel={() =>
-                setWidgetPanelOpen((open) => {
-                  const next = !open;
-                  localStorage.setItem("widget-panel-open", String(next));
-                  return next;
-                })
-              }
-            />
             <LeafletProvider>
-              <CanvasContainer
-                showWidgetPanel={widgetPanelOpen && !isShellPreviewWidgetsRoute(pathname)}
-                content={<CanvasContent>{children}</CanvasContent>}
-                widgetPanel={
-                  isShellPreviewWidgetsRoute(pathname) ? null : (
-                    <>
-                      <ListsForLeafletWidget />
-                      {isShellPreviewLeafletRoute(pathname) && <LeafletWidgetPanel />}
-                    </>
-                  )
+              <LeafletShellBody
+                pathname={pathname}
+                breadcrumbs={breadcrumbs}
+                isFavorite={isFavorite(currentRoute)}
+                onFavoriteToggle={handleFavoriteToggle}
+                widgetPanelOpen={widgetPanelOpen}
+                onToggleWidgetPanel={() =>
+                  setWidgetPanelOpen((open) => {
+                    const next = !open;
+                    localStorage.setItem("widget-panel-open", String(next));
+                    return next;
+                  })
                 }
-              />
+                currentEvent={currentEvent}
+              >
+                {children}
+              </LeafletShellBody>
             </LeafletProvider>
           </Canvas>
         </CanvasArea>

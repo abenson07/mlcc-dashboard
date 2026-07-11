@@ -17,6 +17,7 @@ export interface Routes {
   building_contact_email: string | null;
   building_contact_phone: string | null;
   building_contact_is_deliverer: boolean;
+  special_instructions: string | null;
 }
 
 export interface RoutesInsert {
@@ -30,6 +31,7 @@ export interface RoutesInsert {
   building_contact_email?: string | null;
   building_contact_phone?: string | null;
   building_contact_is_deliverer?: boolean;
+  special_instructions?: string | null;
 }
 
 export interface RoutesUpdate {
@@ -43,4 +45,5 @@ export interface RoutesUpdate {
   building_contact_email?: string | null;
   building_contact_phone?: string | null;
   building_contact_is_deliverer?: boolean;
+  special_instructions?: string | null;
 }
