@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { evaluateCountExpression } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
+import { ROUTE_TYPE_OPTIONS } from "@/components/shell/widgets/RouteTypeField";
 import DelivererCell from "../routes/DelivererCell";
 import EditableCountCell from "../routes/EditableCountCell";
 import RouteNameCell from "../routes/RouteNameCell";
@@ -12,6 +13,7 @@ import RouteTable from "../routes/RouteTable";
 export default function OpenRoutesPageContent() {
   const { deliveries, updateDelivery, setSelectedDeliveryId } = useLeafletContext();
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [pickerOpenId, setPickerOpenId] = useState<string | null>(null);
   const [editingCountId, setEditingCountId] = useState<string | null>(null);
   const [countDraft, setCountDraft] = useState("");
@@ -46,9 +48,11 @@ export default function OpenRoutesPageContent() {
     const q = search.trim().toLowerCase();
     return openDeliveries.filter((d) => {
       const name = d.routes?.route_name?.toLowerCase() ?? "";
-      return !q || name.includes(q);
+      if (q && !name.includes(q)) return false;
+      if (typeFilter && d.routes?.route_type !== typeFilter) return false;
+      return true;
     });
-  }, [openDeliveries, search]);
+  }, [openDeliveries, search, typeFilter]);
 
   const selected = filtered.find((d) => d.id === effectiveSelectedId) ?? null;
 
@@ -111,6 +115,10 @@ export default function OpenRoutesPageContent() {
         <label className="lf-search">
           <input type="search" placeholder="Search routes..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </label>
+        <select className="lf-select" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+          <option value="">All types</option>
+          {ROUTE_TYPE_OPTIONS.map(({ label }) => <option key={label} value={label}>{label}</option>)}
+        </select>
       </div>
 
       <RouteTable
@@ -129,6 +137,7 @@ export default function OpenRoutesPageContent() {
             <RouteNameCell routeName={d.routes?.route_name} routeType={d.routes?.route_type} />
             <DelivererCell
               personName={d.people?.full_name}
+              personAddress={d.people?.address}
               excludePersonId={d.person_id}
               isOpen={pickerOpenId === d.id}
               onToggle={() => setPickerOpenId((cur) => (cur === d.id ? null : d.id))}

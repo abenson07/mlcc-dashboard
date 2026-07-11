@@ -1,5 +1,5 @@
 import SubstitutionsPageContent from "@/components/leaflet/substitutions/SubstitutionsPageContent";
 
-export default function ShellPreviewLeafletSubstitutionsPage() {
+export default function ShellPreviewLeafletSkippedRoutesPage() {
   return <SubstitutionsPageContent />;
 }

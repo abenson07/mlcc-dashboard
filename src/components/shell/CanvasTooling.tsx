@@ -11,12 +11,14 @@ type CanvasToolingProps = {
   onToggleWidgetPanel?: () => void;
   widgetPanelOpen?: boolean;
   links?: CanvasToolingLink[];
+  showDownload?: boolean;
 };
 
 export default function CanvasTooling({
   onToggleWidgetPanel,
   widgetPanelOpen = true,
   links,
+  showDownload = true,
 }: CanvasToolingProps) {
   return (
     <div className="shell-canvas-tooling">
@@ -30,9 +32,11 @@ export default function CanvasTooling({
           {link.label}
         </button>
       ))}
-      <button type="button" className="shell-canvas-tooling-btn" aria-label="Download">
-        <Download size={16} strokeWidth={1.5} />
-      </button>
+      {showDownload && (
+        <button type="button" className="shell-canvas-tooling-btn" aria-label="Download">
+          <Download size={16} strokeWidth={1.5} />
+        </button>
+      )}
       <button
         type="button"
         className="shell-canvas-tooling-btn shell-canvas-tooling-btn--toggle"

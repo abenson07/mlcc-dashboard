@@ -9,22 +9,28 @@ import { TableRowActionsMenu } from "@/components/ui/table/TableRowActionsMenu";
 import type { CloseOutMetrics } from "@/lib/leaflets/getCloseOutMetrics";
 import ShellWidget from "./ShellWidget";
 import PropertyRow from "./property/PropertyRow";
+import InlineDateProperty from "./property/InlineDateProperty";
 
 export default function DistributionDetailsWidget() {
-  const { leaflet, leafletId, deliveries, readOnly, closeLeaflet, refetchAll } = useLeafletContext();
+  const { leaflet, leafletId, deliveries, readOnly, closeLeaflet, refetchAll, updateLeaflet } =
+    useLeafletContext();
   const [endReviewOpen, setEndReviewOpen] = useState(false);
   const [endConfirmedOpen, setEndConfirmedOpen] = useState(false);
   const [endedMetrics, setEndedMetrics] = useState<CloseOutMetrics | null>(null);
 
   if (!leaflet || !leafletId) return null;
 
-  const deliveryDate = new Date(`${leaflet.distribution_date}T12:00:00`).toLocaleDateString(
-    "en-US",
-    { month: "short", day: "numeric", year: "numeric" },
-  );
   const totalLeaflets = deliveries
     .reduce((sum, d) => sum + (d.leaflet_count ?? 0), 0)
     .toLocaleString();
+
+  async function handleSaveDate(field: "distribution_date" | "sponsorship_due_date" | "delivery_date", raw: string) {
+    try {
+      await updateLeaflet({ [field]: raw || null });
+    } catch {
+      toast.error("Failed to update date");
+    }
+  }
 
   async function handleEndLeaflet() {
     await closeLeaflet();
@@ -52,11 +58,31 @@ export default function DistributionDetailsWidget() {
         ) : undefined
       }
     >
-      <PropertyRow label="Delivery Date">
-        <span className="shell-widget-property-static">{deliveryDate}</span>
+      <PropertyRow label="Distribution date">
+        <InlineDateProperty
+          value={leaflet.distribution_date}
+          readOnly={readOnly}
+          onSave={(raw) => handleSaveDate("distribution_date", raw)}
+        />
+      </PropertyRow>
+      <PropertyRow label="Sponsorship due date">
+        <InlineDateProperty
+          value={leaflet.sponsorship_due_date ?? ""}
+          readOnly={readOnly}
+          onSave={(raw) => handleSaveDate("sponsorship_due_date", raw)}
+        />
+      </PropertyRow>
+      <PropertyRow label="Delivery date">
+        <InlineDateProperty
+          value={leaflet.delivery_date ?? ""}
+          readOnly={readOnly}
+          onSave={(raw) => handleSaveDate("delivery_date", raw)}
+        />
       </PropertyRow>
       <PropertyRow label="Leaflets">
-        <span className="shell-widget-property-static">{totalLeaflets}</span>
+        <span className="shell-widget-property-static" title="determined by routes">
+          {totalLeaflets}
+        </span>
       </PropertyRow>
 
       <CloseOutReviewModal

@@ -164,6 +164,82 @@ export async function removeDeliveriesForPerson(
   return { removed: params.deliveryIds.length, remainingCount: remaining.length };
 }
 
+export type ReviewEdit = { count: number; action: "keep" | "skip" | "remove" };
+
+export async function applyReviewedResponse(
+  supabase: SupabaseClient,
+  params: {
+    leafletId: string;
+    personId: string;
+    edits: Record<string, ReviewEdit>;
+  },
+) {
+  const deliveries = await loadPersonRespondDeliveries(supabase, params.leafletId, params.personId);
+  const now = new Date().toISOString();
+
+  await Promise.all(
+    deliveries.map(async (delivery) => {
+      const edit = params.edits[delivery.id];
+      if (!edit) return;
+
+      if (edit.action === "keep") {
+        const { error } = await supabase
+          .from("deliveries")
+          .update({
+            response: "confirmed",
+            is_skipped: false,
+            leaflet_count: edit.count,
+            responded_at: now,
+            updated_at: now,
+          })
+          .eq("id", delivery.id)
+          .eq("leaflet_id", params.leafletId);
+        if (error) throw new Error(error.message);
+        return;
+      }
+
+      if (edit.action === "skip") {
+        const { error } = await supabase
+          .from("deliveries")
+          .update({
+            response: "needs_cover",
+            is_skipped: true,
+            person_id: null,
+            leaflet_count: edit.count,
+            responded_at: now,
+            updated_at: now,
+          })
+          .eq("id", delivery.id)
+          .eq("leaflet_id", params.leafletId);
+        if (error) throw new Error(error.message);
+        return;
+      }
+
+      // remove
+      const { error } = await supabase
+        .from("deliveries")
+        .update({
+          response: "rejected",
+          person_id: null,
+          responded_at: now,
+          updated_at: now,
+        })
+        .eq("id", delivery.id)
+        .eq("leaflet_id", params.leafletId);
+      if (error) throw new Error(error.message);
+    }),
+  );
+
+  const committedCount = deliveries.filter((d) => (params.edits[d.id]?.action ?? "keep") === "keep").length;
+  const hasChanges = deliveries.some((d) => {
+    const edit = params.edits[d.id];
+    if (!edit) return false;
+    return edit.action !== "keep" || edit.count !== (d.leaflet_count ?? 0);
+  });
+
+  return { committedCount, hasChanges };
+}
+
 export async function loadRespondContext(
   supabase: SupabaseClient,
   leafletId: string,

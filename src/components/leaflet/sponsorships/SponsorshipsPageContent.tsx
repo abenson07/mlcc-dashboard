@@ -2,44 +2,37 @@
 
 import { useMemo, useState } from "react";
 import InvoiceComposerModal from "@/components/billing/InvoiceComposerModal";
-import AddSponsorModal from "@/components/sponsorship/AddSponsorModal";
+import { IconPlus, IconSearch } from "@/components/leaflet/icons";
 import { useLeafletContext } from "../LeafletContext";
 
 type SponsorTab = "all" | "paid" | "pledged" | "invoiced";
-type InvoiceTab = "all" | "paid" | "sent" | "overdue" | "draft";
 
 export default function SponsorshipsPageContent() {
   const {
     leaflet,
     sponsors,
-    invoices,
     sponsorshipTierSeeds,
     readOnly,
-    createSponsorship,
     updateSponsorship,
     refetchAll,
-    sponsorModalOpen,
-    setSponsorModalOpen,
     invoiceModalOpen,
     setInvoiceModalOpen,
   } = useLeafletContext();
   const [sponsorTab, setSponsorTab] = useState<SponsorTab>("all");
-  const [invoiceTab, setInvoiceTab] = useState<InvoiceTab>("all");
+  const [search, setSearch] = useState("");
+  const [tierFilter, setTierFilter] = useState("");
 
   const filteredSponsors = useMemo(() => {
-    if (sponsorTab === "paid") return sponsors.filter((s) => s.status === "Paid");
-    if (sponsorTab === "pledged") return sponsors.filter((s) => s.status === "Pledged");
-    if (sponsorTab === "invoiced") return sponsors.filter((s) => s.status === "Invoiced");
-    return sponsors;
-  }, [sponsors, sponsorTab]);
-
-  const filteredInvoices = useMemo(() => {
-    if (invoiceTab === "paid") return invoices.filter((i) => i.status === "Paid");
-    if (invoiceTab === "sent") return invoices.filter((i) => i.status === "Sent");
-    if (invoiceTab === "overdue") return invoices.filter((i) => i.status === "Overdue");
-    if (invoiceTab === "draft") return invoices.filter((i) => i.status === "Draft");
-    return invoices;
-  }, [invoices, invoiceTab]);
+    const q = search.trim().toLowerCase();
+    return sponsors.filter((s) => {
+      if (sponsorTab === "paid" && s.status !== "Paid") return false;
+      if (sponsorTab === "pledged" && s.status !== "Pledged") return false;
+      if (sponsorTab === "invoiced" && s.status !== "Invoiced") return false;
+      if (q && !s.business.toLowerCase().includes(q)) return false;
+      if (tierFilter && s.level !== tierFilter) return false;
+      return true;
+    });
+  }, [sponsors, sponsorTab, search, tierFilter]);
 
   const leafletLabel = leaflet
     ? `${leaflet.title} — ${new Date(`${leaflet.distribution_date}T12:00:00`).toLocaleDateString(undefined, {
@@ -59,8 +52,8 @@ export default function SponsorshipsPageContent() {
         <section className="lf-card" data-lf-card="sponsors">
           <div className="lf-card-header">
             <span className="lf-card-title">Sponsors</span>
-            {!readOnly && (
-              <button type="button" className="lf-link" onClick={() => setSponsorModalOpen(true)}>
+            {!readOnly && sponsors.length > 0 && (
+              <button type="button" className="lf-link" onClick={() => setInvoiceModalOpen(true)}>
                 + Add sponsor
               </button>
             )}
@@ -78,8 +71,43 @@ export default function SponsorshipsPageContent() {
                 </button>
               ))}
             </div>
-            {filteredSponsors.length === 0 ? (
-              <p className="lf-meta">No sponsors yet.</p>
+
+            {sponsors.length > 0 && (
+              <div className="lf-filters" style={{ marginTop: 12, marginBottom: 12 }}>
+                <label className="lf-search">
+                  <IconSearch />
+                  <input
+                    type="search"
+                    placeholder="Search sponsors..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </label>
+                <select className="lf-select" value={tierFilter} onChange={(e) => setTierFilter(e.target.value)}>
+                  <option value="">All tiers</option>
+                  {sponsorshipTierSeeds.map((tier) => (
+                    <option key={tier.name} value={tier.name}>
+                      {tier.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {sponsors.length === 0 ? (
+              <div className="lf-empty-state">
+                <p className="lf-meta">No sponsors yet.</p>
+                {!readOnly && (
+                  <button type="button" className="lf-small-btn" onClick={() => setInvoiceModalOpen(true)}>
+                    <IconPlus />
+                    Add sponsor
+                  </button>
+                )}
+              </div>
+            ) : filteredSponsors.length === 0 ? (
+              <p className="lf-meta" style={{ padding: "8px 0" }}>
+                No sponsors match your search or filters.
+              </p>
             ) : (
               <table className="lf-table">
                 <thead>
@@ -135,83 +163,15 @@ export default function SponsorshipsPageContent() {
             )}
           </div>
         </section>
-
-        <section className="lf-card" data-lf-card="invoices">
-          <div className="lf-card-header">
-            <span className="lf-card-title">Invoices</span>
-            {!readOnly && (
-              <button type="button" className="lf-link" onClick={() => setInvoiceModalOpen(true)}>
-                Issue invoice
-              </button>
-            )}
-          </div>
-          <div className="lf-card-body">
-            <div className="lf-sponsor-tabs">
-              {(["all", "paid", "sent", "overdue", "draft"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  className={invoiceTab === tab ? "lf-tab lf-tab--active" : "lf-tab"}
-                  onClick={() => setInvoiceTab(tab)}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </div>
-            {filteredInvoices.length === 0 ? (
-              <p className="lf-meta">No invoices linked to this leaflet run.</p>
-            ) : (
-              <table className="lf-table">
-                <thead>
-                  <tr>
-                    <th>Invoice</th>
-                    <th>Sponsor</th>
-                    <th>Amount</th>
-                    <th>Due date</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredInvoices.map((inv) => (
-                    <tr key={inv.id}>
-                      <td style={{ fontWeight: 500 }}>{inv.invoice}</td>
-                      <td className="lf-meta">{inv.sponsor}</td>
-                      <td className="lf-meta">${inv.amount.toLocaleString()}</td>
-                      <td className="lf-meta">{inv.dueDate}</td>
-                      <td
-                        className={
-                          inv.status === "Paid"
-                            ? "lf-status-paid"
-                            : inv.status === "Overdue"
-                              ? "lf-text-red"
-                              : inv.status === "Sent"
-                                ? "lf-text-green"
-                                : "lf-status-muted"
-                        }
-                      >
-                        {inv.status}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
       </div>
-
-      <AddSponsorModal
-        isOpen={sponsorModalOpen}
-        onClose={() => setSponsorModalOpen(false)}
-        onSubmit={createSponsorship}
-        tierOptions={sponsorshipTierSeeds}
-      />
 
       <InvoiceComposerModal
         isOpen={invoiceModalOpen}
         onClose={() => setInvoiceModalOpen(false)}
         defaultLeafletId={leaflet?.id}
         defaultLeafletLabel={leafletLabel}
+        defaultDueDate={leaflet?.sponsorship_due_date ?? undefined}
+        titleOverride="Add Sponsor"
         onIssued={() => {
           setInvoiceModalOpen(false);
           void refetchAll();

@@ -1,11 +1,19 @@
 "use client";
 
-import NoActiveLeaflet from "@/components/leaflet/overview/NoActiveLeaflet";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import OverviewContent from "@/components/leaflet/overview/OverviewContent";
 import { useLeafletContext } from "@/components/leaflet/LeafletContext";
 
 export default function ShellPreviewLeafletPage() {
   const { activeLeaflet, leaflet, loading, error } = useLeafletContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !activeLeaflet && !leaflet) {
+      router.replace("/admin/leaflets");
+    }
+  }, [loading, activeLeaflet, leaflet, router]);
 
   if (loading) {
     return <p className="lf-meta">Loading overview…</p>;
@@ -16,7 +24,7 @@ export default function ShellPreviewLeafletPage() {
   }
 
   if (!activeLeaflet && !leaflet) {
-    return <NoActiveLeaflet />;
+    return null;
   }
 
   return <OverviewContent />;

@@ -44,7 +44,7 @@ export default function SendConfirmationModal({
         />
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 20 }}>
-        <Button variant="outline" onClick={onClose} disabled={sending}>Cancel</Button>
+        <Button variant="ghost" onClick={onClose} disabled={sending}>Cancel</Button>
         <Button disabled={confirmText !== "confirm" || sending} onClick={handleSend}>
           {sending ? "Sending…" : "Send"}
         </Button>

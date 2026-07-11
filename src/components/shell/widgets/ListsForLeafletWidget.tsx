@@ -5,7 +5,6 @@ import { useBusinesses, useEvents } from "hooks";
 import { IconCopy } from "@/components/leaflet/icons";
 import { toast } from "sonner";
 import ShellWidget from "./ShellWidget";
-import WidgetFooterButton from "./WidgetFooterButton";
 
 type View = "members" | "events";
 
@@ -60,7 +59,23 @@ export default function ListsForLeafletWidget() {
   }, []);
 
   return (
-    <ShellWidget title="Lists for leaflet" widgetId="lists-for-leaflet">
+    <ShellWidget
+      title="Lists for leaflet"
+      widgetId="lists-for-leaflet"
+      headerAction={
+        <button
+          type="button"
+          className="lf-copy-btn"
+          style={{ opacity: 1 }}
+          onClick={() => void onCopy()}
+          disabled={loading || lines.length === 0}
+          aria-label="Copy list"
+          title="Copy to clipboard"
+        >
+          <IconCopy />
+        </button>
+      }
+    >
       {/* Segmented toggle */}
       <div className="shell-widget-segment-row">
         <button
@@ -120,10 +135,6 @@ export default function ListsForLeafletWidget() {
           ))}
         </ul>
       )}
-
-      <WidgetFooterButton onClick={onCopy} disabled={loading || lines.length === 0}>
-        Copy to clipboard
-      </WidgetFooterButton>
     </ShellWidget>
   );
 }

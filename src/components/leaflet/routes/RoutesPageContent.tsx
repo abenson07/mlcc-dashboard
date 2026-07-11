@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { evaluateCountExpression, routesTableStatusLabel } from "../deliveryUtils";
 import { useLeafletContext } from "../LeafletContext";
 import SkipRouteModal, { type CoveringPerson } from "../deliverers/SkipRouteModal";
+import { ROUTE_TYPE_OPTIONS } from "@/components/shell/widgets/RouteTypeField";
 import DelivererCell from "./DelivererCell";
 import EditableCountCell from "./EditableCountCell";
 import RouteNameCell from "./RouteNameCell";
@@ -45,14 +46,6 @@ export default function RoutesPageContent() {
     }
   }, [deliveryFromUrl]);
 
-  const routeTypes = useMemo(() => {
-    const types = new Set<string>();
-    for (const d of deliveries) {
-      if (d.routes?.route_type) types.add(d.routes.route_type);
-    }
-    return Array.from(types).sort();
-  }, [deliveries]);
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return deliveries.filter((d) => {
@@ -66,7 +59,7 @@ export default function RoutesPageContent() {
     });
   }, [deliveries, search, typeFilter, statusFilter]);
 
-  const effectiveSelectedId = selectedId ?? filtered[0]?.id ?? null;
+  const effectiveSelectedId = selectedId;
   const selected = filtered.find((d) => d.id === effectiveSelectedId) ?? null;
 
   useEffect(() => {
@@ -177,7 +170,7 @@ export default function RoutesPageContent() {
         </label>
         <select className="lf-select" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
           <option value="">All types</option>
-          {routeTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+          {ROUTE_TYPE_OPTIONS.map(({ label }) => <option key={label} value={label}>{label}</option>)}
         </select>
         <select className="lf-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="">All statuses</option>
@@ -205,6 +198,7 @@ export default function RoutesPageContent() {
               <RouteNameCell routeName={d.routes?.route_name} routeType={d.routes?.route_type} />
               <DelivererCell
                 personName={d.people?.full_name}
+                personAddress={d.people?.address}
                 excludePersonId={d.person_id}
                 isOpen={pickerOpenId === d.id}
                 onToggle={() => setPickerOpenId((cur) => (cur === d.id ? null : d.id))}

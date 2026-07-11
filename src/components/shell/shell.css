@@ -1004,6 +1004,11 @@
   pointer-events: none;
 }
 
+.shell-widget-send-btn--neutral {
+  background: #000;
+  color: #fff;
+}
+
 /* Budget & sponsorships / sponsorship levels widgets */
 .shell-widget-headline-group {
   display: flex;
@@ -1064,25 +1069,12 @@
 }
 
 
-.shell-widget-close-run-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 5px 8px;
-  border-radius: 4px;
-  background: var(--sds-color-background-default-tertiary, #d9d9d9);
-  color: var(--sds-color-text-neutral-on-neutral-tertiary, #434343);
+.shell-widget-net-change {
   font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  border: none;
+  opacity: 0.7;
+  margin-bottom: 8px;
 }
 
-.shell-widget-close-run-btn:hover {
-  filter: brightness(0.95);
-}
 
 /* ── Widget segmented toggle (Business List / Upcoming Events) ── */
 .shell-widget-segment-row {
@@ -1209,6 +1201,14 @@
 }
 
 .shell-widget-event-row:hover .shell-widget-event-copy {
+  opacity: 1;
+}
+
+.shell-widget-property-row .lf-row-skip-btn {
+  opacity: 0;
+  transition: opacity .15s;
+}
+.shell-widget-property-row:hover .lf-row-skip-btn {
   opacity: 1;
 }
 

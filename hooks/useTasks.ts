@@ -82,6 +82,17 @@ export function useTasks(options: UseTasksOptions) {
     },
   });
 
+  const removeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!supabaseClient) throw new Error("Supabase client is not initialized");
+      const { error: dError } = await supabaseClient.from("tasks").delete().eq("id", id);
+      if (dError) throw dError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", context, contextId] });
+    },
+  });
+
   return {
     tasks,
     openCount,
@@ -102,6 +113,15 @@ export function useTasks(options: UseTasksOptions) {
     },
     createTask: async (payload: { title: string; offset_days: number; description?: string | null }) => {
       return createMutation.mutateAsync(payload);
+    },
+    createTaskFull: async (payload: Omit<TasksInsert, "context" | "context_id">) => {
+      return createMutation.mutateAsync(payload);
+    },
+    update: async (id: string, patch: TasksUpdate) => {
+      return updateMutation.mutateAsync({ id, patch });
+    },
+    remove: async (id: string) => {
+      await removeMutation.mutateAsync(id);
     },
   };
 }

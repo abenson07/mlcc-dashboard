@@ -35,6 +35,17 @@ export async function POST(request: NextRequest) {
   const title = typeof o.title === "string" ? o.title.trim() : "";
   const distribution_date =
     typeof o.distribution_date === "string" ? o.distribution_date.trim() : "";
+  const sponsorship_due_date =
+    typeof o.sponsorship_due_date === "string" && o.sponsorship_due_date.trim()
+      ? o.sponsorship_due_date.trim()
+      : null;
+  const delivery_date =
+    typeof o.delivery_date === "string" && o.delivery_date.trim() ? o.delivery_date.trim() : null;
+  const sponsorship_goal_cents =
+    typeof o.sponsorship_goal_cents === "number" ? o.sponsorship_goal_cents : null;
+  const tierOverrides = Array.isArray(o.tierOverrides)
+    ? (o.tierOverrides as { name: string; amount: number; quantity: number }[])
+    : undefined;
 
   if (!title || !distribution_date) {
     return NextResponse.json(
@@ -45,7 +56,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = await getSupabaseForLeafletRoutes();
-    const leaflet = await createLeaflet(supabase, { title, distribution_date });
+    const leaflet = await createLeaflet(supabase, {
+      title,
+      distribution_date,
+      sponsorship_due_date,
+      delivery_date,
+      sponsorship_goal_cents,
+      tierOverrides,
+    });
     return NextResponse.json({ ok: true, leaflet });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to create leaflet";

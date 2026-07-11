@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         destination: "/events/template",
         permanent: true,
       },
+      {
+        source: "/admin/leaflet/substitutions",
+        destination: "/admin/leaflet/skipped-routes",
+        permanent: true,
+      },
     ];
   },
   images: {

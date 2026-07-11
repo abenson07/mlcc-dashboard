@@ -230,7 +230,7 @@ export default function AddSponsorModal({
         </div>
 
         <div className="flex items-center justify-end gap-3" style={{ marginTop: 24 }}>
-          <Button type="button" size="sm" variant="outline" onClick={handleClose} disabled={submitting}>
+          <Button type="button" size="sm" variant="ghost" onClick={handleClose} disabled={submitting}>
             Cancel
           </Button>
           <Button type="submit" size="sm" disabled={submitting}>

@@ -161,8 +161,8 @@ export function EventProvider({
 
   const scheduleGroups = useMemo(
     (): ScheduleGroups => ({
-      active: groupScheduleTasks(tasks, false),
-      completed: groupScheduleTasks(tasks, true),
+      active: groupScheduleTasks(tasks, "active"),
+      completed: groupScheduleTasks(tasks, "complete"),
     }),
     [tasks],
   );

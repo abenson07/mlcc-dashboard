@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Command } from "cmdk";
+import { ArrowLeftRight } from "lucide-react";
 import { usePeople } from "hooks";
 import PropertyPopover from "./property/PropertyPopover";
 import { IconSwap } from "./widgetIcons";
@@ -60,7 +61,10 @@ export default function DelivererNameField({
   }
 
   return (
-    <div className="shell-widget-deliverer-field" style={{ flex: 1, minWidth: 0 }}>
+    <div
+      className="shell-widget-deliverer-field shell-widget-deliverer-field--hover-actions"
+      style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 4 }}
+    >
       <PropertyPopover
         open={open}
         onClose={close}
@@ -104,16 +108,6 @@ export default function DelivererNameField({
                   <div className="shell-widget-popover-group-header">Actions</div>
                   <button
                     type="button"
-                    className="shell-widget-popover-item"
-                    onClick={() => {
-                      close();
-                      onSkip();
-                    }}
-                  >
-                    <span className="shell-widget-popover-item-label">Skip route</span>
-                  </button>
-                  <button
-                    type="button"
                     className="shell-widget-popover-item shell-widget-popover-item--danger"
                     onClick={() => {
                       close();
@@ -154,6 +148,17 @@ export default function DelivererNameField({
           )}
         </Command>
       </PropertyPopover>
+      {hasPerson && (
+        <button
+          type="button"
+          className="lf-icon-btn lf-row-skip-btn"
+          onClick={onSkip}
+          aria-label="Skip route"
+          title="Skip this route"
+        >
+          <ArrowLeftRight size={13} />
+        </button>
+      )}
     </div>
   );
 }

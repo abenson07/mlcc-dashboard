@@ -354,7 +354,7 @@ function DraggableLineRow({
           onChange={(e) => updateLine(row.key, { quantity: e.target.value })}
           placeholder="1"
           maxLength={3}
-          className={`h-11 w-full px-1 text-center tabular-nums ${inputRing}`}
+          className={`h-11 w-full px-2 text-center tabular-nums ${inputRing}`}
         />
         <div className="relative h-11 w-[7.5rem] shrink-0">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
@@ -582,6 +582,8 @@ export default function StripeInvoiceComposer({
   fixedEventLabel,
   defaultLeafletId,
   defaultLeafletLabel,
+  defaultDueDate,
+  titleOverride,
   onIssued,
   onClose,
   fullScreen = false,
@@ -590,6 +592,8 @@ export default function StripeInvoiceComposer({
   fixedEventLabel?: string;
   defaultLeafletId?: string;
   defaultLeafletLabel?: string;
+  defaultDueDate?: string;
+  titleOverride?: string;
   onIssued?: (invoiceId: string) => void;
   onClose?: () => void;
   fullScreen?: boolean;
@@ -613,7 +617,7 @@ export default function StripeInvoiceComposer({
   const [leafletId, setLeafletId] = useState(defaultLeafletId ?? "");
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
   const [missingEmailInput, setMissingEmailInput] = useState("");
-  const [dueDate, setDueDate] = useState(() => dueDatePlusDays(30));
+  const [dueDate, setDueDate] = useState(() => defaultDueDate || dueDatePlusDays(30));
   const [memo, setMemo] = useState("");
   const [lines, setLines] = useState<LineRow[]>([
     {
@@ -982,7 +986,11 @@ export default function StripeInvoiceComposer({
       return;
     }
 
-    if (dueDate.trim() && dueDateError) {
+    if (!dueDate.trim()) {
+      toast.error("Due date is required.");
+      return;
+    }
+    if (dueDateError) {
       toast.error(dueDateError);
       return;
     }
@@ -1003,8 +1011,7 @@ export default function StripeInvoiceComposer({
     }
     const nm = name.trim();
     if (nm) body.name = nm;
-    const due = dueDate.trim();
-    if (due) body.dueDate = due;
+    body.dueDate = dueDate.trim();
     const mem = memo.trim();
     if (mem) body.memo = mem;
 
@@ -1068,11 +1075,7 @@ export default function StripeInvoiceComposer({
   };
 
   const stepTitle =
-    step === 1
-      ? "Invoice set up"
-      : step === 2
-        ? "Invoice set up"
-        : "Invoice details";
+    titleOverride ?? (step === 3 ? "Invoice details" : "Invoice set up");
 
   const step1Panel = (
     <div className="space-y-6">
@@ -1302,17 +1305,17 @@ export default function StripeInvoiceComposer({
       </div>
 
       <div>
-        <Label htmlFor="inv-due">Due date (optional)</Label>
+        <Label htmlFor="inv-due">Due date</Label>
         <input
           id="inv-due"
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
+          onBlur={() => {
+            if (!dueDate.trim()) setDueDate(dueDatePlusDays(30));
+          }}
           className="mt-2 h-11 w-full max-w-xs rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-blue-400"
         />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Defaults to 30 days from today. Clear to use Stripe net 30 instead.
-        </p>
         {dueDateError ? (
           <p className="mt-1 text-xs text-red-600 dark:text-red-400">
             {dueDateError}

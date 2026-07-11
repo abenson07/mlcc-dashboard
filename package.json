@@ -41,7 +41,7 @@
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/world": "^1.1.2",
     "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.93.3",
+    "@supabase/supabase-js": "^2.110.1",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query": "^5.90.20",
@@ -97,7 +97,7 @@
     "pg": "^8.20.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
-    "tsx": "^4.21.0",
+    "tsx": "^4.23.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",
     "wrangler": "^4.11.1"

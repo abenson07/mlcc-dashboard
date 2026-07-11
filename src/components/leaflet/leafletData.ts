@@ -42,6 +42,16 @@ export function formatDistributionDate(iso: string) {
   });
 }
 
+export function defaultSponsorshipDueDate(distributionDate: string): string {
+  const d = new Date(`${distributionDate}T12:00:00`);
+  d.setDate(d.getDate() - 30);
+  return d.toISOString().slice(0, 10);
+}
+
+export function defaultDeliveryDate(distributionDate: string): string {
+  return distributionDate;
+}
+
 export function daysUntilDistribution(iso: string) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -102,6 +112,8 @@ export function mapTasksForUi(tasks: Tasks[], distributionDate: string | null): 
       title: t.title,
       offset_days: t.offset_days,
       is_complete: t.is_complete,
+      is_skipped: t.is_skipped,
+      template_id: t.template_id,
       group: isOverdue ? "Past due" : scheduleGroupForOffset(t.offset_days),
       dueLabel: formatTaskDueLabel(t, due, isOverdue),
       isOverdue,
@@ -109,22 +121,25 @@ export function mapTasksForUi(tasks: Tasks[], distributionDate: string | null): 
   });
 }
 
-export function groupScheduleTasks(tasks: Task[], complete: boolean) {
-  const filtered = tasks.filter((t) => t.is_complete === complete);
+export function groupScheduleTasks(tasks: Task[], mode: "active" | "complete" | "skipped") {
+  const filtered = tasks.filter((t) =>
+    mode === "skipped"
+      ? t.is_skipped
+      : mode === "complete"
+        ? t.is_complete && !t.is_skipped
+        : !t.is_complete && !t.is_skipped,
+  );
   const groups = new Map<ScheduleGroupLabel, Task[]>();
 
   for (const task of filtered) {
-    const label: ScheduleGroupLabel = complete
-      ? scheduleGroupForOffset(task.offset_days)
-      : (task.group as ScheduleGroupLabel);
+    const label: ScheduleGroupLabel =
+      mode === "active" ? (task.group as ScheduleGroupLabel) : scheduleGroupForOffset(task.offset_days);
     const list = groups.get(label) ?? [];
     list.push(task);
     groups.set(label, list);
   }
 
-  const order = complete
-    ? SCHEDULE_GROUP_ORDER.filter((g) => g !== "Past due")
-    : SCHEDULE_GROUP_ORDER;
+  const order = mode === "active" ? SCHEDULE_GROUP_ORDER : SCHEDULE_GROUP_ORDER.filter((g) => g !== "Past due");
 
   return order
     .filter((label) => groups.has(label))
@@ -311,14 +326,13 @@ export function buildCommStages(
           year: "numeric",
         });
       }
+      stage.sentCount = recipientCount;
       if (s.step_key === "initial_confirmation") {
         stage.yes = counts.yes;
         stage.unresponsive = counts.unresponsive;
         stage.no = counts.no;
         stage.noSkipped = counts.noSkipped;
         stage.noRemoved = counts.noRemoved;
-      } else {
-        stage.sentCount = recipientCount;
       }
     }
 
@@ -510,6 +524,19 @@ export function countChangeMap(
     if (prev == null || currentCount == null) return null;
     return currentCount - prev;
   };
+}
+
+export function buildNetLeafletCountChange(
+  current: DeliveryWithRelations[],
+  previous: DeliveryWithRelations[],
+): number {
+  const prevByRoute = new Map(previous.map((d) => [d.route_id, d.leaflet_count]));
+  let total = 0;
+  for (const d of current) {
+    const prev = prevByRoute.get(d.route_id);
+    if (prev != null && d.leaflet_count != null) total += d.leaflet_count - prev;
+  }
+  return total;
 }
 
 export function buildPastDeliverers(

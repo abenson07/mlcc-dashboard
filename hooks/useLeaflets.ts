@@ -31,7 +31,14 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
     null;
 
   const createMutation = useMutation({
-    mutationFn: async (input: Pick<LeafletsInsert, "title" | "distribution_date">) => {
+    mutationFn: async (
+      input: Pick<LeafletsInsert, "title" | "distribution_date"> & {
+        sponsorship_due_date?: string | null;
+        delivery_date?: string | null;
+        sponsorship_goal_cents?: number | null;
+        tierOverrides?: { name: string; amount: number; quantity: number }[];
+      },
+    ) => {
       const res = await fetch(`${getApiBase()}/api/leaflets`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,8 +105,14 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
     refetch: async () => {
       await refetch();
     },
-    create: (input: Pick<LeafletsInsert, "title" | "distribution_date">) =>
-      createMutation.mutateAsync(input),
+    create: (
+      input: Pick<LeafletsInsert, "title" | "distribution_date"> & {
+        sponsorship_due_date?: string | null;
+        delivery_date?: string | null;
+        sponsorship_goal_cents?: number | null;
+        tierOverrides?: { name: string; amount: number; quantity: number }[];
+      },
+    ) => createMutation.mutateAsync(input),
     activate: (id: string) => activateMutation.mutateAsync(id),
     close: (id: string) => closeMutation.mutateAsync(id),
     update: (id: string, patch: LeafletsUpdate) => updateMutation.mutateAsync({ id, patch }),

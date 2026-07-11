@@ -6,6 +6,8 @@ export type LeafletEdition = {
   id: string;
   title: string;
   distribution_date: string;
+  sponsorship_due_date?: string | null;
+  delivery_date?: string | null;
   status: LeafletStatus;
   comm_initial_confirmation_sent_at?: string | null;
 };
@@ -48,6 +50,8 @@ export type Task = {
   title: string;
   offset_days: number;
   is_complete: boolean;
+  is_skipped: boolean;
+  template_id: string | null;
   group: string;
   dueLabel: string;
   isOverdue?: boolean;

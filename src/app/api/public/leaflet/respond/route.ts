@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  applyReviewedResponse,
   completeAllDeliveriesForPerson,
   confirmAllDeliveriesForPerson,
   loadRespondContext,
-  removeDeliveriesForPerson,
-  skipDeliveriesForPerson,
+  type RespondDeliveryRow,
 } from "@/lib/leaflets/handleDelivererResponse";
 import {
+  decodeEdits,
+  defaultEdits,
+  type EditsMap,
   renderCompleteHome,
   renderCompleteThankYou,
-  renderRespondChanges,
   renderRespondConfirmed,
   renderRespondError,
   renderRespondExpiredLink,
   renderRespondFarewellAllRemoved,
   renderRespondHome,
   renderRespondInvalidLink,
-  renderRespondSkipFarewell,
-  respondUrl,
+  renderRespondReview,
 } from "@/lib/leaflets/respondHtml";
 import { verifyRespondToken, type RespondMode } from "@/lib/leaflets/signRespondUrl";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
@@ -33,11 +34,20 @@ function parseToken(request: NextRequest) {
   return { p, sig, payload };
 }
 
-function parseDeliveryIds(form: FormData) {
-  return form
-    .getAll("delivery_id")
-    .map((v) => String(v).trim())
-    .filter(Boolean);
+function parseEditsFromForm(form: FormData, deliveries: RespondDeliveryRow[]): EditsMap {
+  const edits: EditsMap = {};
+  for (const d of deliveries) {
+    const countRaw = form.get(`count_${d.id}`);
+    const actionRaw = form.get(`action_${d.id}`);
+    const count = countRaw != null ? Math.max(0, Math.round(Number(countRaw))) : (d.leaflet_count ?? 0);
+    const action =
+      actionRaw === "skip" || actionRaw === "remove" ? actionRaw : ("keep" as const);
+    edits[d.id] = {
+      count: Number.isFinite(count) ? count : (d.leaflet_count ?? 0),
+      action,
+    };
+  }
+  return edits;
 }
 
 export async function GET(request: NextRequest) {
@@ -49,20 +59,14 @@ export async function GET(request: NextRequest) {
     return new NextResponse(renderRespondExpiredLink(), { headers: HTML_HEADERS, status: 403 });
   }
 
-  const view = request.nextUrl.searchParams.get("view");
+  const panel = request.nextUrl.searchParams.get("panel");
+  const editsParam = request.nextUrl.searchParams.get("edits");
   const { payload, p, sig } = token;
   const mode: RespondMode = payload.mode ?? "confirm";
 
   try {
     const supabase = await getSupabaseForLeafletRoutes();
     const ctx = await loadRespondContext(supabase, payload.leafletId, payload.personId);
-
-    if (view === "changes") {
-      return new NextResponse(
-        renderRespondChanges({ token: { p, sig }, deliveries: ctx.deliveries }),
-        { headers: HTML_HEADERS },
-      );
-    }
 
     if (ctx.deliveries.length === 0) {
       return new NextResponse(renderRespondFarewellAllRemoved(), { headers: HTML_HEADERS });
@@ -81,6 +85,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    if (panel === "review") {
+      const edits = editsParam ? decodeEdits(editsParam) : defaultEdits(ctx.deliveries);
+      return new NextResponse(
+        renderRespondReview({ token: { p, sig }, deliveries: ctx.deliveries, edits }),
+        { headers: HTML_HEADERS },
+      );
+    }
+
+    const edits = editsParam ? decodeEdits(editsParam) : undefined;
+
     return new NextResponse(
       renderRespondHome({
         token: { p, sig },
@@ -88,6 +102,8 @@ export async function GET(request: NextRequest) {
         leafletTitle: ctx.leaflet.title,
         distributionDate: ctx.leaflet.distribution_date,
         deliveries: ctx.deliveries,
+        edits,
+        openChangesPanel: panel === "changes",
       }),
       { headers: HTML_HEADERS },
     );
@@ -118,7 +134,10 @@ export async function POST(request: NextRequest) {
         payload.leafletId,
         payload.personId,
       );
-      return new NextResponse(renderRespondConfirmed(confirmed.length), { headers: HTML_HEADERS });
+      return new NextResponse(
+        renderRespondConfirmed({ committedCount: confirmed.length, hasChanges: false }),
+        { headers: HTML_HEADERS },
+      );
     }
 
     if (action === "mark_complete_all") {
@@ -130,34 +149,26 @@ export async function POST(request: NextRequest) {
       return new NextResponse(renderCompleteThankYou(completed.length), { headers: HTML_HEADERS });
     }
 
-    if (action === "skip_selected") {
-      const deliveryIds = parseDeliveryIds(form);
-      const { remainingCount } = await skipDeliveriesForPerson(supabase, {
-        leafletId: payload.leafletId,
-        personId: payload.personId,
-        deliveryIds,
-      });
-
-      if (remainingCount === 0) {
-        return new NextResponse(renderRespondSkipFarewell(), { headers: HTML_HEADERS });
-      }
-
-      return NextResponse.redirect(new URL(respondUrl(token), request.url), 303);
+    if (action === "review") {
+      const ctx = await loadRespondContext(supabase, payload.leafletId, payload.personId);
+      const edits = parseEditsFromForm(form, ctx.deliveries);
+      return new NextResponse(
+        renderRespondReview({ token, deliveries: ctx.deliveries, edits }),
+        { headers: HTML_HEADERS },
+      );
     }
 
-    if (action === "remove_selected") {
-      const deliveryIds = parseDeliveryIds(form);
-      const { remainingCount } = await removeDeliveriesForPerson(supabase, {
+    if (action === "confirm_reviewed") {
+      const ctx = await loadRespondContext(supabase, payload.leafletId, payload.personId);
+      const edits = parseEditsFromForm(form, ctx.deliveries);
+      const { committedCount, hasChanges } = await applyReviewedResponse(supabase, {
         leafletId: payload.leafletId,
         personId: payload.personId,
-        deliveryIds,
+        edits,
       });
-
-      if (remainingCount === 0) {
-        return new NextResponse(renderRespondFarewellAllRemoved(), { headers: HTML_HEADERS });
-      }
-
-      return NextResponse.redirect(new URL(respondUrl(token), request.url), 303);
+      return new NextResponse(renderRespondConfirmed({ committedCount, hasChanges }), {
+        headers: HTML_HEADERS,
+      });
     }
 
     return new NextResponse(renderRespondError("Unknown action."), { headers: HTML_HEADERS, status: 400 });

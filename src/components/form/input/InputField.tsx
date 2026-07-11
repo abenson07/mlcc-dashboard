@@ -8,6 +8,8 @@ interface InputProps {
   defaultValue?: string | number;
   value?: string | number; // Controlled: when provided, input is controlled
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   className?: string;
   min?: string;
   max?: string;
@@ -31,6 +33,8 @@ const Input: FC<InputProps> = ({
   defaultValue,
   value,
   onChange,
+  onClick,
+  onFocus,
   className = "",
   min,
   max,
@@ -45,8 +49,11 @@ const Input: FC<InputProps> = ({
   maxLength,
   pattern,
 }) => {
+  // appearance-none hides native date/time picker chrome — keep it for text-like inputs only
+  const appearanceClass = type === "date" || type === "time" ? "" : "appearance-none";
+
   // Determine input styles based on state (disabled, success, error)
-  let inputClasses = `h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 ${className}`;
+  let inputClasses = `h-11 w-full rounded-lg border ${appearanceClass} px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 ${className}`;
 
   // Add styles for the different states
   if (disabled) {
@@ -69,6 +76,8 @@ const Input: FC<InputProps> = ({
         defaultValue={value === undefined ? defaultValue : undefined}
         value={value !== undefined ? value : undefined}
         onChange={onChange}
+        onClick={onClick}
+        onFocus={onFocus}
         min={min}
         max={max}
         step={step}

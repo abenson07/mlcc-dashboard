@@ -22,8 +22,6 @@ export default function OverviewContent() {
     readOnly,
     openRoutePreviews,
     stories,
-    budget,
-    budgetLineItems,
     deliveryStats,
   } = useLeafletContext();
   const { create: createStory } = useStories({ autoFetch: false });
@@ -88,70 +86,26 @@ export default function OverviewContent() {
           </Link>
         </section>
 
-        <div className="lf-overview-mid-row">
-          <section className="lf-overview-card" data-lf-card="open-routes">
-            <div className="lf-overview-card-header">
-              <span className="lf-overview-card-title">Open routes</span>
-              <span className="lf-meta">{deliveryStats.openRoutes} unassigned</span>
-            </div>
-            {openRoutePreviews.map((route) => (
-              <div key={route.id} className="lf-open-route" data-lf-card={`open-route-${route.id}`}>
-                <span className="lf-avatar">{route.initials}</span>
-                <div className="lf-open-route-info">
-                  <div className="lf-open-route-name">{route.name}</div>
-                  <div className="lf-meta">{route.detail}</div>
-                </div>
-                <span className={route.dot === "amber" ? "lf-dot lf-dot--amber" : "lf-dot lf-dot--green"} />
+        <section className="lf-overview-card" data-lf-card="open-routes">
+          <div className="lf-overview-card-header">
+            <span className="lf-overview-card-title">Open routes</span>
+            <span className="lf-meta">{deliveryStats.openRoutes} unassigned</span>
+          </div>
+          {openRoutePreviews.map((route) => (
+            <div key={route.id} className="lf-open-route" data-lf-card={`open-route-${route.id}`}>
+              <span className="lf-avatar">{route.initials}</span>
+              <div className="lf-open-route-info">
+                <div className="lf-open-route-name">{route.name}</div>
+                <div className="lf-meta">{route.detail}</div>
               </div>
-            ))}
-            <Link href={leafletHref(`${leafletBase}/leaflet/open-routes`, leafletId)} className="lf-view-all-btn">
-              <IconArrowRight />
-              View all open routes
-            </Link>
-          </section>
-
-          <section className="lf-overview-card" data-lf-card="budget-and-finances">
-            <div className="lf-overview-card-header">
-              <span className="lf-overview-card-title">Budget & finances</span>
+              <span className={route.dot === "amber" ? "lf-dot lf-dot--amber" : "lf-dot lf-dot--green"} />
             </div>
-            <div className="lf-metric-row">
-              <span className="lf-metric-label">Print budget used</span>
-              <span className="lf-metric-strong">{budget.progressPct}%</span>
-            </div>
-            <div className="lf-progress-track">
-              <div className="lf-progress-fill" style={{ width: `${budget.progressPct}%` }} />
-            </div>
-            <div className="lf-budget-metrics">
-              <div className="lf-budget-metric">
-                <span className="lf-budget-metric-label">Print budget</span>
-                <span className="lf-budget-metric-value">${budget.printBudget.toLocaleString()}</span>
-              </div>
-              <div className="lf-budget-metric">
-                <span className="lf-budget-metric-label">Spent</span>
-                <span className="lf-budget-metric-value">${budget.spent.toLocaleString()}</span>
-              </div>
-              <div className="lf-budget-metric">
-                <span className="lf-budget-metric-label">Remaining</span>
-                <span className="lf-budget-metric-value">${budget.remaining.toLocaleString()}</span>
-              </div>
-            </div>
-            <p className="lf-line-items-label">Line items</p>
-            {budgetLineItems.map((item) => (
-              <div key={item.name} className="lf-line-item" data-lf-card={`line-item-${item.name}`}>
-                <div>
-                  <div style={{ fontWeight: 500, fontSize: 13 }}>{item.name}</div>
-                  <div className="lf-meta">{item.amount}</div>
-                </div>
-                <span className={item.statusTone === "paid" ? "lf-qty-badge lf-qty-badge--paid" : "lf-qty-badge lf-qty-badge--pending"}>
-                  {item.status}
-                </span>
-              </div>
-            ))}
-            <Link href={leafletHref(`${leafletBase}/leaflet/sponsorships`, leafletId)} className="lf-view-all-btn lf-view-all-btn--dark">
-              View full budget
-            </Link>
-          </section>
-        </div>
+          ))}
+          <Link href={leafletHref(`${leafletBase}/leaflet/open-routes`, leafletId)} className="lf-view-all-btn">
+            <IconArrowRight />
+            View all open routes
+          </Link>
+        </section>
 
         <section className="lf-overview-card" data-lf-card="stories">
           <div className="lf-overview-card-header">
@@ -171,7 +125,18 @@ export default function OverviewContent() {
           </div>
           <div className="lf-story-list">
             {stories.length === 0 ? (
-              <p className="lf-meta">No stories yet.</p>
+              <div className="lf-empty-state">
+                <p className="lf-meta">No stories yet.</p>
+                <button
+                  type="button"
+                  className="lf-small-btn"
+                  disabled={addingStory}
+                  onClick={() => void handleAddStory()}
+                >
+                  <IconPlus />
+                  {addingStory ? "Adding…" : "Create your first story"}
+                </button>
+              </div>
             ) : (
               stories.map((story) => (
                 <Link

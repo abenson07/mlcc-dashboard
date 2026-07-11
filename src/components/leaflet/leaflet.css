@@ -74,6 +74,7 @@
 .lf-content-col > .lf-canvas { flex: none; min-height: 0; overflow: visible; }
 .lf-canvas { min-height: 0; flex: 1; border-radius: 12px; border: 1px solid var(--lf-canvas-border); background: var(--lf-canvas); box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; overflow: auto; }
 .lf-canvas--white { background: var(--lf-card); }
+.lf-empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; background: var(--lf-bg); border-radius: 8px; text-align: center; }
 .lf-banner { border-radius: 12px; padding: 12px 16px; font-size: 13px; }
 .lf-banner--amber { border: 1px solid #fde68a; background: #fffbeb; color: #92400e; }
 .lf-banner--green { border: 1px solid #a7f3d0; background: #ecfdf5; color: #065f46; }
@@ -177,6 +178,9 @@
 .lf-overview-card-title { font-size: 15px; font-weight: 600; }
 .lf-hero-date { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--lf-text-muted); }
 .lf-task-box { display: flex; align-items: flex-start; gap: 10px; margin-top: 6px; border-radius: 6px; background: #fafafa; padding: 6px 8px; font-size: 13px; }
+.lf-task-hover-row { align-items: center; justify-content: space-between; }
+.lf-task-row-menu { opacity: 0; transition: opacity .15s; }
+.lf-task-hover-row:hover .lf-task-row-menu { opacity: 1; }
 .lf-task-done { text-decoration: line-through; color: var(--lf-text-subtle); }
 .lf-see-all { margin-top: 8px; border: none; background: none; padding: 4px 0; font-size: 12px; font-weight: 500; color: var(--lf-text-muted); cursor: pointer; text-decoration: none; display: inline-block; }
 .lf-see-all:hover { color: var(--lf-text); }

@@ -332,6 +332,12 @@ export function isShellPreviewLeafletRoute(pathname: string): boolean {
   );
 }
 
+export function isShellPreviewLeafletsListRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflets`;
+}
+
 export function isShellPreviewEventDetailRoute(pathname: string): boolean {
   return parseShellPreviewEventId(pathname) !== null;
 }
@@ -340,6 +346,12 @@ export function isShellPreviewLeafletDeliverersRoute(pathname: string): boolean 
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
   return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/deliverers`;
+}
+
+export function isShellPreviewLeafletRoutesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/routes`;
 }
 
 export function isShellPreviewLeafletTodoRoute(pathname: string): boolean {
@@ -354,14 +366,32 @@ export function isShellPreviewLeafletSponsorshipsRoute(pathname: string): boolea
   return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/sponsorships`;
 }
 
+export function isShellPreviewLeafletInvoicesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/invoices`;
+}
+
 export function isShellPreviewLeafletRouteDetailsRoute(pathname: string): boolean {
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
   return (
     normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/routes` ||
     normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes` ||
-    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/substitutions`
+    normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/skipped-routes`
   );
+}
+
+export function isShellPreviewLeafletOpenRoutesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/open-routes`;
+}
+
+export function isShellPreviewLeafletSkippedRoutesRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflet/skipped-routes`;
 }
 
 export function buildShellPreviewLeafletL2Config(options?: {
@@ -436,7 +466,7 @@ export function buildShellPreviewLeafletL2Config(options?: {
             id: "substitutions",
             label: "Skipped Routes",
             icon: ArrowLeftRight,
-            href: `${SHELL_PREVIEW_BASE}/leaflet/substitutions`,
+            href: `${SHELL_PREVIEW_BASE}/leaflet/skipped-routes`,
           },
         ],
       },
@@ -449,6 +479,12 @@ export function buildShellPreviewLeafletL2Config(options?: {
             label: "Sponsorships",
             icon: HandCoins,
             href: `${SHELL_PREVIEW_BASE}/leaflet/sponsorships`,
+          },
+          {
+            id: "invoices",
+            label: "Invoices",
+            icon: Receipt,
+            href: `${SHELL_PREVIEW_BASE}/leaflet/invoices`,
           },
         ],
       },

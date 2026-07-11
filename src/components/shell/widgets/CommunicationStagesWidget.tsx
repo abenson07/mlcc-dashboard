@@ -8,6 +8,7 @@ import CloseOutReviewModal from "@/components/leaflet/close-out/CloseOutReviewMo
 import CloseOutConfirmedModal from "@/components/leaflet/close-out/CloseOutConfirmedModal";
 import type { CloseOutMetrics } from "@/lib/leaflets/getCloseOutMetrics";
 import ShellWidget from "./ShellWidget";
+import WidgetActionButton from "./WidgetActionButton";
 import {
   IconStatusConfirmed,
   IconStatusUnresponsive,
@@ -16,7 +17,7 @@ import {
 } from "./widgetIcons";
 
 export default function CommunicationStagesWidget() {
-  const { leafletId, commStages, unconfirmedCount, sendComm, closeLeaflet, refetchAll } =
+  const { leafletId, commStages, unconfirmedCount, sendComm, closeLeaflet, refetchAll, netLeafletCountChange } =
     useLeafletContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [sending, setSending] = useState(false);
@@ -59,6 +60,14 @@ export default function CommunicationStagesWidget() {
 
   return (
     <ShellWidget title="Communication Stages" widgetId="communication-stages">
+      <div className="shell-widget-net-change">
+        Net leaflet change:{" "}
+        {netLeafletCountChange > 0
+          ? `+${netLeafletCountChange}`
+          : netLeafletCountChange === 0
+            ? "+0"
+            : `−${Math.abs(netLeafletCountChange)}`}
+      </div>
       {commStages.map((stage) => {
         const isActive = stage.state === "active";
         const isUpcoming = stage.state === "upcoming";
@@ -109,7 +118,7 @@ export default function CommunicationStagesWidget() {
 
               {isStatsStage && allCompleted && stage.yes != null && (
                 <span className="shell-widget-comm-timing">
-                  {(stage.yes ?? 0) + (stage.unresponsive ?? 0) + (stage.no ?? 0)} sent, {stage.yes} confirmed
+                  {stage.sentCount} sent, {stage.yes} confirmed
                 </span>
               )}
 
@@ -144,9 +153,7 @@ export default function CommunicationStagesWidget() {
             </div>
 
             {isStatsStage && !allCompleted && stage.yes != null && (
-              <span className="shell-widget-comm-sent">
-                {(stage.yes ?? 0) + (stage.unresponsive ?? 0) + (stage.no ?? 0)} Sent
-              </span>
+              <span className="shell-widget-comm-sent">{stage.sentCount} Sent</span>
             )}
 
             {isActive && (
@@ -156,9 +163,7 @@ export default function CommunicationStagesWidget() {
                 onClick={() => setModalOpen(true)}
                 disabled={sending}
               >
-                {activeStage?.stepKey === "initial_confirmation"
-                  ? "Send confirmation request"
-                  : "Send"}
+                Send
               </button>
             )}
 
@@ -172,13 +177,9 @@ export default function CommunicationStagesWidget() {
       })}
 
       {allCompleted && (
-        <button
-          type="button"
-          className="shell-widget-close-run-btn"
-          onClick={() => setEndReviewOpen(true)}
-        >
+        <WidgetActionButton onClick={() => setEndReviewOpen(true)}>
           Close leaflet run
-        </button>
+        </WidgetActionButton>
       )}
 
       <SendConfirmationModal

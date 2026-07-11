@@ -17,7 +17,12 @@ import {
   isShellPreviewFaqsRoute,
   isShellPreviewLeafletDeliverersRoute,
   isShellPreviewLeafletRoute,
+  isShellPreviewLeafletInvoicesRoute,
+  isShellPreviewLeafletOpenRoutesRoute,
   isShellPreviewLeafletRouteDetailsRoute,
+  isShellPreviewLeafletRoutesRoute,
+  isShellPreviewLeafletSkippedRoutesRoute,
+  isShellPreviewLeafletsListRoute,
   isShellPreviewLeafletSponsorshipsRoute,
   isShellPreviewLeafletTodoRoute,
   isShellPreviewWidgetsRoute,
@@ -41,6 +46,103 @@ type ShellPreviewContentProps = {
   children: ReactNode;
 };
 
+type LeafletShellBodyProps = {
+  pathname: string;
+  breadcrumbs: { label: string }[];
+  isFavorite: boolean;
+  onFavoriteToggle: () => void;
+  widgetPanelOpen: boolean;
+  onToggleWidgetPanel: () => void;
+  currentEvent: { id: string; kind?: string } | null | undefined;
+  children: ReactNode;
+};
+
+function LeafletShellBody({
+  pathname,
+  breadcrumbs,
+  isFavorite,
+  onFavoriteToggle,
+  widgetPanelOpen,
+  onToggleWidgetPanel,
+  currentEvent,
+  children,
+}: LeafletShellBodyProps) {
+  const { selectedDeliveryId } = useLeafletContext();
+  const routesSelectionSatisfied = isShellPreviewLeafletRoutesRoute(pathname)
+    ? selectedDeliveryId != null
+    : true;
+
+  return (
+    <>
+      <CanvasTopbar
+        breadcrumbs={breadcrumbs}
+        isFavorite={isFavorite}
+        onFavoriteToggle={onFavoriteToggle}
+        widgetPanelOpen={widgetPanelOpen}
+        onToggleWidgetPanel={onToggleWidgetPanel}
+        tooling={
+          isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
+            <LeafletSponsorshipTooling
+              widgetPanelOpen={widgetPanelOpen}
+              onToggleWidgetPanel={onToggleWidgetPanel}
+            />
+          ) : isShellPreviewLeafletsListRoute(pathname) ? (
+            <CanvasTooling
+              showDownload={false}
+              widgetPanelOpen={widgetPanelOpen}
+              onToggleWidgetPanel={onToggleWidgetPanel}
+            />
+          ) : undefined
+        }
+      />
+      <CanvasContainer
+        showWidgetPanel={
+          widgetPanelOpen &&
+          !isShellPreviewWidgetsRoute(pathname) &&
+          !isShellPreviewFaqsRoute(pathname) &&
+          !isShellPreviewLeafletsListRoute(pathname) &&
+          !isShellPreviewLeafletTodoRoute(pathname) &&
+          routesSelectionSatisfied
+        }
+        content={<CanvasContent>{children}</CanvasContent>}
+        widgetPanel={
+          isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewEventDetailRoute(pathname) && currentEvent?.kind === "committee_meeting" ? (
+            <AttendanceWidget eventId={currentEvent.id} />
+          ) : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
+            <>
+              <RouteDetailsWidget />
+              <BuildingContactWidget />
+            </>
+          ) : isShellPreviewLeafletDeliverersRoute(pathname) ? (
+            <>
+              <CommunicationStagesWidget />
+              <CoverSheetsWidget />
+            </>
+          ) : isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
+            <>
+              <SponsorshipLevelsWidget />
+              <BudgetSponsorshipsWidget />
+            </>
+          ) : isShellPreviewLeafletTodoRoute(pathname) ? (
+            <>
+              <DistributionDetailsWidget />
+              <ListsForLeafletWidget />
+              <QrCodesWidget />
+            </>
+          ) : (
+            <>
+              <DistributionDetailsWidget />
+              <CommunicationStagesWidget />
+              <ListsForLeafletWidget />
+              <QrCodesWidget />
+            </>
+          )
+        }
+      />
+    </>
+  );
+}
+
 function LeafletSponsorshipTooling({
   widgetPanelOpen,
   onToggleWidgetPanel,
@@ -48,15 +150,12 @@ function LeafletSponsorshipTooling({
   widgetPanelOpen: boolean;
   onToggleWidgetPanel: () => void;
 }) {
-  const { setSponsorModalOpen, setInvoiceModalOpen } = useLeafletContext();
+  const { setInvoiceModalOpen } = useLeafletContext();
   return (
     <CanvasTooling
       widgetPanelOpen={widgetPanelOpen}
       onToggleWidgetPanel={onToggleWidgetPanel}
-      links={[
-        { label: "+ Add sponsor", onClick: () => setSponsorModalOpen(true) },
-        { label: "Issue invoice", onClick: () => setInvoiceModalOpen(true) },
-      ]}
+      links={[{ label: "+ Add sponsor", onClick: () => setInvoiceModalOpen(true) }]}
     />
   );
 }
@@ -100,7 +199,14 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
         leaflets[0];
 
       if (leaflet) {
-        return [{ label: "Leaflet" }, { label: leaflet.title }];
+        const segments = [{ label: "Leaflet" }, { label: leaflet.title }];
+        if (isShellPreviewLeafletTodoRoute(pathname)) segments.push({ label: "Tasks" });
+        else if (isShellPreviewLeafletRoutesRoute(pathname)) segments.push({ label: "Routes" });
+        else if (isShellPreviewLeafletOpenRoutesRoute(pathname)) segments.push({ label: "Open Routes" });
+        else if (isShellPreviewLeafletSkippedRoutesRoute(pathname)) segments.push({ label: "Skipped Routes" });
+        else if (isShellPreviewLeafletSponsorshipsRoute(pathname)) segments.push({ label: "Sponsorships" });
+        else if (isShellPreviewLeafletInvoicesRoute(pathname)) segments.push({ label: "Invoices" });
+        return segments;
       }
       return [{ label: "Leaflet" }];
     }
@@ -120,7 +226,8 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
         <CanvasArea>
           <Canvas>
             <LeafletProvider>
-              <CanvasTopbar
+              <LeafletShellBody
+                pathname={pathname}
                 breadcrumbs={breadcrumbs}
                 isFavorite={isFavorite(currentRoute)}
                 onFavoriteToggle={handleFavoriteToggle}
@@ -132,62 +239,10 @@ export default function ShellPreviewContent({ children }: ShellPreviewContentPro
                     return next;
                   })
                 }
-                tooling={
-                  isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
-                    <LeafletSponsorshipTooling
-                      widgetPanelOpen={widgetPanelOpen}
-                      onToggleWidgetPanel={() =>
-                        setWidgetPanelOpen((open) => {
-                          const next = !open;
-                          localStorage.setItem("widget-panel-open", String(next));
-                          return next;
-                        })
-                      }
-                    />
-                  ) : undefined
-                }
-              />
-              <CanvasContainer
-                showWidgetPanel={
-                  widgetPanelOpen &&
-                  !isShellPreviewWidgetsRoute(pathname) &&
-                  !isShellPreviewFaqsRoute(pathname)
-                }
-                content={<CanvasContent>{children}</CanvasContent>}
-                widgetPanel={
-                  isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewEventDetailRoute(pathname) && currentEvent?.kind === "committee_meeting" ? (
-                    <AttendanceWidget eventId={currentEvent.id} />
-                  ) : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
-                    <>
-                      <RouteDetailsWidget />
-                      <BuildingContactWidget />
-                    </>
-                  ) : isShellPreviewLeafletDeliverersRoute(pathname) ? (
-                    <>
-                      <CommunicationStagesWidget />
-                      <CoverSheetsWidget />
-                    </>
-                  ) : isShellPreviewLeafletSponsorshipsRoute(pathname) ? (
-                    <>
-                      <SponsorshipLevelsWidget />
-                      <BudgetSponsorshipsWidget />
-                    </>
-                  ) : isShellPreviewLeafletTodoRoute(pathname) ? (
-                    <>
-                      <DistributionDetailsWidget />
-                      <ListsForLeafletWidget />
-                      <QrCodesWidget />
-                    </>
-                  ) : (
-                    <>
-                      <DistributionDetailsWidget />
-                      <CommunicationStagesWidget />
-                      <ListsForLeafletWidget />
-                      <QrCodesWidget />
-                    </>
-                  )
-                }
-              />
+                currentEvent={currentEvent}
+              >
+                {children}
+              </LeafletShellBody>
             </LeafletProvider>
           </Canvas>
         </CanvasArea>
