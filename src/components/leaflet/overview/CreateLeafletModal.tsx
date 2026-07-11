@@ -212,7 +212,7 @@ export default function CreateLeafletModal({
               <PastDateWarning value={sponsorshipDueDate} />
             </div>
             <div>
-              <Label htmlFor="leaflet-delivery-date">Delivery date</Label>
+              <Label htmlFor="leaflet-delivery-date">Content due date</Label>
               <Input
                 id="leaflet-delivery-date"
                 type="date"

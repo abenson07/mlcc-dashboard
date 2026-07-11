@@ -72,7 +72,7 @@ export default function DistributionDetailsWidget() {
           onSave={(raw) => handleSaveDate("sponsorship_due_date", raw)}
         />
       </PropertyRow>
-      <PropertyRow label="Delivery date">
+      <PropertyRow label="Content due date">
         <InlineDateProperty
           value={leaflet.delivery_date ?? ""}
           readOnly={readOnly}

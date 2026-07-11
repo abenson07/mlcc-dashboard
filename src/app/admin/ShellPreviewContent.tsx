@@ -86,13 +86,13 @@ function LeafletShellBody({
               widgetPanelOpen={widgetPanelOpen}
               onToggleWidgetPanel={onToggleWidgetPanel}
             />
-          ) : isShellPreviewLeafletsListRoute(pathname) ? (
+          ) : (
             <CanvasTooling
               showDownload={false}
               widgetPanelOpen={widgetPanelOpen}
               onToggleWidgetPanel={onToggleWidgetPanel}
             />
-          ) : undefined
+          )
         }
       />
       <CanvasContainer
@@ -153,6 +153,7 @@ function LeafletSponsorshipTooling({
   const { setInvoiceModalOpen } = useLeafletContext();
   return (
     <CanvasTooling
+      showDownload={false}
       widgetPanelOpen={widgetPanelOpen}
       onToggleWidgetPanel={onToggleWidgetPanel}
       links={[{ label: "+ Add sponsor", onClick: () => setInvoiceModalOpen(true) }]}
