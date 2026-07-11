@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { getApiBase } from "@/lib/apiBase";
 import { supabaseClient } from "@/lib/supabaseClient";
 import type { DeliveryWithRelations } from "hooks";
 import type { Leaflets } from "@/types/database";
@@ -27,7 +28,9 @@ export function useLeafletHistory(
     queryKey: ["deliveries", previousLeaflet?.id, "prev"],
     queryFn: async () => {
       if (!previousLeaflet) return [] as DeliveryWithRelations[];
-      const res = await fetch(`/api/leaflets/${previousLeaflet.id}/deliveries`);
+      const res = await fetch(
+        `${getApiBase()}/api/leaflets/${previousLeaflet.id}/deliveries`,
+      );
       const data = (await res.json()) as { deliveries?: DeliveryWithRelations[] };
       return data.deliveries ?? [];
     },
