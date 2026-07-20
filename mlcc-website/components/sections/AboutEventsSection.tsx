@@ -73,7 +73,7 @@ export function AboutEventsSection() {
               ${headingVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}
             `}
           >
-            Traditions neighbors look forward to — and room for new ones
+            Traditions neighbors look forward to, and room for new ones
           </h2>
           <p className="m-0 max-w-[34rem] font-body text-base leading-6 text-sparkles-navy">
             More than 4,500 neighbors attend MLCC events each year. From decades-old gatherings to
@@ -109,7 +109,7 @@ export function AboutEventsSection() {
                     style={{
                       height: "50%",
                       backgroundImage:
-                        "linear-gradient(0deg, color-mix(in srgb, var(--sparkles-navy) 65%, transparent), transparent)",
+                        "linear-gradient(0deg, color-mix(in srgb, var(--puget-night) 65%, transparent), transparent)",
                     }}
                   >
                     <div className="flex flex-row items-center gap-3">

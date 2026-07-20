@@ -42,22 +42,9 @@ function ProgramShowcase({ currentSlide }: { currentSlide: number }) {
         <span className="font-body text-xs font-bold uppercase leading-4 tracking-[0.0625rem] text-sparkles-muted">
           Your gift supports
         </span>
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-display text-3xl font-bold leading-9 tracking-[-0.0625rem] text-puget-night max-[767px]:text-2xl max-[767px]:leading-8">
-            {program.title}
-          </span>
-          <svg
-            className="h-10 w-10 shrink-0 text-puget-night"
-            width="40"
-            height="40"
-            viewBox="0 0 48 48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path d="M14 34L34 14M34 14H18M34 14V30" stroke="currentColor" strokeLinecap="square" />
-          </svg>
-        </div>
+        <span className="font-display text-3xl font-bold leading-9 tracking-[-0.0625rem] text-puget-night max-[767px]:text-2xl max-[767px]:leading-8">
+          {program.title}
+        </span>
         <span className="font-body text-xs leading-4 text-sparkles-navy">
           {currentSlide + 1} of {membershipPrograms.length} neighborhood programs your gift powers
         </span>
@@ -125,7 +112,7 @@ export function DonateMarqueeSection() {
                   </p>
                   <p className="mt-2 mb-0 font-body text-base leading-6 text-sparkles-navy">
                     Your {formatCurrency(activeAmount)} gift to the Maple Leaf Community Council means a
-                    lot. Payment processing will be connected soon — we&apos;ll follow up at {email}.
+                    lot. Payment processing will be connected soon. We&apos;ll follow up at {email}.
                   </p>
                 </div>
               ) : (

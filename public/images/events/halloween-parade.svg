@@ -1,0 +1,52 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="#0d1526"/>
+
+  <!-- moon -->
+  <circle cx="1040" cy="150" r="70" fill="#f2ece5" opacity="0.95"/>
+
+  <!-- bats -->
+  <g fill="#f2ece5" opacity="0.85">
+    <path d="M150 110 q20 -22 40 0 q6 -10 16 -6 q-4 12 -16 16 q12 4 16 16 q-10 4 -16 -6 q-20 22 -40 0 q-6 10 -16 6 q4 -12 16 -16 q-12 -4 -16 -16 q10 -4 16 6 Z"/>
+    <path d="M300 190 q16 -18 32 0 q5 -8 13 -5 q-3 10 -13 13 q10 3 13 13 q-8 3 -13 -5 q-16 18 -32 0 q-5 8 -13 5 q3 -10 13 -13 q-10 -3 -13 -13 q8 -3 13 5 Z"/>
+    <path d="M900 250 q14 -16 28 0 q4 -7 11 -4 q-2 8 -11 11 q9 3 11 11 q-7 3 -11 -4 q-14 16 -28 0 q-4 7 -11 4 q2 -8 11 -11 q-9 -3 -11 -11 q7 -3 11 4 Z"/>
+  </g>
+
+  <!-- ground line -->
+  <line x1="0" y1="560" x2="1200" y2="560" stroke="#f2ece5" stroke-width="2" opacity="0.35"/>
+
+  <!-- pumpkins -->
+  <g>
+    <g transform="translate(940,470)">
+      <ellipse cx="0" cy="60" rx="90" ry="70" fill="#c96a4e"/>
+      <line x1="-75" y1="30" x2="-75" y2="95" stroke="#a1502f" stroke-width="4"/>
+      <line x1="-38" y1="15" x2="-38" y2="112" stroke="#a1502f" stroke-width="4"/>
+      <line x1="0" y1="8" x2="0" y2="120" stroke="#a1502f" stroke-width="4"/>
+      <line x1="38" y1="15" x2="38" y2="112" stroke="#a1502f" stroke-width="4"/>
+      <line x1="75" y1="30" x2="75" y2="95" stroke="#a1502f" stroke-width="4"/>
+      <path d="M-10 -6 q-4 -34 22 -40" fill="none" stroke="#5c6b3c" stroke-width="10" stroke-linecap="round"/>
+      <!-- face -->
+      <polygon points="-32,40 -14,40 -24,60" fill="#0d1526"/>
+      <polygon points="32,40 14,40 24,60" fill="#0d1526"/>
+      <path d="M-30 85 q30 30 60 0 q-8 20 -30 20 q-22 0 -30 -20 Z" fill="#0d1526"/>
+    </g>
+    <g transform="translate(1060,510) scale(0.55)">
+      <ellipse cx="0" cy="60" rx="90" ry="70" fill="#e2924f"/>
+      <path d="M-10 -6 q-4 -34 22 -40" fill="none" stroke="#5c6b3c" stroke-width="12" stroke-linecap="round"/>
+      <polygon points="-32,40 -14,40 -24,60" fill="#0d1526"/>
+      <polygon points="32,40 14,40 24,60" fill="#0d1526"/>
+      <path d="M-30 85 q30 30 60 0 q-8 20 -30 20 q-22 0 -30 -20 Z" fill="#0d1526"/>
+    </g>
+  </g>
+
+  <!-- maple leaf line art -->
+  <g fill="none" stroke="#f2ece5" stroke-width="2.5" opacity="0.5">
+    <path d="M120 480 l14 -30 l16 8 l6 -34 l18 24 l10 -14 l4 30 l20 -6 l-14 26 l22 8 l-30 12 l10 22 l-30 -8 l-4 26 l-16 -20 l-10 18 l-6 -26 l-22 8 l6 -24 l-24 -4 Z" transform="scale(0.9) translate(0,20)"/>
+  </g>
+
+  <!-- title -->
+  <text x="90" y="290" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="80" fill="#f2ece5" letter-spacing="-1">HALLOWEEN</text>
+  <text x="90" y="370" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="80" fill="#c96a4e" letter-spacing="-1">PARADE</text>
+
+  <text x="90" y="420" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#f2ece5">Maple Leaf Community Council</text>
+  <text x="90" y="452" font-family="Arial, sans-serif" font-weight="400" font-size="22" fill="#f2ece5" opacity="0.8">Costumes, candy, and neighbors — all ages welcome</text>
+</svg>

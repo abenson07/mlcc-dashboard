@@ -10,7 +10,7 @@ export const MEMBERSHIP_GOAL = {
   targetDate: "December 2026",
   headline: "10% of Maple Leaf neighbors supporting MLCC by end of 2026",
   summary:
-    "More than 4,500 people attend MLCC events each year — roughly everyone who lives here. Growing from 5% to 10% financial support lets us sustain what neighbors love and say yes to more ideas.",
+    "More than 4,500 people attend MLCC events each year, roughly everyone who lives here. Growing from 5% to 10% financial support lets us sustain what neighbors love and say yes to more ideas.",
 };
 
 export const membershipMilestones: MembershipMilestone[] = [
@@ -21,17 +21,17 @@ export const membershipMilestones: MembershipMilestone[] = [
   },
   {
     percent: 6,
-    label: "6% — stronger outreach",
+    label: "6%: stronger outreach",
     unlock: "Fund an additional Community Meeting each year and expand hybrid streaming support.",
   },
   {
     percent: 8,
-    label: "8% — deeper advocacy",
+    label: "8%: deeper advocacy",
     unlock: "Grow zoning workshops and neighborhood advocacy capacity for street safety and civic issues.",
   },
   {
     percent: 10,
-    label: "10% — our 2026 goal",
+    label: "10%: our 2026 goal",
     unlock: "Seed new neighbor-led traditions, expand event support, and keep saying yes to ideas like yours.",
   },
 ];
@@ -46,7 +46,7 @@ export type MembershipStory = {
 export const membershipStories: MembershipStory[] = [
   {
     quote:
-      "The Maple Leaf Community Council doesn't exist apart from the neighborhood. It exists because of it — built by neighbors, sustained by neighbors.",
+      "The Maple Leaf Community Council doesn't exist apart from the neighborhood. It exists because of it, built by neighbors, sustained by neighbors.",
     name: "From the Leaflet",
     attribution: "Built by neighbors, sustained by neighbors",
     image:
@@ -78,7 +78,7 @@ export const membershipStories: MembershipStory[] = [
   },
   {
     quote:
-      "Our goal is to grow membership to 10% by the end of 2026 — so we can keep traditions like the Halloween Parade going and make room for what's next.",
+      "Our goal is to grow membership to 10% by the end of 2026, so we can keep traditions like the Halloween Parade going and make room for what's next.",
     name: "From the Leaflet",
     attribution: "Carrying the Halloween Parade forward",
     image:
@@ -86,7 +86,7 @@ export const membershipStories: MembershipStory[] = [
   },
   {
     quote:
-      "Whether you have time to volunteer, ideas to bring forward, or the ability to support financially — each form of involvement helps Maple Leaf stay connected.",
+      "Whether you have time to volunteer, ideas to bring forward, or the ability to support financially, each form of involvement helps Maple Leaf stay connected.",
     name: "Maple Leaf neighbor",
     attribution: "Why membership matters",
     image:

@@ -9,7 +9,7 @@ export async function CommitteesFaqSection() {
     <FaqSection
       label="FAQ"
       headline="Common questions about getting involved"
-      faqs={faqs}
+      faqs={faqs.slice(0, 5)}
       data-editable="true"
       data-editable-type="section"
       data-editable-id="committees.faq"

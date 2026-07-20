@@ -1,5 +1,6 @@
-import { formatLineItemsSummary } from "@/lib/commerce/tshirtCart";
-import type { TshirtLineItem } from "@/types/database";
+import { formatLineItemsSummary as formatTshirtLineItemsSummary } from "@/lib/commerce/tshirtCart";
+import { formatLineItemsSummary as formatShopLineItemsSummary } from "@/lib/commerce/shopCart";
+import type { TshirtLineItem, ShopLineItem } from "@/types/database";
 import { getResend, getResendFromEmail } from "@/lib/resend";
 
 function formatCents(cents: number): string {
@@ -21,7 +22,7 @@ export async function sendTshirtConfirmationEmail(params: {
     return { sent: false, error: "Resend is not configured" };
   }
 
-  const summary = formatLineItemsSummary(params.lineItems);
+  const summary = formatTshirtLineItemsSummary(params.lineItems);
   const amount = formatCents(params.amountCents);
 
   try {
@@ -38,6 +39,61 @@ export async function sendTshirtConfirmationEmail(params: {
         `Total paid: ${amount}`,
         "",
         "We'll be in touch about pickup at the summer social or shipping if needed.",
+        "",
+        "— Maple Leaf Community Council",
+      ].join("\n"),
+    });
+    if (error) return { sent: false, error: error.message };
+    return { sent: true };
+  } catch (e) {
+    return {
+      sent: false,
+      error: e instanceof Error ? e.message : "Failed to send email",
+    };
+  }
+}
+
+export async function sendShopOrderConfirmationEmail(params: {
+  to: string;
+  customerName: string;
+  lineItems: ShopLineItem[];
+  amountCents: number;
+}): Promise<{ sent: boolean; error?: string }> {
+  const resend = getResend();
+  const from = getResendFromEmail();
+  if (!resend || !from) {
+    return { sent: false, error: "Resend is not configured" };
+  }
+
+  const summary = formatShopLineItemsSummary(params.lineItems);
+  const amount = formatCents(params.amountCents);
+  const hasPreorder = params.lineItems.some((l) => l.fulfillment === "preorder");
+  const hasInStock = params.lineItems.some((l) => l.fulfillment === "in_stock");
+
+  const shippingNotes: string[] = [];
+  if (hasPreorder) {
+    shippingNotes.push(
+      "Pre-order items are printed after the order window closes, then mailed to you — plan on a few weeks before they ship."
+    );
+  }
+  if (hasInStock) {
+    shippingNotes.push("In-stock items will ship to your address soon.");
+  }
+
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to: params.to,
+      subject: "Maple Leaf shop order confirmed",
+      text: [
+        `Hi ${params.customerName},`,
+        "",
+        "Thank you for your order from the Maple Leaf shop.",
+        "",
+        `Order: ${summary}`,
+        `Total paid: ${amount}`,
+        "",
+        ...shippingNotes,
         "",
         "— Maple Leaf Community Council",
       ].join("\n"),

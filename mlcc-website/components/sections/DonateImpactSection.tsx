@@ -97,7 +97,7 @@ export function DonateImpactSection() {
             </div>
 
             <p className="m-0 font-body text-base leading-6 text-sparkles-navy">
-              MLCC is volunteer-run. Your donation goes directly toward neighborhood programs — not
+              MLCC is volunteer-run. Your donation goes directly toward neighborhood programs, not
               overhead.
             </p>
           </div>

@@ -7,7 +7,7 @@ const FEATURE_IMAGE =
 const features = [
   {
     title: "Make an impact locally",
-    text: "Help shape the events, programs, and advocacy that neighbors experience every day — from the Summer Social to the Leaflet on your doorstep.",
+    text: "Help shape the events, programs, and advocacy that neighbors experience every day, from the Summer Social to the Leaflet on your doorstep.",
     icon: (
       <svg
         width="100%"

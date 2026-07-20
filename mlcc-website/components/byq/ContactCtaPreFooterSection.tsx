@@ -1,3 +1,7 @@
+"use client";
+
+import * as React from "react";
+import { getApiBase } from "@/lib/apiBase";
 import { SectionLabel } from "@marketing/components/SectionLabel";
 import { TestimonialPanel, type TestimonialPanelProps } from "@marketing/components/byq/TestimonialPanel";
 
@@ -17,6 +21,7 @@ const labelClassName =
 export type ContactCtaPreFooterSectionProps = {
   testimonial?: TestimonialPanelProps;
   committeeName?: string;
+  headline?: string;
 };
 
 function formatCommitteeName(name: string): string {
@@ -29,13 +34,12 @@ function formatCommitteeName(name: string): string {
 
 function getJoinCopy(committeeName?: string) {
   if (committeeName) {
-    const committee = formatCommitteeName(committeeName);
     return {
       label: "Get involved",
-      headline: `Join the ${committee}`,
+      headline: "Attend the next committee meeting",
       description:
         "Share your name and email or phone and a committee lead will be in touch about volunteering.",
-      button: "Join the committee",
+      button: "Request an invite",
       idPrefix: committeeName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     };
   }
@@ -53,11 +57,40 @@ function getJoinCopy(committeeName?: string) {
 export function ContactCtaPreFooterSection({
   testimonial = defaultTestimonial,
   committeeName,
+  headline,
 }: ContactCtaPreFooterSectionProps = {}) {
-  const copy = getJoinCopy(committeeName);
+  const copy = { ...getJoinCopy(committeeName), ...(headline ? { headline } : {}) };
+  const [status, setStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    setStatus("submitting");
+    try {
+      const response = await fetch(`${getApiBase()}/api/public/committees/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          contact: formData.get("contact"),
+          committeeName,
+          source: "join-card",
+        }),
+      });
+
+      if (!response.ok) throw new Error("Request failed");
+      setStatus("success");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
+  }
 
   return (
     <section
+      id="join-committee"
       className="bg-sparkles-cream"
       data-editable="true"
       data-editable-type="section"
@@ -79,7 +112,7 @@ export function ContactCtaPreFooterSection({
                   </div>
                 </div>
 
-                <form className="flex flex-col gap-0" aria-label={copy.headline}>
+                <form className="flex flex-col gap-0" aria-label={copy.headline} onSubmit={handleSubmit}>
                   <div className="flex flex-col">
                     <label htmlFor={`${copy.idPrefix}-name`} className={labelClassName}>
                       Name
@@ -112,13 +145,22 @@ export function ContactCtaPreFooterSection({
                     />
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 flex items-center gap-4">
                     <button
                       type="submit"
-                      className="cursor-pointer rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90"
+                      disabled={status === "submitting"}
+                      className="cursor-pointer rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {copy.button}
+                      {status === "submitting" ? "Sending…" : copy.button}
                     </button>
+                    {status === "success" ? (
+                      <span className="font-body text-sm text-sparkles-navy">Thanks! We&apos;ll be in touch!</span>
+                    ) : null}
+                    {status === "error" ? (
+                      <span className="font-body text-sm text-red-700">
+                        Something went wrong. Please try again.
+                      </span>
+                    ) : null}
                   </div>
                 </form>
               </div>

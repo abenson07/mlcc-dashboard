@@ -210,7 +210,7 @@ export function ContactSection({ title = "Contact" }: { title?: string }) {
                     </div>
                     <p className="m-0 font-body text-sm leading-6 text-sparkles-navy/80">
                       The Maple Leaf Community Council serves the Maple Leaf neighborhood in
-                      northeast Seattle — your local voice for parks, transit, and community.
+                      northeast Seattle, your local voice for parks, transit, and community.
                     </p>
                   </div>
 

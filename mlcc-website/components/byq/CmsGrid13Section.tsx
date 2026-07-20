@@ -21,6 +21,14 @@ function ArrowRightIcon() {
   );
 }
 
+function ChevronRightIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 16 16" fill="none">
+      <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function NavButton({
   direction,
   onClick,
@@ -88,12 +96,6 @@ export function CmsGrid13Section() {
                 <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
                   Local events
                 </h2>
-                <Link
-                  href="/events"
-                  className="font-body text-base font-semibold text-sparkles-navy underline-offset-4 hover:underline"
-                >
-                  see all events
-                </Link>
               </div>
 
               <div className="flex items-center gap-3">
@@ -121,6 +123,16 @@ export function CmsGrid13Section() {
                 ))}
               </div>
             </div>
+
+            <Link
+              href="/events"
+              className="mt-16 flex justify-start items-center gap-1 no-underline uppercase transition-colors duration-[350ms] font-[family-name:var(--font-decalotype)] text-lg leading-4 font-bold text-[#0d1526] hover:text-[#0d1526e0] max-[767px]:mt-10"
+            >
+              <span>See all events</span>
+              <span className="flex items-center justify-center shrink-0 w-4 h-4">
+                <ChevronRightIcon />
+              </span>
+            </Link>
           </div>
         </div>
       </div>

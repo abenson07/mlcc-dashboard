@@ -61,7 +61,7 @@ export function BusinessMembershipBenefitsSection() {
               >
                 <SectionLabel>Member benefits</SectionLabel>
                 <h2 className="mt-6 font-display text-[2.75rem] leading-10 font-bold tracking-[-0.031rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7">
-                  When you join, neighbors know you&apos;re invested — and your business gets seen
+                  When you join, neighbors know you&apos;re invested, and your business gets seen
                   by the people who live and shop right here.
                 </h2>
               </div>

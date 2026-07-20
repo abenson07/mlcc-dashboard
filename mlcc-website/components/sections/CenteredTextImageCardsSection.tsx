@@ -104,7 +104,7 @@ export function CenteredTextImageCardsSection() {
               `}
             >
               <h2 className="m-0 text-puget-night font-[family-name:var(--font-decalotype)] text-[2.75rem] leading-10 font-bold tracking-[-0.031rem] max-[767px]:text-[2rem] max-[767px]:leading-7">
-                We&apos;re the cleaning team built for busy New Yorkers — the people juggling work, family, pets,
+                We&apos;re the cleaning team built for busy New Yorkers, the people juggling work, family, pets,
                 elevators, walk-ups, deadlines, and everything in between.
               </h2>
             </div>

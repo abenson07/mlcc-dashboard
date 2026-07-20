@@ -25,7 +25,7 @@ export function CommitteeDetailPage({ slug }: { slug: CommitteeSlug }) {
           cards={committee.featureSection.cards}
         />
       ) : null}
-      <Team4Section />
+      <Team4Section image={committeeImage} />
       <CmsGrid6Section />
       <ContactCtaPreFooterSection committeeName={committee.title} />
       <CtaSection />

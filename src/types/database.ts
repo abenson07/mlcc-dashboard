@@ -58,6 +58,8 @@ export type {
   TshirtLineItem,
   FundraisingDonations,
   FundraisingDonationTier,
+  ShopOrders,
+  ShopLineItem,
   QrCodes,
   QrCodesInsert,
   QrCodesUpdate,

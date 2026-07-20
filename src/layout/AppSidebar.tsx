@@ -194,6 +194,11 @@ const mainNavSections: NavSection[] = [
         pro: false,
       },
       {
+        name: "Shop orders",
+        path: "/old-admin/commerce/shop-orders",
+        pro: false,
+      },
+      {
         name: "Fundraising",
         path: "/old-admin/commerce/fundraising",
         pro: false,

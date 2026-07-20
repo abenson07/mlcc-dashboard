@@ -81,19 +81,19 @@ export const COMMITTEE_CONTENT: Record<CommitteeSlug, CommitteeContent> = {
   newsletter: {
     title: "Newsletter",
     headline: "The Leaflet reaches neighbors where they live",
-    body: "The Newsletter committee writes, designs, and coordinates delivery of the Leaflet — Maple Leaf’s printed neighborhood newsletter and often a neighbor’s first introduction to the community council. More than 50 volunteers help distribute it door to door each issue, keeping the neighborhood informed about events, advocacy, and local news.",
+    body: "The Newsletter committee writes, designs, and coordinates delivery of the Leaflet, Maple Leaf’s printed neighborhood newsletter and often a neighbor’s first introduction to the community council. More than 50 volunteers help distribute it door to door each issue, keeping the neighborhood informed about events, advocacy, and local news.",
   },
   events: {
     title: "Events",
     headline: "Gatherings that bring Maple Leaf together",
-    body: "The Events committee plans and hosts the traditions neighbors look forward to year after year — from the Summer Social and Halloween Parade to Movie Nights, Silent Book Club, and community meetings. Volunteers handle logistics, promotion, and the small details that make each gathering feel welcoming.",
+    body: "The Events committee plans and hosts the traditions neighbors look forward to year after year, from the Summer Social and Halloween Parade to Movie Nights, Silent Book Club, and community meetings. Volunteers handle logistics, promotion, and the small details that make each gathering feel welcoming.",
     featureSection: {
       label: "Made possible by this committee",
       headline: "Neighborhood traditions neighbors help make happen",
       cards: [
         {
           title: "Summer Social",
-          text: "Maple Leaf’s flagship summer gathering — neighbors, music, food, and the faces that make this place feel like home.",
+          text: "Maple Leaf’s flagship summer gathering: neighbors, music, food, and the faces that make this place feel like home.",
           image:
             "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530e8b1aadf47968a6eb09_summer_social_2024-62%20(1).webp",
         },
@@ -111,7 +111,7 @@ export const COMMITTEE_CONTENT: Record<CommitteeSlug, CommitteeContent> = {
         },
         {
           title: "Halloween Parade",
-          text: "A fall favorite — families, dogs, and neighbors walk the route, visit local businesses, and celebrate together.",
+          text: "A fall favorite: families, dogs, and neighbors walk the route, visit local businesses, and celebrate together.",
           image:
             "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg",
         },

@@ -37,22 +37,9 @@ function ProgramShowcase({ currentSlide }: { currentSlide: number }) {
         <span className="font-body text-xs font-bold uppercase leading-4 tracking-[0.0625rem] text-sparkles-muted">
           Your membership supports
         </span>
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-display text-3xl font-bold leading-9 tracking-[-0.0625rem] text-puget-night max-[767px]:text-2xl max-[767px]:leading-8">
-            {program.title}
-          </span>
-          <svg
-            className="h-10 w-10 shrink-0 text-puget-night"
-            width="40"
-            height="40"
-            viewBox="0 0 48 48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path d="M14 34L34 14M34 14H18M34 14V30" stroke="currentColor" strokeLinecap="square" />
-          </svg>
-        </div>
+        <span className="font-display text-3xl font-bold leading-9 tracking-[-0.0625rem] text-puget-night max-[767px]:text-2xl max-[767px]:leading-8">
+          {program.title}
+        </span>
         <span className="font-body text-xs leading-4 text-sparkles-navy">
           {currentSlide + 1} of {membershipPrograms.length} neighborhood programs your membership powers
         </span>
@@ -117,7 +104,7 @@ export function MembershipMarqueeSection() {
                 data-editable-id="membership.hero.description"
                 data-editable-label="Membership description"
               >
-                From the Leaflet on your doorstep to movie nights in the park — these are the programs
+                From the Leaflet on your doorstep to movie nights in the park, these are the programs
                 neighbors built together. Membership is how we keep them going.
               </p>
 
@@ -125,7 +112,7 @@ export function MembershipMarqueeSection() {
                 {submitted ? (
                   <div className="rounded-2xl border border-sparkles-navy/20 bg-sparkles-warm px-6 py-5">
                     <p className="m-0 font-display text-lg font-bold text-puget-night">
-                      Thanks — we&apos;ll be in touch.
+                      Thanks! We&apos;ll be in touch.
                     </p>
                     <p className="mt-2 mb-0 font-body text-base leading-6 text-sparkles-navy">
                       We&apos;ll send a note about joining MLCC and the programs your membership keeps

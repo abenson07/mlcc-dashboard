@@ -17,7 +17,7 @@ const workAreas = [
   {
     title: "Publish the Leaflet",
     description:
-      "Seattle's last printed neighborhood newsletter — written, designed, and delivered door to door by volunteers across Maple Leaf.",
+      "Seattle's last printed neighborhood newsletter, written, designed, and delivered door to door by volunteers across Maple Leaf.",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" strokeLinecap="round" strokeLinejoin="round" />
@@ -28,7 +28,7 @@ const workAreas = [
   {
     title: "Host neighborhood events",
     description:
-      "From the Summer Social and Halloween Parade to Movies by the Tower and Silent Book Club — gatherings that keep neighbors connected.",
+      "From the Summer Social and Halloween Parade to Movies by the Tower and Silent Book Club, gatherings that keep neighbors connected.",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -146,7 +146,7 @@ export function AboutWhatWeDoSection() {
 
                 <p className="m-0 max-w-[28rem] font-body text-xl leading-7 text-sparkles-navy max-[991px]:max-w-none">
                   The Maple Leaf Community Council is a registered nonprofit and a recognized
-                  community council under Seattle&apos;s neighborhood engagement system — not a
+                  community council under Seattle&apos;s neighborhood engagement system, not a
                   government agency, and not a staff office. Just neighbors who care about this
                   place.
                 </p>
@@ -179,7 +179,7 @@ export function AboutWhatWeDoSection() {
                 Four ways neighbors experience the council
               </h3>
               <p className="m-0 max-w-[42.5rem] font-body text-base leading-6 text-sparkles-navy">
-                Most people know us through everyday life — a newsletter on the doorstep, a parade
+                Most people know us through everyday life: a newsletter on the doorstep, a parade
                 in October, a summer gathering in the park. Committees handle the day-to-day; the
                 board sets direction.
               </p>
@@ -235,7 +235,7 @@ export function AboutWhatWeDoSection() {
                       When Seattle makes decisions that shape Maple Leaf, we lean on relationships
                       we&apos;ve built to share what neighbors care about and help keep our
                       community in the conversation. We listen, show up prepared, and work to raise
-                      awareness — knowing outcomes are never guaranteed.
+                      awareness, knowing outcomes are never guaranteed.
                     </p>
                     <div className="grid grid-cols-2 gap-4">
                       {civicFocus.map((item) => (
@@ -289,7 +289,7 @@ export function AboutWhatWeDoSection() {
                   </div>
 
                   <p className="m-0 font-body text-xl leading-7 text-sparkles-navy">
-                    Board members, committee volunteers, Leaflet deliverers, and event planners —
+                    Board members, committee volunteers, Leaflet deliverers, and event planners,
                     every role matters, and there&apos;s room for however much time you have to give.
                     Those traditions don&apos;t happen on their own. They&apos;re planned, funded,
                     and carried out by people who live here.

@@ -3,7 +3,7 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 const responsibilities = [
   {
     title: "Set direction for the council",
-    text: "The board decides what the community council focuses on — from sustaining traditions like the Leaflet and Summer Social to supporting new neighbor-led ideas. Committees do the day-to-day work; the board keeps everyone aligned.",
+    text: "The board decides what the community council focuses on, from sustaining traditions like the Leaflet and Summer Social to supporting new neighbor-led ideas. Committees do the day-to-day work; the board keeps everyone aligned.",
     image:
       "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
   },
@@ -15,7 +15,7 @@ const responsibilities = [
   },
   {
     title: "Represent Maple Leaf thoughtfully",
-    text: "From community meetings to conversations with city officials, the board gives neighbors a consistent voice on local issues — zoning, street safety, emergency preparedness, and what it means to grow as a neighborhood.",
+    text: "From community meetings to conversations with city officials, the board gives neighbors a consistent voice on local issues: zoning, street safety, emergency preparedness, and what it means to grow as a neighborhood.",
     image:
       "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6913dbb252ed363168221ae6_Maple_Leaf.jpg",
   },
@@ -39,7 +39,7 @@ export function JoinBoardWhatSection() {
                 What keeps neighbor-led work going
               </h2>
               <p className="m-0 max-w-[35.25rem] font-body text-base leading-6 text-sparkles-navy">
-                The executive board isn&apos;t a separate layer above the neighborhood — it&apos;s
+                The executive board isn&apos;t a separate layer above the neighborhood; it&apos;s
                 neighbors who stepped up to steward what Maple Leaf has built together. Here&apos;s
                 the short version of what that involves.
               </p>

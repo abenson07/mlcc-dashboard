@@ -32,6 +32,10 @@ const EVENT_IMAGES = {
   summerSocial: "/images/events/summer-social.png",
   yardSale: "/images/events/maple-leaf-free-yard-sale.png",
   springMeeting: "/images/events/spring-community-meeting.png",
+  moviesByTheTower: "/images/events/movies-by-the-tower.svg",
+  halloweenParade: "/images/events/halloween-parade.svg",
+  fallMeeting: "/images/events/fall-community-meeting.svg",
+  nightOut: "/images/events/night-out.svg",
 } as const;
 
 const EVENT_TIMEZONE = "America/Los_Angeles";
@@ -80,7 +84,7 @@ const SILENT_BOOK_CLUB_DETAIL: EventDetailContent = {
     {
       kind: "list",
       items: [
-        "Arrive with whatever you’re reading — any genre, any format",
+        "Arrive with whatever you’re reading, any genre, any format",
         "Read together in comfortable silence for about an hour",
         "Mingle before and after over drinks or snacks",
         "Meet on the third Sunday of each month",
@@ -97,7 +101,7 @@ const SUMMER_SOCIAL_DETAIL: EventDetailContent = {
   blocks: [
     {
       kind: "paragraph",
-      text: "The Summer Social has been part of Maple Leaf since the 1990s. Organized by the Maple Leaf Community Council, it’s one of the most consistent ways we bring neighbors together — and in our recent community survey, it ranked as the most loved event we host.",
+      text: "The Summer Social has been part of Maple Leaf since the 1990s. Organized by the Maple Leaf Community Council, it’s one of the most consistent ways we bring neighbors together, and in our recent community survey, it ranked as the most loved event we host.",
     },
     {
       kind: "heading",
@@ -110,12 +114,64 @@ const SUMMER_SOCIAL_DETAIL: EventDetailContent = {
         "Food, music, and room to wander the park with neighbors",
         "Activities for kids and spaces to simply catch up",
         "Nonprofits and local partners welcome to participate",
-        "A relaxed afternoon in Maple Leaf Park — all are welcome",
+        "A relaxed afternoon in Maple Leaf Park, all are welcome",
       ],
     },
     {
       kind: "paragraph",
       text: "Volunteers make the Summer Social happen each year. Whether you help with setup, outreach, or day-of logistics, it’s a great way to plug into the Events committee and meet people across the neighborhood.",
+    },
+  ],
+};
+
+const MOVIES_BY_THE_TOWER_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "Movies by the Tower brings a free outdoor movie night to the lawn beneath Maple Leaf Reservoir Park's iconic water tower. It's presented by Aegis Living and hosted by SV Archive (Scarecrow Video) alongside the MLCC Events Committee.",
+    },
+    {
+      kind: "heading",
+      text: "What to expect",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "Live music, trivia, and a beer garden before the show",
+        "The movie starts at dusk; bring a low-back chair or blanket",
+        "Free and open to everyone in the neighborhood",
+      ],
+    },
+    {
+      kind: "paragraph",
+      text: "Like the Summer Social, this one runs on volunteers, from setup to the projection booth. If you'd like to help out, the Events Committee is always glad for another set of hands.",
+    },
+  ],
+};
+
+const NIGHT_OUT_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "Night Out is a national community-building event promoted locally by Seattle Police Department's Crime Prevention team. It's a chance to meet the neighbors on your block and build the kind of connection that makes a neighborhood feel safer for everyone.",
+    },
+    {
+      kind: "heading",
+      text: "What to expect",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "Block-by-block gatherings across Maple Leaf, porch lights on, neighbors out",
+        "A relaxed evening to swap names, numbers, and get to know your street",
+        "Want to host your own block's gathering? Registration is handled through the city",
+      ],
+    },
+    {
+      kind: "paragraph",
+      text: "Check seattle.gov/police/crime-prevention/night-out for the city's registration form and materials if you're organizing a gathering on your own block.",
     },
   ],
 };
@@ -196,7 +252,7 @@ export const events: Event[] = [
     title: "Maple Leaf Free Yard Sale Day",
     dateIso: "2026-07-12T17:00:00.000Z",
     shortDescription:
-      "Neighbors setting out free stuff yard-sale style — in driveways and along roads, at no cost.",
+      "Neighbors setting out free stuff yard-sale style, in driveways and along roads, at no cost.",
     locationName: "Maple Leaf",
     category: "Community",
     image: EVENT_IMAGES.yardSale,
@@ -226,6 +282,30 @@ export const events: Event[] = [
     detail: SILENT_BOOK_CLUB_DETAIL,
   }),
   event({
+    slug: "night-out",
+    title: "Night Out",
+    dateIso: "2026-08-05T00:00:00.000Z",
+    shortDescription: "Meet your block, swap stories, celebrate neighborhood safety together.",
+    locationName: "Maple Leaf",
+    category: "Community",
+    image: EVENT_IMAGES.nightOut,
+    href: "https://www.seattle.gov/police/crime-prevention/night-out",
+    external: true,
+    detail: NIGHT_OUT_DETAIL,
+  }),
+  event({
+    slug: "2026-movies-by-the-tower",
+    title: "2026 Movies by the Tower",
+    dateIso: "2026-08-09T01:00:00.000Z",
+    shortDescription: "Free outdoor movie at the tower: live music, trivia, dusk skies.",
+    locationName: "Maple Leaf Reservoir Park",
+    category: "Movie Night",
+    image: EVENT_IMAGES.moviesByTheTower,
+    href: "https://www.facebook.com/MLTowerMovies/",
+    external: true,
+    detail: MOVIES_BY_THE_TOWER_DETAIL,
+  }),
+  event({
     slug: "august-silent-book-club",
     title: "August Silent Book Club",
     dateIso: "2026-08-16T22:00:00.000Z",
@@ -248,6 +328,16 @@ export const events: Event[] = [
     detail: SILENT_BOOK_CLUB_DETAIL,
   }),
   event({
+    slug: "fall-community-meeting",
+    title: "Fall Community Meeting",
+    dateIso: "2026-10-15T01:00:00.000Z",
+    shortDescription: "Our fall check-in on what's happening in Maple Leaf. All welcome.",
+    locationName: "Olympic View Elementary",
+    category: "Community",
+    image: EVENT_IMAGES.fallMeeting,
+    href: "https://www.google.com/maps/search/?api=1&query=Olympic%20View%20Elementary%20Seattle",
+  }),
+  event({
     slug: "october-silent-book-club",
     title: "October Silent Book Club",
     dateIso: "2026-10-18T22:00:00.000Z",
@@ -257,6 +347,16 @@ export const events: Event[] = [
     image: EVENT_IMAGES.silentBookClub,
     href: "https://www.google.com/maps/search/?api=1&query=Watershed%20Pub%20Seattle",
     detail: SILENT_BOOK_CLUB_DETAIL,
+  }),
+  event({
+    slug: "halloween-parade",
+    title: "Halloween Parade",
+    dateIso: "2026-10-25T21:00:00.000Z",
+    shortDescription: "Costumes, candy, and neighbors marching together before Halloween.",
+    locationName: "Maple Leaf",
+    category: "Community",
+    image: EVENT_IMAGES.halloweenParade,
+    href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Seattle",
   }),
   event({
     slug: "november-silent-book-club",

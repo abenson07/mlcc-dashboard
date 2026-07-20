@@ -17,6 +17,7 @@ const linkColumns = [
     links: [
       { name: "Events", href: "/events" },
       { name: "Leaflet", href: "/leaflet" },
+      { name: "Shop", href: "/shop" },
       { name: "About", href: "/about" },
       { name: "Contact", href: "/contact" },
     ],

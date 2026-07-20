@@ -5,9 +5,10 @@ import {
   COMMERCE_METADATA_KEYS,
   isCommerceFlow,
 } from "@/lib/stripe/commerceMetadata";
-import type { TshirtLineItem } from "@/types/database";
+import type { TshirtLineItem, ShopLineItem } from "@/types/database";
 import {
   sendFundraiserThankYouEmail,
+  sendShopOrderConfirmationEmail,
   sendTshirtConfirmationEmail,
 } from "@/lib/commerce/commerceEmail";
 import type { FundraisingDonationTier } from "@/types/database";
@@ -29,6 +30,35 @@ function parseLineItemsJson(raw: string | undefined): TshirtLineItem[] | null {
         category: o.category,
         size: o.size,
         quantity,
+      });
+    }
+    return items.length > 0 ? items : null;
+  } catch {
+    return null;
+  }
+}
+
+function parseShopLineItemsJson(raw: string | undefined): ShopLineItem[] | null {
+  if (!raw?.trim()) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return null;
+    const items: ShopLineItem[] = [];
+    for (const row of parsed) {
+      if (!row || typeof row !== "object") continue;
+      const o = row as Record<string, unknown>;
+      if (typeof o.product_slug !== "string" || typeof o.variant !== "string") continue;
+      const quantity = Number(o.quantity);
+      if (!Number.isInteger(quantity) || quantity < 1) continue;
+      const fulfillment = o.fulfillment === "preorder" ? "preorder" : "in_stock";
+      items.push({
+        product_slug: o.product_slug,
+        product_name: typeof o.product_name === "string" ? o.product_name : o.product_slug,
+        variant: o.variant,
+        quantity,
+        unit_amount_cents:
+          typeof o.unit_amount_cents === "number" ? o.unit_amount_cents : 0,
+        fulfillment,
       });
     }
     return items.length > 0 ? items : null;
@@ -204,6 +234,71 @@ export async function fulfillCheckoutSession(
         to: customerEmail,
         amountCents,
         tier,
+      });
+    }
+
+    return { ok: true, flow };
+  }
+
+  if (flow === COMMERCE_FLOW.SHOP) {
+    const { data: existing } = await supabase
+      .from("shop_orders")
+      .select("id, status")
+      .eq("stripe_checkout_session_id", sessionId)
+      .maybeSingle();
+
+    if (existing?.status === "paid") {
+      return { ok: true, flow, alreadyFulfilled: true };
+    }
+
+    const lineItems =
+      parseShopLineItemsJson(session.metadata?.[COMMERCE_METADATA_KEYS.lineItems]) ?? [];
+    const customerName =
+      session.metadata?.[COMMERCE_METADATA_KEYS.customerName]?.trim() ??
+      session.customer_details?.name ??
+      "Guest";
+    const customerEmail =
+      session.metadata?.[COMMERCE_METADATA_KEYS.customerEmail]?.trim() ??
+      session.customer_details?.email ??
+      session.customer_email ??
+      "";
+
+    if (!customerEmail) {
+      return { ok: false, error: "Missing customer email on session" };
+    }
+
+    const shipping = shippingFromMetadata(session.metadata ?? {});
+
+    const row = {
+      stripe_checkout_session_id: sessionId,
+      stripe_payment_intent_id: paymentIntentId,
+      customer_name: customerName,
+      customer_email: customerEmail,
+      shipping_address: shipping,
+      line_items: lineItems,
+      amount_cents: amountCents,
+      currency,
+      status: "paid" as const,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = existing
+      ? await supabase
+          .from("shop_orders")
+          .update(row)
+          .eq("stripe_checkout_session_id", sessionId)
+      : await supabase.from("shop_orders").insert(row);
+
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+
+    if (lineItems.length > 0) {
+      await sendShopOrderConfirmationEmail({
+        to: customerEmail,
+        customerName,
+        lineItems,
+        amountCents,
       });
     }
 

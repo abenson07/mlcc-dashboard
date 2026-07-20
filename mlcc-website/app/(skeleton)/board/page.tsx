@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Executive Board | Maple Leaf Community Council",
   description:
-    "Meet the executive board of the Maple Leaf Community Council — neighbors who provide leadership and stewardship for our volunteer-run neighborhood organization.",
+    "Meet the executive board of the Maple Leaf Community Council, neighbors who provide leadership and stewardship for our volunteer-run neighborhood organization.",
 };
 
 export default function BoardPage() {

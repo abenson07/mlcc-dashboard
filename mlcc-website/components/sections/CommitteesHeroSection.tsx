@@ -39,10 +39,10 @@ export function CommitteesHeroSection() {
               <div className="col-start-1 row-start-3 mt-20 max-w-[28rem] max-[991px]:mt-0 max-[767px]:max-w-none">
                 <p className="m-0 font-body text-xl leading-7 font-normal text-sparkles-navy">
                   Committees are how the Maple Leaf Community Council gets things done. Each team
-                  focuses on a part of neighborhood life — events, the newsletter, advocacy,
+                  focuses on a part of neighborhood life: events, the newsletter, advocacy,
                   communications, emergency preparedness, and local business. Volunteers plan
                   gatherings, share information, and represent Maple Leaf with city partners. You
-                  don&apos;t need a special résumé — just curiosity and a willingness to show up.
+                  don&apos;t need a special résumé, just curiosity and a willingness to show up.
                 </p>
               </div>
 

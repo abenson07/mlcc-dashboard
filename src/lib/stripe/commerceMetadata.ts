@@ -3,6 +3,7 @@
 export const COMMERCE_FLOW = {
   TSHIRT: "tshirt_preorder",
   FUNDRAISER: "fundraiser",
+  SHOP: "shop_order",
 } as const;
 
 export type CommerceFlow =
@@ -23,6 +24,8 @@ export const COMMERCE_METADATA_KEYS = {
 
 export function isCommerceFlow(value: string | undefined): value is CommerceFlow {
   return (
-    value === COMMERCE_FLOW.TSHIRT || value === COMMERCE_FLOW.FUNDRAISER
+    value === COMMERCE_FLOW.TSHIRT ||
+    value === COMMERCE_FLOW.FUNDRAISER ||
+    value === COMMERCE_FLOW.SHOP
   );
 }

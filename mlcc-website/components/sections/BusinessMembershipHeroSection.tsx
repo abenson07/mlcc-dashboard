@@ -70,7 +70,7 @@ export function BusinessMembershipHeroSection() {
                 }`}
               >
                 <p className="m-0 max-w-[35.25rem] font-body text-xl leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
-                  Maple Leaf is built on neighbors who show up — and local businesses are part of
+                  Maple Leaf is built on neighbors who show up, and local businesses are part of
                   that story. A business membership tells customers you invest in the community
                   where you work, connect with other owners and volunteers, and help fund the
                   events and advocacy that keep this neighborhood strong.

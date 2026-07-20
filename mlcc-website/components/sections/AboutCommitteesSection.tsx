@@ -56,7 +56,7 @@ export function AboutCommitteesSection() {
                 How neighbors get the work done
               </h2>
               <p className="m-0 max-w-[34rem] font-body text-base leading-6 text-sparkles-navy">
-                Committees are the engine of the council — events, the newsletter, advocacy,
+                Committees are the engine of the council: events, the newsletter, advocacy,
                 communications, emergency preparedness, and local business. Each team is run by
                 volunteers. No special résumé required.
               </p>

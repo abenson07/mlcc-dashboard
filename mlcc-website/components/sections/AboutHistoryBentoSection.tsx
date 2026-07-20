@@ -27,7 +27,7 @@ export function AboutHistoryBentoSection() {
               </h2>
               <p className="m-0 max-w-[42.5rem] font-body text-base leading-6 text-sparkles-navy">
                 The council has been part of Maple Leaf long enough that many neighbors experience
-                it not as an organization, but simply as part of life here — a parade in the fall, a
+                it not as an organization, but simply as part of life here: a parade in the fall, a
                 newsletter at the door, a summer gathering. What&apos;s easy to miss is that none of
                 it happens on its own.
               </p>
@@ -57,7 +57,7 @@ export function AboutHistoryBentoSection() {
               >
                 <img
                   src={HISTORY_IMAGE}
-                  alt="The Maple Leaf Leaflet — Seattle's last printed neighborhood newsletter"
+                  alt="The Maple Leaf Leaflet, Seattle's last printed neighborhood newsletter"
                   loading="lazy"
                   className="h-full w-full object-cover"
                 />
@@ -104,7 +104,7 @@ export function AboutHistoryBentoSection() {
                     4,500+
                   </p>
                   <p className="m-0 font-body text-base leading-6 text-sparkles-cream/90">
-                    neighbors attend MLCC events each year — roughly everyone who lives in Maple Leaf.
+                    neighbors attend MLCC events each year, roughly everyone who lives in Maple Leaf.
                     Past board members, route volunteers, and quiet supporters have carried these
                     traditions forward for generations.
                   </p>

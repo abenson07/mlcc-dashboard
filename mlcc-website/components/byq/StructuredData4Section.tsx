@@ -8,10 +8,19 @@ import {
   volunteerOpportunities,
   type VolunteerFilter,
 } from "@marketing/data/volunteers";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 
+function isVolunteerFilter(value: string | null): value is VolunteerFilter {
+  return VOLUNTEER_FILTERS.some((filter) => filter.id === value);
+}
+
 export function StructuredData4Section({ title }: { title: string }) {
-  const [activeFilter, setActiveFilter] = React.useState<VolunteerFilter | null>(null);
+  const searchParams = useSearchParams();
+  const filterParam = searchParams.get("filter");
+  const [activeFilter, setActiveFilter] = React.useState<VolunteerFilter | null>(
+    isVolunteerFilter(filterParam) ? filterParam : null,
+  );
 
   const visibleOpportunities = filterVolunteerOpportunities(volunteerOpportunities, activeFilter);
 

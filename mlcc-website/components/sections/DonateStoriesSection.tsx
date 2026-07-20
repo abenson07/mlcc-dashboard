@@ -94,7 +94,7 @@ export function DonateStoriesSection() {
               Generosity that keeps Maple Leaf strong
             </h2>
             <p className="m-0 font-body text-base leading-6 text-sparkles-navy">
-              Reflections on why neighbors give — once, or again and again.
+              Reflections on why neighbors give: once, or again and again.
             </p>
           </div>
         </div>

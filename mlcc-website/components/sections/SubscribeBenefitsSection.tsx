@@ -9,7 +9,7 @@ const benefits = [
   },
   {
     title: "Neighborhood news that matters",
-    text: "Highlights from the Leaflet — Seattle's last printed neighborhood newsletter — plus updates on local projects and council decisions.",
+    text: "Highlights from the Leaflet, Seattle's last printed neighborhood newsletter, plus updates on local projects and council decisions.",
     image:
       "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
   },
@@ -40,7 +40,7 @@ export function SubscribeBenefitsSection() {
               </h2>
               <p className="m-0 max-w-[35.25rem] font-body text-base leading-6 text-sparkles-navy">
                 Our email list is how neighbors hear about what&apos;s happening before it hits the
-                doorstep. No spam — just the updates that help you stay part of Maple Leaf.
+                doorstep. No spam, just the updates that help you stay part of Maple Leaf.
               </p>
             </div>
 

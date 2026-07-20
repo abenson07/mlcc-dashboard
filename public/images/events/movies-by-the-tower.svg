@@ -1,0 +1,56 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="#34422e"/>
+
+  <!-- dusk stars -->
+  <g fill="#fdf8f1" opacity="0.85">
+    <circle cx="110" cy="80" r="2.5"/>
+    <circle cx="180" cy="140" r="1.8"/>
+    <circle cx="90" cy="200" r="2"/>
+    <circle cx="230" cy="70" r="1.6"/>
+    <circle cx="1040" cy="90" r="2.2"/>
+    <circle cx="1100" cy="150" r="1.8"/>
+    <circle cx="960" cy="60" r="1.6"/>
+    <circle cx="1140" cy="60" r="2"/>
+  </g>
+
+  <!-- crescent moon -->
+  <path d="M 1080 130 a 46 46 0 1 0 0 92 a 36 36 0 1 1 0 -92 Z" fill="#f2ece5" opacity="0.9"/>
+
+  <!-- water tower silhouette, right side -->
+  <g fill="none" stroke="#f2ece5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+    <ellipse cx="960" cy="330" rx="120" ry="46"/>
+    <path d="M840 330 v70 a120 46 0 0 0 240 0 v-70"/>
+    <line x1="840" y1="330" x2="800" y2="600"/>
+    <line x1="1080" y1="330" x2="1120" y2="600"/>
+    <line x1="880" y1="380" x2="850" y2="600"/>
+    <line x1="1040" y1="380" x2="1070" y2="600"/>
+    <line x1="820" y1="470" x2="1100" y2="470"/>
+    <line x1="830" y1="540" x2="1090" y2="540"/>
+    <line x1="800" y1="600" x2="1120" y2="600"/>
+    <line x1="960" y1="284" x2="960" y2="230"/>
+    <line x1="920" y1="284" x2="930" y2="240"/>
+    <line x1="1000" y1="284" x2="990" y2="240"/>
+  </g>
+
+  <!-- film reel accent, lower left -->
+  <g fill="none" stroke="#c96a4e" stroke-width="6" opacity="0.9">
+    <circle cx="190" cy="560" r="70"/>
+    <circle cx="190" cy="560" r="14" fill="#c96a4e" stroke="none"/>
+    <circle cx="190" cy="510" r="12" fill="#c96a4e" stroke="none"/>
+    <circle cx="235" cy="535" r="12" fill="#c96a4e" stroke="none"/>
+    <circle cx="235" cy="585" r="12" fill="#c96a4e" stroke="none"/>
+    <circle cx="190" cy="610" r="12" fill="#c96a4e" stroke="none"/>
+    <circle cx="145" cy="585" r="12" fill="#c96a4e" stroke="none"/>
+    <circle cx="145" cy="535" r="12" fill="#c96a4e" stroke="none"/>
+  </g>
+
+  <!-- title -->
+  <text x="90" y="270" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="78" fill="#fdf8f1" letter-spacing="-1">MOVIES</text>
+  <text x="90" y="350" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="78" fill="#fdf8f1" letter-spacing="-1">BY THE TOWER</text>
+
+  <rect x="92" y="390" width="180" height="52" rx="26" fill="#c96a4e"/>
+  <text x="182" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="#fdf8f1">2026</text>
+
+  <text x="90" y="470" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#f2ece5">Maple Leaf Reservoir Park</text>
+  <text x="90" y="502" font-family="Arial, sans-serif" font-weight="400" font-size="22" fill="#f2ece5" opacity="0.85">Free movie at dusk · live music · trivia</text>
+</svg>

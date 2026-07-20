@@ -59,7 +59,7 @@ export function DonateAmountSection() {
                 </div>
 
                 <p className="m-0 max-w-[30rem] font-body text-xl leading-7 max-[767px]:text-base max-[767px]:leading-6">
-                  Pick an amount or enter your own. Unlike membership, this is a single gift — no
+                  Pick an amount or enter your own. Unlike membership, this is a single gift: no
                   recurring charge.
                 </p>
 
@@ -70,7 +70,7 @@ export function DonateAmountSection() {
                     </p>
                     <p className="mt-2 mb-0 font-body text-base leading-6 text-sparkles-navy">
                       Your {formatCurrency(activeAmount)} gift to the Maple Leaf Community Council
-                      means a lot. Payment processing will be connected soon — we&apos;ll follow up
+                      means a lot. Payment processing will be connected soon. We&apos;ll follow up
                       at {email}.
                     </p>
                   </div>
@@ -191,7 +191,7 @@ export function DonateAmountSection() {
                     4,500+
                   </p>
                   <p className="mt-1 mb-0 font-body text-sm leading-5 text-sparkles-navy">
-                    neighbors attend MLCC events each year — your gift helps keep them going
+                    neighbors attend MLCC events each year, your gift helps keep them going
                   </p>
                 </div>
               </div>

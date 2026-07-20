@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${event.title} — Events`,
+    title: `${event.title} | Events`,
     description: event.shortDescription,
   };
 }

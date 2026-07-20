@@ -16,7 +16,7 @@ const slides = [
     image: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
     body: "We deliver 4,000 leaflets to Maple Leaf residents multiple times a year",
     linkText: "Learn more",
-    href: "/committees/newsletter",
+    href: "/leaflet",
   },
   {
     image: "/images/events/summer-social.png",

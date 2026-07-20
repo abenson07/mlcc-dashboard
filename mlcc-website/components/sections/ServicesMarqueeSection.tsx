@@ -2,63 +2,29 @@
 
 import * as React from "react";
 import { SectionLabel } from "@marketing/components/SectionLabel";
+import { COMMITTEE_CONTENT, COMMITTEE_LISTINGS, type CommitteeListingSlug } from "@marketing/data/committees";
 
-const serviceImages = [
-  {
-    img: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage1.jpg",
-    imgSet:
-      "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage1-p-500.jpg 500w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage1-p-800.jpg 800w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage1.jpg 996w",
-  },
-  {
-    img: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage2.jpg",
-    imgSet:
-      "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage2-p-500.jpg 500w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage2-p-800.jpg 800w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage2.jpg 996w",
-  },
-  {
-    img: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage3.jpg",
-    imgSet:
-      "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage3-p-500.jpg 500w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage3-p-800.jpg 800w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage3.jpg 996w",
-  },
-  {
-    img: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage4.jpg",
-    imgSet:
-      "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage4-p-500.jpg 500w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage4-p-800.jpg 800w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage4.jpg 996w",
-  },
-  {
-    img: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage5.jpg",
-    imgSet:
-      "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage5-p-500.jpg 500w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage5-p-800.jpg 800w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage5.jpg 996w",
-  },
-  {
-    img: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage6.jpg",
-    imgSet:
-      "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage6-p-500.jpg 500w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage6-p-800.jpg 800w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage6.jpg 996w",
-  },
-  {
-    img: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage7.jpg",
-    imgSet:
-      "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage7-p-500.jpg 500w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage7-p-800.jpg 800w, https://byqsupply-components.netlify.app/sparkles/images/ServicesImage7.jpg 996w",
-  },
+function committeeImage(slug: CommitteeListingSlug) {
+  return COMMITTEE_LISTINGS.find((committee) => committee.slug === slug)!.image;
+}
+
+function eventsFeatureImage(cardTitle: string) {
+  return COMMITTEE_CONTENT.events.featureSection!.cards.find((card) => card.title === cardTitle)!.image;
+}
+
+const involvementOptions = [
+  { title: "Newsletter", href: "/committees/newsletter", img: committeeImage("newsletter") },
+  { title: "Events", href: "/volunteer?filter=planning", img: committeeImage("events") },
+  { title: "Emergency Hub", href: "/committees/emergency-hub", img: committeeImage("emergency-hub") },
+  { title: "Communications", href: "/committees/communications", img: committeeImage("communications") },
+  { title: "Advocacy", href: "/committees/advocacy", img: committeeImage("advocacy") },
+  { title: "Business Committee", href: "/committees/business-committee", img: committeeImage("business-committee") },
+  { title: "Summer Social Planning", href: "/volunteer?filter=planning", img: eventsFeatureImage("Summer Social") },
+  { title: "Movie Night Planning", href: "/volunteer?filter=planning", img: eventsFeatureImage("Movies by the Tower") },
+  { title: "Volunteer Day of", href: "/volunteer?filter=single-day-events", img: eventsFeatureImage("Community Meeting") },
+  { title: "Deliver a Leaflet", href: "/open-routes", img: committeeImage("newsletter") },
+  { title: "Halloween Parade Planning", href: "/volunteer?filter=planning", img: eventsFeatureImage("Halloween Parade") },
 ];
-
-const involvementTitles = [
-  "Newsletter",
-  "Events",
-  "Emergency Hub",
-  "Communications",
-  "Advocacy",
-  "Business Committee",
-  "Summer Social Planning",
-  "Movie Night Planning",
-  "Volunteer Day of",
-  "Deliver a Leaflet",
-  "Halloween Parade Planning",
-];
-
-const involvementOptions = involvementTitles.map((title, index) => ({
-  title,
-  ...serviceImages[index % serviceImages.length],
-}));
 
 function ArrowIcon() {
   return (
@@ -76,10 +42,10 @@ function ChevronRightIcon() {
   );
 }
 
-function InvolvementCard({ title, img, imgSet }: { title: string; img: string; imgSet: string }) {
+function InvolvementCard({ title, href, img }: { title: string; href: string; img: string }) {
   return (
     <a
-      href="#"
+      href={href}
       className="group relative flex overflow-hidden rounded-2xl text-[#fdf8f1] uppercase no-underline w-[20.75rem] h-[26.25rem] shrink-0"
     >
       <div className="absolute inset-0 z-[3] w-full h-full overflow-hidden">
@@ -87,8 +53,6 @@ function InvolvementCard({ title, img, imgSet }: { title: string; img: string; i
           className="w-full h-full object-cover"
           src={img}
           alt={title}
-          srcSet={imgSet}
-          sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 940px"
           loading="lazy"
         />
       </div>
@@ -109,10 +73,10 @@ function InvolvementCard({ title, img, imgSet }: { title: string; img: string; i
   );
 }
 
-function InvolvementCardMobile({ title, img, imgSet }: { title: string; img: string; imgSet: string }) {
+function InvolvementCardMobile({ title, href, img }: { title: string; href: string; img: string }) {
   return (
     <a
-      href="#"
+      href={href}
       className="group relative flex overflow-hidden rounded-2xl text-[#fdf8f1] uppercase no-underline w-[20.75rem] h-[22.5rem] shrink-0"
     >
       <div className="absolute inset-0 z-[3] w-full h-full overflow-hidden">
@@ -120,8 +84,6 @@ function InvolvementCardMobile({ title, img, imgSet }: { title: string; img: str
           className="w-full h-full object-cover"
           src={img}
           alt={title}
-          srcSet={imgSet}
-          sizes="(max-width: 767px) 100vw, (max-width: 991px) 728px, 940px"
           loading="lazy"
         />
       </div>
@@ -229,12 +191,12 @@ export function ServicesMarqueeSection({ pauseOnHover = false }: { pauseOnHover?
                 <div className={`flex items-center gap-4 w-max animate-marquee-services${pauseOnHover ? " pause-on-hover" : ""}`}>
                   {involvementOptions.map((option, i) => (
                     <div key={`a-${i}`} className="shrink-0">
-                      <InvolvementCard title={option.title} img={option.img} imgSet={option.imgSet} />
+                      <InvolvementCard title={option.title} href={option.href} img={option.img} />
                     </div>
                   ))}
                   {involvementOptions.map((option, i) => (
                     <div key={`b-${i}`} className="shrink-0">
-                      <InvolvementCard title={option.title} img={option.img} imgSet={option.imgSet} />
+                      <InvolvementCard title={option.title} href={option.href} img={option.img} />
                     </div>
                   ))}
                 </div>
@@ -258,7 +220,7 @@ export function ServicesMarqueeSection({ pauseOnHover = false }: { pauseOnHover?
                 >
                   {involvementOptions.map((option, i) => (
                     <div key={i} className="shrink-0">
-                      <InvolvementCardMobile title={option.title} img={option.img} imgSet={option.imgSet} />
+                      <InvolvementCardMobile title={option.title} href={option.href} img={option.img} />
                     </div>
                   ))}
                 </div>
@@ -301,7 +263,7 @@ export function ServicesMarqueeSection({ pauseOnHover = false }: { pauseOnHover?
                 There&apos;s a place for everyone at MLCC. Join a committee that matches your interests, or reach out and we&apos;ll help you find the right fit.
               </p>
               <a
-                href="#"
+                href="/volunteer"
                 className="flex justify-start items-center gap-1 no-underline uppercase transition-colors duration-[350ms] font-[family-name:var(--font-decalotype)] text-lg leading-4 font-bold text-[#0d1526] hover:text-[#0d1526e0]"
               >
                 <span>See all opportunities</span>

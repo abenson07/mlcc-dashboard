@@ -26,7 +26,7 @@ const goals = [
   {
     title: "Keep traditions going",
     description:
-      "The Halloween Parade, Summer Social, and printed Leaflet are worth protecting — and growing membership helps us say yes to what's next.",
+      "The Halloween Parade, Summer Social, and printed Leaflet are worth protecting, and growing membership helps us say yes to what's next.",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeLinecap="round" strokeLinejoin="round" />
@@ -36,7 +36,7 @@ const goals = [
   {
     title: "Stronger advocacy",
     description:
-      "More voices at community meetings and deeper capacity on city policy — from zoning workshops to street safety.",
+      "More voices at community meetings and deeper capacity on city policy, from zoning workshops to street safety.",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M3 21h18M5 21V7l7-4 7 4v14" strokeLinecap="round" strokeLinejoin="round" />
@@ -190,7 +190,7 @@ export function AboutFutureSection() {
 
                   <div className="flex flex-col gap-6">
                     <p className="m-0 font-body text-xl leading-7 text-sparkles-navy">
-                      More than 4,500 neighbors attend MLCC events each year — roughly everyone who
+                      More than 4,500 neighbors attend MLCC events each year, roughly everyone who
                       lives here. Yet only about 5% financially support the council. Growing to 10%
                       by the end of 2026 lets us do more of what neighbors already love.
                     </p>

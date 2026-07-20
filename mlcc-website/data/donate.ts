@@ -4,7 +4,7 @@ export const DONATION_GOAL = {
   label: "2026 Community Fund",
   headline: "Help us reach our 2026 community fund goal",
   summary:
-    "One-time gifts go directly toward programs neighbors rely on — the Leaflet, events, advocacy, and emergency preparedness. Every contribution moves the bar forward.",
+    "One-time gifts go directly toward programs neighbors rely on: the Leaflet, events, advocacy, and emergency preparedness. Every contribution moves the bar forward.",
 };
 
 export type DonationAmount = {
@@ -58,7 +58,7 @@ export type DonateStory = {
 export const donateStories: DonateStory[] = [
   {
     quote:
-      "Sometimes it’s quieter still — becoming a member or making a donation so the work can continue even when volunteer capacity ebbs and flows.",
+      "Sometimes it’s quieter still, becoming a member or making a donation so the work can continue even when volunteer capacity ebbs and flows.",
     name: "From the Leaflet",
     attribution: "Built by neighbors, sustained by neighbors",
     image:
@@ -66,7 +66,7 @@ export const donateStories: DonateStory[] = [
   },
   {
     quote:
-      "If you are able to give over and above your annual membership, we appreciate that deeply — and so will your neighbors.",
+      "If you are able to give over and above your annual membership, we appreciate that deeply, and so will your neighbors.",
     name: "MLCC Board",
     attribution: "Supporting the neighborhood",
     image:
@@ -82,7 +82,7 @@ export const donateStories: DonateStory[] = [
   },
   {
     quote:
-      "We know you appreciate the shared community the MLCC helps engender — and now is the time we need your help to ensure that work can continue.",
+      "We know you appreciate the shared community the MLCC helps engender, and now is the time we need your help to ensure that work can continue.",
     name: "Maple Leaf neighbor",
     attribution: "Why giving matters",
     image:
@@ -90,7 +90,7 @@ export const donateStories: DonateStory[] = [
   },
   {
     quote:
-      "Whether you have time to volunteer or the ability to give financially — each form of involvement helps ensure traditions are preserved and new ideas take root.",
+      "Whether you have time to volunteer or the ability to give financially, each form of involvement helps ensure traditions are preserved and new ideas take root.",
     name: "From the Leaflet",
     attribution: "Built by neighbors, sustained by neighbors",
     image:

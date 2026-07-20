@@ -37,7 +37,7 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
     slug: "board-secretary",
     title: "Board Secretary",
     description:
-      "Join the Maple Leaf Community Council as Board Secretary — help lead meetings and keep our community organized!",
+      "Join the Maple Leaf Community Council as Board Secretary; help lead meetings and keep our community organized!",
     volunteersNeeded: 1,
     timeCommitment: "2 hours per month",
     filters: ["communication", "online"],
@@ -62,7 +62,7 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
         },
         {
           kind: "heading",
-          text: "We're looking for a neighbor who likes keeping things clear, written down, and on track — not someone who needs to be the loudest voice in the room.",
+          text: "We're looking for a neighbor who likes keeping things clear, written down, and on track, not someone who needs to be the loudest voice in the room.",
           size: "h6",
         },
         {
@@ -86,7 +86,7 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
         {
           kind: "list",
           items: [
-            "Clear, careful writing — minutes don't need to be fancy, but they do need to be accurate",
+            "Clear, careful writing: minutes don't need to be fancy, but they do need to be accurate",
             "Comfort coordinating schedules and gentle follow-ups by email",
             "A bias toward organization without needing everything to be perfect on day one",
             "Interest in how a neighborhood council works, and willingness to learn as you go",

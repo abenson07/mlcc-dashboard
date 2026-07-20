@@ -53,7 +53,7 @@ export function BoardHistorySection() {
                   className={`flex flex-col gap-6 transition-all delay-150 duration-700 ease-out ${textVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
                 >
                   <p className="m-0 font-body text-2xl leading-10 font-normal tracking-[-0.0625rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-8">
-                    The executive board has guided the Maple Leaf Community Council for decades —
+                    The executive board has guided the Maple Leaf Community Council for decades,
                     through parades, newsletters, community meetings, and the everyday work of
                     keeping a neighborhood organization alive.
                   </p>

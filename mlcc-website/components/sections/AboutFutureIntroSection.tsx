@@ -37,11 +37,11 @@ export function AboutFutureIntroSection() {
               <div className="flex w-full max-w-[42.5rem] flex-col gap-[7.5rem] max-[767px]:max-w-none max-[479px]:gap-16">
                 <div className="flex flex-col gap-6">
                   <h2 className="m-0 font-display text-[2rem] leading-10 font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[1.75rem] max-[767px]:leading-8">
-                    Room for what&apos;s next — and for you
+                    Room for what&apos;s next, and for you
                   </h2>
                   <p className="m-0 font-body text-xl leading-7 text-sparkles-navy">
                     Maple Leaf is growing and changing. The council&apos;s job is to hold onto what
-                    makes this neighborhood feel like home while making room for new ideas — and new
+                    makes this neighborhood feel like home while making room for new ideas, and new
                     neighbors ready to help carry them forward.
                   </p>
                 </div>

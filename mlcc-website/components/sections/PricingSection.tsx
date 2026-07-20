@@ -143,7 +143,7 @@ export function PricingSection() {
               </h2>
               <div className="max-w-[28rem]">
                 <p className="m-0 font-[family-name:var(--font-bricolage)] text-xl leading-7 font-normal text-[#0d1526]">
-                  Choose how often you want your home cleaned — your price updates automatically.
+                  Choose how often you want your home cleaned; your price updates automatically.
                 </p>
               </div>
             </div>

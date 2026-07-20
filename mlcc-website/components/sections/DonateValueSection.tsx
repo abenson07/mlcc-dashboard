@@ -35,7 +35,7 @@ const reasons = [
   },
   {
     title: "Honor a tradition",
-    text: "Sponsor something specific — the parade, the Leaflet, a movie night — with a gift that matches your passion.",
+    text: "Sponsor something specific, like the parade, the Leaflet, or a movie night, with a gift that matches your passion.",
   },
 ] as const;
 
@@ -87,7 +87,7 @@ export function DonateValueSection() {
             >
               <SectionLabel>Donate vs. membership</SectionLabel>
               <h2 className="m-0 font-display text-[3rem] font-bold leading-[3.25rem] tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                Two ways to support — pick what fits your life
+                Two ways to support: pick what fits your life
               </h2>
             </div>
 

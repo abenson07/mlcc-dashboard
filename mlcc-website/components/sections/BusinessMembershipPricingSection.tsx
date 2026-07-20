@@ -111,7 +111,7 @@ export function BusinessMembershipPricingSection() {
                   One membership. One neighborhood.
                 </h2>
                 <p className="m-0 font-body text-base leading-6 text-sparkles-navy">
-                  A flat annual rate — no tiers, no surprises. Your support goes directly toward
+                  A flat annual rate: no tiers, no surprises. Your support goes directly toward
                   keeping Maple Leaf connected.
                 </p>
               </div>
@@ -177,7 +177,7 @@ export function BusinessMembershipPricingSection() {
                 <div className={`${cardClassName} items-center justify-center text-center`}>
                   <blockquote className="m-0 font-body text-xl leading-7 font-normal">
                     &ldquo;Hosting neighbors through council events brought regulars through our
-                    door — but more than that, it reminded us we&apos;re part of something bigger
+                    door, but more than that, it reminded us we&apos;re part of something bigger
                     than our four walls.&rdquo;
                   </blockquote>
 

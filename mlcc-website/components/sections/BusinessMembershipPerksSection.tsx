@@ -107,7 +107,7 @@ export function BusinessMembershipPerksSection() {
                       <div className="flex flex-col items-start justify-start gap-6">
                         <SectionLabel>Sponsorship access</SectionLabel>
                         <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                          Get there first — and pay less to sponsor
+                          Get there first, and pay less to sponsor
                         </h2>
                       </div>
                     </div>
@@ -167,7 +167,7 @@ export function BusinessMembershipPerksSection() {
                     </div>
 
                     <p className="m-0 font-body text-xl leading-7 font-normal text-sparkles-navy">
-                      Membership plugs you into the broader Maple Leaf business community — the
+                      Membership plugs you into the broader Maple Leaf business community: the
                       shops, restaurants, and service providers who sponsor events, host gatherings,
                       and show up for the neighborhood. Through the Business Committee, you&apos;ll
                       meet fellow members, learn what&apos;s happening locally, and find natural

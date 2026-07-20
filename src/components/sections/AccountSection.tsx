@@ -303,7 +303,7 @@ export function AccountSection() {
                     />
                   </div>
                   <p className="m-0 text-mercury-small leading-6 text-white/65">
-                    &ldquo;The Leaflet keeps our neighborhood connected — from
+                    &ldquo;The Leaflet keeps our neighborhood connected, from
                     block parties to the issues that matter on every street.&rdquo;
                   </p>
                 </div>

@@ -15,7 +15,7 @@ export default function MembershipBusinessPage() {
       <BusinessMembershipPricingSection />
       <CtaSection
         title="Stand with your neighbors. Grow with your community."
-        subhead="Business membership is $200 per year. Questions? Reach out to the Business Committee — we're happy to help."
+        subhead="Business membership is $200 per year. Questions? Reach out to the Business Committee; we're happy to help."
         primaryButton={{ label: "Join for $200/year", href: "/subscribe" }}
         secondaryButton={{ label: "Contact us", href: "/committees/business-committee" }}
       />

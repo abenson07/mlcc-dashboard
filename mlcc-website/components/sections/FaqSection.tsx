@@ -26,12 +26,12 @@ const faqs = [
   },
   {
     question: "Do you use eco-friendly products?",
-    answer: "Yes — everything we bring is non-toxic and safe for kids and pets.",
+    answer: "Yes, everything we bring is non-toxic and safe for kids and pets.",
   },
   {
     question: "Can I request the same cleaner every time?",
     answer:
-      "Yes — if you book recurring cleanings we'll assign the same cleaner whenever possible.",
+      "Yes, if you book recurring cleanings we'll assign the same cleaner whenever possible.",
   },
 ];
 
@@ -93,7 +93,7 @@ export function FaqSection() {
 
               <div className="max-w-[28rem]">
                 <p className="m-0 font-body text-xl leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
-                  Choose how often you want your home cleaned — your price updates automatically.
+                  Choose how often you want your home cleaned; your price updates automatically.
                 </p>
               </div>
             </div>

@@ -72,7 +72,7 @@ export function JoinBoardFormSection() {
                     Join the board
                   </h1>
                   <p className="m-0 font-body text-xl leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
-                    The executive board keeps Maple Leaf&apos;s community council running — setting
+                    The executive board keeps Maple Leaf&apos;s community council running: setting
                     direction, supporting committees, and making sure neighbors have a voice. If
                     you&apos;re curious about serving, tell us a little about yourself. No commitment
                     required to start the conversation.
@@ -162,7 +162,7 @@ export function JoinBoardFormSection() {
                         id="board-interest"
                         className={`${inputClassName} min-h-[10rem] resize-y`}
                         name="interest"
-                        placeholder="What would you hope to contribute? Is there a particular area — events, advocacy, communications — that draws you in?"
+                        placeholder="What would you hope to contribute? Is there a particular area (events, advocacy, communications) that draws you in?"
                         required
                         value={interest}
                         onChange={(event) => setInterest(event.target.value)}
@@ -177,7 +177,7 @@ export function JoinBoardFormSection() {
                         id="board-experience"
                         className={`${inputClassName} min-h-[7rem] resize-y`}
                         name="experience"
-                        placeholder="Professional background, volunteer history, or skills you'd bring — whatever feels useful."
+                        placeholder="Professional background, volunteer history, or skills you'd bring, whatever feels useful."
                         value={experience}
                         onChange={(event) => setExperience(event.target.value)}
                       />
@@ -191,7 +191,7 @@ export function JoinBoardFormSection() {
                         id="board-prior-involvement"
                         className={inputClassName}
                         name="priorInvolvement"
-                        placeholder="Committee volunteer, event attendee, Leaflet reader — anything that helps us know your connection to Maple Leaf"
+                        placeholder="Committee volunteer, event attendee, Leaflet reader, anything that helps us know your connection to Maple Leaf"
                         type="text"
                         value={priorInvolvement}
                         onChange={(event) => setPriorInvolvement(event.target.value)}

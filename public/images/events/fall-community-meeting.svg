@@ -1,0 +1,22 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="#34422e"/>
+
+  <!-- leaf line art, corners -->
+  <g fill="none" stroke="#fdf8f1" stroke-width="2" opacity="0.35">
+    <path d="M60 40 l20 -28 l10 20 l24 -18 l-4 26 l28 -4 l-20 22 l22 12 l-30 6 l8 26 l-26 -14 l-2 28 l-18 -20 l-14 22 l-4 -28 l-24 10 l10 -26 l-26 -6 l24 -14 Z"/>
+    <path d="M1140 620 l-20 28 l-10 -20 l-24 18 l4 -26 l-28 4 l20 -22 l-22 -12 l30 -6 l-8 -26 l26 14 l2 -28 l18 20 l14 -22 l4 28 l24 -10 l-10 26 l26 6 l-24 14 Z"/>
+    <path d="M1080 60 l16 22 l-8 16 l20 -6 l-2 20 l22 -4 l-16 18 l16 10 l-24 4 l6 20 l-20 -10 l0 22 l-14 -16 l-10 18 l-4 -22 l-18 8 l8 -20 l-20 -6 l18 -16 l-14 -14 l22 -2 l0 -20 Z"/>
+    <path d="M120 640 l-16 -22 l8 -16 l-20 6 l2 -20 l-22 4 l16 -18 l-16 -10 l24 -4 l-6 -20 l20 10 l0 -22 l14 16 l10 -18 l4 22 l18 -8 l-8 20 l20 6 l-18 16 l14 14 l-22 2 l0 20 Z"/>
+  </g>
+
+  <!-- content -->
+  <text x="600" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="#fdf8f1" letter-spacing="4" opacity="0.9">MAPLE LEAF COMMUNITY COUNCIL</text>
+
+  <text x="600" y="290" text-anchor="middle" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="96" fill="#fdf8f1" letter-spacing="-1">COMMUNITY</text>
+  <text x="600" y="390" text-anchor="middle" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="96" fill="#e2924f" letter-spacing="-1">MEETING</text>
+
+  <rect x="500" y="440" width="200" height="56" rx="28" fill="#f2ece5"/>
+  <text x="600" y="478" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#34422e" letter-spacing="3">FALL 2026</text>
+
+  <text x="600" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="22" fill="#f2ece5" opacity="0.85">Our fall check-in on what's happening in Maple Leaf</text>
+</svg>

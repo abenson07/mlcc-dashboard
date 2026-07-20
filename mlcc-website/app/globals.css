@@ -74,7 +74,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-sparkles-cream: var(--sparkles-cream);
-  --color-sparkles-navy: var(--sparkles-navy);
+  --color-sparkles-navy: var(--puget-night);
   --color-sparkles-warm: var(--sparkles-warm);
   --color-sparkles-blue: var(--sparkles-blue);
   --color-sparkles-accent: var(--sparkles-accent);
@@ -86,9 +86,13 @@
   --font-display: var(--font-decalotype);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--sparkles-cream);
-  color: var(--sparkles-navy);
+  color: var(--puget-night);
   font-family: var(--font-bricolage);
 }
 
@@ -130,7 +134,7 @@ body {
 }
 
 .leaflet-body a:hover {
-  color: var(--sparkles-navy);
+  color: var(--puget-night);
 }
 
 .leaflet-body strong {
@@ -167,8 +171,8 @@ body {
   display: inline-block;
   margin-top: 0.5rem;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--sparkles-navy);
-  background: var(--sparkles-navy);
+  border: 1px solid var(--puget-night);
+  background: var(--puget-night);
   padding: 0.75rem 1rem;
   font-family: var(--font-decalotype);
   font-size: 0.875rem;

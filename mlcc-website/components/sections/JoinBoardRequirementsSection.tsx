@@ -5,7 +5,7 @@ const requirements = [
   {
     number: "01",
     title: "Live in Maple Leaf",
-    text: "Board members need to be neighbors here — people who experience the same streets, schools, and local changes as the community they represent. They're also dues-paying MLCC members, investing in the same organization they help lead.",
+    text: "Board members need to be neighbors here, people who experience the same streets, schools, and local changes as the community they represent. They're also dues-paying MLCC members, investing in the same organization they help lead.",
   },
   {
     number: "02",
@@ -15,7 +15,7 @@ const requirements = [
   {
     number: "03",
     title: "Contribute to the larger vision",
-    text: "Executive board members meet monthly to set priorities, support committee leads, and think ahead about where the council is headed. It's work at the leadership level — helping guide the organization, not just keeping tasks moving.",
+    text: "Executive board members meet monthly to set priorities, support committee leads, and think ahead about where the council is headed. It's work at the leadership level, helping guide the organization, not just keeping tasks moving.",
   },
 ] as const;
 
@@ -78,8 +78,8 @@ export function JoinBoardRequirementsSection() {
                 className="font-bold text-sparkles-navy underline decoration-sparkles-navy/30 underline-offset-2 transition-colors duration-200 hover:decoration-sparkles-navy"
               >
                 become a member
-              </Link>{" "}
-              — many board members built up to it that way.
+              </Link>
+              ; many board members built up to it that way.
             </p>
           </div>
         </div>

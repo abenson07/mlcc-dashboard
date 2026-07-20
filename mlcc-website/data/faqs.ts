@@ -39,3 +39,30 @@ export async function getFaqsForPage(pageSlug: string): Promise<FaqItem[]> {
     return [];
   }
 }
+
+export async function getAllFaqs(): Promise<FaqItem[]> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return [];
+
+  const params = new URLSearchParams({
+    select: "question,answer",
+    is_active: "eq.true",
+    order: "sort_order.asc",
+  });
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/faqs?${params.toString()}`, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      next: { revalidate: 60 },
+    });
+
+    if (!response.ok) return [];
+
+    const rows = (await response.json()) as FaqRow[];
+    return rows.map(({ question, answer }) => ({ question, answer }));
+  } catch {
+    return [];
+  }
+}

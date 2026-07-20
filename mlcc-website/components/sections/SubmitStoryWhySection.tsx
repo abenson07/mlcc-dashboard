@@ -3,13 +3,13 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 const reasons = [
   {
     title: "Reach neighbors where they live",
-    text: "The Leaflet is Seattle's last printed neighborhood newsletter. Your story lands on doorsteps across Maple Leaf — not buried in a feed.",
+    text: "The Leaflet is Seattle's last printed neighborhood newsletter. Your story lands on doorsteps across Maple Leaf, not buried in a feed.",
     image:
       "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
   },
   {
     title: "Celebrate what makes Maple Leaf, Maple Leaf",
-    text: "Block parties, new businesses, quiet acts of kindness, advocacy wins — the Leaflet is how we remember what this neighborhood is building together.",
+    text: "Block parties, new businesses, quiet acts of kindness, advocacy wins: the Leaflet is how we remember what this neighborhood is building together.",
     image:
       "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
   },

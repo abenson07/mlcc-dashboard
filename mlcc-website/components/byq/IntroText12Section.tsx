@@ -17,10 +17,12 @@ export function IntroText12Section({
         <div className="w-full max-w-[1800px] mx-auto">
           <div className="py-40 max-[767px]:py-20">
             <div className="mx-auto flex max-w-[50%] flex-col items-center gap-6 text-center max-[767px]:max-w-none">
-              <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                {headline}
-              </h2>
-              <div className="font-body text-base leading-6 font-normal text-sparkles-navy">
+              {headline ? (
+                <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
+                  {headline}
+                </h2>
+              ) : null}
+              <div className="font-body text-lg leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
                 {body}
               </div>
             </div>

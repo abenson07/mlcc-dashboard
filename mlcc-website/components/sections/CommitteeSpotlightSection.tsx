@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { getApiBase } from "@/lib/apiBase";
 
 export function CommitteeSpotlightSection({
   committeeName,
@@ -18,6 +19,34 @@ export function CommitteeSpotlightSection({
 
   const gridRef = React.useRef<HTMLDivElement>(null);
   const [gridVisible, setGridVisible] = React.useState(false);
+
+  const [meetingStatus, setMeetingStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  async function handleMeetingSignup(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    setMeetingStatus("submitting");
+    try {
+      const response = await fetch(`${getApiBase()}/api/public/committees/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          contact: formData.get("contact"),
+          committeeName,
+          source: "meeting-signup",
+        }),
+      });
+
+      if (!response.ok) throw new Error("Request failed");
+      setMeetingStatus("success");
+      form.reset();
+    } catch {
+      setMeetingStatus("error");
+    }
+  }
 
   React.useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -101,7 +130,7 @@ export function CommitteeSpotlightSection({
                   </a>
 
                   <a
-                    href="/about"
+                    href="#join-committee"
                     className="flex items-center justify-center gap-2 rounded-[2rem] border border-sparkles-navy/30 bg-white/50 px-4 py-3 font-display text-sm leading-5 font-bold uppercase text-puget-night no-underline transition-all duration-300 hover:border-white/10 hover:bg-sparkles-navy/90 hover:text-sparkles-cream"
                   >
                     <span>Learn more</span>
@@ -129,16 +158,17 @@ export function CommitteeSpotlightSection({
 
               <div className="flex h-[32.5rem] w-full flex-col justify-between rounded-3xl bg-sparkles-navy p-8 max-[767px]:h-auto max-[767px]:rounded-[1.25rem] max-[767px]:p-6">
                 <div className="mb-6 flex flex-col gap-2">
-                  <span className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-cream/70">
-                    Saturday, July 12, 2026 · 6:30 PM
-                  </span>
                   <h3 className="m-0 font-display text-2xl leading-7 font-bold tracking-[-0.03125rem] text-sparkles-cream">
                     Join us for our next committee meeting
                   </h3>
                 </div>
 
                 <div className="flex flex-col">
-                  <form className="flex flex-col gap-3" aria-label="Committee meeting signup">
+                  <form
+                    className="flex flex-col gap-3"
+                    aria-label="Committee meeting signup"
+                    onSubmit={handleMeetingSignup}
+                  >
                     <input
                       className="min-h-12 w-full rounded-lg border border-sparkles-cream/20 bg-sparkles-cream/10 px-4 py-2 font-body text-base leading-6 text-sparkles-cream placeholder:text-sparkles-cream/50 focus:border-sparkles-cream focus:outline-none"
                       type="text"
@@ -159,10 +189,19 @@ export function CommitteeSpotlightSection({
                     />
                     <button
                       type="submit"
-                      className="mt-1 cursor-pointer rounded-[2rem] border border-sparkles-cream bg-sparkles-cream px-4 py-3 font-display text-sm leading-5 font-bold uppercase text-sparkles-navy transition-all duration-300 hover:border-sparkles-cream/90 hover:bg-sparkles-cream/90"
+                      disabled={meetingStatus === "submitting"}
+                      className="mt-1 cursor-pointer rounded-[2rem] border border-sparkles-cream bg-sparkles-cream px-4 py-3 font-display text-sm leading-5 font-bold uppercase text-sparkles-navy transition-all duration-300 hover:border-sparkles-cream/90 hover:bg-sparkles-cream/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Request to join
+                      {meetingStatus === "submitting" ? "Sending…" : "Request to join"}
                     </button>
+                    {meetingStatus === "success" ? (
+                      <span className="font-body text-xs text-sparkles-cream">Thanks! We&apos;ll be in touch!</span>
+                    ) : null}
+                    {meetingStatus === "error" ? (
+                      <span className="font-body text-xs text-red-300">
+                        Something went wrong. Please try again.
+                      </span>
+                    ) : null}
                   </form>
 
                   <p className="m-0 mt-4 font-body text-xs leading-4 font-normal text-sparkles-cream/60">

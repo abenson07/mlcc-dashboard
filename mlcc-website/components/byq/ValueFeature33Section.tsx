@@ -47,7 +47,7 @@ const cardData: MarqueeCard[] = [
   },
   {
     heading: "Movie Night Planning",
-    text: "Coordinate an outdoor screening—from film picks to setup and promotion.",
+    text: "Coordinate an outdoor screening, from film picks to setup and promotion.",
     href: "/volunteer",
   },
   {

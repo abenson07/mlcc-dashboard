@@ -1,0 +1,9 @@
+<svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#0d1526" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M280 180 L220 220 L160 310 L230 360 L280 320 L280 620 L520 620 L520 320 L570 360 L640 310 L580 220 L520 180 C520 220 460 250 400 250 C340 250 280 220 280 180 Z" fill="#fdf8f1"/>
+  </g>
+  <g fill="#2e7b34">
+    <path d="M400 400 q18 -20 40 0 q6 -9 14 -5 q-3 11 -14 15 q11 4 14 15 q-8 4 -14 -5 q-18 20 -40 0 q-6 9 -14 5 q3 -11 14 -15 q-11 -4 -14 -15 q8 -4 14 5 Z"/>
+  </g>
+  <text x="400" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="30" fill="#0d1526">SUMMER SOCIAL '26</text>
+</svg>

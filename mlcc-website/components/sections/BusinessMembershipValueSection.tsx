@@ -10,7 +10,7 @@ const FEATURE_IMAGE =
 const features = [
   {
     title: "Support the neighborhood",
-    text: "Your membership helps fund the Leaflet, Summer Social, advocacy work, and emergency preparedness — the programs neighbors rely on year-round.",
+    text: "Your membership helps fund the Leaflet, Summer Social, advocacy work, and emergency preparedness, the programs neighbors rely on year-round.",
     icon: (
       <svg
         width="100%"
@@ -80,7 +80,7 @@ const features = [
   },
   {
     title: "Stand out locally",
-    text: "Customers notice when a business gives back. Membership signals that you are rooted here — not just passing through Maple Leaf.",
+    text: "Customers notice when a business gives back. Membership signals that you are rooted here, not just passing through Maple Leaf.",
     icon: (
       <svg
         width="100%"
@@ -162,7 +162,7 @@ export function BusinessMembershipValueSection() {
                 >
                   <SectionLabel>Why join</SectionLabel>
                   <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                    More than a line item — a connection to Maple Leaf
+                    More than a line item: a connection to Maple Leaf
                   </h2>
                 </div>
 

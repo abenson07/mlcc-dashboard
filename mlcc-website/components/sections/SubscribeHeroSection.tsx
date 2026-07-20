@@ -47,7 +47,7 @@ export function SubscribeHeroSection() {
                 </div>
 
                 <p className="m-0 max-w-[26.875rem] font-body text-xl leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
-                  Get event reminders, neighborhood updates, and highlights from the Leaflet — delivered
+                  Get event reminders, neighborhood updates, and highlights from the Leaflet, delivered
                   to your inbox. Sign up takes less than a minute.
                 </p>
 

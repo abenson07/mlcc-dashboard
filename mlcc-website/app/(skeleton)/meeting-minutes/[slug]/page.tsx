@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${formatMeetingMinutesTitle(entry)} — Meeting Minutes`,
+    title: `${formatMeetingMinutesTitle(entry)} | Meeting Minutes`,
   };
 }
 

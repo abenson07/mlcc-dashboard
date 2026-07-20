@@ -14,7 +14,7 @@ const resources = [
   {
     title: "Meeting minutes",
     description:
-      "Read what the board and steering committee have discussed — a transparent look at how decisions get made.",
+      "Read what the board and steering committee have discussed, a transparent look at how decisions get made.",
     href: "/meeting-minutes",
     cta: "Browse meeting minutes",
     image:
@@ -32,7 +32,7 @@ const resources = [
   {
     title: "Volunteer opportunities",
     description:
-      "Not ready for the board yet? There are open roles across the neighborhood — from event support to newsletter delivery.",
+      "Not ready for the board yet? There are open roles across the neighborhood, from event support to newsletter delivery.",
     href: "/volunteer",
     cta: "See volunteer openings",
     image:

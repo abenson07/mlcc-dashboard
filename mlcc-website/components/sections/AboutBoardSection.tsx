@@ -63,13 +63,13 @@ export function AboutBoardSection() {
                     The MLCC board is made up of Maple Leaf residents elected by members. They set
                     direction for the council, oversee finances, represent the neighborhood in city
                     processes, and support the committees doing the day-to-day work. Many current
-                    board members started as volunteers — delivering the Leaflet, helping at an
+                    board members started as volunteers, delivering the Leaflet, helping at an
                     event, or joining a committee conversation.
                   </p>
 
                   <p className="m-0 font-body text-base leading-6 text-sparkles-navy">
                     Board meetings are open to the public. If you want to understand how decisions
-                    get made — or you&apos;re curious about serving yourself — that&apos;s the best
+                    get made, or you&apos;re curious about serving yourself, that&apos;s the best
                     place to start.
                   </p>
 
@@ -93,7 +93,7 @@ export function AboutBoardSection() {
                 <div className="flex w-full flex-col gap-4 rounded-2xl bg-sparkles-cream p-6">
                   <p className="m-0 font-body text-base leading-6 italic text-sparkles-navy">
                     &ldquo;The Maple Leaf Community Council doesn&apos;t exist apart from the
-                    neighborhood. It exists because of it — built by neighbors, sustained by
+                    neighborhood. It exists because of it, built by neighbors, sustained by
                     neighbors.&rdquo;
                   </p>
                   <p className="m-0 font-body text-xs font-bold uppercase tracking-[0.0625rem] text-sparkles-muted">

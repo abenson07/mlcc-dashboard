@@ -12,7 +12,7 @@ export async function SubscribeFaqSection() {
       data-editable-id="subscribe.faq"
       data-editable-label="Subscribe FAQ"
     >
-      <FaqSection label="Questions" headline="Before you sign up" faqs={faqs} />
+      <FaqSection label="Questions" headline="Before you sign up" faqs={faqs.slice(0, 5)} />
     </section>
   );
 }

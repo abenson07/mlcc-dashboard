@@ -88,7 +88,7 @@ export function SubmitStoryFormSection() {
                   </h1>
                   <p className="m-0 font-body text-xl leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
                     Neighbors like you keep the Leaflet alive. Tell us what&apos;s happening in your
-                    corner of the neighborhood — a few paragraphs is plenty. Add photos if you have them.
+                    corner of the neighborhood, a few paragraphs is plenty. Add photos if you have them.
                   </p>
                 </div>
 
