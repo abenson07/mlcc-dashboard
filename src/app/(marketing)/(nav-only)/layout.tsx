@@ -1,4 +1,6 @@
+import { ViewTransition } from "react";
 import { NavigationBarSection } from "@marketing/components/byq/NavigationBarSection";
+import PublicSignInButton from "@/components/auth/PublicSignInButton";
 
 export default function NavOnlyLayout({
   children,
@@ -7,8 +9,10 @@ export default function NavOnlyLayout({
 }>) {
   return (
     <>
-      <NavigationBarSection />
-      <div className="flex-1 bg-sparkles-cream pt-[6.75rem] max-[991px]:pt-[6.25rem]">{children}</div>
+      <NavigationBarSection accountSlot={<PublicSignInButton />} />
+      <div className="flex-1 bg-sparkles-cream pt-[6.75rem] max-[991px]:pt-[6.25rem]">
+        <ViewTransition>{children}</ViewTransition>
+      </div>
     </>
   );
 }

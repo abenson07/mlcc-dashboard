@@ -15,6 +15,7 @@ export interface People {
   created_at: string | null; // timestamp with time zone
   membership_id: string | null; // uuid (references memberships)
   is_executive_board: boolean; // default attendee for executive board meetings
+  auth_user_id: string | null; // uuid (references auth.users)
 }
 
 export interface PeopleInsert {
@@ -28,6 +29,7 @@ export interface PeopleInsert {
   created_at?: string | null;
   membership_id?: string | null;
   is_executive_board?: boolean;
+  auth_user_id?: string | null;
 }
 
 export interface PeopleUpdate {
@@ -41,4 +43,5 @@ export interface PeopleUpdate {
   created_at?: string | null;
   membership_id?: string | null;
   is_executive_board?: boolean;
+  auth_user_id?: string | null;
 }

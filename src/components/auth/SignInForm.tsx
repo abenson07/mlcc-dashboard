@@ -3,6 +3,7 @@
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
+import PostVerifyChooser from "@/components/auth/PostVerifyChooser";
 import { ChevronLeftIcon } from "@/icons";
 import Link from "next/link";
 import React, { useActionState, useState } from "react";
@@ -60,6 +61,7 @@ export default function SignInForm() {
   >(verifyLoginCode, null);
 
   const showCodeStep = Boolean(sendState?.ok && email && !useDifferentEmail);
+  const showChooser = Boolean(verifyState?.ok);
 
   function handleEmailSubmit(e: React.FormEvent<HTMLFormElement>) {
     const fd = new FormData(e.currentTarget);
@@ -98,13 +100,17 @@ export default function SignInForm() {
               Sign In
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {!showCodeStep
+              {showChooser
+                ? "Signed in successfully."
+                : !showCodeStep
                 ? "Enter your email to receive a sign-in code."
                 : "Enter the 8-digit code we sent to your email."}
             </p>
           </div>
           <div>
-            {!showCodeStep ? (
+            {showChooser ? (
+              <PostVerifyChooser />
+            ) : !showCodeStep ? (
               <form action={sendAction} onSubmit={handleEmailSubmit}>
                 <div className="space-y-6">
                   {sendState?.error && (
