@@ -13,23 +13,28 @@ function ArrowIcon() {
 
 const slides = [
   {
+    image: "/images/events/night-out.jpeg",
+    body: "Meet your block, swap stories, celebrate neighborhood safety together at Night Out",
+    linkText: "Learn more",
+    href: "/events/night-out",
+  },
+  {
+    image: "/images/events/movie-by-tower.png",
+    body: "Free outdoor movie at the tower: beer garden, food trucks, live music, dusk screening",
+    linkText: "Learn more",
+    href: "/events/2026-movies-by-the-tower",
+  },
+  {
     image: "/images/leaflet/leaflet.webp",
     body: "We deliver 4,000 leaflets to Maple Leaf residents multiple times a year",
     linkText: "Learn more",
-    href: "/leaflet",
+    href: "/committees/newsletter",
   },
   {
-    image: "/images/events/summer-social.png",
-    body: "Join us for the Summer Social on July 16th",
+    image: "/images/one-seattle/reservoir-park.jpg",
+    body: "Hub Meet & Greet + Inventory Day — see what's in the Hub supply box and meet the volunteers",
     linkText: "Learn more",
-    href: "/events/2026-summer-social",
-  },
-  {
-    image:
-      "/images/community-photos/summer-social-2024-62.webp",
-    body: "Help us put on the Halloween Parade in October",
-    linkText: "Learn more",
-    href: "/committees/events",
+    href: "/committees/emergency-hub",
   },
 ];
 
@@ -73,16 +78,18 @@ export function HeroSection() {
       <style>{`
         @keyframes hero-slide-fade {
           0%, 100% { opacity: 0; pointer-events: none; }
-          0.33%, 33% { opacity: 1; pointer-events: auto; }
-          33.33% { opacity: 0; pointer-events: none; }
+          0.25%, 25% { opacity: 1; pointer-events: auto; }
+          25.25% { opacity: 0; pointer-events: none; }
         }
         .hero-slide {
           animation: hero-slide-fade 60s linear infinite;
           opacity: 0;
+          pointer-events: none;
         }
         .hero-slide-1 { animation-delay: 0s; }
-        .hero-slide-2 { animation-delay: 20s; }
-        .hero-slide-3 { animation-delay: 40s; }
+        .hero-slide-2 { animation-delay: 15s; }
+        .hero-slide-3 { animation-delay: 30s; }
+        .hero-slide-4 { animation-delay: 45s; }
       `}</style>
 
       <section className="bg-sparkles-cream" data-editable="true" data-editable-type="section" data-editable-id="home.hero" data-editable-label="Hero Section">
@@ -158,7 +165,7 @@ export function HeroSection() {
                 </div>
               </div>
 
-              {/* Right card — 3-slide CSS crossfade */}
+              {/* Right card — 4-slide CSS crossfade */}
               <div
                 ref={rightCardRef}
                 className={`
