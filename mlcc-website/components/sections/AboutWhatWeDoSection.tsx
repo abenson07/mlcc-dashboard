@@ -5,13 +5,13 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 import * as React from "react";
 
 const MEETING_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d6d_community-meeting.webp";
+  "/images/community-photos/community-meeting-a.webp";
 const NEIGHBORHOOD_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6913dbb252ed363168221ae6_Maple_Leaf.jpg";
+  "/images/community-photos/maple-leaf.jpg";
 const LEAFLET_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp";
+  "/images/leaflet/leaflet.webp";
 const EVENTS_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp";
+  "/images/community-photos/summer-social-2024-39.webp";
 
 const workAreas = [
   {

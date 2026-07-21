@@ -4,7 +4,7 @@ import * as React from "react";
 import { SectionLabel } from "@marketing/components/SectionLabel";
 
 const FEATURE_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6877bff9b59839fa1fd6792c_Photo-Jun-11-2025.jpg";
+  "/images/community-photos/photo-jun-11-2025.jpg";
 
 const valueItems = [
   "Fund the printed Leaflet, Seattle's last neighborhood newsletter delivered door to door",

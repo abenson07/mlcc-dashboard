@@ -1,11 +1,11 @@
 import { SectionLabel } from "@marketing/components/SectionLabel";
 
 const HISTORY_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp";
+  "/images/leaflet/leaflet.webp";
 const MEETING_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d6d_community-meeting.webp";
+  "/images/community-photos/community-meeting-a.webp";
 const PARADE_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg";
+  "/images/community-photos/img-6554.jpg";
 
 export function AboutHistoryBentoSection() {
   return (

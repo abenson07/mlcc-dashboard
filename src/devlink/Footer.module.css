@@ -411,14 +411,14 @@
 }
 
 .footer_form_input.is-select-input {
-  background-image: url("https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f474b29211e3047d6a31c4_chevron-down.svg");
+  background-image: url("/images/footer/chevron-down.svg");
   background-position: 99% 50%;
   background-size: auto;
   background-repeat: no-repeat;
 }
 
 .footer_form_input.is-select-input.is-alternate {
-  background-image: url("https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f474b29211e3047d6a31c3_chevron-down-white.svg");
+  background-image: url("/images/footer/chevron-down-white.svg");
 }
 
 .footer_form_input.is-alternate {

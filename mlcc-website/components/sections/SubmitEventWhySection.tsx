@@ -5,19 +5,19 @@ const reasons = [
     title: "Help neighbors find each other",
     text: "The events calendar is where people discover block parties, book clubs, meetings, and gatherings they might otherwise miss. Your submission keeps that list useful.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530e8b1aadf47968a6eb09_summer_social_2024-62%20(1).webp",
+      "/images/community-photos/summer-social-2024-62.webp",
   },
   {
     title: "Support what’s already happening",
     text: "You don’t have to run the event yourself. If something community-minded is coming up in Maple Leaf, sharing it helps the right people show up.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b30685a1f306acdc73283_IMG_6862.jpg",
+      "/images/community-photos/img-6862.jpg",
   },
   {
     title: "Quick to submit, easy to review",
     text: "Date, location, and a short description are enough to get started. Volunteers review submissions and follow up if anything needs clarification.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
 ];
 

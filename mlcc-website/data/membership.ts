@@ -50,7 +50,7 @@ export const membershipStories: MembershipStory[] = [
     name: "From the Leaflet",
     attribution: "Built by neighbors, sustained by neighbors",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6877bff9b59839fa1fd6792c_Photo-Jun-11-2025.jpg",
+      "/images/community-photos/photo-jun-11-2025.jpg",
   },
   {
     quote:
@@ -58,7 +58,7 @@ export const membershipStories: MembershipStory[] = [
     name: "Maple Leaf neighbor",
     attribution: "Supporting neighbor-led events",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b30685a1f306acdc73283_IMG_6862.jpg",
+      "/images/community-photos/img-6862.jpg",
   },
   {
     quote:
@@ -66,7 +66,7 @@ export const membershipStories: MembershipStory[] = [
     name: "From the Leaflet",
     attribution: "Connecting Maple Leaf through the decades",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     quote:
@@ -74,7 +74,7 @@ export const membershipStories: MembershipStory[] = [
     name: "MLCC",
     attribution: "Community survey & event attendance",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
+      "/images/community-photos/summer-social-2024-39.webp",
   },
   {
     quote:
@@ -82,7 +82,7 @@ export const membershipStories: MembershipStory[] = [
     name: "From the Leaflet",
     attribution: "Carrying the Halloween Parade forward",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg",
+      "/images/community-photos/img-6554.jpg",
   },
   {
     quote:
@@ -90,7 +90,7 @@ export const membershipStories: MembershipStory[] = [
     name: "Maple Leaf neighbor",
     attribution: "Why membership matters",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
 ];
 
@@ -98,32 +98,32 @@ export const membershipPrograms = [
   {
     title: "The Leaflet",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     title: "Summer Social",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
+      "/images/community-photos/summer-social-2024-39.webp",
   },
   {
     title: "Halloween Parade",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg",
+      "/images/community-photos/img-6554.jpg",
   },
   {
     title: "Movies by the Tower",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2928eb2f48f58fa2aef8_movies-tower.webp",
+      "/images/community-photos/movies-tower.webp",
   },
   {
     title: "Community Meetings",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
   {
     title: "Advocacy",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/68c82d9a55f62655acb2e46c_IMG_9152.jpg",
+      "/images/community-photos/img-9152.jpg",
   },
   {
     title: "Emergency Hub",
@@ -132,12 +132,12 @@ export const membershipPrograms = [
   {
     title: "Love Your Neighbor",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2ef4da00327d5e0c5403_love-your-neighbor.webp",
+      "/images/community-photos/love-your-neighbor.webp",
   },
   {
     title: "Silent Book Club",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b30685a1f306acdc73283_IMG_6862.jpg",
+      "/images/community-photos/img-6862.jpg",
   },
   {
     title: "Volunteer Day",

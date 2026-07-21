@@ -5,19 +5,19 @@ const reasons = [
     title: "Reach neighbors where they live",
     text: "The Leaflet is Seattle's last printed neighborhood newsletter. Your story lands on doorsteps across Maple Leaf, not buried in a feed.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     title: "Celebrate what makes Maple Leaf, Maple Leaf",
     text: "Block parties, new businesses, quiet acts of kindness, advocacy wins: the Leaflet is how we remember what this neighborhood is building together.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
+      "/images/community-photos/summer-social-2024-39.webp",
   },
   {
     title: "No polish required",
     text: "A few paragraphs and a photo from your phone is plenty. Volunteers on the Newsletter committee help shape submissions into print-ready stories.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
 ];
 

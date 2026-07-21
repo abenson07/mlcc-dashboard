@@ -1,9 +1,9 @@
 import { SectionLabel } from "@marketing/components/SectionLabel";
 
 const PARADE_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg";
+  "/images/community-photos/img-6554.jpg";
 const MOVIES_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2928eb2f48f58fa2aef8_movies-tower.webp";
+  "/images/community-photos/movies-tower.webp";
 
 export function AboutFutureIntroSection() {
   return (

@@ -28,7 +28,7 @@ export function NextZoningMeeting({
           width="auto"
           height="auto"
           alt=""
-          src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/688b7265bdc1dbb6fc1ce130_moviesbythetower.jpg"
+          src="/images/zoning/movies-by-the-tower.jpg"
         />
       </_Builtin.Block>
       <_Builtin.Block

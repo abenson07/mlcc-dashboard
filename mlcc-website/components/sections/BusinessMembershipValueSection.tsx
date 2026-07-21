@@ -5,7 +5,7 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 import * as React from "react";
 
 const FEATURE_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp";
+  "/images/community-photos/community-meeting-a.webp";
 
 const features = [
   {

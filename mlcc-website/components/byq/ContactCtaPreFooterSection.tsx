@@ -3,14 +3,14 @@
 import * as React from "react";
 import { getApiBase } from "@/lib/apiBase";
 import { SectionLabel } from "@marketing/components/SectionLabel";
-import { TestimonialPanel, type TestimonialPanelProps } from "@marketing/components/byq/TestimonialPanel";
+// import { TestimonialPanel, type TestimonialPanelProps } from "@marketing/components/byq/TestimonialPanel";
 
-const defaultTestimonial: TestimonialPanelProps = {
-  quote:
-    "Volunteering with MLCC connected me with neighbors I would never have met otherwise. It is the best way to feel at home in Maple Leaf.",
-  name: "Maple Leaf neighbor",
-  attribution: "Newsletter volunteer",
-};
+// const defaultTestimonial: TestimonialPanelProps = {
+//   quote:
+//     "Volunteering with MLCC connected me with neighbors I would never have met otherwise. It is the best way to feel at home in Maple Leaf.",
+//   name: "Maple Leaf neighbor",
+//   attribution: "Newsletter volunteer",
+// };
 
 const inputClassName =
   "mb-3 min-h-12 w-full rounded-lg border border-sparkles-warm bg-sparkles-cream px-4 py-2 font-body text-base leading-6 text-sparkles-navy/90 placeholder:text-sparkles-muted focus:border-sparkles-navy focus:outline-none";
@@ -19,9 +19,11 @@ const labelClassName =
   "mb-2 font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy";
 
 export type ContactCtaPreFooterSectionProps = {
-  testimonial?: TestimonialPanelProps;
+  // testimonial?: TestimonialPanelProps;
+  image?: string;
   committeeName?: string;
   headline?: string;
+  source?: string;
 };
 
 function formatCommitteeName(name: string): string {
@@ -55,9 +57,11 @@ function getJoinCopy(committeeName?: string) {
 }
 
 export function ContactCtaPreFooterSection({
-  testimonial = defaultTestimonial,
+  // testimonial = defaultTestimonial,
+  image,
   committeeName,
   headline,
+  source = "join-card",
 }: ContactCtaPreFooterSectionProps = {}) {
   const copy = { ...getJoinCopy(committeeName), ...(headline ? { headline } : {}) };
   const [status, setStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -76,7 +80,7 @@ export function ContactCtaPreFooterSection({
           name: formData.get("name"),
           contact: formData.get("contact"),
           committeeName,
-          source: "join-card",
+          source,
         }),
       });
 
@@ -100,7 +104,11 @@ export function ContactCtaPreFooterSection({
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="py-[7.5rem] max-[767px]:py-20">
-            <div className="grid gap-16 rounded-2xl bg-sparkles-warm p-20 [grid-template-columns:1.5fr_1fr] max-[991px]:grid-cols-1 max-[479px]:p-12">
+            <div
+              className={`grid gap-16 rounded-2xl bg-sparkles-warm p-20 max-[479px]:p-12 ${
+                image ? "[grid-template-columns:1.5fr_1fr] max-[991px]:grid-cols-1" : "grid-cols-1"
+              }`}
+            >
               <div>
                 <SectionLabel>{copy.label}</SectionLabel>
                 <div className="mb-8 mt-6 flex flex-col gap-6">
@@ -165,7 +173,12 @@ export function ContactCtaPreFooterSection({
                 </form>
               </div>
 
-              <TestimonialPanel {...testimonial} />
+              {/* <TestimonialPanel {...testimonial} /> */}
+              {image ? (
+                <div className="min-h-[400px] overflow-hidden rounded-lg max-[991px]:min-h-[300px]">
+                  <img loading="lazy" src={image} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

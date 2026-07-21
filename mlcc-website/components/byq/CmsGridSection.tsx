@@ -101,10 +101,12 @@ function StoryCard({
         <div className="relative h-[28.5rem] w-full overflow-hidden rounded-2xl max-[767px]:h-[15rem]">
           <img loading="lazy" src={image} alt="" className="z-[1] h-full w-full object-cover" />
         </div>
-        <div className="flex flex-col gap-4">
-          <StoryMeta type={story.type} publishDate={story.publishDate} author={story.author} />
-          <div className="font-display text-[2.5rem] leading-[2.75rem] font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7">
-            {story.title}
+        <div className="flex flex-col gap-4 max-[767px]:gap-2">
+          <div className="flex flex-col gap-4 max-[767px]:gap-1">
+            <StoryMeta type={story.type} publishDate={story.publishDate} author={story.author} />
+            <div className="font-display text-[2.5rem] leading-[2.75rem] font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7">
+              {story.title}
+            </div>
           </div>
           <p className="m-0 font-body text-base leading-6 text-sparkles-navy">
             {getLeafletStoryExcerpt(story.body)}
@@ -122,12 +124,14 @@ function StoryCard({
       <div className="relative h-[16.875rem] w-full overflow-hidden rounded-2xl">
         <img loading="lazy" src={image} alt="" className="z-[1] h-full w-full object-cover" />
       </div>
-      <div className="flex flex-col gap-4">
-        <span className="font-body text-xs leading-4 font-normal text-sparkles-navy">
-          {formatLeafletDate(story.publishDate)}
-        </span>
-        <div className="font-display text-[1.5rem] leading-7 font-bold tracking-[-0.03125rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-6">
-          {story.title}
+      <div className="flex flex-col gap-4 max-[767px]:gap-2">
+        <div className="flex flex-col gap-4 max-[767px]:gap-1">
+          <span className="font-body text-xs leading-4 font-normal text-sparkles-navy">
+            {formatLeafletDate(story.publishDate)}
+          </span>
+          <div className="font-display text-[1.5rem] leading-7 font-bold tracking-[-0.03125rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-6">
+            {story.title}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-body text-xs leading-4 font-normal text-sparkles-navy">{story.type}</span>

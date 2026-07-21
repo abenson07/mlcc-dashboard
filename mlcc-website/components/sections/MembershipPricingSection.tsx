@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SectionLabel } from "@marketing/components/SectionLabel";
+import { formatMembershipPrice, membershipTiers } from "@marketing/data/membership-tiers";
 
 interface MembershipCardProps {
   title: string;
@@ -23,9 +24,9 @@ function MembershipCard({ title, description, price, href, stripeHref }: Members
       <p className="m-0 mt-2 font-body text-sm leading-5 text-sparkles-muted">{description}</p>
 
       <div className="mt-4 flex items-center justify-between gap-4">
-        <a href={href} className="font-body text-sm font-bold text-sparkles-navy underline underline-offset-2">
+        <Link href={href} className="font-body text-sm font-bold text-sparkles-navy underline underline-offset-2">
           Learn more
-        </a>
+        </Link>
         <a
           href={stripeHref}
           target="_blank"
@@ -39,36 +40,20 @@ function MembershipCard({ title, description, price, href, stripeHref }: Members
   );
 }
 
-const membershipCards: MembershipCardProps[] = [
-  {
-    title: "Household",
-    description: "One membership for everyone at home.",
-    price: "$40",
-    href: "/membership/household",
-    stripeHref: "https://buy.stripe.com/cNidRa2aHesdfIWdNw3sI0E",
-  },
-  {
-    title: "Individual",
-    description: "Support MLCC as a single neighbor.",
-    price: "$25",
-    href: "/membership/individual",
-    stripeHref: "https://buy.stripe.com/00gdT37PPae95DGdQS",
-  },
-  {
-    title: "Senior",
-    description: "A discounted rate for senior neighbors.",
-    price: "$5",
-    href: "/membership/senior",
-    stripeHref: "https://buy.stripe.com/aEUeX7fihfyt5DGdQT",
-  },
-  {
-    title: "Student",
-    description: "A discounted rate for students.",
-    price: "$5",
-    href: "/membership/student",
-    stripeHref: "https://buy.stripe.com/aEUeX7fihfyt5DGdQT",
-  },
-];
+const STRIPE_PAYMENT_LINKS: Record<string, string> = {
+  household: "https://buy.stripe.com/cNidRa2aHesdfIWdNw3sI0E",
+  individual: "https://buy.stripe.com/00gdT37PPae95DGdQS",
+  senior: "https://buy.stripe.com/aEUeX7fihfyt5DGdQT",
+  student: "https://buy.stripe.com/aEUeX7fihfyt5DGdQT",
+};
+
+const membershipCards: MembershipCardProps[] = membershipTiers.map((tier) => ({
+  title: tier.name,
+  description: tier.description,
+  price: formatMembershipPrice(tier.priceCents),
+  href: `/membership/${tier.slug}`,
+  stripeHref: STRIPE_PAYMENT_LINKS[tier.slug] ?? "/membership",
+}));
 
 interface MembershipPricingSectionProps {
   editableId?: string;

@@ -57,28 +57,38 @@ function TeamCard({ card }: { card: (typeof cards)[number] }) {
   );
 }
 
-export function Team4Section({ image }: { image?: string }) {
+export function Team4Section({
+  image,
+  label = "Committee Volunteers",
+  headline = "Run by neighbors like you",
+  body = "This committee is powered entirely by volunteers, neighbors who live right here in Maple Leaf and give their time because they care about the community. There's always room for another familiar face.",
+  editableId = "template.team-4",
+  editableLabel = "Team 4 (Template)",
+}: {
+  image?: string;
+  label?: string;
+  headline?: string;
+  body?: string;
+  editableId?: string;
+  editableLabel?: string;
+}) {
   return (
     <section
       className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20"
       data-editable="true"
       data-editable-type="section"
-      data-editable-id="template.team-4"
-      data-editable-label="Team 4 (Template)"
+      data-editable-id={editableId}
+      data-editable-label={editableLabel}
     >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="grid w-full items-center gap-12 [grid-template-columns:1fr_1fr] max-[991px]:[grid-template-columns:1fr]">
             <div className="flex max-w-[42.5rem] flex-col items-start gap-6">
-              <SectionLabel>Committee Volunteers</SectionLabel>
+              <SectionLabel>{label}</SectionLabel>
               <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                Run by neighbors like you
+                {headline}
               </h2>
-              <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                This committee is powered entirely by volunteers, neighbors who live right here in Maple Leaf and
-                give their time because they care about the community. There&apos;s always room for another
-                familiar face.
-              </p>
+              <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">{body}</p>
             </div>
 
             <div className="h-[24rem] w-full overflow-hidden rounded-3xl bg-[var(--sparkles-navy-16)] max-[767px]:h-[18rem]">

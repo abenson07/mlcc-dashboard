@@ -1,12 +1,12 @@
 "use client";
 
 import { SectionLabel } from "@marketing/components/SectionLabel";
-import { TestimonialPanel } from "@marketing/components/byq/TestimonialPanel";
+// import { TestimonialPanel } from "@marketing/components/byq/TestimonialPanel";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-const HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530e8b1aadf47968a6eb09_summer_social_2024-62%20(1).webp";
+// const HERO_IMAGE =
+//   "/images/community-photos/summer-social-2024-62.webp";
 
 const fieldLabelClassName =
   "font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-muted";
@@ -117,14 +117,14 @@ export function SubmitEventFormSection() {
                   </p>
                 </div>
 
-                <div className="max-w-[22rem] max-[991px]:max-w-none">
+                {/* <div className="max-w-[22rem] max-[991px]:max-w-none">
                   <TestimonialPanel
                     quote="From block parties to book clubs, the events calendar helps neighbors find each other. Your submission keeps that list fresh and useful."
                     name="Events Committee"
                     attribution="Maple Leaf Community Council"
                     avatarSrc={HERO_IMAGE}
                   />
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full">

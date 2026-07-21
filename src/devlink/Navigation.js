@@ -71,7 +71,7 @@ export function Navigation({ as: _Component = _Builtin.NavbarWrapper }) {
               height="auto"
               loading="eager"
               alt=""
-              src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f474d94f5d5f791e219a67_Logo-wide.svg"
+              src="/images/nav/logo-wide.svg"
             />
           </_Builtin.NavbarBrand>
           <_Builtin.NavbarLink

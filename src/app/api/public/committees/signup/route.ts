@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { corsPreflightResponse, withCors } from "@/lib/stripe/cors";
 import { postToSlack } from "@/lib/slack";
 
-type SignupSource = "join-card" | "meeting-signup";
+type SignupSource = "join-card" | "meeting-signup" | "zoning-workshop";
 
 const SOURCE_LABELS: Record<SignupSource, string> = {
   "join-card": "Join the committee",
   "meeting-signup": "Meeting RSVP",
+  "zoning-workshop": "Would like to attend a zoning workshop",
 };
 
 function isSignupSource(value: unknown): value is SignupSource {
-  return value === "join-card" || value === "meeting-signup";
+  return value === "join-card" || value === "meeting-signup" || value === "zoning-workshop";
 }
 
 export async function OPTIONS(request: NextRequest) {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     `*Name:* ${name.trim()}\n` +
     `*Contact:* ${contact.trim()}`;
 
-  await postToSlack(text);
+  await postToSlack(text, typeof committeeName === "string" ? committeeName.trim() : undefined);
 
   return withCors(request, NextResponse.json({ ok: true }));
 }

@@ -2,9 +2,10 @@
 
 import { SectionLabel } from "@marketing/components/SectionLabel";
 import * as React from "react";
+import { getApiBase } from "@/lib/apiBase";
 
 const HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp";
+  "/images/leaflet/leaflet.webp";
 
 const inputClassName =
   "min-h-12 w-full rounded-2xl border border-sparkles-warm bg-sparkles-warm px-4 py-2 font-body text-base leading-6 text-sparkles-navy placeholder:text-sparkles-muted focus:border-sparkles-navy focus:outline-none";
@@ -12,18 +13,28 @@ const inputClassName =
 export function SubscribeHeroSection() {
   const [submitHovered, setSubmitHovered] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
-  const [error, setError] = React.useState(false);
+  const [error, setError] = React.useState<"invalid" | "request" | null>(null);
   const [firstName, setFirstName] = React.useState("");
   const [email, setEmail] = React.useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !email.includes("@")) {
-      setError(true);
+      setError("invalid");
       return;
     }
-    setSubmitted(true);
-    setError(false);
+    setError(null);
+    try {
+      const response = await fetch(`${getApiBase()}/api/public/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), firstName: firstName.trim() }),
+      });
+      if (!response.ok) throw new Error("Request failed");
+      setSubmitted(true);
+    } catch {
+      setError("request");
+    }
   };
 
   return (
@@ -101,7 +112,9 @@ export function SubscribeHeroSection() {
                   )}
                   {error && (
                     <p className="mt-3 mb-0 font-body text-sm leading-5 text-sparkles-accent">
-                      Please enter a valid email address.
+                      {error === "invalid"
+                        ? "Please enter a valid email address."
+                        : "Something went wrong. Please try again."}
                     </p>
                   )}
                 </div>

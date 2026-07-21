@@ -1,5 +1,13 @@
-import { SkeletonPageShell } from "@marketing/components/byq/SkeletonPageShell";
+import { MembershipTierHeroSection } from "@marketing/components/sections/MembershipTierHeroSection";
+import { MembershipValueSection } from "@marketing/components/sections/MembershipValueSection";
+// import { MembershipStoriesSection } from "@marketing/components/sections/MembershipStoriesSection";
 
 export default function MembershipSeniorPage() {
-  return <SkeletonPageShell title="Senior Membership" />;
+  return (
+    <main className="bg-sparkles-cream">
+      <MembershipTierHeroSection tier="senior" />
+      <MembershipValueSection />
+      {/* <MembershipStoriesSection /> */}
+    </main>
+  );
 }

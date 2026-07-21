@@ -5,9 +5,9 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 import * as React from "react";
 
 const HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2ef4da00327d5e0c5403_love-your-neighbor.webp";
+  "/images/community-photos/love-your-neighbor.webp";
 const SECONDARY_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp";
+  "/images/community-photos/summer-social-2024-39.webp";
 
 function useInView(threshold = 0.1) {
   const ref = React.useRef<HTMLDivElement>(null);

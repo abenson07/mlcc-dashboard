@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { SectionLabel } from "@marketing/components/SectionLabel";
 import type { Event } from "@marketing/data/events";
 import { getEventPageHref } from "@marketing/data/events";
 
@@ -154,9 +153,6 @@ export function EventCard({
           : "relative h-[22.5rem] overflow-hidden rounded-2xl max-[479px]:h-[17rem]"
       }
     >
-      <div className="absolute left-3 top-3 z-10">
-        <SectionLabel>{event.date}</SectionLabel>
-      </div>
       <EventImageSlider images={imageSources} />
     </div>
   );

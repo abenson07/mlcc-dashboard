@@ -1,9 +1,9 @@
 import { SectionLabel } from "@marketing/components/SectionLabel";
 
 const LEFT_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d6d_community-meeting.webp";
+  "/images/community-photos/community-meeting-a.webp";
 const RIGHT_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69540779dacfe8969b3b1a95_summer_social_2024-1%201.webp";
+  "/images/community-photos/summer-social-2024-1.webp";
 
 export function CommitteesHeroSection() {
   return (

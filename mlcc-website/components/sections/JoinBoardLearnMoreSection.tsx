@@ -9,7 +9,7 @@ const resources = [
     href: "/board",
     cta: "View the board page",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
   {
     title: "Meeting minutes",
@@ -18,7 +18,7 @@ const resources = [
     href: "/meeting-minutes",
     cta: "Browse meeting minutes",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69531455684e18c663a2a6b7_community-meeting3.webp",
+      "/images/community-photos/community-meeting-d.webp",
   },
   {
     title: "Start with a committee",
@@ -27,7 +27,7 @@ const resources = [
     href: "/committees",
     cta: "Explore committees",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     title: "Volunteer opportunities",
@@ -36,7 +36,7 @@ const resources = [
     href: "/volunteer",
     cta: "See volunteer openings",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530e8b1aadf47968a6eb09_summer_social_2024-62%20(1).webp",
+      "/images/community-photos/summer-social-2024-62.webp",
   },
 ] as const;
 

@@ -7,11 +7,13 @@ import { CopyableEmail } from "@/components/common/CopyableEmail";
 import { useSidebar } from "@/context/SidebarContext";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import InviteMemberModal from "./InviteMemberModal";
 
 export default function UserDropdown() {
   const router = useRouter();
   const { hideSidebarMenuSections } = useSidebar();
   const [isOpen, setIsOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -167,6 +169,33 @@ export default function UserDropdown() {
                 Support
               </DropdownItem>
             </li>
+            <li>
+              <DropdownItem
+                onItemClick={() => {
+                  closeDropdown();
+                  setIsInviteOpen(true);
+                }}
+                tag="button"
+                className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              >
+                <svg
+                  className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12C20 12.9067 19.8494 13.7778 19.5722 14.5901C19.4363 14.9878 19.6485 15.4202 20.0462 15.5561C20.4439 15.6921 20.8763 15.4798 21.0122 15.0821C21.3283 14.1594 21.5 13.1691 21.5 12.1379V12C21.5 6.75329 17.2467 2.5 12 2.5C6.75329 2.5 2.5 6.75329 2.5 12C2.5 17.2467 6.75329 21.5 12 21.5C13.0511 21.5 14.0631 21.3312 15.0103 21.0195C15.4093 20.8879 15.6259 20.4577 15.4943 20.0587C15.3627 19.6596 14.9325 19.4431 14.5335 19.5747C13.7343 19.8382 12.8834 19.9829 12 20C7.58172 20 4 16.4183 4 12ZM12.75 8C12.75 7.58579 12.4142 7.25 12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V11.25H8C7.58579 11.25 7.25 11.5858 7.25 12C7.25 12.4142 7.58579 12.75 8 12.75H11.25V16C11.25 16.4142 11.5858 16.75 12 16.75C12.4142 16.75 12.75 16.4142 12.75 16V12.75H16C16.4142 12.75 16.75 12.4142 16.75 12C16.75 11.5858 16.4142 11.25 16 11.25H12.75V8Z"
+                    fill=""
+                  />
+                </svg>
+                Invite member
+              </DropdownItem>
+            </li>
           </ul>
         )}
         <button
@@ -192,6 +221,7 @@ export default function UserDropdown() {
           Sign out
         </button>
       </Dropdown>
+      <InviteMemberModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} />
     </div>
   );
 }

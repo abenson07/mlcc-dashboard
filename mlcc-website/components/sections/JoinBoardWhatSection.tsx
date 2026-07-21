@@ -5,19 +5,19 @@ const responsibilities = [
     title: "Set direction for the council",
     text: "The board decides what the community council focuses on, from sustaining traditions like the Leaflet and Summer Social to supporting new neighbor-led ideas. Committees do the day-to-day work; the board keeps everyone aligned.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
+      "/images/community-photos/summer-social-2024-39.webp",
   },
   {
     title: "Support the people doing the work",
     text: "Board members recruit committee leads, mentor volunteers, and make sure the organization's memory doesn't depend on whoever happened to be in the room. It's leadership that looks like reliability and follow-through.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
   {
     title: "Represent Maple Leaf thoughtfully",
     text: "From community meetings to conversations with city officials, the board gives neighbors a consistent voice on local issues: zoning, street safety, emergency preparedness, and what it means to grow as a neighborhood.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6913dbb252ed363168221ae6_Maple_Leaf.jpg",
+      "/images/community-photos/maple-leaf.jpg",
   },
 ];
 

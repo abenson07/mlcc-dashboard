@@ -25,10 +25,25 @@ export function CommitteeDetailPage({ slug }: { slug: CommitteeSlug }) {
           cards={committee.featureSection.cards}
         />
       ) : null}
-      <Team4Section image={committeeImage} />
-      <CmsGrid6Section />
-      <ContactCtaPreFooterSection committeeName={committee.title} />
-      <CtaSection />
+      <Team4Section
+        image={committeeImage}
+        label={committee.aboutSection?.label}
+        headline={committee.aboutSection?.headline}
+        body={committee.aboutSection?.body}
+      />
+      {committee.eventSection ? (
+        <Team4Section
+          image={committee.eventSection.image}
+          label={committee.eventSection.label}
+          headline={committee.eventSection.headline}
+          body={committee.eventSection.body}
+          editableId="committee.event-spotlight"
+          editableLabel="Event Spotlight"
+        />
+      ) : null}
+      <CmsGrid6Section committee={slug} body={committee.getInvolvedBody} />
+      <ContactCtaPreFooterSection committeeName={committee.title} image={committeeImage} />
+      <CtaSection {...committee.cta} />
     </main>
   );
 }

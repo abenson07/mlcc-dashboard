@@ -9,7 +9,7 @@ import { defaultSponsorshipDueDate, defaultDeliveryDate } from "../leafletData";
 import { defaultSponsorshipTierSeeds, type SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 
 const LEAFLET_HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp";
+  "/images/leaflet/leaflet.webp";
 
 const inputRing =
   "h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/25 dark:border-gray-600 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-400 dark:focus:ring-blue-400/20";

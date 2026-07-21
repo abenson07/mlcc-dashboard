@@ -116,7 +116,7 @@ export function BusinessMembershipPricingSection() {
                 </p>
               </div>
 
-              <div className="grid w-full grid-cols-2 items-stretch gap-6 max-[767px]:grid-cols-1">
+              <div className="mx-auto grid w-full max-w-[28rem] grid-cols-1 items-stretch gap-6">
                 <div className={cardClassName}>
                   <div className="flex flex-col gap-5">
                     <div className="flex flex-col gap-3">
@@ -174,7 +174,7 @@ export function BusinessMembershipPricingSection() {
                   </div>
                 </div>
 
-                <div className={`${cardClassName} items-center justify-center text-center`}>
+                {/* <div className={`${cardClassName} items-center justify-center text-center`}>
                   <blockquote className="m-0 font-body text-xl leading-7 font-normal">
                     &ldquo;Hosting neighbors through council events brought regulars through our
                     door, but more than that, it reminded us we&apos;re part of something bigger
@@ -193,7 +193,7 @@ export function BusinessMembershipPricingSection() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

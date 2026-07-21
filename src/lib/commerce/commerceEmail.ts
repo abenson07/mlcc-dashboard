@@ -108,6 +108,52 @@ export async function sendShopOrderConfirmationEmail(params: {
   }
 }
 
+export async function sendMembershipConfirmationEmail(params: {
+  to: string;
+  customerName: string;
+  tierName: string;
+  amountCents: number;
+  isSubscription: boolean;
+}): Promise<{ sent: boolean; error?: string }> {
+  const resend = getResend();
+  const from = getResendFromEmail();
+  if (!resend || !from) {
+    return { sent: false, error: "Resend is not configured" };
+  }
+
+  const amount = formatCents(params.amountCents);
+  const cadenceNote = params.isSubscription
+    ? "Your membership renews automatically each year — thank you for the ongoing support."
+    : "This is a one-time membership; we'll be in touch when it's time to renew.";
+
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to: params.to,
+      subject: "Your Maple Leaf membership is confirmed",
+      text: [
+        `Hi ${params.customerName},`,
+        "",
+        `Thank you for joining the Maple Leaf Community Council with a ${params.tierName} membership.`,
+        "",
+        `Amount paid: ${amount}`,
+        cadenceNote,
+        "",
+        "This email is your receipt. Welcome to the neighborhood.",
+        "",
+        "— Maple Leaf Community Council",
+      ].join("\n"),
+    });
+    if (error) return { sent: false, error: error.message };
+    return { sent: true };
+  } catch (e) {
+    return {
+      sent: false,
+      error: e instanceof Error ? e.message : "Failed to send email",
+    };
+  }
+}
+
 export async function sendFundraiserThankYouEmail(params: {
   to: string;
   amountCents: number;

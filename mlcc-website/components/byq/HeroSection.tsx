@@ -13,7 +13,7 @@ function ArrowIcon() {
 
 const slides = [
   {
-    image: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+    image: "/images/leaflet/leaflet.webp",
     body: "We deliver 4,000 leaflets to Maple Leaf residents multiple times a year",
     linkText: "Learn more",
     href: "/leaflet",
@@ -26,7 +26,7 @@ const slides = [
   },
   {
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530e8b1aadf47968a6eb09_summer_social_2024-62%20(1).webp",
+      "/images/community-photos/summer-social-2024-62.webp",
     body: "Help us put on the Halloween Parade in October",
     linkText: "Learn more",
     href: "/committees/events",
@@ -72,9 +72,9 @@ export function HeroSection() {
     <>
       <style>{`
         @keyframes hero-slide-fade {
-          0%, 100% { opacity: 0; }
-          0.33%, 33% { opacity: 1; }
-          33.33% { opacity: 0; }
+          0%, 100% { opacity: 0; pointer-events: none; }
+          0.33%, 33% { opacity: 1; pointer-events: auto; }
+          33.33% { opacity: 0; pointer-events: none; }
         }
         .hero-slide {
           animation: hero-slide-fade 60s linear infinite;
@@ -88,13 +88,13 @@ export function HeroSection() {
       <section className="bg-sparkles-cream" data-editable="true" data-editable-type="section" data-editable-id="home.hero" data-editable-label="Hero Section">
         <div className="px-8 max-[767px]:px-4">
           <div className="w-full max-w-[1800px] mx-auto">
-            <div className="grid grid-cols-2 gap-4 py-8 min-h-[calc(100dvh-6.75rem)] max-[767px]:grid-cols-1 max-[767px]:gap-3 max-[767px]:py-6 max-[991px]:min-h-[calc(100dvh-6.25rem)]">
+            <div className="grid grid-cols-2 gap-4 py-8 min-h-[calc(100dvh-6.75rem)] max-[767px]:grid-cols-1 max-[767px]:gap-3 max-[767px]:py-6 max-[767px]:min-h-0 max-[991px]:min-h-[calc(100dvh-6.25rem)]">
               {/* Left card */}
               <div
                 ref={leftCardRef}
                 className={`
                   flex w-full h-full flex-col items-start justify-between gap-16 rounded-[1.25rem] bg-sparkles-warm p-12
-                  max-[767px]:gap-12 max-[767px]:rounded-2xl max-[767px]:p-8
+                  max-[767px]:gap-12 max-[767px]:rounded-none max-[767px]:bg-transparent max-[767px]:p-0
                   transition-all duration-700 ease-out
                   ${leftCardVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[50px]"}
                 `}
@@ -163,7 +163,7 @@ export function HeroSection() {
                 ref={rightCardRef}
                 className={`
                   relative z-[1] w-full h-full overflow-hidden rounded-[1.25rem]
-                  max-[767px]:rounded-2xl max-[767px]:min-h-[400px]
+                  max-[767px]:hidden
                   transition-all duration-700 ease-out delay-150
                   ${rightCardVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[50px]"}
                 `}

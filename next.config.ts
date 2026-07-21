@@ -110,11 +110,6 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       {
-        source: "/volunteer/:slug",
-        destination: "/",
-        permanent: false,
-      },
-      {
         source: "/admin/leaflet/substitutions",
         destination: "/admin/leaflet/skipped-routes",
         permanent: true,
@@ -131,6 +126,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
+    viewTransition: true,
     serverActions: {
       // Allow public domains and Webflow/Cosmic internal host so origin vs x-forwarded-host check passes when behind their proxy.
       allowedOrigins: [

@@ -1,12 +1,12 @@
 "use client";
 
 import { SectionLabel } from "@marketing/components/SectionLabel";
-import { TestimonialPanel } from "@marketing/components/byq/TestimonialPanel";
+// import { TestimonialPanel } from "@marketing/components/byq/TestimonialPanel";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-const HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp";
+// const HERO_IMAGE =
+//   "/images/community-photos/community-meeting-a.webp";
 
 const fieldLabelClassName =
   "font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-muted";
@@ -79,14 +79,14 @@ export function JoinBoardFormSection() {
                   </p>
                 </div>
 
-                <div className="max-w-[22rem] max-[991px]:max-w-none">
+                {/* <div className="max-w-[22rem] max-[991px]:max-w-none">
                   <TestimonialPanel
                     quote="Many current board members started by volunteering on a committee or showing up to a community meeting. Expressing interest is simply the first step."
                     name="Maple Leaf Community Council"
                     attribution="Built by neighbors, sustained by neighbors"
                     avatarSrc={HERO_IMAGE}
                   />
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full">

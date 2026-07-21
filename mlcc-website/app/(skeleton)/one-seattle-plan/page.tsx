@@ -7,7 +7,7 @@ import { ValueFeature50Section } from "@marketing/components/byq/ValueFeature50S
 import { ValueFeature57Section } from "@marketing/components/byq/ValueFeature57Section";
 import { ValueFeatures29Section } from "@marketing/components/byq/ValueFeatures29Section";
 import { VisionSection } from "@marketing/components/byq/VisionSection";
-import { TestimonialsSection } from "@marketing/components/byq/TestimonialsSection";
+// import { TestimonialsSection } from "@marketing/components/byq/TestimonialsSection";
 
 export default function OneSeattlePlanPage() {
   return (
@@ -15,12 +15,16 @@ export default function OneSeattlePlanPage() {
       <ValueFeatures29Section title="Maple Leaf Zoning Workshops" />
       <VisionSection />
       <ValueFeature50Section />
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
       <BentoSection />
       <ValueFeature57Section />
       <IntroText13Section />
       <CmsGrid26Section />
-      <ContactCtaPreFooterSection committeeName="Advocacy" headline="Join the advocacy committee" />
+      <ContactCtaPreFooterSection
+        committeeName="Advocacy"
+        headline="Join the advocacy committee"
+        source="zoning-workshop"
+      />
       <CtaSection
         title="Ready to build a better Maple Leaf for everyone?"
         subhead="Reach out or join us at an upcoming workshop."

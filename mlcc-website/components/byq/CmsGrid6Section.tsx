@@ -1,43 +1,17 @@
 import { SectionLabel } from "@marketing/components/SectionLabel";
-const tiles = [
-  {
-    timeCommitment: "3–5 hours per month",
-    volunteersNeeded: "2 volunteers needed",
-    title: "Wireframe Architect",
-    description:
-      "This is skeleton filler text, written only to keep the shape alive. It simply marks the rhythm of where real words will go.",
-  },
-  {
-    timeCommitment: "2–4 hours per month",
-    volunteersNeeded: "1 volunteer needed",
-    title: "Placeholder Hero",
-    description:
-      "This is skeleton filler text, written only to keep the shape alive. It simply marks the rhythm of where real words will go.",
-  },
-  {
-    timeCommitment: "4–6 hours per month",
-    volunteersNeeded: "3 volunteers needed",
-    title: "Pixel Skeleton",
-    description:
-      "This is skeleton filler text, written only to keep the shape alive. It simply marks the rhythm of where real words will go.",
-  },
-  {
-    timeCommitment: "2–3 hours per month",
-    volunteersNeeded: "2 volunteers needed",
-    title: "Grid Keeper",
-    description:
-      "This is skeleton filler text, written only to keep the shape alive. It simply marks the rhythm of where real words will go.",
-  },
-  {
-    timeCommitment: "5–8 hours per month",
-    volunteersNeeded: "1 volunteer needed",
-    title: "Layout Surgeon",
-    description:
-      "This is skeleton filler text, written only to keep the shape alive. It simply marks the rhythm of where real words will go.",
-  },
-];
+import type { CommitteeSlug } from "@marketing/data/committees";
+import { formatVolunteersNeeded, getVolunteerOpportunitiesByCommittee } from "@marketing/data/volunteers";
 
-export function CmsGrid6Section() {
+export function CmsGrid6Section({
+  committee,
+  body = "These are the roles we're hoping to fill right now. Each one is a chance to give a little time, meet people nearby, and help keep Maple Leaf connected.",
+}: {
+  committee?: CommitteeSlug;
+  body?: string;
+}) {
+  const opportunities =
+    committee && committee !== "template" ? getVolunteerOpportunitiesByCommittee(committee) : [];
+
   return (
     <section
       className="bg-sparkles-cream"
@@ -55,47 +29,51 @@ export function CmsGrid6Section() {
                 <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
                   Join your neighbors
                 </h2>
-                <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                  These are the roles we&apos;re hoping to fill right now. Each one is a chance to give a little time,
-                  meet people nearby, and help keep Maple Leaf connected.
-                </p>
+                <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">{body}</p>
               </div>
 
               <div
                 id="open-positions"
                 className="flex flex-col gap-6 border-b border-sparkles-navy/16 pb-8 max-[767px]:col-span-1"
               >
-                {tiles.map((tile, index) => (
-                  <div key={index} className="flex flex-col gap-4 border-t border-sparkles-navy/16 pt-8">
-                    <div className="flex flex-wrap items-center justify-start gap-2">
-                      <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
-                        {tile.timeCommitment}
+                {opportunities.length === 0 ? (
+                  <p className="m-0 border-t border-sparkles-navy/16 pt-8 font-body text-base leading-6 font-normal text-sparkles-navy">
+                    We don&apos;t have specific open roles listed for this committee right now. Reach out above and
+                    we&apos;ll find a way to plug you in.
+                  </p>
+                ) : (
+                  opportunities.map((opportunity) => (
+                    <div key={opportunity.slug} className="flex flex-col gap-4 border-t border-sparkles-navy/16 pt-8">
+                      <div className="flex flex-wrap items-center justify-start gap-2">
+                        <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
+                          {opportunity.timeCommitment}
+                        </div>
+                        <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
+                          |
+                        </div>
+                        <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
+                          {formatVolunteersNeeded(opportunity.volunteersNeeded)}
+                        </div>
                       </div>
-                      <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
-                        |
-                      </div>
-                      <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
-                        {tile.volunteersNeeded}
-                      </div>
-                    </div>
 
-                    <div className="flex flex-wrap items-end justify-between gap-6">
-                      <div className="font-display text-[2rem] leading-10 font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[1.75rem] max-[767px]:leading-8">
-                        {tile.title}
+                      <div className="flex flex-wrap items-end justify-between gap-6">
+                        <div className="font-display text-[2rem] leading-10 font-bold tracking-[-0.0625rem] text-puget-night max-[767px]:text-[1.75rem] max-[767px]:leading-8">
+                          {opportunity.title}
+                        </div>
+                        <a
+                          href={`/volunteer/${opportunity.slug}`}
+                          className="inline-flex shrink-0 items-center justify-center rounded-[2rem] border border-sparkles-navy/30 bg-white/50 px-4 py-3 font-display text-sm leading-5 font-bold text-puget-night no-underline transition-all duration-300 hover:border-white/10 hover:bg-sparkles-navy/90 hover:text-sparkles-cream"
+                        >
+                          Learn more
+                        </a>
                       </div>
-                      <a
-                        href="/template/style-guide"
-                        className="inline-flex shrink-0 items-center justify-center rounded-[2rem] border border-sparkles-navy/30 bg-white/50 px-4 py-3 font-display text-sm leading-5 font-bold text-puget-night no-underline transition-all duration-300 hover:border-white/10 hover:bg-sparkles-navy/90 hover:text-sparkles-cream"
-                      >
-                        Learn more
-                      </a>
-                    </div>
 
-                    <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                      {tile.description}
-                    </p>
-                  </div>
-                ))}
+                      <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
+                        {opportunity.description}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

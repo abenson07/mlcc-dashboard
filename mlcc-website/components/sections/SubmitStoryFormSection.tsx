@@ -1,12 +1,12 @@
 "use client";
 
 import { SectionLabel } from "@marketing/components/SectionLabel";
-import { TestimonialPanel } from "@marketing/components/byq/TestimonialPanel";
+// import { TestimonialPanel } from "@marketing/components/byq/TestimonialPanel";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-const HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp";
+// const HERO_IMAGE =
+//   "/images/leaflet/leaflet.webp";
 
 const fieldLabelClassName =
   "font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-muted";
@@ -92,14 +92,14 @@ export function SubmitStoryFormSection() {
                   </p>
                 </div>
 
-                <div className="max-w-[22rem] max-[991px]:max-w-none">
+                {/* <div className="max-w-[22rem] max-[991px]:max-w-none">
                   <TestimonialPanel
                     quote="Most of our board members first learned about the council through the Leaflet. Your story could be the next one neighbors read at their doorstep."
                     name="The Leaflet"
                     attribution="Maple Leaf Community Council"
                     avatarSrc={HERO_IMAGE}
                   />
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full">

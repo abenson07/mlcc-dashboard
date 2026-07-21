@@ -1,7 +1,8 @@
 export type EventDetailBlock =
   | { kind: "heading"; text: string; size?: "h5" | "h6" }
-  | { kind: "paragraph"; text: string }
-  | { kind: "list"; items: string[] };
+  | { kind: "paragraph"; text: string; linkText?: string; href?: string }
+  | { kind: "list"; items: string[] }
+  | { kind: "video"; youtubeId: string; title: string };
 
 export type EventDetailContent = {
   blocks: EventDetailBlock[];
@@ -19,6 +20,9 @@ export type Event = {
   href: string;
   external?: boolean;
   detail?: EventDetailContent;
+  mapHref?: string;
+  mapQuery?: string;
+  mapZoom?: number;
 };
 
 export type EventsByMonth = {
@@ -32,10 +36,10 @@ const EVENT_IMAGES = {
   summerSocial: "/images/events/summer-social.png",
   yardSale: "/images/events/maple-leaf-free-yard-sale.png",
   springMeeting: "/images/events/spring-community-meeting.png",
-  moviesByTheTower: "/images/events/movies-by-the-tower.svg",
+  moviesByTheTower: "/images/events/movie-by-tower.png",
   halloweenParade: "/images/events/halloween-parade.svg",
   fallMeeting: "/images/events/fall-community-meeting.svg",
-  nightOut: "/images/events/night-out.svg",
+  nightOut: "/images/events/night-out.jpeg",
 } as const;
 
 const EVENT_TIMEZONE = "America/Los_Angeles";
@@ -58,8 +62,9 @@ export function formatEventTime(isoDate: string): string {
 }
 
 export function getEventMapEmbedUrl(event: Event): string {
-  const query = encodeURIComponent(`${event.locationName}, Seattle, WA`);
-  return `https://maps.google.com/maps?q=${query}&z=15&output=embed`;
+  const query = encodeURIComponent(event.mapQuery ?? `${event.locationName}, Seattle, WA`);
+  const zoom = event.mapZoom ?? 15;
+  return `https://maps.google.com/maps?q=${query}&z=${zoom}&output=embed`;
 }
 
 export function getEventDetailBlocks(event: Event): EventDetailBlock[] {
@@ -128,7 +133,7 @@ const MOVIES_BY_THE_TOWER_DETAIL: EventDetailContent = {
   blocks: [
     {
       kind: "paragraph",
-      text: "Movies by the Tower brings a free outdoor movie night to the lawn beneath Maple Leaf Reservoir Park's iconic water tower. It's presented by Aegis Living and hosted by SV Archive (Scarecrow Video) alongside the MLCC Events Committee.",
+      text: "Movies by the Tower brings a free outdoor movie night to the Lower Baseball Fields at Maple Leaf Reservoir Park, in view of the neighborhood's iconic water tower. It's presented by Seattle Credit Union and hosted by Scarecrow Video alongside the MLCC Events Committee, with additional support from Aegis Living Ravenna and other neighborhood businesses.",
     },
     {
       kind: "heading",
@@ -138,14 +143,47 @@ const MOVIES_BY_THE_TOWER_DETAIL: EventDetailContent = {
     {
       kind: "list",
       items: [
-        "Live music, trivia, and a beer garden before the show",
-        "The movie starts at dusk; bring a low-back chair or blanket",
+        "Gates open at 5pm with a beer garden, food trucks, and free admission",
+        "Live sets from The Low Lonesome Sound, Dog Mom, and The Chase Rabideau Band",
+        "Superman (2025) screens at dusk; bring a low-back chair or blanket",
         "Free and open to everyone in the neighborhood",
       ],
     },
     {
+      kind: "heading",
+      text: "Tonight's movie: Superman (2025)",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "This year's screening, curated by Scarecrow Video, is James Gunn's Superman, the film that kicks off the new DC Universe. David Corenswet stars as Clark Kent alongside Rachel Brosnahan as Lois Lane and Nicholas Hoult as Lex Luthor, with Edi Gathegi, Anthony Carrigan, Nathan Fillion, and Isabela Merced rounding out the cast. Rated PG-13, runtime 2h 9m.",
+    },
+    {
+      kind: "video",
+      youtubeId: "Ox8ZLF6cGM0",
+      title: "Superman | Official Trailer | DC",
+    },
+    {
+      kind: "heading",
+      text: "The lineup",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "Music starts as soon as the gates open, with sets from The Low Lonesome Sound, Dog Mom, and The Chase Rabideau Band carrying the evening through the beer garden and food trucks until the sky's dark enough to roll the movie.",
+    },
+    {
       kind: "paragraph",
       text: "Like the Summer Social, this one runs on volunteers, from setup to the projection booth. If you'd like to help out, the Events Committee is always glad for another set of hands.",
+    },
+    {
+      kind: "heading",
+      text: "Thanks to our sponsors",
+      size: "h6",
+    },
+    {
+      kind: "paragraph",
+      text: "In partnership with Scarecrow Video and the Maple Leaf Community Council, with additional support from Fresh & Clean Garment Care, the Stefan Marian Team at Windermere Real Estate, Aegis Living Ravenna, Moonlight Tattoo Seattle, Rain City Dentistry, Billings Middle School, RUG Little League, The Watershed Pub & Kitchen, Project 9, ReAnimated Music, Cafe Javasti, Math 'n' Stuff, and Attuned.",
     },
   ],
 };
@@ -154,7 +192,7 @@ const NIGHT_OUT_DETAIL: EventDetailContent = {
   blocks: [
     {
       kind: "paragraph",
-      text: "Night Out is a national community-building event promoted locally by Seattle Police Department's Crime Prevention team. It's a chance to meet the neighbors on your block and build the kind of connection that makes a neighborhood feel safer for everyone.",
+      text: "Night Out started in 1984 as a national community-building campaign from the National Association of Town Watch, and it's grown into one of the country's largest crime-prevention events, with tens of thousands of communities and tens of millions of neighbors taking part each year. In Seattle, it's promoted locally by SPD's Crime Prevention team on the first Tuesday of August as a low-key way to meet the people who live around you.",
     },
     {
       kind: "heading",
@@ -166,12 +204,23 @@ const NIGHT_OUT_DETAIL: EventDetailContent = {
       items: [
         "Block-by-block gatherings across Maple Leaf, porch lights on, neighbors out",
         "A relaxed evening to swap names, numbers, and get to know your street",
-        "Want to host your own block's gathering? Registration is handled through the city",
+        "Presented locally by SPD's Crime Prevention team, free to attend",
       ],
+    },
+    {
+      kind: "heading",
+      text: "Organizing your own block",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "Want to host a gathering on your own block? Register with SPD by July 27, 2026 for this year's event. Once registered, your gathering shows up on the city's public Night Out map so neighbors up and down the street know where to find you, and SPD provides a starter kit: street closure signs, waste station labels, the Night Out logo, and invitation templates in eight languages, including Spanish, Vietnamese, and Tagalog.",
     },
     {
       kind: "paragraph",
       text: "Check seattle.gov/police/crime-prevention/night-out for the city's registration form and materials if you're organizing a gathering on your own block.",
+      linkText: "seattle.gov/police/crime-prevention/night-out",
+      href: "https://www.seattle.gov/police/crime-prevention/night-out",
     },
   ],
 };
@@ -296,14 +345,17 @@ export const events: Event[] = [
   event({
     slug: "2026-movies-by-the-tower",
     title: "2026 Movies by the Tower",
-    dateIso: "2026-08-09T01:00:00.000Z",
-    shortDescription: "Free outdoor movie at the tower: live music, trivia, dusk skies.",
-    locationName: "Maple Leaf Reservoir Park",
+    dateIso: "2026-08-09T00:00:00.000Z",
+    shortDescription: "Free outdoor movie at the tower: beer garden, food trucks, live music, dusk screening.",
+    locationName: "Lower Baseball Fields, Maple Leaf Reservoir Park",
     category: "Movie Night",
     image: EVENT_IMAGES.moviesByTheTower,
     href: "https://www.facebook.com/MLTowerMovies/",
     external: true,
     detail: MOVIES_BY_THE_TOWER_DETAIL,
+    mapHref: "https://maps.app.goo.gl/nmZ8fJnKHcM6YZ8y5",
+    mapQuery: "47.6891713,-122.3160804",
+    mapZoom: 17,
   }),
   event({
     slug: "august-silent-book-club",
@@ -391,7 +443,9 @@ export function getEventPageHref(event: Event): string {
 }
 
 export function getRelatedEvents(currentSlug?: string, limit = 2): Event[] {
-  return events.filter((item) => item.slug !== currentSlug).slice(0, limit);
+  return getUpcomingEvents(events)
+    .filter((item) => item.slug !== currentSlug)
+    .slice(0, limit);
 }
 
 export const eventRoutes = events.map((item) => ({

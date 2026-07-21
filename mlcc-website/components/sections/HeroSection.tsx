@@ -215,7 +215,7 @@ export function HeroSection() {
                 className="w-full h-full object-cover"
                 style={{
                   backgroundImage:
-                    'url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6%2F693817393d800624450974eb_hero%20%281%29_poster.0000000.jpg")',
+                    'url("/images/hero/hero-poster.jpg")',
                 }}
               >
                 <source src="https://byqsupply-components.netlify.app/sparkles/videos/hero-1_mp4.mp4" type="video/mp4" />

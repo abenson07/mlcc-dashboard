@@ -6,7 +6,7 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 import { donationAmounts } from "@marketing/data/donate";
 
 const HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2ef4da00327d5e0c5403_love-your-neighbor.webp";
+  "/images/community-photos/love-your-neighbor.webp";
 
 const inputClassName =
   "min-h-12 w-full rounded-2xl border border-sparkles-warm bg-sparkles-warm px-4 py-2 font-body text-base leading-6 text-sparkles-navy placeholder:text-sparkles-muted focus:border-sparkles-navy focus:outline-none";

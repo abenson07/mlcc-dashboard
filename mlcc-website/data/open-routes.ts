@@ -13,7 +13,7 @@ export const openRoutes: OpenRoute[] = [
     description: "Deliver the Leaflet to homes along 15th Ave NE between NE 90th and NE 95th St.",
     timeCommitment: "About 1 hour, a few times a year",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     slug: "roosevelt-way-85th-to-90th",
@@ -21,7 +21,7 @@ export const openRoutes: OpenRoute[] = [
     description: "Deliver the Leaflet to homes along Roosevelt Way NE between NE 85th and NE 90th St.",
     timeCommitment: "About 1 hour, a few times a year",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     slug: "5th-ave-ne-95th-to-100th",
@@ -29,7 +29,7 @@ export const openRoutes: OpenRoute[] = [
     description: "Deliver the Leaflet to homes along 5th Ave NE between NE 95th and NE 100th St.",
     timeCommitment: "About 1 hour, a few times a year",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
 ];
 

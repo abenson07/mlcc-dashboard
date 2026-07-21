@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { getApiBase } from "@/lib/apiBase";
 
 const CONTACT_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6913dbb252ed363168221ae6_Maple_Leaf.jpg";
+  "/images/community-photos/maple-leaf.jpg";
 
 const inputClassName =
   "w-full rounded-lg border border-sparkles-warm bg-white px-4 py-3 font-body text-base leading-6 text-sparkles-navy/90 placeholder:text-sparkles-muted focus:border-sparkles-navy focus:text-sparkles-navy focus:outline-none";
@@ -162,12 +163,25 @@ export function ContactSection({ title = "Contact" }: { title?: string }) {
   const [submitHovered, setSubmitHovered] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [message, setMessage] = React.useState("");
+  const [status, setStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const subject = encodeURIComponent("Website contact form");
-    const body = encodeURIComponent(`From: ${email}\n\n${message}`);
-    window.location.href = `mailto:hello@mapleleafcommunity.org?subject=${subject}&body=${body}`;
+    setStatus("submitting");
+    try {
+      const response = await fetch(`${getApiBase()}/api/public/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, message }),
+      });
+
+      if (!response.ok) throw new Error("Request failed");
+      setStatus("success");
+      setEmail("");
+      setMessage("");
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (
@@ -288,15 +302,26 @@ export function ContactSection({ title = "Contact" }: { title?: string }) {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                   />
-                  <input
-                    type="submit"
-                    value="Send message"
-                    onMouseEnter={() => setSubmitHovered(true)}
-                    onMouseLeave={() => setSubmitHovered(false)}
-                    className={`mt-1 w-fit cursor-pointer rounded-[2rem] border px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 ${
-                      submitHovered ? "border-sparkles-navy/90 bg-sparkles-navy/90" : "border-sparkles-navy bg-sparkles-navy"
-                    }`}
-                  />
+                  <div className="mt-1 flex items-center gap-4">
+                    <input
+                      type="submit"
+                      value={status === "submitting" ? "Sending…" : "Send message"}
+                      disabled={status === "submitting"}
+                      onMouseEnter={() => setSubmitHovered(true)}
+                      onMouseLeave={() => setSubmitHovered(false)}
+                      className={`w-fit cursor-pointer rounded-[2rem] border px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        submitHovered ? "border-sparkles-navy/90 bg-sparkles-navy/90" : "border-sparkles-navy bg-sparkles-navy"
+                      }`}
+                    />
+                    {status === "success" ? (
+                      <span className="font-body text-sm text-sparkles-navy">Thanks! We&apos;ll be in touch!</span>
+                    ) : null}
+                    {status === "error" ? (
+                      <span className="font-body text-sm text-red-700">
+                        Something went wrong. Please try again.
+                      </span>
+                    ) : null}
+                  </div>
                 </form>
 
                 <div ref={listRef}>

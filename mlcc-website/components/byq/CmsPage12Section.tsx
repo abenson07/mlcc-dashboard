@@ -80,6 +80,42 @@ function renderEventBody(blocks: EventDetailBlock[]) {
           );
         }
 
+        if (block.kind === "video") {
+          return (
+            <div key={index} className="mb-4 aspect-[16/9] w-full overflow-hidden rounded-xl">
+              <iframe
+                title={block.title}
+                src={`https://www.youtube-nocookie.com/embed/${block.youtubeId}`}
+                className="h-full w-full border-0"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          );
+        }
+
+        if (block.href && block.linkText && block.text.includes(block.linkText)) {
+          const linkIndex = block.text.indexOf(block.linkText);
+          const before = block.text.slice(0, linkIndex);
+          const after = block.text.slice(linkIndex + block.linkText.length);
+
+          return (
+            <p key={index} className="mb-4 text-base leading-6">
+              {before}
+              <a
+                href={block.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sparkles-navy underline decoration-1 underline-offset-2 hover:no-underline"
+              >
+                {block.linkText}
+              </a>
+              {after}
+            </p>
+          );
+        }
+
         return (
           <p key={index} className="mb-4 text-base leading-6">
             {block.text}
@@ -134,7 +170,20 @@ function EventDetailsCard({ event }: { event: Event }) {
           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-sparkles-navy">
             <LocationIcon />
           </span>
-          <span className="font-body text-base leading-6 text-sparkles-navy">{event.locationName}</span>
+          <span className="font-body text-base leading-6 text-sparkles-navy">
+            {event.mapHref ? (
+              <a
+                href={event.mapHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-1 underline-offset-2 hover:no-underline"
+              >
+                {event.locationName}
+              </a>
+            ) : (
+              event.locationName
+            )}
+          </span>
         </div>
       </div>
 

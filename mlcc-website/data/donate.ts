@@ -62,7 +62,7 @@ export const donateStories: DonateStory[] = [
     name: "From the Leaflet",
     attribution: "Built by neighbors, sustained by neighbors",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6877bff9b59839fa1fd6792c_Photo-Jun-11-2025.jpg",
+      "/images/community-photos/photo-jun-11-2025.jpg",
   },
   {
     quote:
@@ -70,7 +70,7 @@ export const donateStories: DonateStory[] = [
     name: "MLCC Board",
     attribution: "Supporting the neighborhood",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
   {
     quote:
@@ -78,7 +78,7 @@ export const donateStories: DonateStory[] = [
     name: "From the Leaflet",
     attribution: "Carrying the Halloween Parade forward",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg",
+      "/images/community-photos/img-6554.jpg",
   },
   {
     quote:
@@ -86,7 +86,7 @@ export const donateStories: DonateStory[] = [
     name: "Maple Leaf neighbor",
     attribution: "Why giving matters",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
+      "/images/community-photos/summer-social-2024-39.webp",
   },
   {
     quote:
@@ -94,6 +94,6 @@ export const donateStories: DonateStory[] = [
     name: "From the Leaflet",
     attribution: "Built by neighbors, sustained by neighbors",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
 ];

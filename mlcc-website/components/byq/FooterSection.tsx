@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { COMMITTEE_CONTENT, COMMITTEE_LISTINGS } from "@marketing/data/committees";
+import { getApiBase } from "@/lib/apiBase";
 
 const linkColumns = [
   {
@@ -33,6 +34,25 @@ const linkColumns = [
 
 export function FooterSection() {
   const [socialHover, setSocialHover] = React.useState<number | null>(null);
+  const [email, setEmail] = React.useState("");
+  const [status, setStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStatus("submitting");
+    try {
+      const response = await fetch(`${getApiBase()}/api/public/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (!response.ok) throw new Error("Request failed");
+      setStatus("success");
+      setEmail("");
+    } catch {
+      setStatus("error");
+    }
+  };
 
   return (
     <footer
@@ -50,14 +70,14 @@ export function FooterSection() {
                 <a href="/" className="h-12 block">
                   <img
                     loading="lazy"
-                    alt=""
-                    src="https://byqsupply-components.netlify.app/skeletons/footer/images/SkeletonsLogo.svg"
+                    alt="Maple Leaf Community Council"
+                    src="/logo_black.svg"
                     className="h-full"
                   />
                 </a>
 
                 <div className="mb-0 flex flex-col justify-start items-start w-full">
-                  <form className="flex flex-col gap-4 w-full">
+                  <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-3">
                       <div className="font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy">
                         Subscribe for our newsletter
@@ -76,13 +96,17 @@ export function FooterSection() {
                           type="email"
                           id="footer-email"
                           required
+                          disabled={status === "submitting"}
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
                         />
                         <div className="absolute inset-y-0 right-0 flex flex-col justify-center items-center w-[3.4375rem] max-[479px]:w-[2.8125rem] pr-4 pl-4">
                           <input
                             type="submit"
-                            className="absolute inset-0 bg-transparent cursor-pointer pr-6 opacity-0 w-full"
+                            className="absolute inset-0 bg-transparent cursor-pointer pr-6 opacity-0 w-full disabled:cursor-not-allowed"
                             value=""
                             aria-label="Subscribe"
+                            disabled={status === "submitting"}
                           />
                           <div className="flex justify-center items-center h-6 max-[479px]:h-3 text-sparkles-navy pointer-events-none">
                             <svg
@@ -104,7 +128,11 @@ export function FooterSection() {
                     </div>
 
                     <div className="font-body text-xs leading-4 font-normal text-sparkles-muted">
-                      Unsubscribe at any time.
+                      {status === "success"
+                        ? "Thanks for subscribing!"
+                        : status === "error"
+                          ? "Something went wrong. Please try again."
+                          : "Unsubscribe at any time."}
                     </div>
                   </form>
                 </div>
@@ -138,7 +166,7 @@ export function FooterSection() {
                   <div className="flex items-center gap-8 max-[479px]:flex-col max-[479px]:items-start max-[479px]:justify-start">
                     <div className="flex items-center gap-3">
                       <a
-                        href="https://facebook.com"
+                        href="https://www.facebook.com/MapleLeafCC/"
                         target="_blank"
                         rel="noreferrer"
                         className={`transition-colors duration-200 ${socialHover === 0 ? "text-sparkles-navy" : "text-sparkles-muted"}`}
@@ -164,61 +192,40 @@ export function FooterSection() {
                       </a>
 
                       <a
-                        href="https://youtube.com"
+                        href="https://www.instagram.com/mapleleafcommunitycouncil/"
                         target="_blank"
                         rel="noreferrer"
                         className={`transition-colors duration-200 ${socialHover === 1 ? "text-sparkles-navy" : "text-sparkles-muted"}`}
                         onMouseEnter={() => setSocialHover(1)}
                         onMouseLeave={() => setSocialHover(null)}
-                        aria-label="YouTube"
+                        aria-label="Instagram"
                       >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                          <g clipPath="url(#clip0_byq_footer_yt)">
-                            <g clipPath="url(#clip1_byq_footer_yt)">
-                              <path
-                                d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"
-                                fill="currentColor"
-                              />
-                              <path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fdf8f1" />
-                            </g>
+                        <svg width="24" height="24" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <g clipPath="url(#clip0_byq_footer_ig)">
+                            <path
+                              d="M6 1.081c1.603 0 1.792.006 2.425.035 1.627.074 2.387.847 2.461 2.461.029.633.034.822.034 2.425 0 1.604-.005 1.792-.034 2.425-.075 1.613-.833 2.387-2.461 2.461-.633.029-.82.035-2.425.035-1.603 0-1.792-.006-2.425-.035C1.948 10.814 1.188 10.04 1.114 8.427 1.085 7.794 1.08 7.605 1.08 6.002c0-1.604.006-1.792.035-2.425C1.189 1.964 1.949 1.19 3.575 1.116 4.209 1.087 4.397 1.081 6 1.081zM6 0C4.37 0 4.166.007 3.527.036 1.345.138.138 1.343.036 3.527.007 4.166 0 4.37 0 6s.007 1.835.036 2.473C.138 10.655 1.343 11.862 3.527 11.964 4.166 11.993 4.37 12 6 12s1.835-.007 2.473-.036c2.181-.102 3.39-1.307 3.491-3.491C11.993 7.835 12 7.63 12 6s-.007-1.834-.036-2.473C11.863 1.347 10.657.138 8.473.036 7.835.007 7.63 0 6 0zm0 2.919a3.081 3.081 0 100 6.162 3.081 3.081 0 000-6.162zM6 8a2 2 0 110-4 2 2 0 010 4zm3.202-5.872a.72.72 0 100 1.44.72.72 0 000-1.44z"
+                              fill="currentColor"
+                            />
                           </g>
                           <defs>
-                            <clipPath id="clip0_byq_footer_yt">
-                              <rect width="24" height="24" fill="currentColor" />
-                            </clipPath>
-                            <clipPath id="clip1_byq_footer_yt">
-                              <rect width="24" height="24" fill="currentColor" />
+                            <clipPath id="clip0_byq_footer_ig">
+                              <rect width="12" height="12" fill="currentColor" />
                             </clipPath>
                           </defs>
                         </svg>
                       </a>
 
                       <a
-                        href="https://linkedin.com"
+                        href="https://us.nextdoor.com/pages/maple-leaf-community-council-seattle-wa/"
                         target="_blank"
                         rel="noreferrer"
                         className={`transition-colors duration-200 ${socialHover === 2 ? "text-sparkles-navy" : "text-sparkles-muted"}`}
                         onMouseEnter={() => setSocialHover(2)}
                         onMouseLeave={() => setSocialHover(null)}
-                        aria-label="LinkedIn"
+                        aria-label="Nextdoor"
                       >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                          <g clipPath="url(#clip0_byq_footer_li)">
-                            <g clipPath="url(#clip1_byq_footer_li)">
-                              <path
-                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
-                                fill="currentColor"
-                              />
-                            </g>
-                          </g>
-                          <defs>
-                            <clipPath id="clip0_byq_footer_li">
-                              <rect width="24" height="24" fill="currentColor" />
-                            </clipPath>
-                            <clipPath id="clip1_byq_footer_li">
-                              <rect width="24" height="24" fill="currentColor" />
-                            </clipPath>
-                          </defs>
+                          <path d="M6 4 H9 V11 L15 4 H18 V20 H15 V13 L9 20 H6 Z" fill="currentColor" />
                         </svg>
                       </a>
                     </div>

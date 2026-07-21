@@ -5,19 +5,19 @@ const benefits = [
     title: "Events you won't want to miss",
     text: "Early word on Summer Social, Movie Nights, the Halloween Parade, community meetings, and volunteer open houses.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
+      "/images/community-photos/summer-social-2024-39.webp",
   },
   {
     title: "Neighborhood news that matters",
     text: "Highlights from the Leaflet, Seattle's last printed neighborhood newsletter, plus updates on local projects and council decisions.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     title: "Ways to get involved",
     text: "Calls for volunteers, committee openings, and advocacy updates when your voice can make a difference in Maple Leaf.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2ef4da00327d5e0c5403_love-your-neighbor.webp",
+      "/images/community-photos/love-your-neighbor.webp",
   },
 ];
 

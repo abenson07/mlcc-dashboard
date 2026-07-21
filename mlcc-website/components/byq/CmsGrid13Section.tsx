@@ -80,6 +80,24 @@ export function CmsGrid13Section() {
   const handlePrev = () => setSlide((prev) => Math.max(0, prev - 1));
   const handleNext = () => setSlide((prev) => Math.min(maxSlide, prev + 1));
 
+  const touchStartX = React.useRef<number | null>(null);
+  const SWIPE_THRESHOLD = 50;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (deltaX <= -SWIPE_THRESHOLD) {
+      handleNext();
+    } else if (deltaX >= SWIPE_THRESHOLD) {
+      handlePrev();
+    }
+  };
+
   return (
     <section
       className="bg-sparkles-cream overflow-hidden"
@@ -112,6 +130,8 @@ export function CmsGrid13Section() {
                   transform: `translateX(-${slide * stepPx}px)`,
                   transition: "transform 700ms ease-out",
                 }}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
               >
                 {events.map((event) => (
                   <div

@@ -4,7 +4,7 @@ import { SectionLabel } from "@marketing/components/SectionLabel";
 import * as React from "react";
 
 const HERO_IMAGE =
-  "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69531455684e18c663a2a6b7_community-meeting3.webp";
+  "/images/community-photos/community-meeting-d.webp";
 
 export function BoardHeroSection() {
   const [visible, setVisible] = React.useState(false);

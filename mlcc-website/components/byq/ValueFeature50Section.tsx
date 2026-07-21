@@ -35,7 +35,7 @@ function CardBody({ card }: { card: (typeof cards)[number] }) {
         </div>
         <p className="m-0 font-body text-base leading-6 font-normal">{card.text}</p>
       </div>
-      <div className="h-72 w-full overflow-hidden rounded-xl">
+      <div className="aspect-[3/2] w-full overflow-hidden rounded-xl">
         <img loading="lazy" alt="" src={card.image} className="h-full w-full object-cover" />
       </div>
     </>

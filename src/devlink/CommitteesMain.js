@@ -231,7 +231,7 @@ export function CommitteesMain({
                             width="auto"
                             height="auto"
                             alt=""
-                            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f48b519939effcfdec35a2_image1.jpeg"
+                            src="/images/committees/committee-photo.jpeg"
                           />
                         </_Builtin.Block>
                       </_Builtin.Link>
@@ -357,7 +357,7 @@ export function CommitteesMain({
                             width="auto"
                             height="auto"
                             alt=""
-                            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f48b51ec064ef3e630383e_community-meeting.jpeg"
+                            src="/images/committees/community-meeting-devlink.jpeg"
                           />
                         </_Builtin.Block>
                       </_Builtin.Link>
@@ -483,7 +483,7 @@ export function CommitteesMain({
                             width="auto"
                             height="auto"
                             alt=""
-                            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f48b519939effcfdec35a2_image1.jpeg"
+                            src="/images/committees/committee-photo.jpeg"
                           />
                         </_Builtin.Block>
                       </_Builtin.Link>
@@ -609,7 +609,7 @@ export function CommitteesMain({
                             width="auto"
                             height="auto"
                             alt=""
-                            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f48b519939effcfdec35a2_image1.jpeg"
+                            src="/images/committees/committee-photo.jpeg"
                           />
                         </_Builtin.Block>
                       </_Builtin.Link>
@@ -735,7 +735,7 @@ export function CommitteesMain({
                             width="auto"
                             height="auto"
                             alt=""
-                            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f48b519939effcfdec35a2_image1.jpeg"
+                            src="/images/committees/committee-photo.jpeg"
                           />
                         </_Builtin.Block>
                       </_Builtin.Link>
@@ -861,7 +861,7 @@ export function CommitteesMain({
                             width="auto"
                             height="auto"
                             alt=""
-                            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f48b519939effcfdec35a2_image1.jpeg"
+                            src="/images/committees/committee-photo.jpeg"
                           />
                         </_Builtin.Block>
                       </_Builtin.Link>
@@ -989,7 +989,7 @@ export function CommitteesMain({
                             width="auto"
                             height="auto"
                             alt=""
-                            src="https://cdn.prod.website-files.com/67f474b29211e3047d6a314e/67f48b519939effcfdec35a2_image1.jpeg"
+                            src="/images/committees/committee-photo.jpeg"
                           />
                         </_Builtin.Block>
                       </_Builtin.Link>

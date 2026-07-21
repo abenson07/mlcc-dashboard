@@ -8,10 +8,14 @@ import {
 import type { TshirtLineItem, ShopLineItem } from "@/types/database";
 import {
   sendFundraiserThankYouEmail,
+  sendMembershipConfirmationEmail,
   sendShopOrderConfirmationEmail,
   sendTshirtConfirmationEmail,
 } from "@/lib/commerce/commerceEmail";
 import type { FundraisingDonationTier } from "@/types/database";
+import type { MembershipsInsert, PaymentsInsert, PeopleInsert } from "@/types/database";
+import { findMembershipTier } from "@marketing/data/membership-tiers";
+import { upsertNewsletterContact, upsertWeeklyDigestContact } from "@/lib/resendContacts";
 
 function parseLineItemsJson(raw: string | undefined): TshirtLineItem[] | null {
   if (!raw?.trim()) return null;
@@ -301,6 +305,144 @@ export async function fulfillCheckoutSession(
         amountCents,
       });
     }
+
+    return { ok: true, flow };
+  }
+
+  if (flow === COMMERCE_FLOW.MEMBERSHIP) {
+    const tierSlug = session.metadata?.[COMMERCE_METADATA_KEYS.membershipTier]?.trim();
+    const tierDef = tierSlug ? findMembershipTier(tierSlug) : undefined;
+    if (!tierDef) {
+      return { ok: false, error: "Unknown membership tier on session" };
+    }
+
+    const isSubscription =
+      session.metadata?.[COMMERCE_METADATA_KEYS.billingMode] === "recurring";
+
+    const customerName =
+      session.metadata?.[COMMERCE_METADATA_KEYS.customerName]?.trim() ??
+      session.customer_details?.name ??
+      "Guest";
+    const customerEmail =
+      session.metadata?.[COMMERCE_METADATA_KEYS.customerEmail]?.trim() ??
+      session.customer_details?.email ??
+      session.customer_email ??
+      "";
+
+    if (!customerEmail) {
+      return { ok: false, error: "Missing customer email on session" };
+    }
+
+    const subscriptionId =
+      typeof session.subscription === "string"
+        ? session.subscription
+        : session.subscription?.id ?? null;
+    const customerId =
+      typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+
+    // Membership rows don't carry a checkout session id, so dedupe on the
+    // Stripe transaction id instead (subscription id for recurring, payment
+    // intent id for one-time) — the same id we're about to store on the payment.
+    const transactionId = isSubscription ? subscriptionId : paymentIntentId;
+    if (transactionId) {
+      const { data: existingPayment } = await supabase
+        .from("payments")
+        .select("id")
+        .eq("stripe_transaction_id", transactionId)
+        .maybeSingle();
+      if (existingPayment) {
+        return { ok: true, flow, alreadyFulfilled: true };
+      }
+    }
+
+    const newsletterOptIn =
+      session.metadata?.[COMMERCE_METADATA_KEYS.newsletterOptIn] === "true";
+    const digestOptIn = session.metadata?.[COMMERCE_METADATA_KEYS.digestOptIn] === "true";
+    const volunteerOptIn = session.metadata?.[COMMERCE_METADATA_KEYS.volunteerOptIn] === "true";
+
+    const { data: existingPerson } = await supabase
+      .from("people")
+      .select("id, tags")
+      .eq("email", customerEmail)
+      .maybeSingle();
+
+    let personId: string;
+    if (existingPerson) {
+      personId = existingPerson.id;
+      if (volunteerOptIn && !(existingPerson.tags ?? []).includes("volunteer_interested")) {
+        const { error } = await supabase
+          .from("people")
+          .update({ tags: [...(existingPerson.tags ?? []), "volunteer_interested"] })
+          .eq("id", personId);
+        if (error) return { ok: false, error: error.message };
+      }
+    } else {
+      const personRow: PeopleInsert = {
+        full_name: customerName,
+        email: customerEmail,
+        source: "membership_checkout",
+        tags: volunteerOptIn ? ["volunteer_interested"] : null,
+      };
+      const { data: inserted, error } = await supabase
+        .from("people")
+        .insert(personRow)
+        .select("id")
+        .single();
+      if (error || !inserted) {
+        return { ok: false, error: error?.message ?? "Failed to create person" };
+      }
+      personId = inserted.id;
+    }
+
+    const membershipRow: MembershipsInsert = {
+      tier: tierDef.slug,
+      status: "active",
+      last_renewal: null,
+      payment_method: "stripe",
+      is_subscription: isSubscription,
+      start_date: new Date().toISOString().slice(0, 10),
+      stripe_customer_id: customerId,
+      stripe_subscription_id: isSubscription ? subscriptionId : null,
+      customer_email: customerEmail,
+    };
+    const { data: membership, error: membershipError } = await supabase
+      .from("memberships")
+      .insert(membershipRow)
+      .select("id")
+      .single();
+    if (membershipError || !membership) {
+      return { ok: false, error: membershipError?.message ?? "Failed to create membership" };
+    }
+
+    const { error: linkError } = await supabase
+      .from("people")
+      .update({ membership_id: membership.id })
+      .eq("id", personId);
+    if (linkError) return { ok: false, error: linkError.message };
+
+    const paymentRow: PaymentsInsert = {
+      person_id: personId,
+      membership_id: membership.id,
+      amount: amountCents / 100,
+      date: new Date().toISOString().slice(0, 10),
+      type: "membership",
+      method: "stripe",
+      stripe_transaction_id: transactionId,
+    };
+    const { error: paymentError } = await supabase.from("payments").insert(paymentRow);
+    if (paymentError) return { ok: false, error: paymentError.message };
+
+    const firstName = customerName.trim().split(/\s+/)[0];
+    if (newsletterOptIn) await upsertNewsletterContact(customerEmail, firstName);
+    if (digestOptIn) await upsertWeeklyDigestContact(customerEmail, firstName);
+
+    await sendMembershipConfirmationEmail({
+      to: customerEmail,
+      customerName,
+      tierName: tierDef.name,
+      amountCents,
+      isSubscription,
+    });
 
     return { ok: true, flow };
   }

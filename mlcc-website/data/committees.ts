@@ -21,42 +21,42 @@ export const COMMITTEE_LISTINGS: CommitteeListing[] = [
     description:
       "Write, design, and coordinate door-to-door delivery of the Leaflet across Maple Leaf.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+      "/images/leaflet/leaflet.webp",
   },
   {
     slug: "events",
     description:
       "Plan neighborhood traditions like the Summer Social, Movie Nights, and the Halloween Parade.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530e8b1aadf47968a6eb09_summer_social_2024-62%20(1).webp",
+      "/images/community-photos/summer-social-2024-62.webp",
   },
   {
     slug: "emergency-hub",
     description:
       "Help neighbors prepare for earthquakes and stay connected when emergencies strike.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69531455684e18c663a2a6b7_community-meeting3.webp",
+      "/images/community-photos/community-meeting-d.webp",
   },
   {
     slug: "communications",
     description:
       "Share council news through email, social media, and outreach across the neighborhood.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp",
+      "/images/community-photos/community-meeting-a.webp",
   },
   {
     slug: "advocacy",
     description:
       "Give Maple Leaf a voice on city policy, zoning, and decisions that shape the neighborhood.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6913dbb252ed363168221ae6_Maple_Leaf.jpg",
+      "/images/community-photos/maple-leaf.jpg",
   },
   {
     slug: "business-committee",
     description:
       "Build relationships between the council and Maple Leaf’s shops, restaurants, and local businesses.",
     image:
-      "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2ef4da00327d5e0c5403_love-your-neighbor.webp",
+      "/images/community-photos/love-your-neighbor.webp",
   },
 ];
 
@@ -64,6 +64,13 @@ export type CommitteeFeatureCard = {
   title: string;
   text: string;
   image: string;
+};
+
+export type CommitteeTextImageSection = {
+  label: string;
+  headline: string;
+  body: string;
+  image?: string;
 };
 
 export type CommitteeContent = {
@@ -74,6 +81,15 @@ export type CommitteeContent = {
     label: string;
     headline: string;
     cards: CommitteeFeatureCard[];
+  };
+  aboutSection?: CommitteeTextImageSection;
+  eventSection?: CommitteeTextImageSection;
+  getInvolvedBody?: string;
+  cta?: {
+    title?: string;
+    subhead?: string;
+    primaryButton?: { label: string; href: string };
+    secondaryButton?: { label: string; href: string };
   };
 };
 
@@ -95,45 +111,64 @@ export const COMMITTEE_CONTENT: Record<CommitteeSlug, CommitteeContent> = {
           title: "Summer Social",
           text: "Maple Leaf’s flagship summer gathering: neighbors, music, food, and the faces that make this place feel like home.",
           image:
-            "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530e8b1aadf47968a6eb09_summer_social_2024-62%20(1).webp",
+            "/images/community-photos/summer-social-2024-62.webp",
         },
         {
           title: "Movies by the Tower",
           text: "Outdoor movie nights at the park with food vendors, trivia, and partners like Scarecrow Video under the summer sky.",
           image:
-            "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2928eb2f48f58fa2aef8_movies-tower.webp",
+            "/images/community-photos/movies-tower.webp",
         },
         {
           title: "Community Meeting",
           text: "Twice-yearly gatherings where neighbors learn what’s happening in Maple Leaf, ask questions, and hear from one another.",
           image:
-            "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d22bb2d6d_community-meeting.webp",
+            "/images/community-photos/community-meeting-a.webp",
         },
         {
           title: "Halloween Parade",
           text: "A fall favorite: families, dogs, and neighbors walk the route, visit local businesses, and celebrate together.",
           image:
-            "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg",
+            "/images/community-photos/img-6554.jpg",
         },
         {
           title: "Love your Neighbor Happy Hour",
           text: "A relaxed adults-only happy hour for neighbors to grab a drink, meet new people, and catch up with familiar faces.",
           image:
-            "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2ef4da00327d5e0c5403_love-your-neighbor.webp",
+            "/images/community-photos/love-your-neighbor.webp",
         },
         {
           title: "Silent Book Club",
           text: "Read together in comfortable silence, then mingle over books and conversation on the third Sunday of each month.",
           image:
-            "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b30685a1f306acdc73283_IMG_6862.jpg",
+            "/images/community-photos/img-6862.jpg",
         },
       ],
     },
   },
   "emergency-hub": {
     title: "Emergency Hub",
-    headline: "Prepared neighbors, stronger together",
-    body: "The Emergency Hub committee helps Maple Leaf get ready for earthquakes and other emergencies. Volunteers organize hub sites, share preparedness resources, and build the neighbor-to-neighbor connections that matter most when normal systems are disrupted.",
+    headline: "The Maple Leaf Emergency Hub is seeking volunteers!",
+    body: "The Emergency Hub exists to help neighbors support each other in a disaster. We focus on planning, training, and connection—not stockpiling—so that when “The Big One” (or any emergency) hits, Maple Leaf is ready to respond together.",
+    aboutSection: {
+      label: "What is an Emergency Hub?",
+      headline: "Neighbors helping neighbors, until help arrives",
+      body: "When a major earthquake or disaster hits, professional responders will likely be overwhelmed. For the first hours and days, neighbors helping neighbors becomes the difference-maker. An Emergency Hub is a volunteer-run gathering point where the neighborhood comes together to share information, pool resources, and help one another until responders arrive. Maple Leaf already has a Hub, a supply box, and a place in Seattle’s citywide Hub network. Come join us and help shape the future of the Maple Leaf Emergency Hub!",
+    },
+    getInvolvedBody:
+      "You don’t need special skills, training, or a lot of spare time. Every neighbor who raises a hand makes the whole neighborhood more resilient. You choose how involved you want to be — from greeting neighbors and spreading the word, to managing supplies, supporting radio operations, teaching prep skills, helping to lead the team year-round, or simply joining our mailing list to stay informed.",
+    eventSection: {
+      label: "This summer",
+      headline: "Hub Meet & Greet + Inventory Day",
+      body: "Saturday, August 1, 10 am–1 pm, Maple Leaf Reservoir Park. See what’s in the Hub supply box, meet the volunteers, and learn how it all works. Family-friendly — drop by anytime.",
+      image: "/images/one-seattle/reservoir-park.jpg",
+    },
+    cta: {
+      title: "Ready to help? Sign up in about a minute",
+      subhead: "Questions? Email mapleleafhubs@gmail.com",
+      primaryButton: { label: "Sign up to volunteer", href: "https://forms.gle/PcxKvxNARtQmVsyS7" },
+      secondaryButton: { label: "Email us", href: "mailto:mapleleafhubs@gmail.com" },
+    },
   },
   communications: {
     title: "Communications",
