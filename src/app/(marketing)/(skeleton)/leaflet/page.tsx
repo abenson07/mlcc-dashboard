@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { CmsGridSection } from "@marketing/components/byq/CmsGridSection";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
 import { getPublishedLeafletStories } from "@marketing/data/leaflet-stories";
+
+export const metadata: Metadata = {
+  title: "The Leaflet | Maple Leaf Community Council",
+  description:
+    "Read stories from the Leaflet, Maple Leaf's printed neighborhood newsletter delivered door to door by neighborhood volunteers.",
+};
 
 export default function LeafletPage() {
   return (

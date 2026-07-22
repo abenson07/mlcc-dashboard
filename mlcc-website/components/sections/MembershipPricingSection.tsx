@@ -95,6 +95,7 @@ export function MembershipPricingSection({
 
   return (
     <section
+      id="membership-pricing"
       className="bg-sparkles-cream py-[7.5rem] max-[767px]:py-20"
       data-editable="true"
       data-editable-type="section"
@@ -117,12 +118,6 @@ export function MembershipPricingSection({
               <p className="m-0 font-body text-base leading-6 text-sparkles-muted">
                 Choose the membership level that fits your household and help sustain Maple Leaf&apos;s events and programs.
               </p>
-              <Link
-                href="/membership"
-                className="font-body text-base font-bold text-sparkles-navy underline underline-offset-2"
-              >
-                Learn More
-              </Link>
             </div>
 
             <div

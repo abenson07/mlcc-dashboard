@@ -11,21 +11,20 @@ import {
 
 const skeletonRelatedCards = [
   {
-    img: "https://byqsupply-components.netlify.app/skeletons/cms-page/images/blogcmspage7.svg",
+    img: "/images/patterns/pattern-vertical.svg",
     title: "Article skeleton title placeholder for layout demonstration only",
     label: "Label",
     href: "/leaflet/template",
   },
   {
-    img: "https://byqsupply-components.netlify.app/skeletons/cms-page/images/vertical-pattern-2.svg",
+    img: "/images/patterns/pattern-vertical.svg",
     title: "Article skeleton title placeholder for layout demonstration only",
     label: "Label",
     href: "/leaflet/template",
   },
 ];
 
-const skeletonHeroImage =
-  "https://byqsupply-components.netlify.app/skeletons/cms-page/images/blogcmspage7.svg";
+const skeletonHeroImage = "/images/patterns/pattern-vertical.svg";
 
 function ParallaxImage({ src, alt }: { src: string; alt: string }) {
   const ref = React.useRef<HTMLImageElement>(null);
@@ -136,7 +135,7 @@ export function CmsPageSection({
                 <figure className="mb-4 w-full">
                   <img
                     loading="lazy"
-                    src="https://byqsupply-components.netlify.app/skeletons/cms-page/images/patter-horizontal-new.svg"
+                    src="/images/patterns/pattern-vertical.svg"
                     alt=""
                     className="w-full rounded-xl"
                   />

@@ -6,43 +6,43 @@ import * as React from "react";
 
 const heroImages = [
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695312357b037d99bca1b7e9_leaflet.webp",
+    src: "/images/leaflet/leaflet.webp",
     alt: "A neighbor holding a copy of the Maple Leaf Leaflet newsletter",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69530f1e1da163ec47328051_summer_social_2024-39.webp",
+    src: "/images/community-photos/summer-social-2024-39.webp",
     alt: "Families enjoying the Summer Social in Maple Leaf",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2c3441277b54461fac94_IMG_6554.jpg",
+    src: "/images/community-photos/img-6554.jpg",
     alt: "Children and families at the Maple Leaf Halloween Parade",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695313c6b976b35d6d_community-meeting.webp",
+    src: "/images/community-photos/community-meeting-a.webp",
     alt: "Neighbors gathered at a Maple Leaf community meeting",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/68c82d9a55f62655acb2e46c_IMG_9152.jpg",
+    src: "/images/community-photos/img-9152.jpg",
     alt: "Neighbors at an advocacy workshop in Maple Leaf",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/69531455684e18c663a2a6b7_community-meeting3.webp",
+    src: "/images/community-photos/community-meeting-d.webp",
     alt: "Community meeting in Maple Leaf",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2928eb2f48f58fa2aef8_movies-tower.webp",
+    src: "/images/community-photos/movies-tower.webp",
     alt: "Movies by the Tower in Maple Leaf Park",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b30685a1f306acdc73283_IMG_6862.jpg",
+    src: "/images/community-photos/img-6862.jpg",
     alt: "Neighbors at Silent Book Club",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/695b2ef4da00327d5e0c5403_love-your-neighbor.webp",
+    src: "/images/community-photos/love-your-neighbor.webp",
     alt: "Love Your Neighbor community event in Maple Leaf",
   },
   {
-    src: "https://cdn.prod.website-files.com/67f50cf24b62add5c586bc28/6913dbb252ed363168221ae6_Maple_Leaf.jpg",
+    src: "/images/community-photos/maple-leaf.jpg",
     alt: "Aerial view of the Maple Leaf neighborhood in Seattle",
   },
 ];

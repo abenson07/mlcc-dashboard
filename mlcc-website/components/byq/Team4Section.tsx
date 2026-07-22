@@ -3,37 +3,37 @@
 import { SectionLabel } from "@marketing/components/SectionLabel";
 const cards = [
   {
-    image: "https://byqsupply-components.netlify.app/skeletons/team-grid/images/vertical-pattern-2.svg",
+    image: "/images/patterns/pattern-vertical.svg",
     name: "Jessy Skeleton",
     role: "CEO",
   },
   {
-    image: "https://byqsupply-components.netlify.app/skeletons/team-grid/images/patter-horizontal-new.svg",
+    image: "/images/patterns/pattern-vertical.svg",
     name: "Mark Bonefield",
     role: "Pixel Skeleton",
   },
   {
-    image: "https://byqsupply-components.netlify.app/skeletons/team-grid/images/horizontal-pattern-2.svg",
+    image: "/images/patterns/pattern-vertical.svg",
     name: "Eddie Marrow",
     role: "Placeholder Hero",
   },
   {
-    image: "https://byqsupply-components.netlify.app/skeletons/team-grid/images/pattern-vertical-new.svg",
+    image: "/images/patterns/pattern-vertical.svg",
     name: "Jessy Skeleton",
     role: "Wireframe Architect",
   },
   {
-    image: "https://byqsupply-components.netlify.app/skeletons/team-grid/images/vertical-pattern-2.svg",
+    image: "/images/patterns/pattern-vertical.svg",
     name: "Mark Bonefield",
     role: "Pixel Skeleton",
   },
   {
-    image: "https://byqsupply-components.netlify.app/skeletons/team-grid/images/horizontal-pattern-2.svg",
+    image: "/images/patterns/pattern-vertical.svg",
     name: "Clara Holloway",
     role: "Layout Surgeon",
   },
   {
-    image: "https://byqsupply-components.netlify.app/skeletons/team-grid/images/pattern-vertical-new.svg",
+    image: "/images/patterns/pattern-vertical.svg",
     name: "Jessy Morales",
     role: "Branding Strategist",
   },

@@ -10,15 +10,13 @@ import {
 const submitStoryHref =
   "mailto:hello@mapleleafcommunity.org?subject=Leaflet%20story%20submission";
 
-const featuredImage =
-  "https://byqsupply-components.netlify.app/skeletons/cms-grid/images/patter-horizontal-new.svg";
+const featuredImage = "/images/patterns/pattern-vertical.svg";
 
 const blogCards = Array(9).fill({
   category: "Wellness",
   date: "May 6, 2024",
   title: "How to Optimize Your Business Operations for Maximum Efficiency",
-  image:
-    "https://byqsupply-components.netlify.app/skeletons/cms-grid/images/patter-horizontal-new.svg",
+  image: "/images/patterns/pattern-vertical.svg",
 });
 
 function sortStories(stories: LeafletStory[]) {

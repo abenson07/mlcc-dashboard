@@ -7,9 +7,6 @@ import { membershipPrograms } from "@marketing/data/membership";
 
 const SLIDE_INTERVAL_MS = 4000;
 
-const inputClassName =
-  "min-h-12 w-full min-w-0 flex-1 rounded-2xl border border-sparkles-warm bg-sparkles-warm px-4 py-2 font-body text-base leading-6 text-sparkles-navy placeholder:text-sparkles-muted focus:border-sparkles-navy focus:outline-none";
-
 function ProgramShowcase({ currentSlide }: { currentSlide: number }) {
   const program = membershipPrograms[currentSlide];
 
@@ -50,9 +47,6 @@ function ProgramShowcase({ currentSlide }: { currentSlide: number }) {
 
 export function MembershipMarqueeSection() {
   const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
-  const [error, setError] = React.useState(false);
   const totalSlides = membershipPrograms.length;
 
   React.useEffect(() => {
@@ -61,16 +55,6 @@ export function MembershipMarqueeSection() {
     }, SLIDE_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [totalSlides]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !email.includes("@")) {
-      setError(true);
-      return;
-    }
-    setError(false);
-    setSubmitted(true);
-  };
 
   return (
     <section
@@ -83,7 +67,7 @@ export function MembershipMarqueeSection() {
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px]">
           <div className="grid items-center gap-12 py-20 [grid-template-columns:minmax(0,1.3fr)_minmax(0,1fr)] max-[991px]:grid-cols-1 max-[991px]:gap-16 max-[767px]:py-16">
-            {/* Left: headline + form */}
+            {/* Left: headline + CTA */}
             <div className="flex max-w-[35.25rem] flex-col items-start gap-6 max-[991px]:max-w-none">
               <SectionLabel>Support MLCC</SectionLabel>
 
@@ -108,43 +92,12 @@ export function MembershipMarqueeSection() {
                 neighbors built together. Membership is how we keep them going.
               </p>
 
-              <div className="w-full max-w-[30rem]">
-                {submitted ? (
-                  <div className="rounded-2xl border border-sparkles-navy/20 bg-sparkles-warm px-6 py-5">
-                    <p className="m-0 font-display text-lg font-bold text-puget-night">
-                      Thanks! We&apos;ll be in touch.
-                    </p>
-                    <p className="mt-2 mb-0 font-body text-base leading-6 text-sparkles-navy">
-                      We&apos;ll send a note about joining MLCC and the programs your membership keeps
-                      going.
-                    </p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="flex w-full items-center gap-2 max-[479px]:flex-col max-[479px]:items-stretch">
-                    <input
-                      className={inputClassName}
-                      name="email"
-                      placeholder="Enter your email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <button
-                      type="submit"
-                      className="inline-flex shrink-0 items-center justify-center rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm font-bold leading-5 text-sparkles-cream transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90 max-[479px]:w-full"
-                    >
-                      Get started
-                    </button>
-                  </form>
-                )}
-                {error && (
-                  <p className="mt-3 mb-0 font-body text-sm leading-5 text-sparkles-accent">
-                    Please enter a valid email address.
-                  </p>
-                )}
-              </div>
+              <a
+                href="#membership-pricing"
+                className="inline-flex shrink-0 items-center justify-center rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-6 py-3 font-display text-sm font-bold leading-5 text-sparkles-cream transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90"
+              >
+                Become a supporter
+              </a>
 
               <p className="m-0 font-body text-sm leading-5 text-sparkles-muted">
                 Memberships start as low as $5 a year. Prefer a one-time gift?{" "}

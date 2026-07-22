@@ -23,6 +23,145 @@ const nextConfig: NextConfig = {
         destination: "/events/template",
         permanent: true,
       },
+      // Legacy mapleleafcommunity.org (Webflow) URLs — see docs/legacy-site-redirects.md
+      {
+        source: "/volunteer-opportunities",
+        destination: "/volunteer",
+        permanent: true,
+      },
+      {
+        source: "/the-leaflet",
+        destination: "/leaflet",
+        permanent: true,
+      },
+      {
+        source: "/advocacy/zoning-workshop",
+        destination: "/one-seattle-plan",
+        permanent: true,
+      },
+      {
+        source: "/committee/newsletter",
+        destination: "/committees/newsletter",
+        permanent: true,
+      },
+      {
+        source: "/committee/communications",
+        destination: "/committees/communications",
+        permanent: true,
+      },
+      {
+        source: "/committee/emergency-hub",
+        destination: "/committees/emergency-hub",
+        permanent: true,
+      },
+      {
+        source: "/committee/advocacy",
+        destination: "/committees/advocacy",
+        permanent: true,
+      },
+      {
+        source: "/committee/business-committee",
+        destination: "/committees/business-committee",
+        permanent: true,
+      },
+      {
+        source: "/committee/outreach",
+        destination: "/committees/communications",
+        permanent: true,
+      },
+      {
+        source: "/committee/summer-social",
+        destination: "/committees/events",
+        permanent: true,
+      },
+      {
+        source: "/committee/movies-by-the-tower",
+        destination: "/committees/events",
+        permanent: true,
+      },
+      {
+        source: "/committee/silent-book-club",
+        destination: "/committees/events",
+        permanent: true,
+      },
+      {
+        source: "/event/2026-maple-leaf-volunteer-committee-open-house",
+        destination: "/leaflet/template/2026-volunteer-open-house",
+        permanent: true,
+      },
+      {
+        source: "/events/spring-community-meeting",
+        destination: "/events",
+        permanent: true,
+      },
+      {
+        source: "/stories/a-fresh-start-for-maple-leaf-join-our-2026-volunteer-committee-open-house",
+        destination: "/leaflet/template/2026-volunteer-open-house",
+        permanent: true,
+      },
+      {
+        // Points to /one-seattle-plan (not the leaflet story) because the
+        // advocacy-and-zoning-workshops story is still draft: true and 404s.
+        // Revisit once data/leaflet-stories.ts publishes that story.
+        source: "/stories/a-place-to-work-through-hard-questions-together",
+        destination: "/one-seattle-plan",
+        permanent: true,
+      },
+      {
+        source: "/stories/a-quiet-way-to-belong",
+        destination: "/leaflet/template/silent-book-club",
+        permanent: true,
+      },
+      {
+        source: "/stories/bringing-neighbors-together-to-learn-ask-questions-and-be-heard",
+        destination: "/leaflet/template/community-meetings",
+        permanent: true,
+      },
+      {
+        source: "/stories/building-connections-under-the-stars",
+        destination: "/leaflet/template/movies-by-the-tower",
+        permanent: true,
+      },
+      {
+        source: "/stories/built-by-neighbors-sustained-by-neighbors",
+        destination: "/leaflet/template/built-by-neighbors",
+        permanent: true,
+      },
+      {
+        source: "/stories/carrying-the-halloween-parade-forward",
+        destination: "/leaflet/template/halloween-parade",
+        permanent: true,
+      },
+      {
+        source: "/stories/connecting-maple-leaf-through-the-decades",
+        destination: "/leaflet/template/the-leaflet",
+        permanent: true,
+      },
+      {
+        source: "/stories/conversations-close-to-home",
+        destination: "/leaflet/template/love-your-neighbor",
+        permanent: true,
+      },
+      {
+        source: "/stories/housing-types",
+        destination: "/leaflet/template/housing-types",
+        permanent: true,
+      },
+      {
+        source: "/stories/one-seattle-plan-speak-up-for-maple-leafs-future",
+        destination: "/leaflet/template/one-seattle-plan",
+        permanent: true,
+      },
+      {
+        source: "/stories/summer-social-tradition-what-it-takes",
+        destination: "/leaflet/template/summer-social",
+        permanent: true,
+      },
+      {
+        source: "/stories/survey",
+        destination: "/leaflet/template/visioning-survey",
+        permanent: true,
+      },
       // Routes not yet ready for main; keep them live on staging only.
       {
         source: "/about/maple-leaf",

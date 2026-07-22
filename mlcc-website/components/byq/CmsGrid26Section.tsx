@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { getLeafletStory } from "@marketing/data/leaflet-stories";
 
-const articleImage =
-  "https://byqsupply-components.netlify.app/skeletons/cms-grid/images/pattern-vertical-new.svg";
+const articleImage = "/images/patterns/pattern-vertical.svg";
 
 const visioningSurvey = getLeafletStory("visioning-survey");
 const housingTypes = getLeafletStory("housing-types");

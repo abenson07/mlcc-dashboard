@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
 import { BusinessMembershipBenefitsSection } from "@marketing/components/sections/BusinessMembershipBenefitsSection";
 import { BusinessMembershipHeroSection } from "@marketing/components/sections/BusinessMembershipHeroSection";
 import { BusinessMembershipPerksSection } from "@marketing/components/sections/BusinessMembershipPerksSection";
 import { BusinessMembershipPricingSection } from "@marketing/components/sections/BusinessMembershipPricingSection";
 import { BusinessMembershipValueSection } from "@marketing/components/sections/BusinessMembershipValueSection";
+
+export const metadata: Metadata = {
+  title: "Business Membership | Maple Leaf Community Council",
+  description:
+    "Business membership with the Maple Leaf Community Council is $200/year and helps connect your business with the neighborhood.",
+};
 
 export default function MembershipBusinessPage() {
   return (

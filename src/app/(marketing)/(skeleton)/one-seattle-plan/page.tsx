@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BentoSection } from "@marketing/components/byq/BentoSection";
 import { CmsGrid26Section } from "@marketing/components/byq/CmsGrid26Section";
 import { ContactCtaPreFooterSection } from "@marketing/components/byq/ContactCtaPreFooterSection";
@@ -8,6 +9,12 @@ import { ValueFeature57Section } from "@marketing/components/byq/ValueFeature57S
 import { ValueFeatures29Section } from "@marketing/components/byq/ValueFeatures29Section";
 import { VisionSection } from "@marketing/components/byq/VisionSection";
 // import { TestimonialsSection } from "@marketing/components/byq/TestimonialsSection";
+
+export const metadata: Metadata = {
+  title: "One Seattle Plan | Maple Leaf Community Council",
+  description:
+    "How the One Seattle Plan affects Maple Leaf, and how the Advocacy committee's zoning workshops give neighbors a voice in the neighborhood's future.",
+};
 
 export default function OneSeattlePlanPage() {
   return (

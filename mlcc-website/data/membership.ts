@@ -127,7 +127,7 @@ export const membershipPrograms = [
   },
   {
     title: "Emergency Hub",
-    image: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage4.jpg",
+    image: "/images/community-photos/community-meeting-d.webp",
   },
   {
     title: "Love Your Neighbor",
@@ -141,6 +141,6 @@ export const membershipPrograms = [
   },
   {
     title: "Volunteer Day",
-    image: "https://byqsupply-components.netlify.app/sparkles/images/ServicesImage1.jpg",
+    image: "/images/community-photos/summer-social-2024-39.webp",
   },
 ];
