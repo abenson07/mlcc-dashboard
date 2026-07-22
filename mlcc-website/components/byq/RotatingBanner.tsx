@@ -2,18 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import bannerData from "@marketing/data/banner.json";
-
-export type BannerItem = {
-  headline: string;
-  linkText: string;
-  linkPath: string;
-};
+import { getBannerItems } from "@marketing/data/banner";
 
 const FADE_MS = 1000;
 const CYCLE_MS = 30000;
 
-const banners = bannerData.banners as BannerItem[];
+const banners = getBannerItems();
 
 export function RotatingBanner() {
   const [index, setIndex] = React.useState(0);
