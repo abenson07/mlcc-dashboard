@@ -59,7 +59,7 @@ export function ValueFeature50Section() {
             <div className="mb-20 flex flex-col gap-6 max-[767px]:mb-12">
               <div className="w-full max-w-[42.5rem] max-[767px]:max-w-none">
                 <h2 className="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-puget-night max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">
-                  Where we&apos;re focusing our attention
+                  Where we focused our attention
                 </h2>
               </div>
             </div>

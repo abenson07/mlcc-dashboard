@@ -13,7 +13,7 @@ import { VisionSection } from "@marketing/components/byq/VisionSection";
 export const metadata: Metadata = {
   title: "One Seattle Plan | Maple Leaf Community Council",
   description:
-    "How the One Seattle Plan affects Maple Leaf, and how the Advocacy committee's zoning workshops give neighbors a voice in the neighborhood's future.",
+    "How the One Seattle Plan affected Maple Leaf, and how the Advocacy committee's zoning workshops gave neighbors a voice in the neighborhood's future.",
 };
 
 export default function OneSeattlePlanPage() {
@@ -29,9 +29,9 @@ export default function OneSeattlePlanPage() {
       <CmsGrid26Section />
       <ContactCtaPreFooterSection committeeName="Advocacy" headline="Join the advocacy committee" />
       <CtaSection
-        title="Ready to build a better Maple Leaf for everyone?"
-        subhead="Reach out or join us at an upcoming workshop."
-        primaryButton={{ label: "Get involved", href: "/contact" }}
+        title="Thanks to everyone who helped build a better Maple Leaf"
+        subhead="Neighbors who joined a workshop helped shape the plan for how our neighborhood grows."
+        primaryButton={{ label: "See the Leaflet", href: "/leaflet" }}
         secondaryButton={{ label: "Become a member", href: "/membership" }}
       />
     </main>

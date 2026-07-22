@@ -75,10 +75,10 @@ export function VisionSection() {
 
                   <div className="flex flex-col gap-4 border-t border-sparkles-navy/16 pt-8">
                     <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                      Zoning workshops give neighbors a real seat at the table before decisions are made, not after.
+                      Zoning workshops gave neighbors a real seat at the table before decisions were made, not after.
                     </p>
                     <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                      We&apos;re building shared language around density, trees, and affordability so Maple Leaf can grow on its own terms.
+                      We built shared language around density, trees, and affordability so Maple Leaf could grow on its own terms.
                     </p>
                   </div>
                 </div>

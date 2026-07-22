@@ -8,7 +8,6 @@ const primaryLinks = [
   { label: "Events", href: "/events" },
   { label: "Leaflet", href: "/leaflet" },
   { label: "Committees", href: "/committees" },
-  { label: "One Seattle Plan", href: "/one-seattle-plan" },
 ];
 
 export function NavigationBarSection() {

@@ -6,12 +6,12 @@ const timelineItems = [
   {
     label: "Session opener",
     title: "Introductions",
-    body: "Each workshop opens with introductions, so neighbors and the MLCC know who's in the room.",
+    body: "Each workshop opened with introductions, so neighbors and the MLCC knew who was in the room.",
   },
   {
     label: "Context",
     title: "Information sharing",
-    body: "We walk through what's changed under WA State's HB 1110 and the Seattle Comprehensive Plan, and what it means for Maple Leaf.",
+    body: "We walked through what had changed under WA State's HB 1110 and the Seattle Comprehensive Plan, and what it meant for Maple Leaf.",
   },
   {
     label: "Working session",
@@ -21,7 +21,7 @@ const timelineItems = [
   {
     label: "Ongoing",
     title: "Follow-through",
-    body: "Between sessions, volunteers handle neighborhood association relationships, City-level updates, meeting logistics, and facilitation.",
+    body: "Between sessions, volunteers handled neighborhood association relationships, City-level updates, meeting logistics, and facilitation.",
   },
 ];
 

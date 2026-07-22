@@ -26,9 +26,9 @@ export default function OneSeattlePlanPage() {
         source="zoning-workshop"
       />
       <CtaSection
-        title="Ready to build a better Maple Leaf for everyone?"
-        subhead="Reach out or join us at an upcoming workshop."
-        primaryButton={{ label: "Get involved", href: "/contact" }}
+        title="Thanks to everyone who helped build a better Maple Leaf"
+        subhead="Neighbors who joined a workshop helped shape the plan for how our neighborhood grows."
+        primaryButton={{ label: "See the Leaflet", href: "/leaflet" }}
         secondaryButton={{ label: "Become a member", href: "/membership" }}
       />
     </main>

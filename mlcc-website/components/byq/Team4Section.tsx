@@ -62,6 +62,8 @@ export function Team4Section({
   label = "Committee Volunteers",
   headline = "Run by neighbors like you",
   body = "This committee is powered entirely by volunteers, neighbors who live right here in Maple Leaf and give their time because they care about the community. There's always room for another familiar face.",
+  href,
+  buttonLabel,
   editableId = "template.team-4",
   editableLabel = "Team 4 (Template)",
 }: {
@@ -69,6 +71,8 @@ export function Team4Section({
   label?: string;
   headline?: string;
   body?: string;
+  href?: string;
+  buttonLabel?: string;
   editableId?: string;
   editableLabel?: string;
 }) {
@@ -89,6 +93,14 @@ export function Team4Section({
                 {headline}
               </h2>
               <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">{body}</p>
+              {href ? (
+                <a
+                  href={href}
+                  className="flex items-center justify-center gap-2 rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm leading-5 font-bold uppercase text-sparkles-cream no-underline transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90"
+                >
+                  {buttonLabel ?? "Learn more"}
+                </a>
+              ) : null}
             </div>
 
             <div className="h-[24rem] w-full overflow-hidden rounded-3xl bg-[var(--sparkles-navy-16)] max-[767px]:h-[18rem]">

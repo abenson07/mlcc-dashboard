@@ -52,6 +52,7 @@ const articles = [
 export function CmsGrid26Section() {
   return (
     <section
+      id="workshop-outcomes"
       className="bg-sparkles-cream text-sparkles-navy"
       data-editable="true"
       data-editable-type="section"
@@ -64,7 +65,7 @@ export function CmsGrid26Section() {
             <div className="flex flex-col items-stretch gap-20">
               <div className="relative">
                 <h2 className="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">
-                  Our work so far...
+                  Our work
                 </h2>
               </div>
 

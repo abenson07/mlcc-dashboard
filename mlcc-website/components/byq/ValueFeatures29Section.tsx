@@ -107,12 +107,12 @@ export function ValueFeatures29Section({ title }: { title: string }) {
               }`}
             >
               <p className="m-0 font-body text-base leading-6 font-normal text-sparkles-navy">
-                As Seattle changes, neighbors are coming together to make our voice heard and partner with others in
+                As Seattle changed, neighbors came together to make our voice heard and partner with others in
                 creating a community where we can all grow, play, work, and live.
               </p>
 
               <a
-                href="/contact"
+                href="#workshop-outcomes"
                 onMouseEnter={() => setBtnHovered(true)}
                 onMouseLeave={() => setBtnHovered(false)}
                 className={`
@@ -122,7 +122,7 @@ export function ValueFeatures29Section({ title }: { title: string }) {
                   ${btnHovered ? "border-sparkles-navy/90 bg-sparkles-navy/90" : "border-sparkles-navy bg-sparkles-navy"}
                 `}
               >
-                <span>Get involved</span>
+                <span>See the outcomes</span>
                 <span className="flex h-4 w-4 items-center justify-center overflow-hidden">
                   <ArrowRightIcon />
                 </span>
@@ -174,7 +174,7 @@ export function ValueFeatures29Section({ title }: { title: string }) {
           >
             <p className="m-0 font-body text-lg leading-7 font-normal text-sparkles-navy max-[767px]:text-base max-[767px]:leading-6">
               How might we encourage thoughtful growth that takes the whole human being into account? Our zoning
-              workshops build a shared vision for Maple Leaf, balancing density with the character and affordability
+              workshops built a shared vision for Maple Leaf, balancing density with the character and affordability
               that make this neighborhood feel like home.
             </p>
           </div>

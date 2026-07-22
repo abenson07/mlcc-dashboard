@@ -71,6 +71,8 @@ export type CommitteeTextImageSection = {
   headline: string;
   body: string;
   image?: string;
+  href?: string;
+  buttonLabel?: string;
 };
 
 export type CommitteeContent = {
@@ -179,6 +181,14 @@ export const COMMITTEE_CONTENT: Record<CommitteeSlug, CommitteeContent> = {
     title: "Advocacy",
     headline: "A voice for Maple Leaf",
     body: "The Advocacy committee creates spaces where neighbors can learn about policy changes, talk through what they mean for Maple Leaf, and decide what to do next. Recent work has included zoning workshops connected to the One Seattle Plan and encouraging meaningful community involvement as the city grows.",
+    eventSection: {
+      label: "Zoning workshops",
+      headline: "See what the Advocacy committee accomplished with the One Seattle Plan",
+      body: "Over the past year, the Advocacy committee ran a series of zoning workshops connected to the One Seattle Plan, giving neighbors a voice in how the neighborhood grows.",
+      image: "/images/one-seattle/Maple_Leaf.jpg",
+      href: "/one-seattle-plan",
+      buttonLabel: "View the One Seattle Plan",
+    },
   },
   "business-committee": {
     title: "Business",

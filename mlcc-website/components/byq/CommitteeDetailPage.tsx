@@ -37,6 +37,8 @@ export function CommitteeDetailPage({ slug }: { slug: CommitteeSlug }) {
           label={committee.eventSection.label}
           headline={committee.eventSection.headline}
           body={committee.eventSection.body}
+          href={committee.eventSection.href}
+          buttonLabel={committee.eventSection.buttonLabel}
           editableId="committee.event-spotlight"
           editableLabel="Event Spotlight"
         />
