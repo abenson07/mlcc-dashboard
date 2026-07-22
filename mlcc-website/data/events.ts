@@ -33,13 +33,16 @@ export type EventsByMonth = {
 
 const EVENT_IMAGES = {
   silentBookClub: "/images/events/silent-book-club-featured.png",
+  silentBookClubParkEvening: "/images/events/maple-leaf-park3.jpg",
+  silentBookClubParkPicnic: "/images/events/maple-leaf-park4.jpg",
   summerSocial: "/images/events/summer-social.png",
   yardSale: "/images/events/maple-leaf-free-yard-sale.png",
   springMeeting: "/images/events/spring-community-meeting.png",
   moviesByTheTower: "/images/events/movie-by-tower.png",
-  halloweenParade: "/images/events/halloween-parade.svg",
-  fallMeeting: "/images/events/fall-community-meeting.svg",
+  halloweenParade: "/images/community-photos/img-6554.jpg",
+  fallMeeting: "/images/community-photos/community-meeting-a.webp",
   nightOut: "/images/events/night-out.jpeg",
+  emergencyHub: "/images/one-seattle/reservoir-park.jpg",
 } as const;
 
 const EVENT_TIMEZONE = "America/Los_Angeles";
@@ -188,6 +191,79 @@ const MOVIES_BY_THE_TOWER_DETAIL: EventDetailContent = {
   ],
 };
 
+const SILENT_BOOK_CLUB_IN_THE_PARK_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "A midweek pop-up version of Silent Book Club, out in the summer air at Maple Leaf Park. Same easy format as the monthly meetup at Watershed, just outdoors and on a weeknight, an excuse to get outside and read with neighbors instead of alone at home.",
+    },
+    {
+      kind: "paragraph",
+      text: "The regular Silent Book Club at Watershed Pub has become one of the most reliable ways neighbors meet each other, and this summer we wanted a version that didn't require staying in on a weekend evening. Maple Leaf Park gives us the room to spread out on the grass, catch the last of the daylight, and still be home before it's fully dark.",
+    },
+    {
+      kind: "heading",
+      text: "What to expect",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "Bring a book, a blanket or camp chair, and yourself",
+        "No assigned reading and no discussion required",
+        "Read together in comfortable quiet, then chat before or after",
+        "Free, casual, and open to everyone in the neighborhood",
+        "Kids and dogs welcome, as long as the quiet-reading vibe holds",
+      ],
+    },
+    {
+      kind: "heading",
+      text: "What to bring",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "Whatever you're currently reading, any genre, any format",
+        "A blanket, towel, or low camp chair to sit on",
+        "A layer for once the sun dips, evenings cool off fast near the water tower",
+        "A drink or snack to share if you're up for it, though it's not required",
+      ],
+    },
+    {
+      kind: "heading",
+      text: "Where to find us",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "Look for the reading blankets on the open lawn near the water tower and the picnic shelter. If you get turned around, the community info kiosk on the park's main path is a good landmark, we'll be within sight of it.",
+    },
+    {
+      kind: "heading",
+      text: "Rain or shine",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "Weather permitting, we'll be out on the grass at Maple Leaf Park. Light drizzle won't stop us, Seattle readers are used to it, but if the forecast turns to real rain we'll call it and try again the following month. Keep an eye on the neighborhood channels in case of a last-minute weather call.",
+    },
+    {
+      kind: "heading",
+      text: "Why we started this",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "It's easy to let summer slip by without actually spending time outside with neighbors. This is a low-effort way to fix that: no planning, no cooking, no RSVP, just show up with a book and sit down. If it goes well, we'd like to make it a regular midweek fixture alongside the monthly Watershed meetup.",
+    },
+    {
+      kind: "paragraph",
+      text: "Want to help organize future sessions, or have a favorite spot in the park you think we should use instead? Reach out through the Events committee, we're always glad for another set of hands or a better picnic spot.",
+    },
+  ],
+};
+
 const NIGHT_OUT_DETAIL: EventDetailContent = {
   blocks: [
     {
@@ -221,6 +297,53 @@ const NIGHT_OUT_DETAIL: EventDetailContent = {
       text: "Check seattle.gov/police/crime-prevention/night-out for the city's registration form and materials if you're organizing a gathering on your own block.",
       linkText: "seattle.gov/police/crime-prevention/night-out",
       href: "https://www.seattle.gov/police/crime-prevention/night-out",
+    },
+  ],
+};
+
+const EMERGENCY_HUB_MEET_AND_GREET_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "The Maple Leaf Emergency Hub is seeking volunteers! Come meet the team, see what's in the Hub supply box, and learn how it all works. Drop by anytime between 10am and 1pm, no RSVP needed, and bring the kids.",
+    },
+    {
+      kind: "heading",
+      text: "What is an Emergency Hub?",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "When a major earthquake or disaster hits, professional responders will likely be overwhelmed. For the first hours and days, neighbors helping neighbors becomes the difference-maker. An Emergency Hub is a volunteer-run gathering point where the neighborhood comes together to share information, pool resources, and help one another until responders arrive. Maple Leaf already has a Hub, a supply box, and a place in Seattle's citywide Hub network, this event is a chance to see it firsthand and help shape what comes next.",
+    },
+    {
+      kind: "heading",
+      text: "What to expect",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "A first look inside the Hub supply box and how it's organized",
+        "Meet the volunteers already involved and hear how the Hub works",
+        "Casual, family-friendly, drop by anytime during the window",
+        "No experience or preparedness background required",
+      ],
+    },
+    {
+      kind: "heading",
+      text: "Get involved",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "You don't need special skills, training, or a lot of spare time. Every neighbor who raises a hand makes the whole neighborhood more resilient. You choose how involved you want to be, from greeting neighbors and spreading the word, to managing supplies, supporting radio operations, teaching prep skills, helping lead the team year-round, or simply joining the mailing list to stay informed.",
+    },
+    {
+      kind: "paragraph",
+      text: "Sign up to volunteer, or email mapleleafhubs@gmail.com with questions.",
+      linkText: "Sign up to volunteer",
+      href: "https://forms.gle/PcxKvxNARtQmVsyS7",
     },
   ],
 };
@@ -331,6 +454,28 @@ export const events: Event[] = [
     detail: SILENT_BOOK_CLUB_DETAIL,
   }),
   event({
+    slug: "silent-book-club-in-the-park-july",
+    title: "Silent Book Club in the Park",
+    dateIso: "2026-07-24T01:00:00.000Z",
+    shortDescription: "A midweek reading hour outdoors at Maple Leaf Park. Bring a book, enjoy the summer evening.",
+    locationName: "Maple Leaf Park",
+    category: "Book Club",
+    image: EVENT_IMAGES.silentBookClubParkPicnic,
+    href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Park%20Seattle",
+    detail: SILENT_BOOK_CLUB_IN_THE_PARK_DETAIL,
+  }),
+  event({
+    slug: "emergency-hub-meet-and-greet",
+    title: "Hub Meet & Greet + Inventory Day",
+    dateIso: "2026-08-01T17:00:00.000Z",
+    shortDescription: "See what's in the Hub supply box, meet the volunteers, and learn how it all works. Family-friendly.",
+    locationName: "Maple Leaf Reservoir Park",
+    category: "Community",
+    image: EVENT_IMAGES.emergencyHub,
+    href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Reservoir%20Park%20Seattle",
+    detail: EMERGENCY_HUB_MEET_AND_GREET_DETAIL,
+  }),
+  event({
     slug: "night-out",
     title: "Night Out",
     dateIso: "2026-08-05T00:00:00.000Z",
@@ -341,6 +486,17 @@ export const events: Event[] = [
     href: "https://www.seattle.gov/police/crime-prevention/night-out",
     external: true,
     detail: NIGHT_OUT_DETAIL,
+  }),
+  event({
+    slug: "silent-book-club-in-the-park-august",
+    title: "Silent Book Club in the Park",
+    dateIso: "2026-08-05T01:00:00.000Z",
+    shortDescription: "A midweek reading hour outdoors at Maple Leaf Park. Bring a book, enjoy the summer evening.",
+    locationName: "Maple Leaf Park",
+    category: "Book Club",
+    image: EVENT_IMAGES.silentBookClubParkEvening,
+    href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Park%20Seattle",
+    detail: SILENT_BOOK_CLUB_IN_THE_PARK_DETAIL,
   }),
   event({
     slug: "2026-movies-by-the-tower",
