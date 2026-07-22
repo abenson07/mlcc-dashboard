@@ -31,7 +31,7 @@ export const shopProducts: ShopProduct[] = [
       "The first batch of Summer Social tees vanished in about sixty minutes. So we're doing this the neighborly way: a short pre-order window (about a week), then we order exactly what you asked for and close the shop. Grab yours and pick it up at Movie Night. If that night doesn't work, we'll find another time that does.",
     image: "/images/shop/2026-summer-social-shirt.png",
     fulfillment: "preorder",
-    priceCents: 2800,
+    priceCents: 2500,
     sizeGroups: [
       { label: "Adult", sizes: ["XS", "S", "M", "L", "XL", "XXL"] },
       { label: "Kids", sizes: ["XS", "S", "M", "L", "XL"] },
