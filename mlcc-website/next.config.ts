@@ -6,6 +6,17 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Shop: only the 2026 shirt preorder is live; keep cart/success/cancelled.
+      {
+        source: "/shop",
+        destination: "/shop/2026-summer-social-shirt",
+        permanent: false,
+      },
+      {
+        source: "/shop/:slug((?!cart|success|cancelled|2026-summer-social-shirt$).*)",
+        destination: "/shop/2026-summer-social-shirt",
+        permanent: false,
+      },
       {
         source: "/skeleton-home",
         destination: "/",

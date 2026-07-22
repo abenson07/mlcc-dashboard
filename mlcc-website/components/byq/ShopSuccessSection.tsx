@@ -25,7 +25,7 @@ export function ShopSuccessSection() {
               items ship after printing; in-stock items ship soon.
             </p>
             <Link
-              href="/shop"
+              href="/shop/2026-summer-social-shirt"
               className="inline-flex items-center justify-center rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-6 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream uppercase transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90"
             >
               Back to shop

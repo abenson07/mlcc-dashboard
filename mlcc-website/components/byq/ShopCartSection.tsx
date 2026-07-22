@@ -23,8 +23,8 @@ const EMPTY_FORM: FormState = {
   phone: "",
   addressLine1: "",
   addressLine2: "",
-  city: "",
-  state: "",
+  city: "Seattle",
+  state: "Washington",
   postalCode: "",
 };
 
@@ -89,7 +89,7 @@ export function ShopCartSection() {
                 Your cart is empty.
               </p>
               <Link
-                href="/shop"
+                href="/shop/2026-summer-social-shirt"
                 className="font-body text-sm font-bold text-sparkles-navy underline underline-offset-2"
               >
                 Browse the shop
@@ -173,7 +173,7 @@ export function ShopCartSection() {
                 className="flex flex-col gap-4 rounded-[1.75rem] border-[3px] border-sparkles-navy bg-sparkles-cream p-7"
               >
                 <div className="font-display text-xl leading-6 font-bold text-puget-night">
-                  Shipping details
+                  Information
                 </div>
 
                 <input

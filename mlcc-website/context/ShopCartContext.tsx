@@ -17,6 +17,9 @@ type ShopCartContextValue = {
   clear: () => void;
   totalQuantity: number;
   totalCents: number;
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 };
 
 const STORAGE_KEY = "mlcc-shop-cart";
@@ -46,6 +49,7 @@ function readStoredLines(): ShopCartLine[] {
 export function ShopCartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = React.useState<ShopCartLine[]>([]);
   const [hydrated, setHydrated] = React.useState(false);
+  const [isCartOpen, setIsCartOpen] = React.useState(false);
 
   React.useEffect(() => {
     setLines(readStoredLines());
@@ -99,6 +103,8 @@ export function ShopCartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clear = React.useCallback(() => setLines([]), []);
+  const openCart = React.useCallback(() => setIsCartOpen(true), []);
+  const closeCart = React.useCallback(() => setIsCartOpen(false), []);
 
   const totalQuantity = lines.reduce((sum, l) => sum + l.quantity, 0);
   const totalCents = lines.reduce((sum, l) => {
@@ -114,6 +120,9 @@ export function ShopCartProvider({ children }: { children: React.ReactNode }) {
     clear,
     totalQuantity,
     totalCents,
+    isCartOpen,
+    openCart,
+    closeCart,
   };
 
   return <ShopCartContext.Provider value={value}>{children}</ShopCartContext.Provider>;

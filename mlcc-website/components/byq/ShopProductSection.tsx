@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { SectionLabel } from "@marketing/components/SectionLabel";
 import { useShopCart } from "@marketing/context/ShopCartContext";
 import {
@@ -11,7 +10,7 @@ import {
 } from "@marketing/data/shop-products";
 
 export function ShopProductSection({ product }: { product: ShopProduct }) {
-  const { addLine, totalQuantity } = useShopCart();
+  const { addLine, totalQuantity, openCart } = useShopCart();
   const firstGroup = product.sizeGroups[0];
   const [selectedVariant, setSelectedVariant] = React.useState<string>(
     formatVariantLabel(product, firstGroup.label, firstGroup.sizes[0])
@@ -22,6 +21,7 @@ export function ShopProductSection({ product }: { product: ShopProduct }) {
   function handleAddToCart() {
     addLine(product.slug, selectedVariant, quantity);
     setAdded(true);
+    openCart();
     window.setTimeout(() => setAdded(false), 2000);
   }
 
@@ -35,17 +35,10 @@ export function ShopProductSection({ product }: { product: ShopProduct }) {
     >
       <div className="px-8 max-[767px]:px-4">
         <div className="mx-auto w-full max-w-[1800px] py-40 max-[767px]:py-20">
-          <Link
-            href="/shop"
-            className="mb-8 inline-block font-body text-sm font-bold text-sparkles-navy underline underline-offset-2"
-          >
-            ← Back to shop
-          </Link>
-
           <div className="grid grid-cols-2 gap-16 max-[991px]:grid-cols-1 max-[991px]:gap-10">
-            <div className="relative flex h-[32rem] w-full items-center justify-center overflow-hidden rounded-[1.75rem] border-[3px] border-sparkles-navy bg-sparkles-warm px-8 py-16 max-[767px]:h-[22rem]">
+            <div className="relative w-full">
               {product.fulfillment === "preorder" && (
-                <span className="absolute top-4 left-4 rounded-2xl bg-sparkles-gold px-2 py-1 font-body text-xs leading-4 font-bold tracking-[0.047rem] text-puget-night uppercase">
+                <span className="absolute top-4 left-4 z-[1] rounded-2xl bg-sparkles-gold px-2 py-1 font-body text-xs leading-4 font-bold tracking-[0.047rem] text-puget-night uppercase">
                   Pre-Order
                 </span>
               )}
@@ -53,7 +46,7 @@ export function ShopProductSection({ product }: { product: ShopProduct }) {
                 loading="lazy"
                 alt={product.name}
                 src={product.image}
-                className="h-full object-contain"
+                className="block h-auto w-full"
               />
             </div>
 
@@ -139,19 +132,20 @@ export function ShopProductSection({ product }: { product: ShopProduct }) {
                   {added ? "Added to cart" : "Add to cart"}
                 </button>
                 {totalQuantity > 0 && (
-                  <Link
-                    href="/shop/cart"
+                  <button
+                    type="button"
+                    onClick={openCart}
                     className="font-body text-sm font-bold text-sparkles-navy underline underline-offset-2"
                   >
                     View cart ({totalQuantity})
-                  </Link>
+                  </button>
                 )}
               </div>
 
               {product.fulfillment === "preorder" && (
                 <p className="m-0 font-body text-sm leading-5 text-sparkles-muted">
-                  This is a pre-order: we print it after the order window closes, then
-                  mail it to you. Plan on a few weeks after ordering before it ships.
+                  Local pickup only. Movie Night is the main handoff. Can&apos;t make
+                  it? We&apos;ll set up a backup pickup with you.
                 </p>
               )}
             </div>

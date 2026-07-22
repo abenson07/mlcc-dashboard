@@ -20,6 +20,7 @@ export * from "./sponsorships";
 export * from "./tshirt_preorders";
 export * from "./fundraising_donations";
 export * from "./shop_orders";
+export * from "./shirt_preorder_items";
 export * from "./qr_codes";
 export * from "./leaflets";
 export * from "./tasks";

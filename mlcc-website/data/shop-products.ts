@@ -26,10 +26,10 @@ export const shopProducts: ShopProduct[] = [
   {
     slug: "2026-summer-social-shirt",
     name: "2026 Summer Social Shirt",
-    tagline: "Pre-order for this year's Summer Social",
+    tagline: "Gone in an hour. Now taking pre-orders.",
     description:
-      "This year's Summer Social tee, available in adult and kids sizes. Pre-orders are printed after the order window closes, then mailed to your address; plan on a few weeks after ordering before it ships.",
-    image: "/images/shop/2026-summer-social-shirt.svg",
+      "The first batch of Summer Social tees vanished in about sixty minutes. So we're doing this the neighborly way: a short pre-order window (about a week), then we order exactly what you asked for and close the shop. Grab yours and pick it up at Movie Night. If that night doesn't work, we'll find another time that does.",
+    image: "/images/shop/2026-summer-social-shirt.png",
     fulfillment: "preorder",
     priceCents: 2800,
     sizeGroups: [

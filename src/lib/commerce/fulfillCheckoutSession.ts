@@ -5,17 +5,24 @@ import {
   COMMERCE_METADATA_KEYS,
   isCommerceFlow,
 } from "@/lib/stripe/commerceMetadata";
-import type { TshirtLineItem, ShopLineItem } from "@/types/database";
+import type {
+  FundraisingDonationTier,
+  MembershipsInsert,
+  PaymentsInsert,
+  PeopleInsert,
+  ShirtPreorderItemsInsert,
+  ShopLineItem,
+  TshirtLineItem,
+} from "@/types/database";
 import {
   sendFundraiserThankYouEmail,
   sendMembershipConfirmationEmail,
   sendShopOrderConfirmationEmail,
   sendTshirtConfirmationEmail,
 } from "@/lib/commerce/commerceEmail";
-import type { FundraisingDonationTier } from "@/types/database";
-import type { MembershipsInsert, PaymentsInsert, PeopleInsert } from "@/types/database";
 import { findMembershipTier } from "@marketing/data/membership-tiers";
 import { upsertNewsletterContact, upsertWeeklyDigestContact } from "@/lib/resendContacts";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 function parseLineItemsJson(raw: string | undefined): TshirtLineItem[] | null {
   if (!raw?.trim()) return null;
@@ -94,6 +101,91 @@ function parseDonationTier(raw: string | undefined): FundraisingDonationTier {
   if (t === "household" || t === "champ" || t === "custom") return t;
   if (t === "individual") return "individual";
   return "custom";
+}
+
+function formatAddressText(shipping: Record<string, string> | null): string | null {
+  if (!shipping) return null;
+  const parts = [
+    shipping.line1,
+    shipping.line2,
+    [shipping.city, shipping.state, shipping.postal_code].filter(Boolean).join(", "),
+  ].filter((p) => !!p?.trim());
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+
+function explodeShirtPreorderRows(params: {
+  personId: string;
+  lineItems: ShopLineItem[];
+  sessionId: string;
+  paymentIntentId: string | null;
+}): ShirtPreorderItemsInsert[] {
+  const rows: ShirtPreorderItemsInsert[] = [];
+  for (const line of params.lineItems) {
+    for (let i = 0; i < line.quantity; i++) {
+      rows.push({
+        person_id: params.personId,
+        product_slug: line.product_slug,
+        product_name: line.product_name,
+        variant: line.variant,
+        unit_amount_cents: line.unit_amount_cents,
+        stripe_checkout_session_id: params.sessionId,
+        stripe_payment_intent_id: params.paymentIntentId,
+        status: "paid",
+      });
+    }
+  }
+  return rows;
+}
+
+async function upsertPersonForShopOrder(
+  supabase: SupabaseClient,
+  params: {
+    customerName: string;
+    customerEmail: string;
+    shipping: Record<string, string> | null;
+  }
+): Promise<{ ok: true; personId: string } | { ok: false; error: string }> {
+  const address = formatAddressText(params.shipping);
+  const { data: existingPerson, error: lookupError } = await supabase
+    .from("people")
+    .select("id")
+    .eq("email", params.customerEmail)
+    .maybeSingle();
+
+  if (lookupError) {
+    return { ok: false, error: lookupError.message };
+  }
+
+  if (existingPerson) {
+    const { error: updateError } = await supabase
+      .from("people")
+      .update({
+        full_name: params.customerName,
+        ...(address ? { address } : {}),
+      })
+      .eq("id", existingPerson.id);
+    if (updateError) {
+      return { ok: false, error: updateError.message };
+    }
+    return { ok: true, personId: existingPerson.id };
+  }
+
+  const personRow: PeopleInsert = {
+    full_name: params.customerName,
+    email: params.customerEmail,
+    address,
+    source: "shirt_preorder",
+  };
+  const { data: inserted, error: insertError } = await supabase
+    .from("people")
+    .insert(personRow)
+    .select("id")
+    .single();
+
+  if (insertError || !inserted) {
+    return { ok: false, error: insertError?.message ?? "Failed to create person" };
+  }
+  return { ok: true, personId: inserted.id };
 }
 
 export type FulfillResult =
@@ -251,7 +343,16 @@ export async function fulfillCheckoutSession(
       .eq("stripe_checkout_session_id", sessionId)
       .maybeSingle();
 
-    if (existing?.status === "paid") {
+    const { count: existingItemCount, error: existingItemsError } = await supabase
+      .from("shirt_preorder_items")
+      .select("id", { count: "exact", head: true })
+      .eq("stripe_checkout_session_id", sessionId);
+
+    if (existingItemsError) {
+      return { ok: false, error: existingItemsError.message };
+    }
+
+    if (existing?.status === "paid" && (existingItemCount ?? 0) > 0) {
       return { ok: true, flow, alreadyFulfilled: true };
     }
 
@@ -272,6 +373,32 @@ export async function fulfillCheckoutSession(
     }
 
     const shipping = shippingFromMetadata(session.metadata ?? {});
+
+    const personResult = await upsertPersonForShopOrder(supabase, {
+      customerName,
+      customerEmail,
+      shipping,
+    });
+    if (!personResult.ok) {
+      return { ok: false, error: personResult.error };
+    }
+
+    if ((existingItemCount ?? 0) === 0 && lineItems.length > 0) {
+      const shirtRows = explodeShirtPreorderRows({
+        personId: personResult.personId,
+        lineItems,
+        sessionId,
+        paymentIntentId,
+      });
+      if (shirtRows.length > 0) {
+        const { error: shirtError } = await supabase
+          .from("shirt_preorder_items")
+          .insert(shirtRows);
+        if (shirtError) {
+          return { ok: false, error: shirtError.message };
+        }
+      }
+    }
 
     const row = {
       stripe_checkout_session_id: sessionId,
@@ -297,7 +424,7 @@ export async function fulfillCheckoutSession(
       return { ok: false, error: error.message };
     }
 
-    if (lineItems.length > 0) {
+    if (lineItems.length > 0 && existing?.status !== "paid") {
       await sendShopOrderConfirmationEmail({
         to: customerEmail,
         customerName,

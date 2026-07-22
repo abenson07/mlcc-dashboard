@@ -3,11 +3,21 @@
 import * as React from "react";
 import Link from "next/link";
 import { RotatingBanner } from "@marketing/components/byq/RotatingBanner";
+import { SectionLabel } from "@marketing/components/SectionLabel";
 
-const primaryLinks = [
+const primaryLinks: {
+  label: string;
+  href: string;
+  tag?: string;
+}[] = [
   { label: "Events", href: "/events" },
   { label: "Leaflet", href: "/leaflet" },
   { label: "Committees", href: "/committees" },
+  {
+    label: "Summer Social T-Shirt",
+    href: "/shop/2026-summer-social-shirt",
+    tag: "New",
+  },
 ];
 
 export function NavigationBarSection() {
@@ -49,9 +59,10 @@ export function NavigationBarSection() {
                     <a
                       key={item.label}
                       href={item.href}
-                      className="relative z-[2] p-0 font-display text-[0.875rem] leading-4 font-bold uppercase no-underline text-sparkles-navy transition-colors duration-200 hover:text-sparkles-navy/90"
+                      className="relative z-[2] inline-flex items-center gap-2 p-0 font-display text-[0.875rem] leading-4 font-bold uppercase no-underline text-sparkles-navy transition-colors duration-200 hover:text-sparkles-navy/90"
                     >
-                      {item.label}
+                      <span>{item.label}</span>
+                      {item.tag ? <SectionLabel>{item.tag}</SectionLabel> : null}
                     </a>
                   ))}
                 </div>
@@ -118,9 +129,10 @@ export function NavigationBarSection() {
               <a
                 key={item.href}
                 href={item.href}
-                className="py-3 font-display text-lg font-bold uppercase text-sparkles-navy no-underline hover:opacity-80 transition-opacity duration-200"
+                className="inline-flex items-center gap-2 py-3 font-display text-lg font-bold uppercase text-sparkles-navy no-underline hover:opacity-80 transition-opacity duration-200"
               >
-                {item.label}
+                <span>{item.label}</span>
+                {item.tag ? <SectionLabel>{item.tag}</SectionLabel> : null}
               </a>
             ))}
 
