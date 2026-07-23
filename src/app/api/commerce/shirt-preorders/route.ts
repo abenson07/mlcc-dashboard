@@ -3,6 +3,15 @@ import { requireSession } from "@/lib/auth/require-session";
 import { createClient } from "@/lib/supabase/server";
 import type { ShirtPreorderItemRow } from "@/hooks/useShirtPreorderItems";
 
+type PersonJoin = NonNullable<ShirtPreorderItemRow["people"]>;
+
+function normalizePeople(
+  people: PersonJoin | PersonJoin[] | null | undefined,
+): PersonJoin | null {
+  if (!people) return null;
+  return Array.isArray(people) ? (people[0] ?? null) : people;
+}
+
 export async function GET() {
   const auth = await requireSession();
   if (!auth.ok) return auth.response;
@@ -30,7 +39,7 @@ export async function GET() {
         phone,
         address
       )
-    `
+    `,
     )
     .order("created_at", { ascending: false })
     .limit(2000);
@@ -39,5 +48,10 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ items: (data ?? []) as ShirtPreorderItemRow[] });
+  const items: ShirtPreorderItemRow[] = (data ?? []).map((row) => ({
+    ...row,
+    people: normalizePeople(row.people as PersonJoin | PersonJoin[] | null),
+  }));
+
+  return NextResponse.json({ items });
 }
