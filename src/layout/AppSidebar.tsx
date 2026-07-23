@@ -188,16 +188,21 @@ const mainNavSections: NavSection[] = [
     rootPath: "/old-admin/commerce/tshirt-preorders",
     pathPrefixes: ["/old-admin/commerce"],
     items: [
-      {
-        name: "T-shirt preorders",
-        path: "/old-admin/commerce/tshirt-preorders",
-        pro: false,
-      },
-      {
-        name: "Shop orders",
-        path: "/old-admin/commerce/shop-orders",
-        pro: false,
-      },
+        {
+          name: "T-shirt preorders",
+          path: "/old-admin/commerce/tshirt-preorders",
+          pro: false,
+        },
+        {
+          name: "Shirt Preorders",
+          path: "/admin/shirt-preorders",
+          pro: false,
+        },
+        {
+          name: "Shop orders",
+          path: "/old-admin/commerce/shop-orders",
+          pro: false,
+        },
       {
         name: "Fundraising",
         path: "/old-admin/commerce/fundraising",

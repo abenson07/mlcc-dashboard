@@ -20,6 +20,7 @@ import {
   Route,
   RouteOff,
   Settings,
+  Shirt,
   Star,
   Store,
   Users,
@@ -206,6 +207,12 @@ const SHELL_PREVIEW_MANAGE_GROUP: NavGroupConfig = {
       href: `${SHELL_PREVIEW_BASE}/invoice`,
       notReady: true,
     },
+    {
+      id: "shirt-preorders",
+      label: "Shirt Preorders",
+      icon: Shirt,
+      href: `${SHELL_PREVIEW_BASE}/shirt-preorders`,
+    },
   ],
 };
 
@@ -301,6 +308,7 @@ const SHELL_PREVIEW_BREADCRUMB_LABELS: Record<string, string> = {
   [`${SHELL_PREVIEW_BASE}/businesses`]: "Businesses",
   [`${SHELL_PREVIEW_BASE}/stories`]: "Stories",
   [`${SHELL_PREVIEW_BASE}/faqs`]: "FAQs",
+  [`${SHELL_PREVIEW_BASE}/shirt-preorders`]: "Shirt Preorders",
   [`${SHELL_PREVIEW_BASE}/widgets`]: "Widget Panel",
 };
 
@@ -321,6 +329,12 @@ export function isShellPreviewFaqsRoute(pathname: string): boolean {
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
   return normalizedPath === `${SHELL_PREVIEW_BASE}/faqs`;
+}
+
+export function isShellPreviewShirtPreordersRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/shirt-preorders`;
 }
 
 export function isShellPreviewLeafletRoute(pathname: string): boolean {

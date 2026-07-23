@@ -26,6 +26,7 @@ import {
   isShellPreviewLeafletSponsorshipsRoute,
   isShellPreviewLeafletTodoRoute,
   isShellPreviewWidgetsRoute,
+  isShellPreviewShirtPreordersRoute,
   parseShellPreviewEventId,
   shellPreviewBreadcrumbLabel,
 } from "@/components/shell/navConfigs";
@@ -41,6 +42,8 @@ import CommunicationStagesWidget from "@/components/shell/widgets/CommunicationS
 import CoverSheetsWidget from "@/components/shell/widgets/CoverSheetsWidget";
 import BudgetSponsorshipsWidget from "@/components/shell/widgets/BudgetSponsorshipsWidget";
 import SponsorshipLevelsWidget from "@/components/shell/widgets/SponsorshipLevelsWidget";
+import ShirtSizeBreakdownWidget from "@/components/shell/widgets/ShirtSizeBreakdownWidget";
+import ShirtTotalsWidget from "@/components/shell/widgets/ShirtTotalsWidget";
 
 type ShellPreviewContentProps = {
   children: ReactNode;
@@ -122,6 +125,11 @@ function LeafletShellBody({
             <>
               <SponsorshipLevelsWidget />
               <BudgetSponsorshipsWidget />
+            </>
+          ) : isShellPreviewShirtPreordersRoute(pathname) ? (
+            <>
+              <ShirtSizeBreakdownWidget />
+              <ShirtTotalsWidget />
             </>
           ) : isShellPreviewLeafletTodoRoute(pathname) ? (
             <>
