@@ -10,7 +10,6 @@ import type {
   MembershipsInsert,
   PaymentsInsert,
   PeopleInsert,
-  ShirtPreorderItemsInsert,
   ShopLineItem,
   TshirtLineItem,
 } from "@/types/database";
@@ -20,9 +19,12 @@ import {
   sendShopOrderConfirmationEmail,
   sendTshirtConfirmationEmail,
 } from "@/lib/commerce/commerceEmail";
+import {
+  explodeShirtPreorderRows,
+  upsertPersonForShopOrder,
+} from "@/lib/commerce/recordShopPreorder";
 import { findMembershipTier } from "@marketing/data/membership-tiers";
 import { upsertNewsletterContact, upsertWeeklyDigestContact } from "@/lib/resendContacts";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 function parseLineItemsJson(raw: string | undefined): TshirtLineItem[] | null {
   if (!raw?.trim()) return null;
@@ -111,81 +113,6 @@ function formatAddressText(shipping: Record<string, string> | null): string | nu
     [shipping.city, shipping.state, shipping.postal_code].filter(Boolean).join(", "),
   ].filter((p) => !!p?.trim());
   return parts.length > 0 ? parts.join(", ") : null;
-}
-
-function explodeShirtPreorderRows(params: {
-  personId: string;
-  lineItems: ShopLineItem[];
-  sessionId: string;
-  paymentIntentId: string | null;
-}): ShirtPreorderItemsInsert[] {
-  const rows: ShirtPreorderItemsInsert[] = [];
-  for (const line of params.lineItems) {
-    for (let i = 0; i < line.quantity; i++) {
-      rows.push({
-        person_id: params.personId,
-        product_slug: line.product_slug,
-        product_name: line.product_name,
-        variant: line.variant,
-        unit_amount_cents: line.unit_amount_cents,
-        stripe_checkout_session_id: params.sessionId,
-        stripe_payment_intent_id: params.paymentIntentId,
-        status: "paid",
-      });
-    }
-  }
-  return rows;
-}
-
-async function upsertPersonForShopOrder(
-  supabase: SupabaseClient,
-  params: {
-    customerName: string;
-    customerEmail: string;
-    shipping: Record<string, string> | null;
-  }
-): Promise<{ ok: true; personId: string } | { ok: false; error: string }> {
-  const address = formatAddressText(params.shipping);
-  const { data: existingPerson, error: lookupError } = await supabase
-    .from("people")
-    .select("id")
-    .eq("email", params.customerEmail)
-    .maybeSingle();
-
-  if (lookupError) {
-    return { ok: false, error: lookupError.message };
-  }
-
-  if (existingPerson) {
-    const { error: updateError } = await supabase
-      .from("people")
-      .update({
-        full_name: params.customerName,
-        ...(address ? { address } : {}),
-      })
-      .eq("id", existingPerson.id);
-    if (updateError) {
-      return { ok: false, error: updateError.message };
-    }
-    return { ok: true, personId: existingPerson.id };
-  }
-
-  const personRow: PeopleInsert = {
-    full_name: params.customerName,
-    email: params.customerEmail,
-    address,
-    source: "shirt_preorder",
-  };
-  const { data: inserted, error: insertError } = await supabase
-    .from("people")
-    .insert(personRow)
-    .select("id")
-    .single();
-
-  if (insertError || !inserted) {
-    return { ok: false, error: insertError?.message ?? "Failed to create person" };
-  }
-  return { ok: true, personId: inserted.id };
 }
 
 export type FulfillResult =
@@ -337,22 +264,22 @@ export async function fulfillCheckoutSession(
   }
 
   if (flow === COMMERCE_FLOW.SHOP) {
-    const { data: existing } = await supabase
-      .from("shop_orders")
-      .select("id, status")
-      .eq("stripe_checkout_session_id", sessionId)
-      .maybeSingle();
-
-    const { count: existingItemCount, error: existingItemsError } = await supabase
+    // Preorders are recorded as pending at checkout-submit time. Webhook only
+    // marks them paid when it arrives (optional; ops can reconcile later).
+    const { data: existingItems, error: existingItemsError } = await supabase
       .from("shirt_preorder_items")
-      .select("id", { count: "exact", head: true })
+      .select("id, status")
       .eq("stripe_checkout_session_id", sessionId);
 
     if (existingItemsError) {
       return { ok: false, error: existingItemsError.message };
     }
 
-    if (existing?.status === "paid" && (existingItemCount ?? 0) > 0) {
+    const hasItems = (existingItems?.length ?? 0) > 0;
+    const allPaid =
+      hasItems && existingItems!.every((item) => item.status === "paid");
+
+    if (allPaid) {
       return { ok: true, flow, alreadyFulfilled: true };
     }
 
@@ -373,36 +300,53 @@ export async function fulfillCheckoutSession(
     }
 
     const shipping = shippingFromMetadata(session.metadata ?? {});
+    const address = formatAddressText(shipping);
 
-    const personResult = await upsertPersonForShopOrder(supabase, {
-      customerName,
-      customerEmail,
-      shipping,
-    });
-    if (!personResult.ok) {
-      return { ok: false, error: personResult.error };
-    }
-
-    if ((existingItemCount ?? 0) === 0 && lineItems.length > 0) {
+    if (hasItems) {
+      const { error: markPaidError } = await supabase
+        .from("shirt_preorder_items")
+        .update({
+          status: "paid",
+          stripe_payment_intent_id: paymentIntentId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("stripe_checkout_session_id", sessionId)
+        .neq("status", "paid");
+      if (markPaidError) {
+        return { ok: false, error: markPaidError.message };
+      }
+    } else if (lineItems.length > 0) {
+      // Fallback if pending rows were never written (older clients / failed insert).
+      const personResult = await upsertPersonForShopOrder(supabase, {
+        customerName,
+        customerEmail,
+        address,
+      });
+      if (!personResult.ok) {
+        return { ok: false, error: personResult.error };
+      }
       const shirtRows = explodeShirtPreorderRows({
         personId: personResult.personId,
         lineItems,
         sessionId,
         paymentIntentId,
+        status: "paid",
       });
-      if (shirtRows.length > 0) {
-        const { error: shirtError } = await supabase
-          .from("shirt_preorder_items")
-          .insert(shirtRows);
-        if (shirtError) {
-          return { ok: false, error: shirtError.message };
-        }
+      const { error: shirtError } = await supabase
+        .from("shirt_preorder_items")
+        .insert(shirtRows);
+      if (shirtError) {
+        return { ok: false, error: shirtError.message };
       }
     }
 
-    // Optional aggregate receipt table — shirt_preorder_items + people are the
-    // source of truth for preorders. Don't fail fulfillment if this table is
-    // missing or write fails after those rows are already saved.
+    // Optional aggregate receipt table — ignore if missing.
+    const { data: existingOrder } = await supabase
+      .from("shop_orders")
+      .select("id, status")
+      .eq("stripe_checkout_session_id", sessionId)
+      .maybeSingle();
+
     const row = {
       stripe_checkout_session_id: sessionId,
       stripe_payment_intent_id: paymentIntentId,
@@ -416,7 +360,7 @@ export async function fulfillCheckoutSession(
       updated_at: new Date().toISOString(),
     };
 
-    const { error: shopOrderError } = existing
+    const { error: shopOrderError } = existingOrder
       ? await supabase
           .from("shop_orders")
           .update(row)
@@ -430,11 +374,7 @@ export async function fulfillCheckoutSession(
       );
     }
 
-    if (
-      lineItems.length > 0 &&
-      existing?.status !== "paid" &&
-      !shopOrderError
-    ) {
+    if (lineItems.length > 0 && existingOrder?.status !== "paid" && !shopOrderError) {
       await sendShopOrderConfirmationEmail({
         to: customerEmail,
         customerName,

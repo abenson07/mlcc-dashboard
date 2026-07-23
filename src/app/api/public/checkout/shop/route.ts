@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createShopCheckoutSession } from "@/lib/commerce/createShopCheckout";
+import {
+  explodeShirtPreorderRows,
+  formatShopAddressText,
+  shopCartToLineItems,
+  upsertPersonForShopOrder,
+} from "@/lib/commerce/recordShopPreorder";
 import { parseShopCart } from "@/lib/commerce/shopCart";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { corsPreflightResponse, withCors } from "@/lib/stripe/cors";
 
 export async function OPTIONS(request: NextRequest) {
@@ -56,6 +63,9 @@ export async function POST(request: NextRequest) {
       : typeof c.zip === "string"
         ? c.zip.trim()
         : "";
+  const phone = typeof c.phone === "string" ? c.phone.trim() : undefined;
+  const addressLine2 =
+    typeof c.addressLine2 === "string" ? c.addressLine2.trim() : undefined;
 
   if (!name || !email || !addressLine1 || !city || !state || !postalCode) {
     return withCors(
@@ -67,21 +77,47 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return withCors(
+      request,
+      NextResponse.json({ error: "Database is not configured" }, { status: 503 })
+    );
+  }
+
+  const customer = {
+    name,
+    email,
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    postalCode,
+    phone,
+  };
+
+  // Save person + pending shirt rows before sending them to Stripe.
+  const personResult = await upsertPersonForShopOrder(supabase, {
+    customerName: name,
+    customerEmail: email,
+    address: formatShopAddressText(customer),
+    phone: phone ?? null,
+  });
+  if (!personResult.ok) {
+    return withCors(
+      request,
+      NextResponse.json(
+        { error: `Could not save customer: ${personResult.error}` },
+        { status: 500 }
+      )
+    );
+  }
+
   try {
     const session = await createShopCheckoutSession({
       cart,
       returnOrigin,
-      customer: {
-        name,
-        email,
-        addressLine1,
-        addressLine2:
-          typeof c.addressLine2 === "string" ? c.addressLine2.trim() : undefined,
-        city,
-        state,
-        postalCode,
-        phone: typeof c.phone === "string" ? c.phone.trim() : undefined,
-      },
+      customer,
     });
 
     if (!session.url) {
@@ -94,9 +130,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const shirtRows = explodeShirtPreorderRows({
+      personId: personResult.personId,
+      lineItems: shopCartToLineItems(cart),
+      sessionId: session.id,
+      status: "pending",
+    });
+
+    if (shirtRows.length === 0) {
+      return withCors(
+        request,
+        NextResponse.json({ error: "Cart produced no shirt rows" }, { status: 400 })
+      );
+    }
+
+    const { error: shirtError } = await supabase
+      .from("shirt_preorder_items")
+      .insert(shirtRows);
+
+    if (shirtError) {
+      console.error("[shop checkout] pending shirt rows failed:", shirtError.message);
+      return withCors(
+        request,
+        NextResponse.json(
+          { error: `Could not save preorder: ${shirtError.message}` },
+          { status: 500 }
+        )
+      );
+    }
+
     return withCors(
       request,
-      NextResponse.json({ url: session.url, sessionId: session.id })
+      NextResponse.json({
+        url: session.url,
+        sessionId: session.id,
+        personId: personResult.personId,
+        itemCount: shirtRows.length,
+      })
     );
   } catch (e) {
     const message = e instanceof Error ? e.message : "Checkout failed";
