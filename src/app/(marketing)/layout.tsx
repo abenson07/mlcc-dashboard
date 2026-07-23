@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "../marketing.css";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function MarketingLayout({
   return (
     <div className="marketing-root min-h-full flex flex-col bg-sparkles-cream text-sparkles-navy font-body antialiased">
       {children}
+      <Analytics />
     </div>
   );
 }

@@ -54,6 +54,7 @@
     "@tiptap/react": "^3.22.5",
     "@tiptap/starter-kit": "^3.22.5",
     "@tiptap/suggestion": "^3.22.5",
+    "@vercel/analytics": "^2.0.1",
     "@visx/group": "^4.0.0",
     "@visx/scale": "^4.0.0",
     "@visx/shape": "^4.0.0",
