@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+import { getApiBase } from "@/lib/apiBase";
 import type { VolunteerDetailContent } from "@marketing/data/volunteers";
 import {
   formatOpportunityMeta,
@@ -18,14 +20,49 @@ export function CmsPage6Section({
   detail,
   signupIdPrefix = "volunteer",
   currentSlug,
+  committeeName,
 }: {
   title: string;
   detail?: VolunteerDetailContent;
   signupIdPrefix?: string;
   currentSlug?: string;
+  /** Slack channel key (e.g. "Events"); omit for Steering fallback. */
+  committeeName?: string;
 }) {
   const backLabel = detail?.backLabel ?? "label placeholder";
   const relatedOpportunities = getRelatedVolunteerOpportunities(currentSlug);
+  const [status, setStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const firstName = String(formData.get("firstName") ?? "").trim();
+    const lastName = String(formData.get("lastName") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const name = [firstName, lastName].filter(Boolean).join(" ");
+
+    setStatus("submitting");
+    try {
+      const response = await fetch(`${getApiBase()}/api/public/committees/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          contact: email,
+          committeeName,
+          opportunityTitle: title,
+          source: "volunteer-opportunity",
+        }),
+      });
+
+      if (!response.ok) throw new Error("Request failed");
+      setStatus("success");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
+  }
 
   function renderBody() {
     if (detail) {
@@ -176,7 +213,11 @@ export function CmsPage6Section({
                 </div>
 
                 <div className="sticky top-[7.5rem] flex w-full max-w-[28rem] flex-col gap-6 rounded-2xl bg-sparkles-warm p-8 max-[991px]:max-w-none max-[991px]:justify-self-start max-[767px]:w-full">
-                  <form className="flex flex-col" aria-label={`Sign up for ${title}`}>
+                  <form
+                    className="flex flex-col"
+                    aria-label={`Sign up for ${title}`}
+                    onSubmit={handleSubmit}
+                  >
                     <div className="flex flex-col">
                       <label htmlFor={`${signupIdPrefix}-first-name`} className={labelClassName}>
                         First name
@@ -227,10 +268,21 @@ export function CmsPage6Section({
 
                     <button
                       type="submit"
-                      className="mt-1 w-full cursor-pointer rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90"
+                      disabled={status === "submitting"}
+                      className="mt-1 w-full cursor-pointer rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm leading-5 font-bold text-sparkles-cream transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      I&apos;m interested
+                      {status === "submitting" ? "Sending…" : "I'm interested"}
                     </button>
+                    {status === "success" ? (
+                      <p className="mt-3 mb-0 font-body text-sm text-sparkles-navy">
+                        Thanks! We&apos;ll be in touch!
+                      </p>
+                    ) : null}
+                    {status === "error" ? (
+                      <p className="mt-3 mb-0 font-body text-sm text-red-700">
+                        Something went wrong. Please try again.
+                      </p>
+                    ) : null}
                   </form>
                 </div>
               </div>

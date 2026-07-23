@@ -1,4 +1,4 @@
-import type { CommitteeListingSlug } from "./committees";
+import { COMMITTEE_CONTENT, type CommitteeListingSlug } from "./committees";
 
 export type VolunteerFilter =
   | "single-day-events"
@@ -25,6 +25,8 @@ export type VolunteerOpportunity = {
   filters: VolunteerFilter[];
   image: string;
   committee?: CommitteeListingSlug;
+  /** When set, Slack routing uses this instead of `committee`. `"steering"` → SLACK_CHANNEL_STEERING fallback. */
+  notifySlackAs?: CommitteeListingSlug | "steering";
   detail?: VolunteerDetailContent;
 };
 
@@ -46,6 +48,7 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
     filters: ["communication", "online"],
     image:
       "/images/community-photos/community-meeting-a.webp",
+    notifySlackAs: "steering",
     detail: {
       backLabel: "All volunteer opportunities",
       blocks: [
@@ -165,6 +168,7 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
     image:
       "/images/community-photos/photo-jun-11-2025.jpg",
     committee: "communications",
+    notifySlackAs: "steering",
     detail: {
       backLabel: "All volunteer opportunities",
       blocks: [
@@ -209,13 +213,14 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
   },
   {
     slug: "vice-president",
-    title: "Vice President / Communications Officer",
+    title: "Vice President",
     description:
       "Step into a leadership role on the Executive Board, supporting the President and helping the council speak with one clear voice.",
     volunteersNeeded: 1,
     timeCommitment: "3 hours per month",
     filters: ["planning", "communication"],
     image: "/images/community-photos/community-meeting-d.webp",
+    notifySlackAs: "steering",
     detail: {
       backLabel: "All volunteer opportunities",
       blocks: [
@@ -512,48 +517,6 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
     committee: "communications",
   },
   {
-    slug: "newsletter-layout-apprentice",
-    title: "Newsletter Layout Apprentice",
-    description:
-      "Learn the ropes of laying out the Leaflet alongside our longtime designer, Laurie, with an eye toward taking on more over time.",
-    volunteersNeeded: 1,
-    timeCommitment: "3 hours per month",
-    filters: ["communication", "online"],
-    image: "/images/leaflet/leaflet.webp",
-    detail: {
-      backLabel: "All volunteer opportunities",
-      blocks: [
-        { kind: "heading", text: "What you'd be doing", size: "h5" },
-        {
-          kind: "list",
-          items: [
-            "Working alongside Laurie to lay out each issue of the Leaflet",
-            "Learning the templates, fonts, and style the newsletter uses",
-            "Gradually taking on more of the layout work as you get comfortable",
-          ],
-        },
-        {
-          kind: "paragraph",
-          text: "This is an apprenticeship, not a solo role. Laurie has laid out the Leaflet for years and is looking for someone to learn alongside her so the newsletter has backup and, eventually, a succession plan.",
-        },
-        {
-          kind: "heading",
-          text: "What it takes",
-          size: "h5",
-        },
-        {
-          kind: "list",
-          items: [
-            "Basic comfort with layout or design software, or eagerness to learn",
-            "About three hours a month around each issue's deadline",
-            "Patience for a gradual, hands-on learning process",
-          ],
-        },
-      ],
-    },
-    committee: "newsletter",
-  },
-  {
     slug: "poster-and-sign-distributor",
     title: "Poster & Sign Distributor",
     description:
@@ -799,7 +762,7 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
   },
   {
     slug: "emergency-hub-response-volunteer",
-    title: "Help on the Day",
+    title: "Hub Captain",
     description:
       "Get some basic training and show up to help neighbors when disaster strikes, no prior experience needed.",
     volunteersNeeded: 10,
@@ -1057,6 +1020,15 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
 
 export function getVolunteerOpportunity(slug: string): VolunteerOpportunity | undefined {
   return volunteerOpportunities.find((opportunity) => opportunity.slug === slug);
+}
+
+/** Slack channel key for `postToSlack`, or `undefined` to fall back to Steering. */
+export function getVolunteerSlackCommitteeName(
+  opportunity: VolunteerOpportunity,
+): string | undefined {
+  const target = opportunity.notifySlackAs ?? opportunity.committee;
+  if (!target || target === "steering") return undefined;
+  return COMMITTEE_CONTENT[target].title;
 }
 
 export function getVolunteerOpportunitiesByCommittee(

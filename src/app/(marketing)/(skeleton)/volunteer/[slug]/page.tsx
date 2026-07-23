@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CmsPage6Section } from "@marketing/components/byq/CmsPage6Section";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
-import { getVolunteerOpportunity, volunteerOpportunities } from "@marketing/data/volunteers";
+import {
+  getVolunteerOpportunity,
+  getVolunteerSlackCommitteeName,
+  volunteerOpportunities,
+} from "@marketing/data/volunteers";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -41,6 +45,7 @@ export default async function VolunteerOpportunityPage({ params }: PageProps) {
         detail={opportunity.detail}
         signupIdPrefix={opportunity.slug}
         currentSlug={opportunity.slug}
+        committeeName={getVolunteerSlackCommitteeName(opportunity)}
       />
       <CtaSection />
     </main>
