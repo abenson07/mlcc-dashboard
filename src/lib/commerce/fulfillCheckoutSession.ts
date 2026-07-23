@@ -400,6 +400,9 @@ export async function fulfillCheckoutSession(
       }
     }
 
+    // Optional aggregate receipt table — shirt_preorder_items + people are the
+    // source of truth for preorders. Don't fail fulfillment if this table is
+    // missing or write fails after those rows are already saved.
     const row = {
       stripe_checkout_session_id: sessionId,
       stripe_payment_intent_id: paymentIntentId,
@@ -413,18 +416,25 @@ export async function fulfillCheckoutSession(
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = existing
+    const { error: shopOrderError } = existing
       ? await supabase
           .from("shop_orders")
           .update(row)
           .eq("stripe_checkout_session_id", sessionId)
       : await supabase.from("shop_orders").insert(row);
 
-    if (error) {
-      return { ok: false, error: error.message };
+    if (shopOrderError) {
+      console.error(
+        "[fulfillCheckoutSession] shop_orders write skipped:",
+        shopOrderError.message
+      );
     }
 
-    if (lineItems.length > 0 && existing?.status !== "paid") {
+    if (
+      lineItems.length > 0 &&
+      existing?.status !== "paid" &&
+      !shopOrderError
+    ) {
       await sendShopOrderConfirmationEmail({
         to: customerEmail,
         customerName,
