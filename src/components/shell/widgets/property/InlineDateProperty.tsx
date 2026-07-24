@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import DatePickerField from "@/components/form/DatePicker";
 
 type InlineDatePropertyProps = {
   value: string;
@@ -24,84 +25,34 @@ function formatUsDate(iso: string): string {
   });
 }
 
-function openDatePicker(e: React.MouseEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>) {
-  const el = e.currentTarget;
-  try {
-    el.showPicker?.();
-  } catch {
-    // ignore
-  }
-}
-
 export default function InlineDateProperty({
   value,
   placeholder = "—",
   readOnly = false,
   onSave,
 }: InlineDatePropertyProps) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
 
-  function startEditing() {
-    setDraft(value);
-    setEditing(true);
-  }
-
-  function cancel() {
-    setEditing(false);
-  }
-
-  async function confirm(next = draft) {
+  async function handleChange(next: string) {
+    if (!next) return;
     setSaving(true);
     try {
       await onSave(next);
-      setEditing(false);
-    } catch {
-      // onSave surfaces errors
     } finally {
       setSaving(false);
     }
   }
 
-  const display = formatUsDate(value);
-
   if (readOnly) {
-    return <span className="shell-widget-property-static">{display || placeholder}</span>;
-  }
-
-  if (!editing) {
-    return (
-      <button
-        type="button"
-        className={`shell-widget-property-trigger${value ? "" : " shell-widget-property-trigger--placeholder"}`}
-        onClick={startEditing}
-      >
-        {display || placeholder}
-      </button>
-    );
+    return <span className="shell-widget-property-static">{formatUsDate(value) || placeholder}</span>;
   }
 
   return (
-    <input
-      type="date"
-      className="shell-widget-property-input cursor-pointer [&::-webkit-calendar-picker-indicator]:!block [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-      autoFocus
+    <DatePickerField
+      value={value.slice(0, 10)}
+      onChange={handleChange}
       disabled={saving}
-      value={draft}
-      onChange={(e) => {
-        const next = e.target.value;
-        setDraft(next);
-        if (next) void confirm(next);
-      }}
-      onClick={openDatePicker}
-      onFocus={openDatePicker}
-      onBlur={() => {
-        if (!saving) cancel();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") cancel();
-      }}
+      placeholder={placeholder}
     />
   );
 }

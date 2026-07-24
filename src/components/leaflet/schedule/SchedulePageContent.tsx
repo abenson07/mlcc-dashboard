@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ui/modal/ConfirmDialog";
+import DatePickerField from "@/components/form/DatePicker";
 import { TableRowActionsMenu } from "@/components/ui/table/TableRowActionsMenu";
 import { daysUntilDistribution, groupScheduleTasks } from "../leafletData";
 import { useLeafletContext } from "../LeafletContext";
@@ -160,13 +161,14 @@ export default function SchedulePageContent() {
                       disabled={creating}
                       autoFocus
                     />
-                    <input
-                      type="date"
-                      style={{ border: "1px solid var(--lf-canvas-border)", borderRadius: 6, padding: "4px 8px" }}
-                      value={newDueDate}
-                      onChange={(e) => setNewDueDate(e.target.value)}
-                      disabled={creating}
-                    />
+                    <div style={{ width: 170 }}>
+                      <DatePickerField
+                        id="schedule-new-task-due-date"
+                        value={newDueDate}
+                        onChange={setNewDueDate}
+                        disabled={creating}
+                      />
+                    </div>
                     <button
                       type="button"
                       className="lf-btn lf-btn--primary"
