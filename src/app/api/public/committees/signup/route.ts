@@ -32,10 +32,16 @@ export async function POST(request: NextRequest) {
     return withCors(request, NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }));
   }
 
-  const { name, contact, committeeName, source, opportunityTitle } = (body ?? {}) as Record<
+  const { name, contact, committeeName, source, opportunityTitle, website } = (body ?? {}) as Record<
     string,
     unknown
   >;
+
+  // Honeypot: "website" is a hidden field real users never see or fill in.
+  // Bots that blindly fill every field trip it — pretend success without notifying Slack.
+  if (typeof website === "string" && website.trim()) {
+    return withCors(request, NextResponse.json({ ok: true }));
+  }
 
   if (typeof name !== "string" || !name.trim() || typeof contact !== "string" || !contact.trim()) {
     return withCors(

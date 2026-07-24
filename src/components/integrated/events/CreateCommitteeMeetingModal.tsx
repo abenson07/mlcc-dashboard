@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
+import DatePickerField from "@/components/form/DatePicker";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
 import type { CreateCommitteeMeetingPayload } from "hooks";
 import { combineLocalDateAndTime } from "@/lib/committee-meetings/meetingDateTime";
@@ -94,12 +95,11 @@ export default function CreateCommitteeMeetingModal({
         </div>
 
         <div>
-          <Label htmlFor="cm-date">Date</Label>
-          <Input
+          <DatePickerField
             id="cm-date"
-            type="date"
+            label="Date"
             value={meetingDate}
-            onChange={(e) => setMeetingDate(e.target.value)}
+            onChange={setMeetingDate}
           />
         </div>
 

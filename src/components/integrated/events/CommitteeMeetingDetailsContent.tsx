@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import DatePickerField from "@/components/form/DatePicker";
 import { COMMITTEE_LABELS } from "schemas/committee_meetings";
 import { useCommitteeMeeting } from "hooks";
 import { useEventContext } from "./EventContext";
@@ -88,14 +89,9 @@ export default function CommitteeMeetingDetailsContent() {
 
         <div>
           <label className="lf-detail-label" htmlFor="md-date">Date</label>
-          <input
-            id="md-date"
-            type="date"
-            className="lf-input"
-            style={{ width: "100%", marginTop: 6 }}
-            value={meetingDate}
-            onChange={(e) => setMeetingDate(e.target.value)}
-          />
+          <div style={{ marginTop: 6 }}>
+            <DatePickerField id="md-date" value={meetingDate} onChange={setMeetingDate} />
+          </div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>

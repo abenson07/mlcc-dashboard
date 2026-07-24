@@ -49,7 +49,9 @@ export function defaultSponsorshipDueDate(distributionDate: string): string {
 }
 
 export function defaultDeliveryDate(distributionDate: string): string {
-  return distributionDate;
+  const d = new Date(`${distributionDate}T12:00:00`);
+  d.setDate(d.getDate() - 21);
+  return d.toISOString().slice(0, 10);
 }
 
 export function daysUntilDistribution(iso: string) {

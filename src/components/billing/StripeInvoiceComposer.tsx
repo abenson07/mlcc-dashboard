@@ -7,6 +7,7 @@ import InvoiceDocumentPreview, {
 import { partitionEventsByRange } from "@/components/events/eventsListUtils";
 import { SPONSORSHIP_TIER_DEFS } from "@/components/leaflet/leafletData";
 import Label from "@/components/form/Label";
+import DatePickerField from "@/components/form/DatePicker";
 import { PlusIcon } from "@/icons";
 import { getApiBase } from "@/lib/apiBase";
 import { useBusinesses, useLeaflets, useWebflowEvents } from "hooks";
@@ -1304,18 +1305,8 @@ export default function StripeInvoiceComposer({
         ) : null}
       </div>
 
-      <div>
-        <Label htmlFor="inv-due">Due date</Label>
-        <input
-          id="inv-due"
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          onBlur={() => {
-            if (!dueDate.trim()) setDueDate(dueDatePlusDays(30));
-          }}
-          className="mt-2 h-11 w-full max-w-xs rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-blue-400"
-        />
+      <div className="max-w-xs">
+        <DatePickerField id="inv-due" label="Due date" value={dueDate} onChange={setDueDate} />
         {dueDateError ? (
           <p className="mt-1 text-xs text-red-600 dark:text-red-400">
             {dueDateError}

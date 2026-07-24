@@ -37,6 +37,7 @@ export function CommitteeSpotlightSection({
           contact: formData.get("contact"),
           committeeName,
           source: "meeting-signup",
+          website: formData.get("website"),
         }),
       });
 
@@ -187,6 +188,15 @@ export function CommitteeSpotlightSection({
                       maxLength={256}
                       required
                     />
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}
+                    />
+
                     <button
                       type="submit"
                       disabled={meetingStatus === "submitting"}

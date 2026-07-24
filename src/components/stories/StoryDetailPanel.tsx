@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { IconClose } from "@/components/leaflet/routes/leafletIcons";
+import DatePickerField from "@/components/form/DatePicker";
 import { useLeaflets, usePeople, useStories } from "hooks";
 import type { Stories } from "@/types/database";
 import StoryBodyEditor from "./StoryBodyEditor";
@@ -150,13 +151,10 @@ export default function StoryDetailPanel({ story, onClose, onDeleted }: StoryDet
         <label className="lf-detail-label" htmlFor="story-publish-date">
           Publish date
         </label>
-        <input
+        <DatePickerField
           id="story-publish-date"
-          type="date"
-          className="lf-input"
           value={publishDate}
-          onChange={(e) => {
-            const next = e.target.value;
+          onChange={(next) => {
             setPublishDate(next);
             void update(story.id, { publish_date: next || null });
           }}

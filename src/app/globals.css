@@ -216,6 +216,108 @@
 }
 
 /*
+  Untitled UI semantic tokens — powers the generated components under
+  src/components/base and src/components/application (e.g. the date-picker).
+  These alias the existing gray/brand/error/warning/success ramps above
+  rather than introducing a second palette, and follow Tailwind v4's
+  per-utility theme namespaces (--background-color-*, --text-color-*, etc.)
+  so e.g. `bg-primary` and `text-primary` can resolve to different colors.
+*/
+@theme {
+  --text-md: 16px;
+  --text-md--line-height: 24px;
+
+  --shadow-skeuomorphic: 0px 0px 0px 1px rgba(0, 0, 0, 0.18) inset, 0px -2px 0px 0px rgba(0, 0, 0, 0.05) inset;
+  --shadow-xs-skeuomorphic: var(--shadow-skeuomorphic), var(--shadow-xs);
+
+  --color-bg-primary: var(--color-white);
+  --color-bg-primary_hover: var(--color-gray-50);
+  --color-bg-secondary: var(--color-gray-50);
+  --color-bg-secondary_hover: var(--color-gray-100);
+  --color-bg-primary-solid: var(--color-gray-900);
+  --color-bg-brand-solid: var(--color-brand-600);
+  --color-bg-brand-solid_hover: var(--color-brand-700);
+  --color-bg-error-primary: var(--color-error-50);
+  --color-bg-error-solid: var(--color-error-600);
+  --color-bg-error-solid_hover: var(--color-error-700);
+
+  --color-fg-white: var(--color-white);
+  --color-fg-brand-primary: var(--color-brand-600);
+  --color-fg-brand-secondary_alt: var(--color-brand-600);
+  --color-fg-brand-secondary_hover: var(--color-brand-700);
+  --color-fg-quaternary: var(--color-gray-400);
+  --color-fg-quaternary_hover: var(--color-gray-500);
+  --color-fg-secondary: var(--color-gray-700);
+  --color-fg-error-primary: var(--color-error-600);
+  --color-fg-error-secondary: var(--color-error-500);
+
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-700);
+  --color-text-secondary_hover: var(--color-gray-800);
+  --color-text-tertiary: var(--color-gray-600);
+  --color-text-tertiary_hover: var(--color-gray-700);
+  --color-text-quaternary: var(--color-gray-500);
+  --color-text-placeholder: var(--color-gray-500);
+  --color-text-brand-secondary: var(--color-brand-700);
+  --color-text-brand-secondary_hover: var(--color-brand-800);
+  --color-text-brand-tertiary: var(--color-brand-600);
+  --color-text-error-primary: var(--color-error-600);
+  --color-text-error-primary_hover: var(--color-error-700);
+
+  --color-border-primary: var(--color-gray-300);
+  --color-border-secondary: var(--color-gray-200);
+  --color-border-secondary_alt: rgb(0 0 0 / 0.1);
+  --color-border-brand: var(--color-brand-500);
+  --color-border-error: var(--color-error-500);
+  --color-border-error_subtle: var(--color-error-300);
+
+  --color-tooltip-supporting-text: var(--color-gray-300);
+  --color-focus-ring: var(--color-brand-500);
+
+  /* Per-utility theme namespaces (Tailwind v4 checks these before the generic --color-* above) */
+  --background-color-primary: var(--color-bg-primary);
+  --background-color-primary_hover: var(--color-bg-primary_hover);
+  --background-color-secondary: var(--color-bg-secondary);
+  --background-color-secondary_hover: var(--color-bg-secondary_hover);
+  --background-color-primary-solid: var(--color-bg-primary-solid);
+  --background-color-brand-solid: var(--color-bg-brand-solid);
+  --background-color-brand-solid_hover: var(--color-bg-brand-solid_hover);
+  --background-color-error-primary: var(--color-bg-error-primary);
+  --background-color-error-solid: var(--color-bg-error-solid);
+  --background-color-error-solid_hover: var(--color-bg-error-solid_hover);
+
+  --text-color-primary: var(--color-text-primary);
+  --text-color-secondary: var(--color-text-secondary);
+  --text-color-secondary_hover: var(--color-text-secondary_hover);
+  --text-color-tertiary: var(--color-text-tertiary);
+  --text-color-tertiary_hover: var(--color-text-tertiary_hover);
+  --text-color-quaternary: var(--color-text-quaternary);
+  --text-color-placeholder: var(--color-text-placeholder);
+  --text-color-brand-secondary: var(--color-text-brand-secondary);
+  --text-color-brand-secondary_hover: var(--color-text-brand-secondary_hover);
+  --text-color-brand-tertiary: var(--color-text-brand-tertiary);
+  --text-color-error-primary: var(--color-text-error-primary);
+  --text-color-error-primary_hover: var(--color-text-error-primary_hover);
+
+  --border-color-primary: var(--color-border-primary);
+  --border-color-secondary: var(--color-border-secondary);
+  --border-color-secondary_alt: var(--color-border-secondary_alt);
+  --border-color-brand: var(--color-border-brand);
+  --border-color-error: var(--color-border-error);
+  --border-color-error_subtle: var(--color-border-error_subtle);
+
+  --ring-color-primary: var(--color-border-primary);
+  --ring-color-secondary: var(--color-border-secondary);
+  --ring-color-secondary_alt: var(--color-border-secondary_alt);
+  --ring-color-brand: var(--color-border-brand);
+  --ring-color-error: var(--color-border-error);
+  --ring-color-error_subtle: var(--color-border-error_subtle);
+
+  --outline-color-brand: var(--color-border-brand);
+  --outline-color-error: var(--color-border-error);
+}
+
+/*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
   looks the same as it did with Tailwind CSS v3.
@@ -265,6 +367,52 @@
   .dark,
   .dark * {
     --color-mercury-line: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Untitled UI semantic token overrides (see light-mode definitions above) */
+  .dark {
+    --color-bg-primary: var(--color-gray-900);
+    --color-bg-primary_hover: var(--color-gray-800);
+    --color-bg-secondary: var(--color-gray-800);
+    --color-bg-secondary_hover: var(--color-gray-700);
+    --color-bg-primary-solid: var(--color-gray-950);
+    --color-bg-brand-solid: var(--color-brand-600);
+    --color-bg-brand-solid_hover: var(--color-brand-500);
+    --color-bg-error-primary: var(--color-error-950);
+    --color-bg-error-solid: var(--color-error-600);
+    --color-bg-error-solid_hover: var(--color-error-500);
+
+    --color-fg-brand-primary: var(--color-brand-400);
+    --color-fg-brand-secondary_alt: var(--color-brand-400);
+    --color-fg-brand-secondary_hover: var(--color-gray-500);
+    --color-fg-quaternary: var(--color-gray-600);
+    --color-fg-quaternary_hover: var(--color-gray-500);
+    --color-fg-secondary: var(--color-gray-300);
+    --color-fg-error-primary: var(--color-error-500);
+    --color-fg-error-secondary: var(--color-error-400);
+
+    --color-text-primary: var(--color-white);
+    --color-text-secondary: var(--color-gray-300);
+    --color-text-secondary_hover: var(--color-gray-200);
+    --color-text-tertiary: var(--color-gray-400);
+    --color-text-tertiary_hover: var(--color-gray-300);
+    --color-text-quaternary: var(--color-gray-400);
+    --color-text-placeholder: var(--color-gray-500);
+    --color-text-brand-secondary: var(--color-gray-300);
+    --color-text-brand-secondary_hover: var(--color-gray-200);
+    --color-text-brand-tertiary: var(--color-gray-400);
+    --color-text-error-primary: var(--color-error-400);
+    --color-text-error-primary_hover: var(--color-error-300);
+
+    --color-border-primary: var(--color-gray-700);
+    --color-border-secondary: var(--color-gray-800);
+    --color-border-secondary_alt: var(--color-gray-800);
+    --color-border-brand: var(--color-brand-400);
+    --color-border-error: var(--color-error-400);
+    --color-border-error_subtle: var(--color-error-500);
+
+    --color-tooltip-supporting-text: var(--color-gray-300);
+    --color-focus-ring: var(--color-brand-500);
   }
 }
 
@@ -366,10 +514,8 @@
 }
 
 @layer utilities {
-  /* For Remove Date Icon */
-  input[type="date"]::-webkit-inner-spin-button,
+  /* For Remove Time Icon (date inputs were replaced by the Untitled UI date-picker) */
   input[type="time"]::-webkit-inner-spin-button,
-  input[type="date"]::-webkit-calendar-picker-indicator,
   input[type="time"]::-webkit-calendar-picker-indicator {
     display: none;
     -webkit-appearance: none;

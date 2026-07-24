@@ -40,6 +40,7 @@ export function CmsPage6Section({
     const firstName = String(formData.get("firstName") ?? "").trim();
     const lastName = String(formData.get("lastName") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
+    const website = String(formData.get("website") ?? "").trim();
     const name = [firstName, lastName].filter(Boolean).join(" ");
 
     setStatus("submitting");
@@ -53,6 +54,7 @@ export function CmsPage6Section({
           committeeName,
           opportunityTitle: title,
           source: "volunteer-opportunity",
+          website,
         }),
       });
 
@@ -265,6 +267,15 @@ export function CmsPage6Section({
                         required
                       />
                     </div>
+
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}
+                    />
 
                     <button
                       type="submit"

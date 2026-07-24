@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import DatePickerField from "@/components/form/DatePicker";
 import {
   useWebflowEvents,
   type WebflowCollectionFieldDTO,
@@ -898,16 +899,11 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-6">
-                <div>
+                <div style={{ width: 170 }}>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                     Date *
                   </label>
-                  <input
-                    type="date"
-                    value={eventDate}
-                    onChange={(e) => setEventDate(e.target.value)}
-                    className="dark:bg-dark-900 h-11 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:text-white/90"
-                  />
+                  <DatePickerField value={eventDate} onChange={setEventDate} />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -1011,16 +1007,11 @@ export default function EventCmsForm({ itemId }: { itemId?: string }) {
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-6">
-            <div>
+            <div style={{ width: 170 }}>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                 Date *
               </label>
-              <input
-                type="date"
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                className="dark:bg-dark-900 h-11 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:text-white/90"
-              />
+              <DatePickerField value={eventDate} onChange={setEventDate} />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
