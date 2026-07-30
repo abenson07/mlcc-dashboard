@@ -264,6 +264,17 @@ const nextConfig: NextConfig = {
         destination: "/admin/leaflet/skipped-routes",
         permanent: true,
       },
+      // Legacy /dashboard links point at the /admin app now.
+      {
+        source: "/dashboard",
+        destination: "/admin",
+        permanent: true,
+      },
+      {
+        source: "/dashboard/:path*",
+        destination: "/admin/:path*",
+        permanent: true,
+      },
     ];
   },
   images: {
