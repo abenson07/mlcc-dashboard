@@ -352,6 +352,12 @@ export function isShellPreviewLeafletsListRoute(pathname: string): boolean {
   return normalizedPath === `${SHELL_PREVIEW_BASE}/leaflets`;
 }
 
+export function isShellPreviewNeighborsRoute(pathname: string): boolean {
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return normalizedPath === `${SHELL_PREVIEW_BASE}/neighbors`;
+}
+
 export function isShellPreviewEventDetailRoute(pathname: string): boolean {
   return parseShellPreviewEventId(pathname) !== null;
 }

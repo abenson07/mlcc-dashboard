@@ -5,6 +5,7 @@ import { IconMail, IconMapPin } from "@/components/leaflet/icons";
 import { IconClose } from "@/components/leaflet/routes/leafletIcons";
 import { usePeople, useRoutes } from "hooks";
 import type { PersonWithMembership } from "hooks";
+import EditPersonModal from "./EditPersonModal";
 import {
   formatDisplayDate,
   personDetailSubtitle,
@@ -21,6 +22,7 @@ type PersonDetailPanelProps = {
 export default function PersonDetailPanel({ person, onClose, onUpdated }: PersonDetailPanelProps) {
   const { update } = usePeople({ autoFetch: false });
   const [boardSaving, setBoardSaving] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const isExecutiveBoard = person.is_executive_board ?? false;
   const membershipStatus = person.membership?.status ?? "Non-member";
   const subtitle = personDetailSubtitle(person);
@@ -38,14 +40,19 @@ export default function PersonDetailPanel({ person, onClose, onUpdated }: Person
           <h2 className="lf-person-detail-name">{person.full_name ?? "—"}</h2>
           {subtitle ? <p className="lf-meta">{subtitle}</p> : null}
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex shrink-0 rounded p-0.5 text-[#A1A1AA] hover:text-[#71717A]"
-          aria-label="Close details"
-        >
-          <IconClose />
-        </button>
+        <div className="inline-flex shrink-0 items-center gap-2">
+          <button type="button" className="lf-small-btn" onClick={() => setEditOpen(true)}>
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex shrink-0 rounded p-0.5 text-[#A1A1AA] hover:text-[#71717A]"
+            aria-label="Close details"
+          >
+            <IconClose />
+          </button>
+        </div>
       </div>
 
       <section className="lf-detail-card" data-lf-card="contact-information">
@@ -140,6 +147,13 @@ export default function PersonDetailPanel({ person, onClose, onUpdated }: Person
           </div>
         </section>
       ) : null}
+
+      <EditPersonModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        person={person}
+        onUpdated={onUpdated}
+      />
     </aside>
   );
 }

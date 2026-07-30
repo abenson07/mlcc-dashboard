@@ -25,6 +25,7 @@ import {
   isShellPreviewLeafletsListRoute,
   isShellPreviewLeafletSponsorshipsRoute,
   isShellPreviewLeafletTodoRoute,
+  isShellPreviewNeighborsRoute,
   isShellPreviewWidgetsRoute,
   isShellPreviewShirtPreordersRoute,
   parseShellPreviewEventId,
@@ -105,11 +106,12 @@ function LeafletShellBody({
           !isShellPreviewFaqsRoute(pathname) &&
           !isShellPreviewLeafletsListRoute(pathname) &&
           !isShellPreviewLeafletTodoRoute(pathname) &&
+          !isShellPreviewNeighborsRoute(pathname) &&
           routesSelectionSatisfied
         }
         content={<CanvasContent>{children}</CanvasContent>}
         widgetPanel={
-          isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) ? null : isShellPreviewEventDetailRoute(pathname) && currentEvent?.kind === "committee_meeting" ? (
+          isShellPreviewWidgetsRoute(pathname) || isShellPreviewFaqsRoute(pathname) || isShellPreviewNeighborsRoute(pathname) ? null : isShellPreviewEventDetailRoute(pathname) && currentEvent?.kind === "committee_meeting" ? (
             <AttendanceWidget eventId={currentEvent.id} />
           ) : isShellPreviewLeafletRouteDetailsRoute(pathname) ? (
             <>

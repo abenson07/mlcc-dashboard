@@ -4,6 +4,7 @@
  */
 
 export { usePeople, type PersonWithMembership } from "./usePeople";
+export { useMemberships } from "./useMemberships";
 export { useBusinesses, type BusinessWithDetails } from "./useBusinesses";
 export { useRoutes, type RouteWithDeliverer } from "./useRoutes";
 export {
