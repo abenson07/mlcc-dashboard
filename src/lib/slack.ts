@@ -35,3 +35,10 @@ export async function postContactToSlack(text: string): Promise<void> {
 
   await postToChannel(channel, text);
 }
+
+export async function postTwilioSmsToSlack(text: string): Promise<void> {
+  const channel = process.env.SLACK_CHANNEL_TWILIO_SMS;
+  if (!channel) return;
+
+  await postToChannel(channel, text);
+}
