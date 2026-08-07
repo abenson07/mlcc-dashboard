@@ -1,0 +1,101 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { CalendarDays, Clock, MapPin, User } from "lucide-react";
+import type { EventDetail } from "@/data/mocks/events";
+
+export type EventInfoBoxProps = {
+  event: EventDetail;
+};
+
+function EventMetaItem({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        color: "var(--linear-color-ink-subtle)",
+        fontSize: 13,
+        lineHeight: "20px",
+      }}
+    >
+      <span style={{ display: "inline-flex" }}>{icon}</span>
+      {children}
+    </span>
+  );
+}
+
+/**
+ * Top bounding box for the event detail page — title, category/organizer
+ * summary, and key event metadata. Mirrors `ClassInfoBox`.
+ */
+export function EventInfoBox({ event }: EventInfoBoxProps) {
+  return (
+    <header
+      data-slot="event-info-box"
+      style={{
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        padding: 20,
+        border:
+          "var(--linear-border-width) solid var(--linear-color-hairline)",
+        borderRadius: "var(--linear-radius-md)",
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 22,
+            lineHeight: "28px",
+            fontWeight: 600,
+            letterSpacing: "-0.01em",
+            color: "var(--linear-color-ink)",
+          }}
+        >
+          {event.title}
+        </h1>
+
+        <p
+          style={{
+            margin: 0,
+            fontSize: 13,
+            lineHeight: "20px",
+            color: "var(--linear-color-ink-subtle)",
+          }}
+        >
+          {event.category} · Organized by {event.organizer}
+        </p>
+
+        <p
+          style={{
+            margin: "8px 0 0",
+            fontSize: 13,
+            lineHeight: "20px",
+            color: "var(--linear-color-ink-subtle)",
+          }}
+        >
+          {event.description}
+        </p>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+        <EventMetaItem icon={<CalendarDays size={14} strokeWidth={1.75} />}>
+          {event.date}
+        </EventMetaItem>
+        <EventMetaItem icon={<Clock size={14} strokeWidth={1.75} />}>
+          {event.time}
+        </EventMetaItem>
+        <EventMetaItem icon={<MapPin size={14} strokeWidth={1.75} />}>
+          {event.location}
+        </EventMetaItem>
+        <EventMetaItem icon={<User size={14} strokeWidth={1.75} />}>
+          {event.organizer}
+        </EventMetaItem>
+      </div>
+    </header>
+  );
+}
