@@ -78,7 +78,7 @@ const group2Items: DemoItem[] = [
     label: "Events",
     icon: <CalendarDays size={16} strokeWidth={1.75} />,
     href: "/admin-preview/events",
-    hasContent: false,
+    hasContent: true,
   },
   {
     id: "committees",

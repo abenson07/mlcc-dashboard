@@ -240,6 +240,56 @@ export const sampleEventBudgetItems: EventBudgetRow[] = [
   },
 ];
 
+export type EventSponsorshipInvoiceRow = {
+  id: string;
+  invoiceNumber: string;
+  business: string;
+  level: string;
+  amount: string;
+  dueDate: string;
+  status: "Paid" | "Pending" | "Overdue";
+};
+
+/** Invoices billed to sponsoring businesses for their sponsorship level. */
+export const sampleEventSponsorshipInvoices: EventSponsorshipInvoiceRow[] = [
+  {
+    id: "spon-inv-1",
+    invoiceNumber: "INV-3001",
+    business: "Third Place Books",
+    level: "Presenting",
+    amount: "$1,000.00",
+    dueDate: "Jul 15, 2026",
+    status: "Paid",
+  },
+  {
+    id: "spon-inv-2",
+    invoiceNumber: "INV-3002",
+    business: "Watershed Pub",
+    level: "Gold",
+    amount: "$500.00",
+    dueDate: "Jul 20, 2026",
+    status: "Paid",
+  },
+  {
+    id: "spon-inv-3",
+    invoiceNumber: "INV-3003",
+    business: "Maple Leaf Grocery",
+    level: "Gold",
+    amount: "$500.00",
+    dueDate: "Aug 5, 2026",
+    status: "Pending",
+  },
+  {
+    id: "spon-inv-4",
+    invoiceNumber: "INV-3004",
+    business: "Elemental Pizza",
+    level: "Community",
+    amount: "$150.00",
+    dueDate: "Jul 25, 2026",
+    status: "Overdue",
+  },
+];
+
 export type EventSponsorStatus = "Confirmed" | "Pending" | "Declined";
 
 export type EventSponsorRow = {

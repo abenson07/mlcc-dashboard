@@ -15,6 +15,7 @@ import { EventTasksPage } from "./EventTasksPage";
 import { EventPromotionPage } from "./EventPromotionPage";
 import { VolunteerDetailPanel } from "./VolunteerDetailPanel";
 import { BudgetDetailPanel } from "./BudgetDetailPanel";
+import { SponsorshipInvoiceDetailPanel } from "./SponsorshipInvoiceDetailPanel";
 import { SponsorDetailPanel } from "./SponsorDetailPanel";
 import {
   eventTaskGroupForDueDate,
@@ -26,6 +27,7 @@ import {
   type EventBudgetRow,
   type EventPromotionItem,
   type EventSponsorRow,
+  type EventSponsorshipInvoiceRow,
   type EventTaskRow,
   type EventVolunteerRow,
 } from "@/data/mocks/events";
@@ -35,6 +37,7 @@ type EventDetailView = "overview" | "volunteers" | "tasks" | "budget" | "promoti
 type Selection =
   | { kind: "volunteer"; row: EventVolunteerRow }
   | { kind: "budget"; row: EventBudgetRow }
+  | { kind: "sponsorship-invoice"; row: EventSponsorshipInvoiceRow }
   | { kind: "sponsor"; row: EventSponsorRow }
   | null;
 
@@ -59,6 +62,10 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
 
   function selectBudgetItem(row: EventBudgetRow) {
     setSelection({ kind: "budget", row });
+  }
+
+  function selectSponsorshipInvoice(row: EventSponsorshipInvoiceRow) {
+    setSelection({ kind: "sponsorship-invoice", row });
   }
 
   function selectSponsor(row: EventSponsorRow) {
@@ -99,13 +106,13 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
     });
   }
 
-  const isFullBleed = view === "volunteers" || view === "budget";
+  const isFullBleed = view === "volunteers";
 
   const body =
     view === "volunteers" ? (
       <VolunteersPage onSelectVolunteer={selectVolunteer} />
     ) : view === "budget" ? (
-      <BudgetPage onSelectBudgetItem={selectBudgetItem} />
+      <BudgetPage onSelectBudgetItem={selectSponsorshipInvoice} />
     ) : view === "tasks" ? (
       <EventTasksPage
         tasks={tasks}
@@ -153,6 +160,8 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
                 <VolunteerDetailPanel volunteer={selection.row} />
               ) : selection.kind === "sponsor" ? (
                 <SponsorDetailPanel sponsor={selection.row} />
+              ) : selection.kind === "sponsorship-invoice" ? (
+                <SponsorshipInvoiceDetailPanel invoice={selection.row} />
               ) : (
                 <BudgetDetailPanel item={selection.row} />
               )}

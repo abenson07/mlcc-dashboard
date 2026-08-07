@@ -4,29 +4,29 @@ import { Button } from "@/components/patterns/primitives/Button";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
-import { Building2, CalendarDays, CircleDollarSign } from "lucide-react";
+import { Award, Building2, CalendarDays, CircleDollarSign } from "lucide-react";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
-import type { EventBudgetRow } from "@/data/mocks/events";
+import type { EventSponsorshipInvoiceRow } from "@/data/mocks/events";
 
-export type BudgetDetailPanelProps = {
-  item: EventBudgetRow;
+export type SponsorshipInvoiceDetailPanelProps = {
+  invoice: EventSponsorshipInvoiceRow;
 };
 
 /**
- * Budget line-item detail — shown in the outlined side panel when a
- * row is selected from the Overview's Invoices section.
+ * Sponsorship invoice detail — shown in the outlined side panel when a
+ * row is selected from the Sponsorships page's invoice list.
  */
-export function BudgetDetailPanel({ item }: BudgetDetailPanelProps) {
+export function SponsorshipInvoiceDetailPanel({ invoice }: SponsorshipInvoiceDetailPanelProps) {
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Text size="sm" color="secondary">
-          {item.item}
+          {invoice.business}
         </Text>
         <Text
           style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.01em" }}
         >
-          {item.amount}
+          {invoice.amount}
         </Text>
       </div>
 
@@ -34,21 +34,25 @@ export function BudgetDetailPanel({ item }: BudgetDetailPanelProps) {
         density="compact"
         header={
           <Text type="label" color="secondary">
-            Invoice
+            Invoice {invoice.invoiceNumber}
           </Text>
         }
       >
         <SideContentField
           icon={<CircleDollarSign size={16} strokeWidth={1.75} />}
-          label={item.status}
+          label={invoice.status}
         />
         <SideContentField
           icon={<CalendarDays size={16} strokeWidth={1.75} />}
-          label={`Due ${item.dueDate}`}
+          label={`Due ${invoice.dueDate}`}
         />
         <SideContentField
           icon={<Building2 size={16} strokeWidth={1.75} />}
-          label={item.vendor}
+          label={invoice.business}
+        />
+        <SideContentField
+          icon={<Award size={16} strokeWidth={1.75} />}
+          label={`${invoice.level} sponsor`}
         />
       </List>
 

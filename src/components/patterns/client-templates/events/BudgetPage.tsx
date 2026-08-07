@@ -2,15 +2,14 @@
 
 import { useMemo } from "react";
 import { pixel, proportional, type TableColumn } from "@/components/patterns/primitives/table";
-import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
-import { RowClickCell } from "@/components/patterns/client-templates/shared";
-import { BudgetStatusToken } from "./BudgetStatusToken";
+import { NestedGroupedTable } from "@/components/patterns/grouped-table/NestedGroupedTable";
+import { RowClickCell, ClassContentPage } from "@/components/patterns/client-templates/shared";
 import { BudgetChart } from "./BudgetChart";
 import { SponsorshipLevelsPanel } from "./SponsorshipLevelsPanel";
 import {
-  sampleEventBudgetItems,
   sampleEventBudgetSummary,
-  type EventBudgetRow,
+  sampleEventSponsorshipInvoices,
+  type EventSponsorshipInvoiceRow,
 } from "@/data/mocks/events";
 
 const GROUP_ORDER = ["Overdue", "Pending", "Paid"];
@@ -22,26 +21,26 @@ const groupColors: Record<string, string> = {
 };
 
 function buildColumns(
-  onSelectBudgetItem?: (row: EventBudgetRow) => void,
-): TableColumn<EventBudgetRow>[] {
+  onSelectInvoice?: (row: EventSponsorshipInvoiceRow) => void,
+): TableColumn<EventSponsorshipInvoiceRow>[] {
   return [
     {
-      key: "item",
-      header: "Item",
+      key: "business",
+      header: "Business",
       width: proportional(1, { minWidth: 180 }),
       renderCell: (row) => (
-        <RowClickCell onClick={() => onSelectBudgetItem?.(row)}>
-          <span style={{ color: "var(--linear-color-ink)" }}>{row.item}</span>
+        <RowClickCell onClick={() => onSelectInvoice?.(row)}>
+          <span style={{ color: "var(--linear-color-ink)" }}>{row.business}</span>
         </RowClickCell>
       ),
     },
     {
-      key: "vendor",
-      header: "Vendor",
-      width: pixel(200),
+      key: "invoiceNumber",
+      header: "Invoice #",
+      width: pixel(120),
       renderCell: (row) => (
-        <RowClickCell onClick={() => onSelectBudgetItem?.(row)}>
-          <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.vendor}</span>
+        <RowClickCell onClick={() => onSelectInvoice?.(row)}>
+          <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.invoiceNumber}</span>
         </RowClickCell>
       ),
     },
@@ -50,18 +49,28 @@ function buildColumns(
       header: "Amount",
       width: pixel(96),
       renderCell: (row) => (
-        <RowClickCell onClick={() => onSelectBudgetItem?.(row)}>
+        <RowClickCell onClick={() => onSelectInvoice?.(row)}>
           <span style={{ color: "var(--linear-color-ink)" }}>{row.amount}</span>
         </RowClickCell>
       ),
     },
     {
-      key: "status",
-      header: "Status",
+      key: "dueDate",
+      header: "Due",
+      width: pixel(120),
+      renderCell: (row) => (
+        <RowClickCell onClick={() => onSelectInvoice?.(row)}>
+          <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.dueDate}</span>
+        </RowClickCell>
+      ),
+    },
+    {
+      key: "level",
+      header: "Level",
       width: pixel(140),
       renderCell: (row) => (
-        <RowClickCell onClick={() => onSelectBudgetItem?.(row)}>
-          <BudgetStatusToken item={row} />
+        <RowClickCell onClick={() => onSelectInvoice?.(row)}>
+          <span style={{ color: "var(--linear-color-ink)" }}>{row.level}</span>
         </RowClickCell>
       ),
     },
@@ -69,13 +78,14 @@ function buildColumns(
 }
 
 export type BudgetPageProps = {
-  onSelectBudgetItem?: (row: EventBudgetRow) => void;
+  onSelectBudgetItem?: (row: EventSponsorshipInvoiceRow) => void;
 };
 
 /**
- * Sponsorships page — a five-column summary row (budget chart spanning
- * four columns, sponsorship levels in the fifth) above the full-width
- * budget item list, grouped by payment status.
+ * Sponsorships page — mixed-content layout like Overview: a five-column
+ * summary row (budget chart spanning four columns, sponsorship levels in
+ * the fifth), then sponsorship invoices nested below, grouped by payment
+ * status.
  */
 export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
   const columns = useMemo(
@@ -85,24 +95,13 @@ export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
   const groupOrder = useMemo(() => GROUP_ORDER, []);
 
   return (
-    <div
-      style={{
-        height: "100%",
-        minHeight: 0,
-        boxSizing: "border-box",
-        padding: "0 8px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
-      }}
-    >
+    <ClassContentPage>
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(5, 1fr)",
           gap: 16,
           alignItems: "stretch",
-          flexShrink: 0,
         }}
       >
         <div style={{ gridColumn: "span 4" }}>
@@ -112,17 +111,15 @@ export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
           <SponsorshipLevelsPanel />
         </div>
       </div>
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <GroupedTable
-          data={sampleEventBudgetItems}
-          columns={columns}
-          getRowKey={(row) => row.id}
-          groupBy={(row) => row.status}
-          groupOrder={groupOrder}
-          getGroupMeta={(key) => ({ color: groupColors[key], label: key })}
-          listChrome
-        />
-      </div>
-    </div>
+      <NestedGroupedTable
+        title="Sponsorship invoices"
+        data={sampleEventSponsorshipInvoices}
+        columns={columns}
+        getRowKey={(row) => row.id}
+        groupBy={(row) => row.status}
+        groupOrder={groupOrder}
+        getGroupMeta={(key) => ({ color: groupColors[key], label: key })}
+      />
+    </ClassContentPage>
   );
 }
