@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { linearTokenVars } from "@/theme/linearTokens";
 
 export type ThemeMode = "light" | "dark";
 
@@ -41,7 +42,17 @@ export function ThemeProvider({ children, defaultMode = "dark" }: ThemeProviderP
 
   return (
     <ThemeContext.Provider value={{ mode, toggle }}>
-      <div style={{ height: "100%", colorScheme: mode }}>{children}</div>
+      <div
+        style={
+          {
+            ...linearTokenVars,
+            height: "100%",
+            colorScheme: mode,
+          } as CSSProperties
+        }
+      >
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 }

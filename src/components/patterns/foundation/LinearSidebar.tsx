@@ -25,9 +25,13 @@ import {
   Dropdown,
   DropdownItem,
 } from "@/components/patterns/shared/dropdown";
+import { useEvents, useStories } from "hooks";
+import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import { AddPromotionModal, NewEventModal } from "@/components/patterns/client-templates/events";
 import { NewStoryModal } from "@/components/patterns/client-templates/content";
-import type { EventPromotionType } from "@/data/mocks/events";
+import { useAdminBasePath } from "@/components/patterns/client-templates/shared";
+import type { EventPromotionType, EventSummary } from "@/data/mocks/events";
+import type { Story } from "@/data/mocks/content";
 import {
   MenuItem,
   NavBottom,
@@ -46,7 +50,8 @@ type DemoItem = {
   id: string;
   label: string;
   icon: ReactNode;
-  href: string;
+  /** Path relative to the active base (`/admin-preview` or `/admin-migrate`) — prefixed at render time. */
+  path: string;
   /** Green dot when a real page has been designed; red when it's still a placeholder. */
   hasContent: boolean;
 };
@@ -56,14 +61,14 @@ const group1Items: DemoItem[] = [
     id: "action-items",
     label: "Action Items",
     icon: <ListChecks size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/action-items",
+    path: "/action-items",
     hasContent: true,
   },
   {
     id: "inbox",
     label: "Inbox",
     icon: <Inbox size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/inbox",
+    path: "/inbox",
     hasContent: false,
   },
 ];
@@ -73,28 +78,28 @@ const group2Items: DemoItem[] = [
     id: "events",
     label: "Events",
     icon: <CalendarDays size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/events",
+    path: "/events",
     hasContent: true,
   },
   {
     id: "committees",
     label: "Committees",
     icon: <Users2 size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/committees",
+    path: "/committees",
     hasContent: true,
   },
   {
     id: "leaflets",
     label: "Leaflets",
     icon: <FileText size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/leaflets",
+    path: "/leaflets",
     hasContent: true,
   },
   {
     id: "invoices",
     label: "Invoices",
     icon: <CreditCard size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/invoices",
+    path: "/invoices",
     hasContent: true,
   },
 ];
@@ -104,21 +109,21 @@ const databaseItems: DemoItem[] = [
     id: "people",
     label: "People",
     icon: <Users size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/people",
+    path: "/people",
     hasContent: true,
   },
   {
     id: "businesses",
     label: "Businesses",
     icon: <Building2 size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/businesses",
+    path: "/businesses",
     hasContent: true,
   },
   {
     id: "content",
     label: "Content",
     icon: <FileStack size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/content",
+    path: "/content",
     hasContent: false,
   },
 ];
@@ -128,14 +133,14 @@ const favoriteItems: DemoItem[] = [
     id: "fav-volunteers",
     label: "Volunteers",
     icon: <Users size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/people?view=volunteers",
+    path: "/people?view=volunteers",
     hasContent: true,
   },
   {
     id: "fav-summer-social",
     label: "Summer Social Overview",
     icon: <CalendarDays size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/events",
+    path: "/events",
     hasContent: false,
   },
 ];
@@ -181,6 +186,57 @@ function KyleBrowerAvatar() {
   );
 }
 
+/**
+ * Real-data create modals for admin-migrate — split out so `useStories`/`useEvents`
+ * (react-query hooks) are only ever mounted inside admin-migrate's QueryClientProvider,
+ * never inside admin-preview, which has none and must stay free of real Supabase calls.
+ */
+function MigrateCreateModals({
+  isNewStoryOpen,
+  onCloseNewStory,
+  isNewEventOpen,
+  onCloseNewEvent,
+  hrefFor,
+}: {
+  isNewStoryOpen: boolean;
+  onCloseNewStory: () => void;
+  isNewEventOpen: boolean;
+  onCloseNewEvent: () => void;
+  hrefFor: (path: string) => string;
+}) {
+  const router = useRouter();
+  const { create: createStory } = useStories({ autoFetch: false });
+  const { create: createEvent } = useEvents({ autoFetch: false });
+
+  async function handleCreateStory(story: Omit<Story, "id">) {
+    const authorId = await getCurrentPersonId();
+    const created = await createStory({
+      title: story.title,
+      author_id: authorId,
+      status: story.status === "Published" ? "published" : "draft",
+      body: story.body || "",
+    });
+    if (created) router.push(hrefFor(`/content?view=stories&selected=${created.id}`));
+  }
+
+  async function handleCreateEvent(event: Omit<EventSummary, "id">) {
+    const startsAt = event.date ? new Date(`${event.date}T00:00:00`).toISOString() : new Date().toISOString();
+    const created = await createEvent({
+      name: event.title,
+      starts_at: startsAt,
+      field_data: { location: event.location, description: event.description },
+    });
+    if (created) router.push(hrefFor(`/events/${created.id}`));
+  }
+
+  return (
+    <>
+      <NewStoryModal isOpen={isNewStoryOpen} onClose={onCloseNewStory} onCreate={handleCreateStory} />
+      <NewEventModal isOpen={isNewEventOpen} onClose={onCloseNewEvent} onCreate={handleCreateEvent} />
+    </>
+  );
+}
+
 export type LinearSidebarProps = {
   onSettingsClick?: () => void;
 };
@@ -192,13 +248,22 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const { mode, toggle } = useThemeMode();
   const pathname = usePathname();
   const router = useRouter();
+  const basePath = useAdminBasePath();
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isNewStoryOpen, setIsNewStoryOpen] = useState(false);
   const [isNewEventOpen, setIsNewEventOpen] = useState(false);
   const [promotionModalType, setPromotionModalType] = useState<EventPromotionType | null>(null);
+  const isMigrate = basePath === "/admin-migrate";
+  // "Invoices" has no admin-migrate route yet — its admin-preview screen reuses
+  // unrelated course/tuition mock data with no real equivalent to wire up.
+  const visibleGroup2Items = isMigrate ? group2Items.filter((item) => item.id !== "invoices") : group2Items;
 
-  function isSelected(href: string): boolean {
-    return pathname === href.split("?")[0];
+  function hrefFor(path: string): string {
+    return `${basePath}${path}`;
+  }
+
+  function isSelected(path: string): boolean {
+    return pathname === hrefFor(path).split("?")[0];
   }
 
   function openCreateOption(next: () => void) {
@@ -287,21 +352,21 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
               key={item.id}
               label={item.label}
               icon={item.icon}
-              selected={isSelected(item.href)}
-              onClick={() => router.push(item.href)}
+              selected={isSelected(item.path)}
+              onClick={() => router.push(hrefFor(item.path))}
               indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
         </div>
 
         <SidebarSection title="Manage">
-          {group2Items.map((item) => (
+          {visibleGroup2Items.map((item) => (
             <MenuItem
               key={item.id}
               label={item.label}
               icon={item.icon}
-              selected={isSelected(item.href)}
-              onClick={() => router.push(item.href)}
+              selected={isSelected(item.path)}
+              onClick={() => router.push(hrefFor(item.path))}
               indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
@@ -313,8 +378,8 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
               key={item.id}
               label={item.label}
               icon={item.icon}
-              selected={isSelected(item.href)}
-              onClick={() => router.push(item.href)}
+              selected={isSelected(item.path)}
+              onClick={() => router.push(hrefFor(item.path))}
               indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
@@ -326,8 +391,8 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
               key={item.id}
               label={item.label}
               icon={item.icon}
-              selected={isSelected(item.href)}
-              onClick={() => router.push(item.href)}
+              selected={isSelected(item.path)}
+              onClick={() => router.push(hrefFor(item.path))}
               indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
@@ -345,8 +410,20 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
         }
       />
 
-      <NewStoryModal isOpen={isNewStoryOpen} onClose={() => setIsNewStoryOpen(false)} />
-      <NewEventModal isOpen={isNewEventOpen} onClose={() => setIsNewEventOpen(false)} />
+      {isMigrate ? (
+        <MigrateCreateModals
+          isNewStoryOpen={isNewStoryOpen}
+          onCloseNewStory={() => setIsNewStoryOpen(false)}
+          isNewEventOpen={isNewEventOpen}
+          onCloseNewEvent={() => setIsNewEventOpen(false)}
+          hrefFor={hrefFor}
+        />
+      ) : (
+        <>
+          <NewStoryModal isOpen={isNewStoryOpen} onClose={() => setIsNewStoryOpen(false)} />
+          <NewEventModal isOpen={isNewEventOpen} onClose={() => setIsNewEventOpen(false)} />
+        </>
+      )}
       <AddPromotionModal
         type={promotionModalType}
         onClose={() => setPromotionModalType(null)}

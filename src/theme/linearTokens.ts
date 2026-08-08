@@ -66,6 +66,20 @@ export const linearTokens = {
       light: "lch(94.5 0.4 282)",
       dark: "#191a1b",
     },
+    /**
+     * Elevated floating card (e.g. a widget/properties panel inset over the
+     * canvas) — measured from linear.app: light is a pure-white card lifted
+     * by shadow alone (no border); dark needs a hairline border to read as
+     * separate from the near-black canvas.
+     */
+    panel: {
+      light: "lch(100 0 282)",
+      dark: "#191a1b",
+    },
+    panelBorder: {
+      light: "transparent",
+      dark: "#282a2c",
+    },
     accent: "#5e6ad2",
     accentHover: "#828fff",
     accentFocus: "#5e69d1",
@@ -95,11 +109,32 @@ export const linearTokens = {
   },
   radius: {
     md: "8px",
+    lg: "10px",
   },
+  /**
+   * `light-dark()` is only valid as a <color> — it can't wrap a whole
+   * box-shadow list (multiple comma-separated shadows would be parsed as
+   * extra light-dark() arguments, and the declaration is dropped). So each
+   * shadow keeps static geometry and only varies its layer *colors* by mode.
+   */
   shadow: {
     canvas: {
-      light: "0 1px 2px lch(0 0 0 / 0.02)",
-      dark: "0 1px 2px lch(0 0 0 / 0.24)",
+      geometry: "0px 1px 2px",
+      colorLight: "lch(0 0 0 / 0.02)",
+      colorDark: "lch(0 0 0 / 0.24)",
+    },
+    /** Floating panel card shadow — measured from linear.app light/dark. */
+    panel: {
+      // Ambient layer: present in light, faded out in dark (real dark
+      // shadow is a single tight layer, not a soft ambient one).
+      ambientGeometry: "0px 3px 6px -2px",
+      ambientColorLight: "lch(0 0 0 / 0.02)",
+      ambientColorDark: "lch(0 0 0 / 0)",
+      // Contact layer: matches linear.app's dark shadow almost exactly;
+      // light just carries the same 1px spread at a much lower alpha.
+      contactGeometry: "0px 1px 1px 1px",
+      contactColorLight: "lch(0 0 0 / 0.04)",
+      contactColorDark: "lch(0 0 0 / 0.3)",
     },
   },
   space: {
@@ -168,6 +203,14 @@ export const linearTokenVars = {
     linearTokens.color.surface4.light,
     linearTokens.color.surface4.dark,
   ),
+  "--linear-color-panel": lightDark(
+    linearTokens.color.panel.light,
+    linearTokens.color.panel.dark,
+  ),
+  "--linear-color-panel-border": lightDark(
+    linearTokens.color.panelBorder.light,
+    linearTokens.color.panelBorder.dark,
+  ),
   "--linear-color-accent": linearTokens.color.accent,
   "--linear-color-sidebar-item-idle": lightDark(
     linearTokens.color.sidebarItemIdle.light,
@@ -183,10 +226,18 @@ export const linearTokenVars = {
   ),
   "--linear-border-width": linearTokens.border.width,
   "--linear-radius-md": linearTokens.radius.md,
-  "--linear-shadow-canvas": lightDark(
-    linearTokens.shadow.canvas.light,
-    linearTokens.shadow.canvas.dark,
-  ),
+  "--linear-radius-lg": linearTokens.radius.lg,
+  "--linear-shadow-canvas": `${linearTokens.shadow.canvas.geometry} ${lightDark(
+    linearTokens.shadow.canvas.colorLight,
+    linearTokens.shadow.canvas.colorDark,
+  )}`,
+  "--linear-shadow-panel": `${linearTokens.shadow.panel.ambientGeometry} ${lightDark(
+    linearTokens.shadow.panel.ambientColorLight,
+    linearTokens.shadow.panel.ambientColorDark,
+  )}, ${linearTokens.shadow.panel.contactGeometry} ${lightDark(
+    linearTokens.shadow.panel.contactColorLight,
+    linearTokens.shadow.panel.contactColorDark,
+  )}`,
   "--linear-space-xs": linearTokens.space.xs,
   "--linear-size-canvas-topbar-min-height":
     linearTokens.size.canvasTopbarMinHeight,

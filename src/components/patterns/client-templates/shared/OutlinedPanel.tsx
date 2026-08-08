@@ -6,16 +6,17 @@ import { IconButton } from "@/components/patterns/shared/IconButton";
 
 export type OutlinedPanelProps = {
   children: ReactNode;
-  width?: number;
+  width?: number | string;
   /** When set, shows a close X top-right and closes on Escape. */
   onClose?: () => void;
 };
 
 /**
- * Side-content variant that reads as its own surface — outlined like
- * `EmptyStateCard`, lifted off the canvas with a background a shade
- * lighter than it — rather than sitting flush like `SideContentBar`.
- * Follows the app's light/dark mode like everything else.
+ * Side-content variant that reads as its own floating card — white with a
+ * soft shadow in light mode, a bordered dark surface in dark mode (measured
+ * off linear.app's Health/Initiatives panel) — rather than sitting flush
+ * like `SideContentBar`. Follows the app's light/dark mode like everything
+ * else via the `--linear-color-panel*` tokens.
  */
 export function OutlinedPanel({ children, width = 320, onClose }: OutlinedPanelProps) {
   useEffect(() => {
@@ -37,10 +38,11 @@ export function OutlinedPanel({ children, width = 320, onClose }: OutlinedPanelP
         height: "100%",
         minHeight: 0,
         overflow: "auto",
-        background: "var(--linear-color-icon-button-secondary)",
+        background: "var(--linear-color-panel)",
         border:
-          "var(--linear-border-width) solid var(--linear-color-hairline)",
-        borderRadius: "var(--linear-radius-md)",
+          "var(--linear-border-width) solid var(--linear-color-panel-border)",
+        borderRadius: "var(--linear-radius-lg)",
+        boxShadow: "var(--linear-shadow-panel)",
         padding: 16,
       }}
     >

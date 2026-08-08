@@ -16,6 +16,12 @@ export type SideContentBarProps = {
   children?: ReactNode;
   /** Fixed column width. @default 280 */
   width?: number;
+  /**
+   * Render as its own floating card inset over the canvas (e.g. a
+   * Health/Initiatives summary panel) instead of a flat region flush with
+   * the canvas background. @default false
+   */
+  isElevated?: boolean;
 };
 
 /**
@@ -26,6 +32,7 @@ export type SideContentBarProps = {
 export function SideContentBar({
   children,
   width = 280,
+  isElevated = false,
 }: SideContentBarProps) {
   return (
     <LayoutPanel
@@ -35,6 +42,7 @@ export function SideContentBar({
       role="complementary"
       label="Properties"
       isScrollable
+      isElevated={isElevated}
     >
       {children ?? <IssueSideContentDemo />}
     </LayoutPanel>

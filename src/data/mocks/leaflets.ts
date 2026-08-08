@@ -169,19 +169,63 @@ export const sampleSkippedRoutes: LeafletRouteRow[] = [
   { id: "route-15", name: "Route 15 — 1st Ave NE", initials: "R15", detail: "Skipped by Owen C.", status: "skipped" },
 ];
 
+export type LeafletDelivererRouteRow = {
+  id: string;
+  name: string;
+  leafletCount: number;
+};
+
 export type LeafletDelivererRow = {
   id: string;
   name: string;
-  routeCount: number;
+  address: string;
   status: "Confirmed" | "Invited" | "Declined";
+  routes: LeafletDelivererRouteRow[];
 };
 
 export const sampleDeliverers: LeafletDelivererRow[] = [
-  { id: "del-1", name: "Priya Anand", routeCount: 2, status: "Confirmed" },
-  { id: "del-2", name: "Marcus Ianelli", routeCount: 1, status: "Confirmed" },
-  { id: "del-3", name: "Dana Whitfield", routeCount: 1, status: "Declined" },
-  { id: "del-4", name: "Sam Okafor", routeCount: 3, status: "Confirmed" },
-  { id: "del-5", name: "Lena Brandt", routeCount: 1, status: "Invited" },
+  {
+    id: "del-1",
+    name: "Priya Anand",
+    address: "8811 8th Ave NE, Seattle, Washington, 98115",
+    status: "Confirmed",
+    routes: [
+      { id: "route-88th", name: "88th: 5th to Roosevelt", leafletCount: 36 },
+      { id: "route-8th", name: "8th: 81st to 89th", leafletCount: 41 },
+    ],
+  },
+  {
+    id: "del-2",
+    name: "Marcus Ianelli",
+    address: "8620 Roosevelt Way NE #201",
+    status: "Confirmed",
+    routes: [{ id: "route-maple-park", name: "Maple Leaf Park Box", leafletCount: 50 }],
+  },
+  {
+    id: "del-3",
+    name: "Dana Whitfield",
+    address: "1246 NE 104th Street",
+    status: "Declined",
+    routes: [{ id: "route-90th", name: "90th: 15th to LCW", leafletCount: 32 }],
+  },
+  {
+    id: "del-4",
+    name: "Sam Okafor",
+    address: "539 NE 95th St",
+    status: "Confirmed",
+    routes: [
+      { id: "route-95th", name: "95th: 5th to Roosevelt", leafletCount: 40 },
+      { id: "route-94th", name: "94th: 5th to Roosevelt", leafletCount: 45 },
+      { id: "route-corliss", name: "Corliss Ave: 90th to 95th", leafletCount: 38 },
+    ],
+  },
+  {
+    id: "del-5",
+    name: "Lena Brandt",
+    address: "7203 15th Ave NE",
+    status: "Invited",
+    routes: [{ id: "route-meridian", name: "Meridian Park Loop", leafletCount: 27 }],
+  },
 ];
 
 export type LeafletBudgetSummary = {

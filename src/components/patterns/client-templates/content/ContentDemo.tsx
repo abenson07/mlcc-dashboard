@@ -47,29 +47,33 @@ function ContentDemoInner() {
         isSideContentVisible={selectedStory != null || selectedFaq != null}
         sideContent={
           selectedStory ? (
-            <OutlinedPanel onClose={() => setSelectedId(null)}>
-              <StoryFormPanel
-                story={selectedStory}
-                onClose={() => setSelectedId(null)}
-                onSave={(updated) => {
-                  setStories((current) =>
-                    current.map((s) => (s.id === updated.id ? updated : s)),
-                  );
-                  setSelectedId(null);
-                }}
-              />
-            </OutlinedPanel>
+            <div style={{ flex: "4 1 0%", minWidth: 0, height: "100%" }}>
+              <OutlinedPanel width="100%" onClose={() => setSelectedId(null)}>
+                <StoryFormPanel
+                  story={selectedStory}
+                  onClose={() => setSelectedId(null)}
+                  onSave={(updated) => {
+                    setStories((current) =>
+                      current.map((s) => (s.id === updated.id ? updated : s)),
+                    );
+                    setSelectedId(null);
+                  }}
+                />
+              </OutlinedPanel>
+            </div>
           ) : selectedFaq ? (
-            <OutlinedPanel onClose={() => setSelectedId(null)}>
-              <FaqFormPanel
-                faq={selectedFaq}
-                onClose={() => setSelectedId(null)}
-                onSave={(updated) => {
-                  setFaqs((current) => current.map((f) => (f.id === updated.id ? updated : f)));
-                  setSelectedId(null);
-                }}
-              />
-            </OutlinedPanel>
+            <div style={{ flex: "4 1 0%", minWidth: 0, height: "100%" }}>
+              <OutlinedPanel width="100%" onClose={() => setSelectedId(null)}>
+                <FaqFormPanel
+                  faq={selectedFaq}
+                  onClose={() => setSelectedId(null)}
+                  onSave={(updated) => {
+                    setFaqs((current) => current.map((f) => (f.id === updated.id ? updated : f)));
+                    setSelectedId(null);
+                  }}
+                />
+              </OutlinedPanel>
+            </div>
           ) : null
         }
         header={
