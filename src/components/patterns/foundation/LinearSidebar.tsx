@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Building2,
@@ -8,11 +8,11 @@ import {
   CreditCard,
   FileStack,
   FileText,
-  GraduationCap,
   HelpCircle,
   Inbox,
   ListChecks,
-  MessageSquare,
+  Mail,
+  Megaphone,
   Moon,
   Plus,
   Search,
@@ -25,6 +25,9 @@ import {
   Dropdown,
   DropdownItem,
 } from "@/components/patterns/shared/dropdown";
+import { AddPromotionModal, NewEventModal } from "@/components/patterns/client-templates/events";
+import { NewStoryModal } from "@/components/patterns/client-templates/content";
+import type { EventPromotionType } from "@/data/mocks/events";
 import {
   MenuItem,
   NavBottom,
@@ -63,13 +66,6 @@ const group1Items: DemoItem[] = [
     href: "/admin-preview/inbox",
     hasContent: false,
   },
-  {
-    id: "comms",
-    label: "Comms",
-    icon: <MessageSquare size={16} strokeWidth={1.75} />,
-    href: "/admin-preview/comms",
-    hasContent: false,
-  },
 ];
 
 const group2Items: DemoItem[] = [
@@ -92,7 +88,7 @@ const group2Items: DemoItem[] = [
     label: "Leaflets",
     icon: <FileText size={16} strokeWidth={1.75} />,
     href: "/admin-preview/leaflets",
-    hasContent: false,
+    hasContent: true,
   },
   {
     id: "invoices",
@@ -196,9 +192,18 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const { mode, toggle } = useThemeMode();
   const pathname = usePathname();
   const router = useRouter();
+  const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
+  const [isNewStoryOpen, setIsNewStoryOpen] = useState(false);
+  const [isNewEventOpen, setIsNewEventOpen] = useState(false);
+  const [promotionModalType, setPromotionModalType] = useState<EventPromotionType | null>(null);
 
   function isSelected(href: string): boolean {
     return pathname === href.split("?")[0];
+  }
+
+  function openCreateOption(next: () => void) {
+    setIsCreateMenuOpen(false);
+    next();
   }
 
   return (
@@ -241,6 +246,8 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
             label="Create"
             placement="below"
             alignment="end"
+            open={isCreateMenuOpen}
+            onOpenChange={setIsCreateMenuOpen}
             trigger={
               <SidebarIconButton
                 label="Create new issue"
@@ -250,16 +257,24 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
             }
           >
             <DropdownItem
-              label="New Class"
-              icon={<GraduationCap size={16} strokeWidth={1.75} />}
+              label="New Story"
+              icon={<FileText size={16} strokeWidth={1.75} />}
+              onSelect={() => openCreateOption(() => setIsNewStoryOpen(true))}
             />
             <DropdownItem
-              label="New Student"
-              icon={<Users size={16} strokeWidth={1.75} />}
+              label="New Event"
+              icon={<CalendarDays size={16} strokeWidth={1.75} />}
+              onSelect={() => openCreateOption(() => setIsNewEventOpen(true))}
             />
             <DropdownItem
-              label="New Invoice"
-              icon={<CreditCard size={16} strokeWidth={1.75} />}
+              label="New Email"
+              icon={<Mail size={16} strokeWidth={1.75} />}
+              onSelect={() => openCreateOption(() => setPromotionModalType("email"))}
+            />
+            <DropdownItem
+              label="New Social Post"
+              icon={<Megaphone size={16} strokeWidth={1.75} />}
+              onSelect={() => openCreateOption(() => setPromotionModalType("social"))}
             />
           </Dropdown>
         </SidebarHeaderActions>
@@ -328,6 +343,14 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
             icon={<HelpCircle size={16} strokeWidth={1.75} />}
           />
         }
+      />
+
+      <NewStoryModal isOpen={isNewStoryOpen} onClose={() => setIsNewStoryOpen(false)} />
+      <NewEventModal isOpen={isNewEventOpen} onClose={() => setIsNewEventOpen(false)} />
+      <AddPromotionModal
+        type={promotionModalType}
+        onClose={() => setPromotionModalType(null)}
+        onAdd={() => {}}
       />
     </div>
   );

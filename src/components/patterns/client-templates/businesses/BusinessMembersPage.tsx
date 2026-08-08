@@ -24,28 +24,20 @@ function getMemberSinceYear(row: BusinessMemberRow): number {
   return new Date(row.memberSince).getFullYear();
 }
 
-const activeMembers = sampleBusinessMembers.filter((row) => row.status === "active");
-const newMembersThisYear = sampleBusinessMembers.filter(
-  (row) => getMemberSinceYear(row) === CURRENT_YEAR,
-);
-const expectedRevenue = sampleBusinessMembers
-  .filter((row) => row.status !== "lapsed")
-  .reduce((sum, row) => sum + row.annualDues, 0);
-
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
 
-function buildColumns(): TableColumn<BusinessMemberRow>[] {
+function buildColumns(onSelect?: (row: BusinessMemberRow) => void): TableColumn<BusinessMemberRow>[] {
   return [
     {
       key: "businessName",
       header: "Business",
       width: proportional(1, { minWidth: 200 }),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink)" }}>{row.businessName}</span>
         </RowClickCell>
       ),
@@ -55,7 +47,7 @@ function buildColumns(): TableColumn<BusinessMemberRow>[] {
       header: "Tier",
       width: pixel(110),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.tier}</span>
         </RowClickCell>
       ),
@@ -65,7 +57,7 @@ function buildColumns(): TableColumn<BusinessMemberRow>[] {
       header: "Renewal Date",
       width: pixel(130),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.renewalDate}</span>
         </RowClickCell>
       ),
@@ -75,7 +67,7 @@ function buildColumns(): TableColumn<BusinessMemberRow>[] {
       header: "Status",
       width: pixel(120),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <BusinessMembershipStatusToken status={row.status} />
         </RowClickCell>
       ),
@@ -83,9 +75,24 @@ function buildColumns(): TableColumn<BusinessMemberRow>[] {
   ];
 }
 
+export type BusinessMembersPageProps = {
+  data?: BusinessMemberRow[];
+  onSelect?: (row: BusinessMemberRow) => void;
+};
+
 /** Business memberships grouped by status — transactions-style chrome. */
-export function BusinessMembersPage() {
-  const columns = useMemo(() => buildColumns(), []);
+export function BusinessMembersPage({ data = sampleBusinessMembers, onSelect }: BusinessMembersPageProps) {
+  const columns = useMemo(() => buildColumns(onSelect), [onSelect]);
+
+  const activeMembers = useMemo(() => data.filter((row) => row.status === "active"), [data]);
+  const newMembersThisYear = useMemo(
+    () => data.filter((row) => getMemberSinceYear(row) === CURRENT_YEAR),
+    [data],
+  );
+  const expectedRevenue = useMemo(
+    () => data.filter((row) => row.status !== "lapsed").reduce((sum, row) => sum + row.annualDues, 0),
+    [data],
+  );
 
   return (
     <div
@@ -111,7 +118,7 @@ export function BusinessMembersPage() {
 
       <NestedGroupedTable
         title="Business Members"
-        data={sampleBusinessMembers}
+        data={data}
         columns={columns}
         getRowKey={(row) => row.id}
         groupBy={(row) => row.status}

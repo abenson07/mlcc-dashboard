@@ -7,14 +7,14 @@ import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
 import { RowClickCell } from "@/components/patterns/client-templates/shared";
 import { sampleNeighbors, type NeighborRow } from "@/data/mocks/people";
 
-function buildColumns(): TableColumn<NeighborRow>[] {
+function buildColumns(onSelect?: (row: NeighborRow) => void): TableColumn<NeighborRow>[] {
   return [
     {
       key: "name",
       header: "Name",
       width: proportional(1, { minWidth: 180 }),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <Avatar name={row.name} size="sm" />
           <span
             style={{
@@ -35,7 +35,7 @@ function buildColumns(): TableColumn<NeighborRow>[] {
       header: "Email",
       width: pixel(220),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.email}</span>
         </RowClickCell>
       ),
@@ -45,7 +45,7 @@ function buildColumns(): TableColumn<NeighborRow>[] {
       header: "Address",
       width: proportional(1, { minWidth: 200 }),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.address}</span>
         </RowClickCell>
       ),
@@ -55,7 +55,7 @@ function buildColumns(): TableColumn<NeighborRow>[] {
       header: "Joined",
       width: pixel(120),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.joinedDate}</span>
         </RowClickCell>
       ),
@@ -63,14 +63,19 @@ function buildColumns(): TableColumn<NeighborRow>[] {
   ];
 }
 
+export type NeighborsTableProps = {
+  data?: NeighborRow[];
+  onSelect?: (row: NeighborRow) => void;
+};
+
 /** Full org-wide neighbor roster — flat, ungrouped. */
-export function NeighborsTable() {
-  const columns = useMemo(() => buildColumns(), []);
+export function NeighborsTable({ data = sampleNeighbors, onSelect }: NeighborsTableProps) {
+  const columns = useMemo(() => buildColumns(onSelect), [onSelect]);
 
   return (
     <div style={{ height: "100%", minHeight: 0, boxSizing: "border-box", padding: "0 8px" }}>
       <GroupedTable
-        data={sampleNeighbors}
+        data={data}
         columns={columns}
         getRowKey={(row) => row.id}
         listChrome

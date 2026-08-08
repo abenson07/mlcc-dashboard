@@ -19,26 +19,20 @@ const GROUP_LABEL: Record<string, string> = {
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const totalSponsors = sampleSponsors.length;
-const newSponsorsThisYear = sampleSponsors.filter(
-  (row) => new Date(row.sponsorSince).getFullYear() === CURRENT_YEAR,
-);
-const totalSponsorshipRevenue = sampleSponsors.reduce((sum, row) => sum + row.amount, 0);
-
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
 
-function buildColumns(): TableColumn<SponsorRow>[] {
+function buildColumns(onSelect?: (row: SponsorRow) => void): TableColumn<SponsorRow>[] {
   return [
     {
       key: "businessName",
       header: "Business",
       width: proportional(1, { minWidth: 200 }),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink)" }}>{row.businessName}</span>
         </RowClickCell>
       ),
@@ -48,7 +42,7 @@ function buildColumns(): TableColumn<SponsorRow>[] {
       header: "Amount",
       width: pixel(110),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>
             {currencyFormatter.format(row.amount)}
           </span>
@@ -60,7 +54,7 @@ function buildColumns(): TableColumn<SponsorRow>[] {
       header: "Last Sponsored",
       width: pixel(130),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.lastSponsoredYear}</span>
         </RowClickCell>
       ),
@@ -70,7 +64,7 @@ function buildColumns(): TableColumn<SponsorRow>[] {
       header: "Level",
       width: pixel(120),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <SponsorshipLevelBadge level={row.sponsorshipLevel} />
         </RowClickCell>
       ),
@@ -78,9 +72,24 @@ function buildColumns(): TableColumn<SponsorRow>[] {
   ];
 }
 
+export type SponsorsPageProps = {
+  data?: SponsorRow[];
+  onSelect?: (row: SponsorRow) => void;
+};
+
 /** Past sponsors grouped by sponsorship level — same layout as Members. */
-export function SponsorsPage() {
-  const columns = useMemo(() => buildColumns(), []);
+export function SponsorsPage({ data = sampleSponsors, onSelect }: SponsorsPageProps) {
+  const columns = useMemo(() => buildColumns(onSelect), [onSelect]);
+
+  const totalSponsors = data.length;
+  const newSponsorsThisYear = useMemo(
+    () => data.filter((row) => new Date(row.sponsorSince).getFullYear() === CURRENT_YEAR),
+    [data],
+  );
+  const totalSponsorshipRevenue = useMemo(
+    () => data.reduce((sum, row) => sum + row.amount, 0),
+    [data],
+  );
 
   return (
     <div
@@ -106,7 +115,7 @@ export function SponsorsPage() {
 
       <NestedGroupedTable
         title="Sponsors"
-        data={sampleSponsors}
+        data={data}
         columns={columns}
         getRowKey={(row) => row.id}
         groupBy={(row) => row.sponsorshipLevel}

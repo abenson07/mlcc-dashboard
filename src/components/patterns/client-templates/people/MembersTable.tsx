@@ -15,14 +15,14 @@ const groupMeta: Record<string, { label: string; color: string }> = {
   "business-affiliate": { label: "Business Affiliate", color: "#f2994a" },
 };
 
-function buildColumns(): TableColumn<MemberRow>[] {
+function buildColumns(onSelect?: (row: MemberRow) => void): TableColumn<MemberRow>[] {
   return [
     {
       key: "name",
       header: "Name",
       width: proportional(1, { minWidth: 180 }),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <Avatar name={row.name} size="sm" />
           <span
             style={{
@@ -43,7 +43,7 @@ function buildColumns(): TableColumn<MemberRow>[] {
       header: "Email",
       width: pixel(220),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.email}</span>
         </RowClickCell>
       ),
@@ -53,7 +53,7 @@ function buildColumns(): TableColumn<MemberRow>[] {
       header: "Member Since",
       width: pixel(130),
       renderCell: (row) => (
-        <RowClickCell>
+        <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.memberSince}</span>
         </RowClickCell>
       ),
@@ -61,14 +61,19 @@ function buildColumns(): TableColumn<MemberRow>[] {
   ];
 }
 
+export type MembersTableProps = {
+  data?: MemberRow[];
+  onSelect?: (row: MemberRow) => void;
+};
+
 /** Members roster grouped by membership type. */
-export function MembersTable() {
-  const columns = useMemo(() => buildColumns(), []);
+export function MembersTable({ data = sampleMembers, onSelect }: MembersTableProps) {
+  const columns = useMemo(() => buildColumns(onSelect), [onSelect]);
 
   return (
     <div style={{ height: "100%", minHeight: 0, boxSizing: "border-box", padding: "0 8px" }}>
       <GroupedTable
-        data={sampleMembers}
+        data={data}
         columns={columns}
         getRowKey={(row) => row.id}
         groupBy={(row) => row.membershipType}

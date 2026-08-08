@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Mail, Megaphone, Plus } from "lucide-react";
 import { Card } from "@/components/patterns/primitives/Card";
-import { Button } from "@/components/patterns/primitives/Button";
-import { TextInput } from "@/components/patterns/primitives/TextInput";
-import { HStack, VStack } from "@/components/patterns/primitives/Stack";
+import { Popover } from "@/components/patterns/primitives/Popover";
+import { VStack } from "@/components/patterns/primitives/Stack";
+import { Icon } from "@/components/patterns/primitives/Icon";
+import { Text } from "@/components/patterns/primitives/Text";
 import { IconButton } from "@/components/patterns/shared/IconButton";
+import { AddPromotionModal } from "./AddPromotionModal";
 import type { EventPromotionItem, EventPromotionType } from "@/data/mocks/events";
 
 export type PromotionInsertRowProps = {
@@ -14,114 +16,79 @@ export type PromotionInsertRowProps = {
 };
 
 /**
- * Slim "+" affordance between promotion cards — expands into an inline
- * form for adding a new email or social post at that point in the timeline.
+ * Slim "+" affordance between promotion cards. Clicking it opens a dropdown
+ * right at that spot to choose email vs. social post, which then opens the
+ * matching modal for the specifics.
  */
 export function PromotionInsertRow({ onInsert }: PromotionInsertRowProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [type, setType] = useState<EventPromotionType>("email");
-  const [title, setTitle] = useState("");
-  const [channel, setChannel] = useState("");
-  const [sendDate, setSendDate] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [modalType, setModalType] = useState<EventPromotionType | null>(null);
 
-  function reset() {
-    setIsAdding(false);
-    setType("email");
-    setTitle("");
-    setChannel("");
-    setSendDate("");
-  }
-
-  if (!isAdding) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ flex: 1, height: 1, background: "var(--linear-color-hairline)" }} />
-        <IconButton
-          label="Add promotion item"
-          variant="secondary"
-          size="sm"
-          icon={<Plus size={14} strokeWidth={1.75} />}
-          onClick={() => setIsAdding(true)}
-        />
-        <div style={{ flex: 1, height: 1, background: "var(--linear-color-hairline)" }} />
-      </div>
-    );
-  }
-
-  function handleSave() {
-    if (!title.trim() || !sendDate) return;
-    onInsert({
-      type,
-      channel: channel.trim() || (type === "email" ? "Newsletter" : "Social"),
-      title: title.trim(),
-      description: "",
-      sendDate,
-      status: "Draft",
-    });
-    reset();
+  function openModal(type: EventPromotionType) {
+    setIsMenuOpen(false);
+    setModalType(type);
   }
 
   return (
-    <Card padding={4}>
-      <VStack gap={3}>
-        <HStack gap={2} align="center">
-          <Button
-            label="Email"
-            variant={type === "email" ? "primary" : "secondary"}
-            size="sm"
-            onClick={() => setType("email")}
-          />
-          <Button
-            label="Social post"
-            variant={type === "social" ? "primary" : "secondary"}
-            size="sm"
-            onClick={() => setType("social")}
-          />
-          <span style={{ flex: 1 }} />
+    <>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ flex: 1, height: 1, background: "var(--linear-color-hairline)" }} />
+        <Popover
+          isOpen={isMenuOpen}
+          onOpenChange={setIsMenuOpen}
+          alignment="center"
+          width={180}
+          content={
+            <Card padding={2} style={{ boxShadow: "var(--linear-shadow-canvas)" }}>
+              <VStack gap={1}>
+                <button
+                  type="button"
+                  onClick={() => openModal("email")}
+                  style={menuItemStyle}
+                >
+                  <Icon icon={Mail} size="sm" color="secondary" />
+                  <Text>Email</Text>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openModal("social")}
+                  style={menuItemStyle}
+                >
+                  <Icon icon={Megaphone} size="sm" color="secondary" />
+                  <Text>Social post</Text>
+                </button>
+              </VStack>
+            </Card>
+          }
+        >
           <IconButton
-            label="Cancel"
-            variant="ghost"
+            label="Add promotion item"
+            variant="secondary"
             size="sm"
-            icon={<X size={14} strokeWidth={1.75} />}
-            onClick={reset}
+            icon={<Plus size={14} strokeWidth={1.75} />}
           />
-        </HStack>
+        </Popover>
+        <div style={{ flex: 1, height: 1, background: "var(--linear-color-hairline)" }} />
+      </div>
 
-        <TextInput label="Title" value={title} onChange={setTitle} />
-        <TextInput
-          label={type === "email" ? "List / send-from" : "Channel"}
-          value={channel}
-          onChange={setChannel}
-        />
-        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 12, color: "var(--linear-color-ink-subtle)" }}>Send date</span>
-          <input
-            type="date"
-            value={sendDate}
-            onChange={(event) => setSendDate(event.target.value)}
-            style={{
-              boxSizing: "border-box",
-              width: "100%",
-              height: 32,
-              paddingInline: 8,
-              borderRadius: 6,
-              border: "var(--linear-border-width) solid var(--linear-color-hairline)",
-              background: "var(--linear-color-canvas)",
-              color: "var(--linear-color-ink)",
-              fontSize: 13,
-              fontFamily: "inherit",
-            }}
-          />
-        </label>
-
-        <Button
-          label={type === "email" ? "Add email" : "Add social post"}
-          variant="primary"
-          size="sm"
-          width="100%"
-          onClick={handleSave}
-        />
-      </VStack>
-    </Card>
+      <AddPromotionModal
+        type={modalType}
+        onClose={() => setModalType(null)}
+        onAdd={onInsert}
+      />
+    </>
   );
 }
+
+const menuItemStyle = {
+  all: "unset" as const,
+  boxSizing: "border-box" as const,
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  width: "100%",
+  height: 32,
+  paddingInline: 8,
+  borderRadius: 6,
+  cursor: "pointer",
+};
