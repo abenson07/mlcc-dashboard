@@ -80,9 +80,9 @@ export const linearTokens = {
       light: "transparent",
       dark: "#282a2c",
     },
-    accent: "#5e6ad2",
-    accentHover: "#828fff",
-    accentFocus: "#5e69d1",
+    accent: "#60d286",
+    accentHover: "#85ffad",
+    accentFocus: "#5dd081",
     onAccent: "#ffffff",
     success: "#27a644",
     /** Sidebar nav item — idle label/icon */
