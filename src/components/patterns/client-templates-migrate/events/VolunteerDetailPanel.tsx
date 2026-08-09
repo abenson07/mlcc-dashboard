@@ -6,7 +6,7 @@ import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
 import { CircleDot, Mail, UserRound } from "lucide-react";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
-import type { EventVolunteerRow } from "@/data/mocks/events";
+import type { EventVolunteerRow } from "./VolunteersPage";
 
 export type VolunteerDetailPanelProps = {
   volunteer: EventVolunteerRow;
@@ -33,7 +33,7 @@ export function VolunteerDetailPanel({ volunteer }: VolunteerDetailPanelProps) {
         density="compact"
         header={
           <Text type="label" color="secondary">
-            RSVP
+            Status
           </Text>
         }
       >

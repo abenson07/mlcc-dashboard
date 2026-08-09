@@ -6,8 +6,10 @@ import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Calendar, CircleDot, DollarSign, Tag } from "lucide-react";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
+import type { BusinessWithDetails } from "hooks";
 import type { BusinessMemberRow } from "./types";
 import { BusinessMembershipStatusToken } from "./BusinessMembershipStatusToken";
+import { DetailsSection, SponsorshipHistorySection } from "./BusinessSections";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -17,10 +19,11 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 
 export type BusinessMemberDetailPanelProps = {
   businessMember: BusinessMemberRow;
+  business: BusinessWithDetails;
 };
 
 /** Business member detail — shown in the outlined side panel when a row is selected. */
-export function BusinessMemberDetailPanel({ businessMember }: BusinessMemberDetailPanelProps) {
+export function BusinessMemberDetailPanel({ businessMember, business }: BusinessMemberDetailPanelProps) {
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -50,6 +53,9 @@ export function BusinessMemberDetailPanel({ businessMember }: BusinessMemberDeta
           label={`${currencyFormatter.format(businessMember.annualDues)} annual dues`}
         />
       </List>
+
+      <DetailsSection business={business} />
+      <SponsorshipHistorySection business={business} />
     </VStack>
   );
 }

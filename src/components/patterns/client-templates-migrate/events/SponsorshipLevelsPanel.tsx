@@ -1,6 +1,8 @@
 "use client";
 
 import { Text } from "@/components/patterns/primitives/Text";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { useEventContext } from "@/components/integrated/events/EventContext";
 import { sampleEventSponsorshipLevels } from "@/data/mocks/events";
 
 /**
@@ -8,7 +10,18 @@ import { sampleEventSponsorshipLevels } from "@/data/mocks/events";
  * sits alongside `BudgetChart` in the Sponsorships page's top grid.
  */
 export function SponsorshipLevelsPanel() {
-  const levels = sampleEventSponsorshipLevels;
+  const { enabled: demo } = useDemoModeOptional();
+  const { sponsorshipTiers } = useEventContext();
+
+  const levels = demo
+    ? sampleEventSponsorshipLevels
+    : sponsorshipTiers.map((tier, index) => ({
+        id: `tier-${index}`,
+        name: tier.name,
+        price: `$${tier.amount.toLocaleString()}`,
+        quantityAvailable: tier.quantity,
+        quantityFilled: Math.max(tier.quantity - tier.remaining, 0),
+      }));
 
   return (
     <section
@@ -28,21 +41,34 @@ export function SponsorshipLevelsPanel() {
         Sponsorship levels
       </Text>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {levels.map((level) => (
-          <div key={level.id} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
-              <Text size="sm">{level.name}</Text>
+      {levels.length === 0 ? (
+        <Text size="sm" color="secondary">
+          No levels yet.
+        </Text>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {levels.map((level) => (
+            <div key={level.id} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  justifyContent: "space-between",
+                  gap: 8,
+                }}
+              >
+                <Text size="sm">{level.name}</Text>
+                <Text size="sm" color="secondary">
+                  {level.quantityFilled}/{level.quantityAvailable}
+                </Text>
+              </div>
               <Text size="sm" color="secondary">
-                {level.quantityFilled}/{level.quantityAvailable}
+                {level.price}
               </Text>
             </div>
-            <Text size="sm" color="secondary">
-              {level.price}
-            </Text>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

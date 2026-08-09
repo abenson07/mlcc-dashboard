@@ -45,10 +45,10 @@ export function StaffClassesSection({ staff, onAddClass }: StaffClassesSectionPr
               <div
                 style={{
                   boxSizing: "border-box",
-                  background: "var(--linear-color-canvas)",
-                  border: "var(--linear-border-width) solid var(--linear-color-hairline)",
-                  borderRadius: "var(--linear-radius-md)",
-                  boxShadow: "var(--linear-shadow-canvas)",
+                  background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
+        borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
                   padding: 4,
                 }}
               >

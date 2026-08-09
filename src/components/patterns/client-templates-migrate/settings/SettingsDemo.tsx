@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { EmptyStateCard } from "@/components/patterns/client-templates/shared";
 import { settingsNavSections } from "@/data/mocks/settings-nav";
 import { SettingsSideNav } from "./SettingsSideNav";
 import { PreferencesPanel } from "./PreferencesPanel";
@@ -16,6 +18,7 @@ function findLabel(id: string): string {
 }
 
 export function SettingsDemo() {
+  const { enabled: demo } = useDemoModeOptional();
   const [selectedNavId, setSelectedNavId] = useState("preferences");
 
   return (
@@ -38,7 +41,12 @@ export function SettingsDemo() {
           }}
         >
           <div style={{ maxWidth: 640, marginInline: "auto" }}>
-            {selectedNavId === "preferences" ? (
+            {!demo ? (
+              <EmptyStateCard
+                variant="plain"
+                label="Settings panels not wired yet — turn on demo mode to preview"
+              />
+            ) : selectedNavId === "preferences" ? (
               <PreferencesPanel />
             ) : (
               <SettingsPlaceholderPanel label={findLabel(selectedNavId)} />

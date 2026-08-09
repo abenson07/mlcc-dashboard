@@ -4,6 +4,7 @@ export { EventCard } from "./EventCard";
 export type { EventCardProps } from "./EventCard";
 export { EventDetailDemo } from "./EventDetailDemo";
 export type { EventDetailDemoProps } from "./EventDetailDemo";
+export { EventDraftBanner } from "./EventDraftBanner";
 export { EventOverviewPage } from "./EventOverviewPage";
 export type { EventOverviewPageProps } from "./EventOverviewPage";
 export { EventInfoBox } from "./EventInfoBox";

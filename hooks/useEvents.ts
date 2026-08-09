@@ -178,6 +178,20 @@ export function useEvent(eventId: string | null, { autoFetch = true } = {}) {
 
   const event: EventEdition | null = data ? mapEventEdition(data) : null;
 
+  const uploadCoverImage = async (file: File): Promise<string> => {
+    if (!supabaseClient) throw new Error("Supabase client is not initialized");
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error: uploadError } = await supabaseClient.storage
+      .from("event-images")
+      .upload(path, file, { contentType: file.type || undefined });
+    if (uploadError) throw uploadError;
+    const { data: publicUrlData } = supabaseClient.storage
+      .from("event-images")
+      .getPublicUrl(path);
+    return publicUrlData.publicUrl;
+  };
+
   return {
     event,
     eventRow: data ?? null,
@@ -189,5 +203,6 @@ export function useEvent(eventId: string | null, { autoFetch = true } = {}) {
     update: (patch: EventsUpdate) => updateMutation.mutateAsync(patch),
     publish: () => publishMutation.mutateAsync(),
     unpublish: () => unpublishMutation.mutateAsync(),
+    uploadCoverImage,
   };
 }

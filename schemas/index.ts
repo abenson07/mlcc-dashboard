@@ -15,6 +15,7 @@ export * from "./event_templates";
 export * from "./event_volunteers";
 export * from "./volunteer_asks";
 export * from "./volunteers";
+export * from "./committee_interests";
 export * from "./payments";
 export * from "./sponsorships";
 export * from "./tshirt_preorders";

@@ -12,7 +12,7 @@ export function ActionItemsPage() {
   const { items, loading, error } = useAllActionItems();
 
   const openItems = useMemo(
-    () => items.filter((item) => item.status !== "done").map(toActionItem),
+    () => items.filter((item) => item.status === "open" || item.status === "canceled").map(toActionItem),
     [items]
   );
 

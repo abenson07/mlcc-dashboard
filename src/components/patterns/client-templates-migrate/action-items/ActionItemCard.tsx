@@ -14,6 +14,8 @@ export type ActionItemCardProps = {
 
 export function ActionItemCard({ item }: ActionItemCardProps) {
   const assigneeIcon = item.assignee.type === "committee" ? Building2 : User;
+  const statusLabel =
+    item.status === "canceled" ? "Canceled" : item.status === "done" ? "Done" : "Open";
 
   return (
     <Card padding={4}>
@@ -22,6 +24,7 @@ export function ActionItemCard({ item }: ActionItemCardProps) {
           <Text weight="semibold" display="block" style={{ flex: 1 }}>
             {item.title}
           </Text>
+          <Badge label={statusLabel} />
           <Text color="secondary" size="sm">
             Due {item.dueDate}
           </Text>

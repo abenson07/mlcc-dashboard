@@ -19,5 +19,6 @@ export function toActionItem(row: ActionItemListRow): ActionItem {
     // Real action items are always assigned to a person — there's no committee-level assignment.
     assignee: { type: "person", name: row.assignee?.full_name ?? "Unassigned" },
     linkedMeeting: meetingGroupLabel(row.committee_meetings),
+    status: row.status,
   };
 }

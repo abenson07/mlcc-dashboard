@@ -1,54 +1,97 @@
 "use client";
 
 import { useState } from "react";
-import { TextInput } from "@/components/patterns/primitives/TextInput";
-import { Switch } from "@/components/patterns/primitives/Switch";
+import { CalendarCheck, Tag, User } from "lucide-react";
 import { Button } from "@/components/patterns/primitives/Button";
-import { HStack, VStack } from "@/components/patterns/primitives/Stack";
-import { Text } from "@/components/patterns/primitives/Text";
+import { HStack } from "@/components/patterns/primitives/Stack";
+import { PropertyChip } from "@/components/patterns/client-templates/shared";
 import { RichTextEditor } from "./RichTextEditor";
-import type { Story } from "@/data/mocks/content";
+import { availableTopics, type Story } from "@/data/mocks/content";
 
 export type StoryFormPanelProps = {
   story: Story;
+  isNew?: boolean;
   onSave: (story: Story) => void;
   onClose: () => void;
 };
 
-export function StoryFormPanel({ story, onSave, onClose }: StoryFormPanelProps) {
+function todayLabel(): string {
+  return new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+export function StoryFormPanel({ story, isNew = false, onSave, onClose }: StoryFormPanelProps) {
   const [draft, setDraft] = useState<Story>(story);
 
+  function cycleTopic() {
+    setDraft((d) => {
+      const currentIndex = availableTopics.indexOf(d.topic);
+      const next = availableTopics[(currentIndex + 1) % availableTopics.length];
+      return { ...d, topic: next };
+    });
+  }
+
+  function togglePublished() {
+    setDraft((d) =>
+      d.status === "Published"
+        ? { ...d, status: "Draft" }
+        : { ...d, status: "Published", publishedAt: todayLabel() },
+    );
+  }
+
   return (
-    <VStack gap={5}>
-      <Text type="label" color="secondary">
-        Edit story
-      </Text>
-      <TextInput
-        label="Title"
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 16 }}>
+      <input
         value={draft.title}
-        onChange={(title) => setDraft((d) => ({ ...d, title }))}
+        onChange={(event) => setDraft((d) => ({ ...d, title: event.target.value }))}
+        placeholder="Untitled story"
+        autoFocus={isNew}
+        style={{
+          all: "unset",
+          boxSizing: "border-box",
+          width: "100%",
+          fontSize: 28,
+          fontWeight: 600,
+          lineHeight: "34px",
+          color: "var(--linear-color-ink)",
+        }}
       />
-      <TextInput
-        label="Author"
-        value={draft.author}
-        onChange={(author) => setDraft((d) => ({ ...d, author }))}
-      />
-      <RichTextEditor
-        label="Body"
-        content={draft.body}
-        onChange={(body) => setDraft((d) => ({ ...d, body }))}
-      />
-      <Switch
-        label="Published"
-        value={draft.status === "Published"}
-        onChange={(isPublished) =>
-          setDraft((d) => ({ ...d, status: isPublished ? "Published" : "Draft" }))
-        }
-      />
+
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <RichTextEditor
+          bare
+          content={draft.body}
+          placeholder="Start writing the story…"
+          onChange={(body) => setDraft((d) => ({ ...d, body }))}
+        />
+      </div>
+
+      <div
+        style={{
+          borderTop: "var(--linear-border-width) solid var(--linear-color-hairline)",
+          paddingTop: 12,
+        }}
+      >
+        <HStack gap={1} style={{ flexWrap: "wrap" }}>
+          <PropertyChip id="author" label={draft.author} icon={<User size={14} strokeWidth={1.75} />} />
+          <PropertyChip
+            id="topic"
+            label={draft.topic || "Add topic"}
+            icon={<Tag size={14} strokeWidth={1.75} />}
+            onClick={cycleTopic}
+          />
+          <PropertyChip
+            id="status"
+            label={draft.status === "Published" ? `Published · ${draft.publishedAt}` : "Draft"}
+            icon={<CalendarCheck size={14} strokeWidth={1.75} />}
+            onClick={togglePublished}
+          />
+        </HStack>
+      </div>
+
       <HStack gap={2} justify="end">
         <Button label="Close" variant="secondary" onClick={onClose} />
-        <Button label="Save" variant="primary" onClick={() => onSave(draft)} />
+        <Button label={isNew ? "Create story" : "Save"} variant="primary" onClick={() => onSave(draft)} />
       </HStack>
-    </VStack>
+    </div>
   );
 }

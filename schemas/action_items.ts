@@ -2,7 +2,7 @@
  * Action items schema — person-assigned follow-ups (not event/leaflet tasks).
  */
 
-export type ActionItemStatus = "open" | "done";
+export type ActionItemStatus = "open" | "done" | "canceled";
 
 export type ActionItemSource = "ai" | "manual" | "bulk";
 
@@ -18,6 +18,7 @@ export interface ActionItems {
   sort_order: number;
   completed_at: string | null;
   completed_by: string | null;
+  reminder_sent_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +34,7 @@ export interface ActionItemsInsert {
   sort_order?: number;
   completed_at?: string | null;
   completed_by?: string | null;
+  reminder_sent_at?: string | null;
 }
 
 export interface ActionItemsUpdate {
@@ -46,5 +48,6 @@ export interface ActionItemsUpdate {
   sort_order?: number;
   completed_at?: string | null;
   completed_by?: string | null;
+  reminder_sent_at?: string | null;
   updated_at?: string;
 }

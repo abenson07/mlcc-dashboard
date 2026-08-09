@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useParams } from "next/navigation";
+import { useLeaflets } from "hooks";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
 import { Badge } from "@/components/patterns/primitives/Badge";
-import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
+import { EmptyStateCard, OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import { LeafletOverviewPage } from "./LeafletOverviewPage";
 import { LeafletDeliverersPage } from "./LeafletDeliverersPage";
 import { LeafletRoutesPage } from "./LeafletRoutesPage";
@@ -23,8 +26,10 @@ import {
   formatLeafletTaskDueLabel,
   sampleLeafletDetail,
   sampleLeafletTasks,
+  type LeafletDetail,
   type LeafletRouteRow,
   type LeafletSponsorshipInvoiceRow,
+  type LeafletStatus,
   type LeafletStoryRow,
   type LeafletTaskRow,
 } from "@/data/mocks/leaflets";
@@ -37,15 +42,61 @@ type Selection =
   | { kind: "story"; row: LeafletStoryRow }
   | null;
 
+function statusLabel(status: LeafletStatus): string {
+  if (status === "active") return "Active";
+  if (status === "planned") return "Planned";
+  return "Closed";
+}
+
+function liveLeafletDetail(
+  id: string,
+  leaflets: { id: string; title: string; distribution_date: string; status: string }[],
+): LeafletDetail {
+  const row = leaflets.find((l) => l.id === id);
+  if (!row) {
+    return {
+      id,
+      title: "Leaflet",
+      distributionDate: "",
+      status: "planned",
+      countdownLabel: "—",
+    };
+  }
+  const status =
+    row.status === "active" || row.status === "planned" || row.status === "closed"
+      ? row.status
+      : "planned";
+  return {
+    id: row.id,
+    title: row.title,
+    distributionDate: row.distribution_date,
+    status,
+    countdownLabel: "—",
+  };
+}
+
 export type LeafletDetailDemoProps = {
   navigation?: ReactNode;
 };
 
 export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
+  const params = useParams<{ id: string }>();
+  const leafletId = typeof params?.id === "string" ? params.id : "";
+  const { enabled: demo } = useDemoModeOptional();
+  const { leaflets } = useLeaflets();
   const [view, setView] = useState<LeafletDetailView>("overview");
   const isFullBleed = view === "routes";
   const [selection, setSelection] = useState<Selection>(null);
-  const [tasks, setTasks] = useState<LeafletTaskRow[]>(sampleLeafletTasks);
+  const [tasks, setTasks] = useState<LeafletTaskRow[]>([]);
+
+  useEffect(() => {
+    setTasks(demo ? sampleLeafletTasks : []);
+  }, [demo]);
+
+  const leaflet = useMemo(
+    () => (demo ? sampleLeafletDetail : liveLeafletDetail(leafletId, leaflets)),
+    [demo, leafletId, leaflets],
+  );
 
   function changeView(next: LeafletDetailView) {
     setView(next);
@@ -88,45 +139,65 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   }
 
-  const body =
-    view === "deliverers" ? (
-      <LeafletDeliverersPage />
-    ) : view === "routes" ? (
-      <LeafletRoutesPage onSelectRoute={selectRoute} />
-    ) : view === "sponsorships" ? (
-      <LeafletSponsorshipsPage onSelectInvoice={selectInvoice} />
-    ) : view === "schedule" ? (
-      <LeafletSchedulePage tasks={tasks} onToggleTask={toggleTask} onAddTask={addTask} onRemoveTask={removeTask} />
-    ) : (
-      <LeafletOverviewPage
-        leaflet={sampleLeafletDetail}
-        tasks={tasks}
-        onToggleTask={toggleTask}
-        onSeeAllTasks={() => changeView("schedule")}
-        onSeeAllOpenRoutes={() => changeView("routes")}
-        onViewSponsorships={() => changeView("sponsorships")}
-        onSelectOpenRoute={selectRoute}
-        onSelectSkippedRoute={selectRoute}
-        onSelectSponsor={() => changeView("sponsorships")}
-        onSelectStory={selectStory}
+  const liveEmpty = (
+    <div style={{ padding: "32px 24px" }}>
+      <EmptyStateCard
+        variant="plain"
+        label={
+          view === "overview"
+            ? "Leaflet detail sections not wired yet — turn on demo mode to preview"
+            : `${view[0]!.toUpperCase()}${view.slice(1)} not wired yet — turn on demo mode to preview`
+        }
       />
-    );
+    </div>
+  );
 
-  const statusLabel =
-    sampleLeafletDetail.status === "active"
-      ? "Active"
-      : sampleLeafletDetail.status === "planned"
-        ? "Planned"
-        : "Closed";
+  const body = !demo
+    ? liveEmpty
+    : view === "deliverers"
+      ? (
+          <LeafletDeliverersPage />
+        )
+      : view === "routes"
+        ? (
+            <LeafletRoutesPage onSelectRoute={selectRoute} />
+          )
+        : view === "sponsorships"
+          ? (
+              <LeafletSponsorshipsPage onSelectInvoice={selectInvoice} />
+            )
+          : view === "schedule"
+            ? (
+                <LeafletSchedulePage
+                  tasks={tasks}
+                  onToggleTask={toggleTask}
+                  onAddTask={addTask}
+                  onRemoveTask={removeTask}
+                />
+              )
+            : (
+                <LeafletOverviewPage
+                  leaflet={leaflet}
+                  tasks={tasks}
+                  onToggleTask={toggleTask}
+                  onSeeAllTasks={() => changeView("schedule")}
+                  onSeeAllOpenRoutes={() => changeView("routes")}
+                  onViewSponsorships={() => changeView("sponsorships")}
+                  onSelectOpenRoute={selectRoute}
+                  onSelectSkippedRoute={selectRoute}
+                  onSelectSponsor={() => changeView("sponsorships")}
+                  onSelectStory={selectStory}
+                />
+              );
 
   return (
     <div style={{ height: "100%" }}>
       <FoundationLayout
         navigation={navigation ?? <LinearSidebar />}
-        contentMaxWidth={isFullBleed ? undefined : 1200}
-        isSideContentVisible={selection != null}
+        contentMaxWidth={isFullBleed && demo ? undefined : 1200}
+        isSideContentVisible={demo && selection != null}
         sideContent={
-          selection ? (
+          demo && selection ? (
             <OutlinedPanel onClose={() => setSelection(null)}>
               {selection.kind === "route" ? (
                 <RouteDetailPanel route={selection.row} />
@@ -141,15 +212,15 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         header={
           <CanvasHeader
             topbar={{
-              title: sampleLeafletDetail.title,
-              titleAdornment: <Badge label={statusLabel} />,
+              title: leaflet.title,
+              titleAdornment: <Badge label={statusLabel(leaflet.status)} />,
               hasFavorite: true,
-              endContent: (
+              endContent: demo ? (
                 <>
                   <LeafletListsMenu />
                   <LeafletQrMenu />
                 </>
-              ),
+              ) : undefined,
             }}
             controls={
               <ViewTabs aria-label="Leaflet views">

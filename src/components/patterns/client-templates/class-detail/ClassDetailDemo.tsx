@@ -76,6 +76,7 @@ export function ClassDetailDemo({ navigation }: ClassDetailDemoProps = {}) {
       <ClassContentPage>
         <ClassInfoBox summary={classSummary} />
         <EmptyStateCard
+          variant="plain"
           label="No messages for this class yet"
           icon={<Inbox size={14} strokeWidth={1.75} />}
         />

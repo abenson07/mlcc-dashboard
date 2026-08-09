@@ -92,6 +92,7 @@ export function InvoicesSection({ onSelectInvoice, onGoToPayments }: InvoicesSec
         style={{ display: "flex", flexDirection: "column", gap: 4 }}
       >
         <EmptyStateCard
+          variant="plain"
           label="No current classes"
           icon={<CreditCard size={14} strokeWidth={1.75} />}
           onClick={onGoToPayments}

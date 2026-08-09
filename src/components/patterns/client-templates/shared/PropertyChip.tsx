@@ -11,10 +11,11 @@ export type { MixedContentProperty };
  * `MixedContentHeader`'s own chip isn't exported, so this mirrors its
  * look without reaching into Foundation internals.
  */
-export function PropertyChip({ label, icon }: MixedContentProperty) {
+export function PropertyChip({ label, icon, onClick }: MixedContentProperty & { onClick?: () => void }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       style={{
         all: "unset",
         boxSizing: "border-box",

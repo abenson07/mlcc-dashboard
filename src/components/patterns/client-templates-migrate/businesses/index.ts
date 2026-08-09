@@ -8,3 +8,4 @@ export { BusinessMemberDetailPanel } from "./BusinessMemberDetailPanel";
 export { BusinessSponsorDetailPanel } from "./BusinessSponsorDetailPanel";
 export { BusinessDetailPanel } from "./BusinessDetailPanel";
 export { AddBusinessModal } from "./AddBusinessModal";
+export { EditBusinessModal } from "./EditBusinessModal";

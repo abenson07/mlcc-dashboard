@@ -93,6 +93,7 @@ export function PrerequisitesSection({
         style={{ display: "flex", flexDirection: "column", gap: 4 }}
       >
         <EmptyStateCard
+          variant="plain"
           label="No prerequisites waiting on review"
           icon={<FileCheck2 size={14} strokeWidth={1.75} />}
         />

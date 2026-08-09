@@ -66,8 +66,10 @@ export function LeafletsListPage() {
                     gap: 16,
                     width: "100%",
                     padding: 16,
-                    border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+                    background: "var(--linear-color-panel)",
+                    border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
                     borderRadius: "var(--linear-radius-md)",
+                    boxShadow: "var(--linear-shadow-panel)",
                     cursor: "pointer",
                   }}
                 >

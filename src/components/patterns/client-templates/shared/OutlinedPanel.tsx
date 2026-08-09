@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { X } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import { IconButton } from "@/components/patterns/shared/IconButton";
 
 export type OutlinedPanelProps = {
@@ -9,6 +9,8 @@ export type OutlinedPanelProps = {
   width?: number | string;
   /** When set, shows a close X top-right and closes on Escape. */
   onClose?: () => void;
+  /** When set, shows an Edit pencil button top-right, to the left of the close X. */
+  onEdit?: () => void;
 };
 
 /**
@@ -18,7 +20,7 @@ export type OutlinedPanelProps = {
  * like `SideContentBar`. Follows the app's light/dark mode like everything
  * else via the `--linear-color-panel*` tokens.
  */
-export function OutlinedPanel({ children, width = 320, onClose }: OutlinedPanelProps) {
+export function OutlinedPanel({ children, width = 320, onClose, onEdit }: OutlinedPanelProps) {
   useEffect(() => {
     if (!onClose) return;
     function onKeyDown(event: KeyboardEvent) {
@@ -46,15 +48,26 @@ export function OutlinedPanel({ children, width = 320, onClose }: OutlinedPanelP
         padding: 16,
       }}
     >
-      {onClose ? (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-          <IconButton
-            label="Close"
-            variant="ghost"
-            size="sm"
-            icon={<X size={16} strokeWidth={1.75} />}
-            onClick={onClose}
-          />
+      {onEdit || onClose ? (
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginBottom: 8 }}>
+          {onEdit ? (
+            <IconButton
+              label="Edit"
+              variant="ghost"
+              size="sm"
+              icon={<Pencil size={16} strokeWidth={1.75} />}
+              onClick={onEdit}
+            />
+          ) : null}
+          {onClose ? (
+            <IconButton
+              label="Close"
+              variant="ghost"
+              size="sm"
+              icon={<X size={16} strokeWidth={1.75} />}
+              onClick={onClose}
+            />
+          ) : null}
         </div>
       ) : null}
       {children}

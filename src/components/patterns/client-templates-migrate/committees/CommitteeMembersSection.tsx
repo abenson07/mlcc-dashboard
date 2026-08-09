@@ -2,6 +2,8 @@
 
 import { Avatar } from "@/components/patterns/primitives/Avatar";
 import { Text } from "@/components/patterns/primitives/Text";
+import { EmptyStateCard } from "@/components/patterns/client-templates/shared";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { sampleCommitteeMembers, type CommitteeMemberRow } from "@/data/mocks/committees";
 
 export type CommitteeMembersSectionProps = {
@@ -14,7 +16,8 @@ export type CommitteeMembersSectionProps = {
  * layout with `CommitteeMeetingsSection`.
  */
 export function CommitteeMembersSection({ onSelectMember }: CommitteeMembersSectionProps) {
-  const members = sampleCommitteeMembers;
+  const { enabled: demo } = useDemoModeOptional();
+  const members = demo ? sampleCommitteeMembers : [];
 
   return (
     <section
@@ -25,11 +28,20 @@ export function CommitteeMembersSection({ onSelectMember }: CommitteeMembersSect
         flexDirection: "column",
         gap: 4,
         padding: 20,
-        border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 8,
+        }}
+      >
         <Text weight="semibold">Members</Text>
         <Text size="sm" color="secondary">
           {members.length} total
@@ -37,9 +49,7 @@ export function CommitteeMembersSection({ onSelectMember }: CommitteeMembersSect
       </div>
 
       {members.length === 0 ? (
-        <Text size="sm" color="secondary">
-          No members added yet.
-        </Text>
+        <EmptyStateCard variant="plain" label="No members added yet" minHeight={72} />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {members.map((member) => (

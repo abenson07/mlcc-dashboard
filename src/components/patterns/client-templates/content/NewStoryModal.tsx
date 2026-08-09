@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
-import type { ContentStatus, Story } from "@/data/mocks/content";
+import { availableTopics, type ContentStatus, type Story } from "@/data/mocks/content";
 
 export type NewStoryModalProps = {
   isOpen: boolean;
@@ -46,7 +46,9 @@ export function NewStoryModal({ isOpen, onClose, onCreate }: NewStoryModalProps)
     onCreate?.({
       title: title.trim(),
       author: author.trim(),
+      topic: availableTopics[0],
       status,
+      publishedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       body: "",
     });
     onClose();

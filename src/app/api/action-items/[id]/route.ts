@@ -21,7 +21,7 @@ export async function PATCH(
   const o = body as Record<string, unknown>;
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
 
-  if (o.status === "open" || o.status === "done") {
+  if (o.status === "open" || o.status === "done" || o.status === "canceled") {
     patch.status = o.status;
     if (o.status === "done") {
       patch.completed_at = new Date().toISOString();

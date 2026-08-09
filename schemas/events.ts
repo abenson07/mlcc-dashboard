@@ -3,9 +3,10 @@
  * Dashboard-native events (parallel track to Webflow calendar).
  *
  * `field_data` jsonb conventions (see `src/lib/events/eventData.ts`):
- * - location, status, capacity, image_url, description
- * - kind: "council" | "external" (default council)
- * - qr_code_id, webflow_item_id (migration bridge)
+ * - location, status, capacity, image_url, description, address
+ * - kind: "council" | "external" | "committee_meeting"
+ * - qr_code_id (legacy), qr_codes: [{ id, description? }]
+ * - webflow_item_id (migration bridge), sponsorship_goal_cents, marketing
  */
 
 export type EventPublishStatus = "draft" | "published";

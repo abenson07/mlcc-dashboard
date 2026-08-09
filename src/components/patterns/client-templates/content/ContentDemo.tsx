@@ -2,24 +2,46 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Plus } from "lucide-react";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
 import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
-import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
-import { DraftsSection } from "@/components/patterns/client-templates/drafts";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { StoryCard } from "./StoryCard";
 import { FaqCard } from "./FaqCard";
 import { StoryFormPanel } from "./StoryFormPanel";
 import { FaqFormPanel } from "./FaqFormPanel";
-import { sampleStories, sampleFaqs, type Story, type Faq } from "@/data/mocks/content";
+import {
+  sampleStories,
+  sampleFaqs,
+  CURRENT_USER_NAME,
+  availableTopics,
+  type Story,
+  type Faq,
+} from "@/data/mocks/content";
 
 type ContentView = "stories" | "faqs";
 
 function isContentView(value: string | null): value is ContentView {
   return value === "stories" || value === "faqs";
+}
+
+function emptyStory(): Story {
+  return {
+    id: `story-${Date.now()}`,
+    title: "",
+    author: CURRENT_USER_NAME,
+    topic: availableTopics[0],
+    status: "Draft",
+    publishedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    body: "",
+  };
+}
+
+function emptyFaq(): Faq {
+  return { id: `faq-${Date.now()}`, question: "", answer: "", pages: [] };
 }
 
 function ContentDemoInner() {
@@ -29,98 +51,134 @@ function ContentDemoInner() {
 
   const [stories, setStories] = useState<Story[]>(sampleStories);
   const [faqs, setFaqs] = useState<Faq[]>(sampleFaqs);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const [editingStory, setEditingStory] = useState<Story | null>(null);
+  const [editingFaq, setEditingFaq] = useState<Faq | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   function changeView(next: ContentView) {
     setView(next);
-    setSelectedId(null);
+    setEditingStory(null);
+    setEditingFaq(null);
+    setIsCreatingNew(false);
   }
 
-  const selectedStory = view === "stories" ? stories.find((s) => s.id === selectedId) ?? null : null;
-  const selectedFaq = view === "faqs" ? faqs.find((f) => f.id === selectedId) ?? null : null;
+  function closeDetail() {
+    setEditingStory(null);
+    setEditingFaq(null);
+    setIsCreatingNew(false);
+  }
+
+  function startCreate() {
+    setIsCreatingNew(true);
+    if (view === "stories") setEditingStory(emptyStory());
+    else setEditingFaq(emptyFaq());
+  }
+
+  const isDetailView = editingStory != null || editingFaq != null;
 
   return (
     <div style={{ height: "100%" }}>
       <FoundationLayout
         navigation={<LinearSidebar />}
-        contentMaxWidth={1200}
-        isSideContentVisible={selectedStory != null || selectedFaq != null}
-        sideContent={
-          selectedStory ? (
-            <div style={{ flex: "4 1 0%", minWidth: 0, height: "100%" }}>
-              <OutlinedPanel width="100%" onClose={() => setSelectedId(null)}>
-                <StoryFormPanel
-                  story={selectedStory}
-                  onClose={() => setSelectedId(null)}
-                  onSave={(updated) => {
-                    setStories((current) =>
-                      current.map((s) => (s.id === updated.id ? updated : s)),
-                    );
-                    setSelectedId(null);
-                  }}
-                />
-              </OutlinedPanel>
-            </div>
-          ) : selectedFaq ? (
-            <div style={{ flex: "4 1 0%", minWidth: 0, height: "100%" }}>
-              <OutlinedPanel width="100%" onClose={() => setSelectedId(null)}>
-                <FaqFormPanel
-                  faq={selectedFaq}
-                  onClose={() => setSelectedId(null)}
-                  onSave={(updated) => {
-                    setFaqs((current) => current.map((f) => (f.id === updated.id ? updated : f)));
-                    setSelectedId(null);
-                  }}
-                />
-              </OutlinedPanel>
-            </div>
-          ) : null
-        }
+        contentMaxWidth={760}
         header={
           <CanvasHeader
-            topbar={{ title: "Content" }}
-            controls={
-              <ViewTabs aria-label="Content views">
-                <ViewTab
-                  label="Stories"
-                  selected={view === "stories"}
-                  onClick={() => changeView("stories")}
-                />
-                <ViewTab
-                  label="FAQs"
-                  selected={view === "faqs"}
-                  onClick={() => changeView("faqs")}
-                />
-              </ViewTabs>
+            topbar={
+              isDetailView
+                ? {
+                    title: isCreatingNew
+                      ? view === "stories"
+                        ? "New story"
+                        : "New FAQ"
+                      : view === "stories"
+                        ? "Story"
+                        : "FAQ",
+                    breadcrumbs: [{ label: "Content", onClick: closeDetail }],
+                  }
+                : { title: "Content" }
             }
+            controls={
+              isDetailView ? undefined : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                  <ViewTabs aria-label="Content views">
+                    <ViewTab
+                      label="Stories"
+                      selected={view === "stories"}
+                      onClick={() => changeView("stories")}
+                    />
+                    <ViewTab label="FAQs" selected={view === "faqs"} onClick={() => changeView("faqs")} />
+                  </ViewTabs>
+                  <button
+                    type="button"
+                    onClick={startCreate}
+                    aria-label={view === "stories" ? "New story" : "New FAQ"}
+                    style={{
+                      all: "unset",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      height: 28,
+                      paddingInline: 10,
+                      borderRadius: 6,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                      color: "var(--linear-color-ink)",
+                      background: "var(--linear-color-icon-button-secondary)",
+                      border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+                    }}
+                  >
+                    <Plus size={14} strokeWidth={1.75} />
+                    {view === "stories" ? "New story" : "New FAQ"}
+                  </button>
+                </div>
+              )
+            }
+            isControlsVisible={!isDetailView}
           />
         }
       >
-        <VStack gap={8}>
-          {view === "stories" ? (
-            <DraftsSection title="Stories" columns={1}>
-              {stories.map((story) => (
-                <StoryCard
-                  key={story.id}
-                  story={story}
-                  isSelected={story.id === selectedId}
-                  onClick={() => setSelectedId(story.id)}
-                />
-              ))}
-            </DraftsSection>
+        <div style={{ height: "100%", padding: isDetailView ? "24px 0" : "16px 0" }}>
+          {editingStory ? (
+            <StoryFormPanel
+              story={editingStory}
+              isNew={isCreatingNew}
+              onClose={closeDetail}
+              onSave={(updated) => {
+                setStories((current) =>
+                  current.some((s) => s.id === updated.id)
+                    ? current.map((s) => (s.id === updated.id ? updated : s))
+                    : [updated, ...current],
+                );
+                closeDetail();
+              }}
+            />
+          ) : editingFaq ? (
+            <FaqFormPanel
+              faq={editingFaq}
+              isNew={isCreatingNew}
+              onClose={closeDetail}
+              onSave={(updated) => {
+                setFaqs((current) =>
+                  current.some((f) => f.id === updated.id)
+                    ? current.map((f) => (f.id === updated.id ? updated : f))
+                    : [updated, ...current],
+                );
+                closeDetail();
+              }}
+            />
           ) : (
-            <DraftsSection title="FAQs" columns={1}>
-              {faqs.map((faq) => (
-                <FaqCard
-                  key={faq.id}
-                  faq={faq}
-                  isSelected={faq.id === selectedId}
-                  onClick={() => setSelectedId(faq.id)}
-                />
-              ))}
-            </DraftsSection>
+            <VStack gap={2}>
+              {view === "stories"
+                ? stories.map((story) => (
+                    <StoryCard key={story.id} story={story} onClick={() => setEditingStory(story)} />
+                  ))
+                : faqs.map((faq) => <FaqCard key={faq.id} faq={faq} onClick={() => setEditingFaq(faq)} />)}
+            </VStack>
           )}
-        </VStack>
+        </div>
       </FoundationLayout>
     </div>
   );

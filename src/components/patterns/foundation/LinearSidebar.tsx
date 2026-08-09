@@ -13,6 +13,7 @@ import {
   ListChecks,
   Mail,
   Megaphone,
+  FlaskConical,
   Moon,
   Plus,
   Search,
@@ -44,6 +45,7 @@ import {
   WorkspaceMenu,
 } from "./sidebar";
 import { useThemeMode } from "./ThemeContext";
+import { useDemoModeOptional } from "./DemoModeContext";
 import "./sidebar/sidebar.css";
 
 type DemoItem = {
@@ -97,7 +99,7 @@ const group2Items: DemoItem[] = [
   },
   {
     id: "invoices",
-    label: "Invoices",
+    label: "Invoicing",
     icon: <CreditCard size={16} strokeWidth={1.75} />,
     path: "/invoices",
     hasContent: true,
@@ -246,6 +248,7 @@ export type LinearSidebarProps = {
  */
 export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const { mode, toggle } = useThemeMode();
+  const { enabled: demoEnabled, toggle: toggleDemo } = useDemoModeOptional();
   const pathname = usePathname();
   const router = useRouter();
   const basePath = useAdminBasePath();
@@ -254,9 +257,6 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const [isNewEventOpen, setIsNewEventOpen] = useState(false);
   const [promotionModalType, setPromotionModalType] = useState<EventPromotionType | null>(null);
   const isMigrate = basePath === "/admin-migrate";
-  // "Invoices" has no admin-migrate route yet — its admin-preview screen reuses
-  // unrelated course/tuition mock data with no real equivalent to wire up.
-  const visibleGroup2Items = isMigrate ? group2Items.filter((item) => item.id !== "invoices") : group2Items;
 
   function hrefFor(path: string): string {
     return `${basePath}${path}`;
@@ -300,6 +300,13 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
             }
             onSelect={toggle}
           />
+          {isMigrate ? (
+            <DropdownItem
+              label={demoEnabled ? "Exit demo mode" : "Enter demo mode"}
+              icon={<FlaskConical size={16} strokeWidth={1.75} />}
+              onSelect={toggleDemo}
+            />
+          ) : null}
         </WorkspaceMenu>
         <SidebarHeaderActions>
           <SidebarIconButton
@@ -360,7 +367,7 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
         </div>
 
         <SidebarSection title="Manage">
-          {visibleGroup2Items.map((item) => (
+          {group2Items.map((item) => (
             <MenuItem
               key={item.id}
               label={item.label}
@@ -400,7 +407,13 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
       </SidebarScrollArea>
 
       <NavBottom
-        start={<TryButton />}
+        start={
+          isMigrate && demoEnabled ? (
+            <TryButton label="Demo on" onClick={toggleDemo} />
+          ) : (
+            <TryButton />
+          )
+        }
         end={
           <SidebarIconButton
             label="Help"

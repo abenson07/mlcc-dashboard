@@ -4,7 +4,10 @@ export type Story = {
   id: string;
   title: string;
   author: string;
+  authorId: string | null;
   status: ContentStatus;
+  /** Formatted for display (e.g. "Aug 8, 2026"); null when unset. */
+  publishedAt: string | null;
   body: string;
 };
 

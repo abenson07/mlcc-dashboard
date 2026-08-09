@@ -1,6 +1,7 @@
 "use client";
 
 import { Text } from "@/components/patterns/primitives/Text";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { sampleEventSponsors, type EventSponsorRow } from "@/data/mocks/events";
 
 export type SponsorsListSectionProps = {
@@ -18,7 +19,8 @@ const STATUS_COLOR: Record<EventSponsorRow["status"], string> = {
  * / `VolunteersListSection` for the Overview's final two-column row.
  */
 export function SponsorsListSection({ onSelectSponsor }: SponsorsListSectionProps) {
-  const sponsors = sampleEventSponsors;
+  const { enabled: demo } = useDemoModeOptional();
+  const sponsors = demo ? sampleEventSponsors : [];
   const confirmedCount = sponsors.filter((s) => s.status === "Confirmed").length;
 
   return (
@@ -30,8 +32,10 @@ export function SponsorsListSection({ onSelectSponsor }: SponsorsListSectionProp
         flexDirection: "column",
         gap: 4,
         padding: 20,
-        border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>

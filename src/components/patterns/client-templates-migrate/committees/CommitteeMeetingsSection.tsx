@@ -1,21 +1,49 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/patterns/primitives/Badge";
 import { Text } from "@/components/patterns/primitives/Text";
-import { sampleCommitteeMeetings, type CommitteeMeetingRow } from "@/data/mocks/committees";
+import { Button } from "@/components/patterns/primitives/Button";
+import { useCommitteeMeetingsList, type CommitteeMeetingListRow } from "hooks";
+import type { CommitteeSlug } from "schemas/committee_meetings";
 
 export type CommitteeMeetingsSectionProps = {
-  onSelectMeeting?: (row: CommitteeMeetingRow) => void;
+  committee: CommitteeSlug;
+  onSchedule?: () => void;
+  onSelectMeeting?: (meetingId: string) => void;
 };
 
-/**
- * Meetings list for the committee Overview page — date / topic / status,
- * matching the boxed shape of `CommitteeMembersSection` for a side-by-side
- * layout.
- */
-export function CommitteeMeetingsSection({ onSelectMeeting }: CommitteeMeetingsSectionProps) {
-  const meetings = sampleCommitteeMeetings;
-  const upcomingCount = meetings.filter((m) => m.status === "Upcoming").length;
+function formatMeetingRow(meeting: CommitteeMeetingListRow): {
+  date: string;
+  topic: string;
+  status: string;
+} {
+  const starts = meeting.events?.starts_at;
+  const date = starts
+    ? new Date(starts).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "TBD";
+  const topic = meeting.events?.name ?? "Committee meeting";
+  let status = "Upcoming";
+  if (meeting.minutes_status === "ready") status = "Completed";
+  else if (starts && new Date(starts).getTime() < Date.now()) status = "Past";
+  return { date, topic, status };
+}
+
+export function CommitteeMeetingsSection({
+  committee,
+  onSchedule,
+  onSelectMeeting,
+}: CommitteeMeetingsSectionProps) {
+  const router = useRouter();
+  const { meetings, loading, error } = useCommitteeMeetingsList(committee);
+  const upcomingCount = meetings.filter((m) => {
+    const starts = m.events?.starts_at;
+    return starts && new Date(starts).getTime() >= Date.now() && m.minutes_status !== "ready";
+  }).length;
 
   return (
     <section
@@ -26,48 +54,70 @@ export function CommitteeMeetingsSection({ onSelectMeeting }: CommitteeMeetingsS
         flexDirection: "column",
         gap: 4,
         padding: 20,
-        border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <Text weight="semibold">Meetings</Text>
-        <Text size="sm" color="secondary">
-          {upcomingCount} upcoming
-        </Text>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Text size="sm" color="secondary">
+            {loading ? "…" : `${upcomingCount} upcoming`}
+          </Text>
+          {onSchedule ? <Button label="Schedule" size="sm" onClick={onSchedule} /> : null}
+        </div>
       </div>
 
-      {meetings.length === 0 ? (
+      {error ? (
+        <Text size="sm" color="secondary">
+          Couldn&apos;t load meetings: {error}
+        </Text>
+      ) : loading ? (
+        <Text size="sm" color="secondary">
+          Loading…
+        </Text>
+      ) : meetings.length === 0 ? (
         <Text size="sm" color="secondary">
           No meetings scheduled yet.
         </Text>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {meetings.map((meeting) => (
-            <button
-              key={meeting.id}
-              type="button"
-              onClick={() => onSelectMeeting?.(meeting)}
-              style={{
-                all: "unset",
-                boxSizing: "border-box",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "8px 4px",
-                borderRadius: "var(--linear-radius-sm)",
-                cursor: onSelectMeeting ? "pointer" : "default",
-              }}
-            >
-              <Text size="sm" color="secondary" style={{ width: 84, flexShrink: 0 }}>
-                {meeting.date}
-              </Text>
-              <Text size="sm" style={{ flex: 1, minWidth: 0 }}>
-                {meeting.topic}
-              </Text>
-              <Badge label={meeting.status} />
-            </button>
-          ))}
+          {meetings.map((meeting) => {
+            const row = formatMeetingRow(meeting);
+            return (
+              <button
+                key={meeting.id}
+                type="button"
+                onClick={() => {
+                  if (onSelectMeeting) onSelectMeeting(meeting.id);
+                  else
+                    router.push(
+                      `/admin-migrate/committees/${encodeURIComponent(committee)}/meetings/${encodeURIComponent(meeting.id)}`,
+                    );
+                }}
+                style={{
+                  all: "unset",
+                  boxSizing: "border-box",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 4px",
+                  borderRadius: "var(--linear-radius-sm)",
+                  cursor: "pointer",
+                }}
+              >
+                <Text size="sm" color="secondary" style={{ width: 84, flexShrink: 0 }}>
+                  {row.date}
+                </Text>
+                <Text size="sm" style={{ flex: 1, minWidth: 0 }}>
+                  {row.topic}
+                </Text>
+                <Badge label={row.status} />
+              </button>
+            );
+          })}
         </div>
       )}
     </section>

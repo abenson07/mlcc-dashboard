@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ThemeProvider } from "@/components/patterns/foundation/ThemeContext";
+import { DemoModeProvider } from "@/components/patterns/foundation/DemoModeContext";
 import { QueryProvider } from "@/providers/QueryProvider";
 import "./isolation.css";
 
@@ -29,7 +30,9 @@ export default async function AdminMigrateLayout({ children }: { children: React
       }}
     >
       <QueryProvider>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <DemoModeProvider>{children}</DemoModeProvider>
+        </ThemeProvider>
       </QueryProvider>
     </div>
   );

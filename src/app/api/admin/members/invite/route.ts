@@ -3,26 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { postToSlack } from "@/lib/slack";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
+import { slackCommitteeName } from "@/lib/committee-meetings/slackCommittee";
 
 function isCommitteeSlug(value: unknown): value is CommitteeSlug {
   return typeof value === "string" && value in COMMITTEE_LABELS;
 }
 
-/**
- * postToSlack() matches committeeName against the public-facing committee
- * names used on the website (COMMITTEE_CHANNEL_ENV in src/lib/slack.ts), which
- * don't line up 1:1 with the internal CommitteeSlug labels (e.g. "leaflet" is
- * called "Newsletter" there). Map to those names so the notification lands in
- * the right channel instead of silently falling back to #steering.
- */
-const SLACK_COMMITTEE_NAME: Partial<Record<CommitteeSlug, string>> = {
-  events: "Events",
-  outreach: "Advocacy",
-  hub: "Emergency Hub",
-  leaflet: "Newsletter",
-  communications: "Communications",
-  businesses: "Business",
-};
 
 export async function POST(request: NextRequest) {
   const session = await createClient();
@@ -125,7 +111,7 @@ export async function POST(request: NextRequest) {
   const committeeLabel = COMMITTEE_LABELS[committee];
   await postToSlack(
     `:wave: ${trimmedEmail} was just invited to the admin dashboard and added to *${committeeLabel}*. Please add them to this Slack channel.`,
-    SLACK_COMMITTEE_NAME[committee],
+    slackCommitteeName(committee),
   );
 
   return NextResponse.json({ ok: true });

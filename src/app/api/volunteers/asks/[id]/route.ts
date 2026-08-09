@@ -59,17 +59,24 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       event_id = await ensureSupabaseEventFromWebflow(supabase, parsed.webflowEventItemId);
     }
 
+    const updatePayload: Record<string, unknown> = {
+      title: parsed.title,
+      description: parsed.description,
+      commitment_type: parsed.commitment_type,
+      commitment_unit: parsed.commitment_unit,
+      commitment_quantity: parsed.commitment_quantity,
+      quantity: parsed.quantity,
+      event_id,
+    };
+    if (parsed.committee) updatePayload.committee = parsed.committee;
+    if (parsed.auto_accept_provided) {
+      updatePayload.auto_accept = parsed.auto_accept;
+      updatePayload.auto_response_body = parsed.auto_response_body;
+    }
+
     const { data: updated, error: updateError } = await supabase
       .from("volunteer_asks")
-      .update({
-        title: parsed.title,
-        description: parsed.description,
-        commitment_type: parsed.commitment_type,
-        commitment_unit: parsed.commitment_unit,
-        commitment_quantity: parsed.commitment_quantity,
-        quantity: parsed.quantity,
-        event_id,
-      })
+      .update(updatePayload)
       .eq("id", id)
       .select()
       .single();

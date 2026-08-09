@@ -1,13 +1,27 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
-import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
+import {
+  CanvasHeader,
+  type CanvasTopbarBreadcrumb,
+} from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
 import { Badge } from "@/components/patterns/primitives/Badge";
-import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
+import { EmptyStateCard, OutlinedPanel } from "@/components/patterns/client-templates/shared";
+import { useEventContext } from "@/components/integrated/events/EventContext";
+import EventDetailsPanel from "@/components/integrated/events/EventDetailsPanel";
+import {
+  MobileAdminShell,
+  MobileEventDetail,
+  useIsMobileAdmin,
+} from "@/components/patterns/client-templates-migrate/mobile";
+import type { EventEdition } from "@/lib/events/eventData";
+import { EventDraftBanner } from "./EventDraftBanner";
 import { EventOverviewPage } from "./EventOverviewPage";
 import { VolunteersPage } from "./VolunteersPage";
 import { BudgetPage } from "./BudgetPage";
@@ -25,14 +39,24 @@ import {
   sampleEventPromotionItems,
   sampleEventTasks,
   type EventBudgetRow,
+  type EventBudgetSummary,
+  type EventDetail,
   type EventPromotionItem,
   type EventSponsorRow,
   type EventSponsorshipInvoiceRow,
   type EventTaskRow,
-  type EventVolunteerRow,
 } from "@/data/mocks/events";
+import type { EventVolunteerRow } from "./VolunteersPage";
 
-type EventDetailView = "overview" | "volunteers" | "tasks" | "budget" | "promotion";
+type EventDetailView = "overview" | "details" | "volunteers" | "tasks" | "budget" | "promotion";
+
+const EVENT_VIEW_LABELS: Record<Exclude<EventDetailView, "overview">, string> = {
+  details: "Settings",
+  volunteers: "Volunteers",
+  tasks: "Tasks",
+  budget: "Sponsorships",
+  promotion: "Promotion",
+};
 
 type Selection =
   | { kind: "volunteer"; row: EventVolunteerRow }
@@ -41,15 +65,88 @@ type Selection =
   | { kind: "sponsor"; row: EventSponsorRow }
   | null;
 
+function formatEventWhen(iso: string | null): { date: string; time: string } {
+  if (!iso) return { date: "—", time: "—" };
+  try {
+    const d = new Date(iso);
+    return {
+      date: d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      time: d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+    };
+  } catch {
+    return { date: "—", time: "—" };
+  }
+}
+
+function liveEventDetail(event: EventEdition | null): EventDetail {
+  if (!event) {
+    return {
+      id: "",
+      title: "Event",
+      category: "Community",
+      date: "—",
+      time: "—",
+      location: "—",
+      description: "",
+      organizer: "—",
+    };
+  }
+  const { date, time } = formatEventWhen(event.starts_at);
+  const ends = event.ends_at ? formatEventWhen(event.ends_at).time : null;
+  return {
+    id: event.id,
+    title: event.title,
+    category: "Community",
+    date,
+    time: ends ? `${time} – ${ends}` : time,
+    location: event.fieldData.location ?? event.fieldData.address ?? "—",
+    description: event.fieldData.description ?? event.fieldData.marketing?.shortDescription ?? "",
+    organizer: event.fieldData.committee
+      ? `${event.fieldData.committee} Committee`
+      : "MLCC",
+  };
+}
+
 export type EventDetailDemoProps = {
   navigation?: ReactNode;
 };
 
 export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
+  const router = useRouter();
+  const isMobile = useIsMobileAdmin();
+  const { enabled: demo } = useDemoModeOptional();
+  const { event, budget } = useEventContext();
   const [view, setView] = useState<EventDetailView>("overview");
   const [selection, setSelection] = useState<Selection>(null);
-  const [tasks, setTasks] = useState<EventTaskRow[]>(sampleEventTasks);
-  const [promotionItems, setPromotionItems] = useState<EventPromotionItem[]>(sampleEventPromotionItems);
+  const [tasks, setTasks] = useState<EventTaskRow[]>([]);
+  const [promotionItems, setPromotionItems] = useState<EventPromotionItem[]>([]);
+
+  useEffect(() => {
+    setTasks(demo ? sampleEventTasks : []);
+    setPromotionItems(demo ? sampleEventPromotionItems : []);
+  }, [demo]);
+
+  const overviewEvent = useMemo(
+    () => (demo ? sampleEventDetail : liveEventDetail(event)),
+    [demo, event],
+  );
+
+  const budgetSummary: EventBudgetSummary = useMemo(() => {
+    if (demo) return sampleEventBudgetSummary;
+    return {
+      totalBudget: budget.goal,
+      received: budget.raised,
+      pending: budget.pledged,
+    };
+  }, [demo, budget.goal, budget.raised, budget.pledged]);
+
+  if (isMobile) {
+    return (
+      <MobileAdminShell active="events">
+        <MobileEventDetail />
+      </MobileAdminShell>
+    );
+  }
 
   function changeView(next: EventDetailView) {
     setView(next);
@@ -107,19 +204,55 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   }
 
   const isFullBleed = view === "volunteers";
+  const eventTitle = event?.title ?? (demo ? sampleEventDetail.title : "Event");
+  const statusLabel =
+    event?.publishStatus === "draft"
+      ? "Draft"
+      : event?.publishStatus === "published"
+        ? "Published"
+        : null;
+
+  const eventsCrumb: CanvasTopbarBreadcrumb = {
+    label: "Events",
+    onClick: () => router.push("/admin-migrate/events"),
+  };
+  const eventCrumb: CanvasTopbarBreadcrumb = {
+    label: eventTitle,
+    onClick: () => changeView("overview"),
+  };
+  const topbarTitle = view === "overview" ? eventTitle : EVENT_VIEW_LABELS[view];
+  const topbarBreadcrumbs: CanvasTopbarBreadcrumb[] =
+    view === "overview" ? [eventsCrumb] : [eventsCrumb, eventCrumb];
 
   const body =
-    view === "volunteers" ? (
+    view === "details" ? (
+      <div
+        style={{
+          height: "100%",
+          minHeight: 0,
+          overflow: "auto",
+          boxSizing: "border-box",
+        }}
+      >
+        <EventDetailsPanel topBanner={<EventDraftBanner />} />
+      </div>
+    ) : view === "volunteers" ? (
       <VolunteersPage onSelectVolunteer={selectVolunteer} />
     ) : view === "budget" ? (
       <BudgetPage onSelectBudgetItem={selectSponsorshipInvoice} />
     ) : view === "tasks" ? (
-      <EventTasksPage
-        tasks={tasks}
-        onToggleTask={toggleTask}
-        onAddTask={addTask}
-        onRemoveTask={removeTask}
-      />
+      !demo && tasks.length === 0 ? (
+        <div style={{ padding: "32px 24px" }}>
+          <EmptyStateCard variant="plain" label="No tasks yet" />
+        </div>
+      ) : (
+        <EventTasksPage
+          tasks={tasks}
+          onToggleTask={toggleTask}
+          onAddTask={addTask}
+          onRemoveTask={removeTask}
+        />
+      )
     ) : view === "promotion" ? (
       <div
         style={{
@@ -130,12 +263,16 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
           padding: "32px 24px 64px",
         }}
       >
-        <EventPromotionPage items={promotionItems} onInsertAt={insertPromotionItem} />
+        {!demo && promotionItems.length === 0 ? (
+          <EmptyStateCard variant="plain" label="No promotions yet" />
+        ) : (
+          <EventPromotionPage items={promotionItems} onInsertAt={insertPromotionItem} />
+        )}
       </div>
     ) : (
       <EventOverviewPage
-        event={sampleEventDetail}
-        budgetSummary={sampleEventBudgetSummary}
+        event={overviewEvent}
+        budgetSummary={budgetSummary}
         tasks={tasks}
         onToggleTask={toggleTask}
         onSeeAllTasks={() => changeView("tasks")}
@@ -171,8 +308,12 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         header={
           <CanvasHeader
             topbar={{
-              title: sampleEventDetail.title,
-              titleAdornment: <Badge label={sampleEventDetail.category} />,
+              title: topbarTitle,
+              breadcrumbs: topbarBreadcrumbs,
+              titleAdornment:
+                view === "overview" ? (
+                  <Badge label={statusLabel ?? (demo ? sampleEventDetail.category : "Event")} />
+                ) : undefined,
               hasFavorite: true,
             }}
             controls={
@@ -181,6 +322,11 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
                   label="Overview"
                   selected={view === "overview"}
                   onClick={() => changeView("overview")}
+                />
+                <ViewTab
+                  label="Settings"
+                  selected={view === "details"}
+                  onClick={() => changeView("details")}
                 />
                 <ViewTab
                   label="Volunteers"

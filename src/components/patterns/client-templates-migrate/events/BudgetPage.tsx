@@ -3,12 +3,19 @@
 import { useMemo } from "react";
 import { pixel, proportional, type TableColumn } from "@/components/patterns/primitives/table";
 import { NestedGroupedTable } from "@/components/patterns/grouped-table/NestedGroupedTable";
-import { RowClickCell, ClassContentPage } from "@/components/patterns/client-templates/shared";
+import {
+  EmptyStateCard,
+  RowClickCell,
+  ClassContentPage,
+} from "@/components/patterns/client-templates/shared";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { useEventContext } from "@/components/integrated/events/EventContext";
 import { BudgetChart } from "./BudgetChart";
 import { SponsorshipLevelsPanel } from "./SponsorshipLevelsPanel";
 import {
   sampleEventBudgetSummary,
   sampleEventSponsorshipInvoices,
+  type EventBudgetSummary,
   type EventSponsorshipInvoiceRow,
 } from "@/data/mocks/events";
 
@@ -19,6 +26,17 @@ const groupColors: Record<string, string> = {
   Pending: "#f2c94c",
   Paid: "#27a644",
 };
+
+function formatMoney(amount: number): string {
+  return amount.toLocaleString("en-US", { style: "currency", currency: "USD" });
+}
+
+function mapInvoiceStatus(status: string): EventSponsorshipInvoiceRow["status"] {
+  const lower = status.toLowerCase();
+  if (lower === "paid" || lower === "succeeded") return "Paid";
+  if (lower === "overdue") return "Overdue";
+  return "Pending";
+}
 
 function buildColumns(
   onSelectInvoice?: (row: EventSponsorshipInvoiceRow) => void,
@@ -88,11 +106,38 @@ export type BudgetPageProps = {
  * status.
  */
 export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
-  const columns = useMemo(
-    () => buildColumns(onSelectBudgetItem),
-    [onSelectBudgetItem],
-  );
+  const { enabled: demo } = useDemoModeOptional();
+  const { budget, invoices, sponsorshipTiers } = useEventContext();
+  const columns = useMemo(() => buildColumns(onSelectBudgetItem), [onSelectBudgetItem]);
   const groupOrder = useMemo(() => GROUP_ORDER, []);
+
+  const summary: EventBudgetSummary = demo
+    ? sampleEventBudgetSummary
+    : {
+        totalBudget: budget.goal,
+        received: budget.raised,
+        pending: budget.pledged,
+      };
+
+  const invoiceRows: EventSponsorshipInvoiceRow[] = demo
+    ? sampleEventSponsorshipInvoices
+    : invoices.map((inv) => ({
+        id: inv.id,
+        invoiceNumber: inv.invoice,
+        business: inv.sponsor,
+        level: "—",
+        amount: formatMoney(inv.amount),
+        dueDate: inv.dueDate,
+        status: mapInvoiceStatus(inv.status),
+      }));
+
+  if (!demo && invoiceRows.length === 0 && sponsorshipTiers.length === 0) {
+    return (
+      <ClassContentPage>
+        <EmptyStateCard variant="plain" label="No sponsorships yet" />
+      </ClassContentPage>
+    );
+  }
 
   return (
     <ClassContentPage>
@@ -105,21 +150,25 @@ export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
         }}
       >
         <div style={{ gridColumn: "span 4" }}>
-          <BudgetChart summary={sampleEventBudgetSummary} />
+          <BudgetChart summary={summary} />
         </div>
         <div style={{ gridColumn: "span 1" }}>
           <SponsorshipLevelsPanel />
         </div>
       </div>
-      <NestedGroupedTable
-        title="Sponsorship invoices"
-        data={sampleEventSponsorshipInvoices}
-        columns={columns}
-        getRowKey={(row) => row.id}
-        groupBy={(row) => row.status}
-        groupOrder={groupOrder}
-        getGroupMeta={(key) => ({ color: groupColors[key], label: key })}
-      />
+      {invoiceRows.length === 0 ? (
+        <EmptyStateCard variant="plain" label="No sponsorship invoices yet" />
+      ) : (
+        <NestedGroupedTable
+          title="Sponsorship invoices"
+          data={invoiceRows}
+          columns={columns}
+          getRowKey={(row) => row.id}
+          groupBy={(row) => row.status}
+          groupOrder={groupOrder}
+          getGroupMeta={(key) => ({ color: groupColors[key], label: key })}
+        />
+      )}
     </ClassContentPage>
   );
 }

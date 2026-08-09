@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Events, EventsInsert } from "@/types/database";
 import { parseEventFieldData } from "./eventData";
+import { buildEventQrUrl, eventPageUrl, withEventQrLinks } from "./eventQr";
 import { activateEventResources } from "./spawnEventResources";
 
 function eventSlug(name: string): string {
@@ -72,29 +73,35 @@ export async function createEvent(
     await activateEventResources(supabase, event as Events);
   }
 
-  if (!fieldData.qr_code_id && slug) {
-    const publicUrl =
-      process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-      "https://mapleleafcommunity.org";
+  if (!fieldData.qr_code_id && !fieldData.qr_codes?.length && slug) {
+    const pageUrl = eventPageUrl(slug);
+    if (!pageUrl) return event as Events;
+
+    const qrUrl = buildEventQrUrl({
+      baseUrl: pageUrl,
+      campaign: slug,
+      content: "event-page",
+    });
     const { data: qr, error: qrError } = await supabase
       .from("qr_codes")
       .insert({
         name: `${name} event QR`,
-        url: `${publicUrl}/events/${slug}`,
+        url: qrUrl,
       })
       .select()
       .single();
 
     if (!qrError && qr) {
+      const nextFieldData = withEventQrLinks(mergedFieldData, [
+        { id: qr.id, description: "Default event page QR" },
+      ]);
       const { error: updateError } = await supabase
         .from("events")
-        .update({
-          field_data: { ...mergedFieldData, qr_code_id: qr.id },
-        })
+        .update({ field_data: nextFieldData })
         .eq("id", event.id);
 
       if (!updateError) {
-        return { ...event, field_data: { ...mergedFieldData, qr_code_id: qr.id } };
+        return { ...event, field_data: nextFieldData };
       }
     }
   }

@@ -13,8 +13,8 @@ import type {
   EventDetail,
   EventSponsorRow,
   EventTaskRow,
-  EventVolunteerRow,
 } from "@/data/mocks/events";
+import type { EventVolunteerRow } from "./VolunteersPage";
 
 export type EventOverviewPageProps = {
   event: EventDetail;

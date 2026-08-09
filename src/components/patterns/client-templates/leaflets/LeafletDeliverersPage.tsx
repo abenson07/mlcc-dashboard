@@ -78,8 +78,10 @@ function DelivererCard({ deliverer }: { deliverer: LeafletDelivererRow }) {
       data-slot="deliverer-card"
       style={{
         boxSizing: "border-box",
-        border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
         overflow: "hidden",
       }}
     >

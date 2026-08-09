@@ -69,16 +69,16 @@ export const linearTokens = {
     /**
      * Elevated floating card (e.g. a widget/properties panel inset over the
      * canvas) — measured from linear.app: light is a pure-white card lifted
-     * by shadow alone (no border); dark needs a hairline border to read as
-     * separate from the near-black canvas.
+     * by shadow alone (no border); dark must read *lighter* than the canvas
+     * (Linear comment/composer boxes), with a hairline border for separation.
      */
     panel: {
       light: "lch(100 0 282)",
-      dark: "#191a1b",
+      dark: "lch(16.5 2.2 272.695)",
     },
     panelBorder: {
       light: "transparent",
-      dark: "#282a2c",
+      dark: "lch(22 2.5 272.695)",
     },
     accent: "#38c768",
     accentHover: "#52ff8b",

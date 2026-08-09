@@ -1,3 +1,5 @@
+import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
+
 export type CommitteeCard = {
   id: string;
   name: string;
@@ -7,48 +9,37 @@ export type CommitteeCard = {
   description: string;
 };
 
-export const sampleCommittees: CommitteeCard[] = [
-  {
-    id: "events",
-    name: "Events Committee",
-    chair: "Priya Anand",
-    memberCount: 8,
-    cadence: "Monthly",
-    description: "Plans the Summer Social, holiday gathering, and other community-wide events.",
-  },
-  {
-    id: "finance",
-    name: "Finance Committee",
-    chair: "Dana Whitfield",
-    memberCount: 5,
-    cadence: "Monthly",
-    description: "Reviews the budget, membership dues, and business sponsorship agreements.",
-  },
-  {
-    id: "volunteer",
-    name: "Volunteer Committee",
-    chair: "Marcus Ianelli",
-    memberCount: 6,
-    cadence: "Bi-weekly",
-    description: "Recruits and coordinates volunteers across leaflet distribution and events.",
-  },
-  {
-    id: "communications",
-    name: "Communications Committee",
-    chair: "Priya Anand",
-    memberCount: 4,
-    cadence: "Monthly",
-    description: "Owns the newsletter, FAQ content, and social media presence.",
-  },
-  {
-    id: "outreach",
-    name: "Neighbor Outreach Committee",
-    chair: "Ines Okafor",
-    memberCount: 7,
-    cadence: "Quarterly",
-    description: "Builds relationships with neighboring households and welcomes new residents.",
-  },
+const REAL_COMMITTEES: CommitteeSlug[] = [
+  "events",
+  "outreach",
+  "hub",
+  "leaflet",
+  "communications",
+  "steering",
+  "executive_board",
+  "businesses",
 ];
+
+const DESCRIPTIONS: Partial<Record<CommitteeSlug, string>> = {
+  events: "Plans the Summer Social, holiday gathering, and other community-wide events.",
+  outreach: "Builds relationships with neighboring households and welcomes new residents.",
+  hub: "Coordinates emergency preparedness and neighborhood hub operations.",
+  leaflet: "Produces and distributes the Maple Leaf Leaflet newsletter.",
+  communications: "Owns FAQ content, stories, and social media presence.",
+  steering: "Guides council priorities and cross-committee coordination.",
+  executive_board: "Executive board meetings for council governance.",
+  businesses: "Partners with neighborhood businesses and sponsorships.",
+};
+
+/** Live committee cards keyed by real CommitteeSlug (admin-migrate). */
+export const sampleCommittees: CommitteeCard[] = REAL_COMMITTEES.map((id) => ({
+  id,
+  name: `${COMMITTEE_LABELS[id]} Committee`,
+  chair: "—",
+  memberCount: 0,
+  cadence: "Monthly",
+  description: DESCRIPTIONS[id] ?? `${COMMITTEE_LABELS[id]} committee.`,
+}));
 
 export type CommitteeDetail = CommitteeCard & {
   meetingDay: string;
@@ -85,9 +76,4 @@ export const sampleCommitteeMembers: CommitteeMemberRow[] = [
   { id: "member-5", name: "Tom Reyes", role: "Member", email: "tom.reyes@example.com" },
 ];
 
-export const sampleCommitteeMeetings: CommitteeMeetingRow[] = [
-  { id: "meeting-1", date: "Aug 12, 2026", topic: "Summer Social planning", status: "Upcoming" },
-  { id: "meeting-2", date: "Jul 8, 2026", topic: "Vendor selection review", status: "Completed" },
-  { id: "meeting-3", date: "Jun 10, 2026", topic: "Budget check-in", status: "Completed" },
-  { id: "meeting-4", date: "May 13, 2026", topic: "Volunteer sign-up kickoff", status: "Completed" },
-];
+export const sampleCommitteeMeetings: CommitteeMeetingRow[] = [];

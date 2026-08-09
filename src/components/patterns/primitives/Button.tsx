@@ -9,6 +9,7 @@ export type ButtonProps = {
   width?: number | string;
   icon?: ReactNode;
   isIconOnly?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
 };
 
@@ -19,6 +20,7 @@ export function Button({
   width,
   icon,
   isIconOnly = false,
+  disabled = false,
   onClick,
 }: ButtonProps) {
   const isPrimary = variant === "primary";
@@ -28,12 +30,14 @@ export function Button({
   return (
     <button
       type="button"
-      onClick={onClick}
+      disabled={disabled}
+      onClick={disabled ? undefined : onClick}
       aria-label={isIconOnly ? label : undefined}
       style={{
         all: "unset",
         boxSizing: "border-box",
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.5 : 1,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",

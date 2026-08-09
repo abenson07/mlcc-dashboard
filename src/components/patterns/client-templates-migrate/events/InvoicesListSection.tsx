@@ -1,6 +1,7 @@
 "use client";
 
 import { Text } from "@/components/patterns/primitives/Text";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { BudgetStatusToken } from "./BudgetStatusToken";
 import { sampleEventBudgetItems, type EventBudgetRow } from "@/data/mocks/events";
 
@@ -14,7 +15,8 @@ export type InvoicesListSectionProps = {
  * two-column row.
  */
 export function InvoicesListSection({ onSelectInvoice }: InvoicesListSectionProps) {
-  const invoices = sampleEventBudgetItems;
+  const { enabled: demo } = useDemoModeOptional();
+  const invoices = demo ? sampleEventBudgetItems : [];
   const openCount = invoices.filter((i) => i.status !== "Paid").length;
 
   return (
@@ -26,8 +28,10 @@ export function InvoicesListSection({ onSelectInvoice }: InvoicesListSectionProp
         flexDirection: "column",
         gap: 4,
         padding: 20,
-        border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>

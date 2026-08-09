@@ -42,9 +42,12 @@ export function OnlineClassInfoBox({ summary }: OnlineClassInfoBoxProps) {
         flexDirection: "column",
         gap: 16,
         padding: 20,
+        background: "var(--linear-color-panel)",
         border:
-          "var(--linear-border-width) solid var(--linear-color-hairline)",
+
+          "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>

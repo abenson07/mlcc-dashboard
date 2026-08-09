@@ -30,6 +30,9 @@ function transformAsk(row: AskRow): VolunteerAskWithSignups {
     id: v.id,
     volunteer_ask_id: v.volunteer_ask_id,
     person_id: v.person_id,
+    status: v.status ?? "accepted",
+    accepted_at: v.accepted_at ?? null,
+    accepted_by: v.accepted_by ?? null,
     created_at: v.created_at,
     person: normalizeOne(v.person),
   }));
@@ -58,6 +61,9 @@ export function useEventVolunteerAsks(eventId: string | null) {
             id,
             volunteer_ask_id,
             person_id,
+            status,
+            accepted_at,
+            accepted_by,
             created_at,
             person:people(id, full_name, email, phone)
           )

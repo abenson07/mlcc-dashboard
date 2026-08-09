@@ -19,7 +19,7 @@ function formatDisplayDate(value: string | null | undefined): string {
 }
 
 /** Real `business_memberships.status` is a free-form enum; normalize into the four statuses this screen renders. */
-function normalizeMembershipStatus(status: string | null | undefined): BusinessMembershipStatus {
+export function normalizeMembershipStatus(status: string | null | undefined): BusinessMembershipStatus {
   const normalized = (status ?? "").trim().toLowerCase();
   if (normalized.includes("past") || normalized.includes("due")) return "past_due";
   if (normalized.includes("pend")) return "pending";

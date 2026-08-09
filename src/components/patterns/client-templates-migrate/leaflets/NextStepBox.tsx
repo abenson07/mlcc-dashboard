@@ -31,8 +31,10 @@ export function NextStepBox({
         flexDirection: "column",
         gap: 8,
         padding: 20,
-        border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
       }}
     >
       <Text type="label" color="secondary">

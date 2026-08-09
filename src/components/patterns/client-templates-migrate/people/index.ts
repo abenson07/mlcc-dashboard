@@ -6,3 +6,4 @@ export { MemberDetailPanel } from "./MemberDetailPanel";
 export { NeighborDetailPanel } from "./NeighborDetailPanel";
 export { VolunteerDetailPanel } from "./VolunteerDetailPanel";
 export { AddPersonModal } from "./AddPersonModal";
+export { EditPersonModal } from "./EditPersonModal";

@@ -1,7 +1,9 @@
 import type { Events, EventPublishStatus, Sponsorships } from "@/types/database";
 import { buildSponsorshipTiers } from "@/components/leaflet/leafletData";
+import type { EventQrLink } from "./eventQr";
 
 export type EventKind = "council" | "external" | "committee_meeting";
+export type { EventQrLink };
 
 /** Conventional keys stored in `events.field_data` jsonb. */
 export type EventFieldData = {
@@ -12,7 +14,10 @@ export type EventFieldData = {
   description?: string;
   kind?: EventKind;
   committee?: string;
+  /** Legacy single QR link — prefer `qr_codes` when present. */
   qr_code_id?: string;
+  /** Event-scoped QR codes (image generated client-side from each URL). */
+  qr_codes?: EventQrLink[];
   webflow_item_id?: string;
   address?: string;
   sponsorship_goal_cents?: number;
@@ -52,6 +57,24 @@ export type EventEdition = {
   publishStatus: EventPublishStatus;
 };
 
+function parseEventQrLinks(raw: unknown): EventQrLink[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const links: EventQrLink[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.id !== "string" || !row.id) continue;
+    links.push({
+      id: row.id,
+      description:
+        typeof row.description === "string" && row.description.trim()
+          ? row.description.trim()
+          : undefined,
+    });
+  }
+  return links.length > 0 ? links : undefined;
+}
+
 export function parseEventFieldData(raw: Record<string, unknown> | null | undefined): EventFieldData {
   if (!raw || typeof raw !== "object") return {};
   const fd = raw as EventFieldData;
@@ -71,6 +94,7 @@ export function parseEventFieldData(raw: Record<string, unknown> | null | undefi
             : undefined,
     committee: typeof fd.committee === "string" ? fd.committee : undefined,
     qr_code_id: typeof fd.qr_code_id === "string" ? fd.qr_code_id : undefined,
+    qr_codes: parseEventQrLinks(fd.qr_codes),
     webflow_item_id: typeof fd.webflow_item_id === "string" ? fd.webflow_item_id : undefined,
     address: typeof fd.address === "string" ? fd.address : undefined,
     sponsorship_goal_cents:
@@ -240,4 +264,16 @@ export function eventIdsForInvoiceFilter(eventId: string, fieldData: EventFieldD
   const ids = [eventId];
   if (fieldData.webflow_item_id) ids.push(fieldData.webflow_item_id);
   return ids;
+}
+
+export function eventsListBasePath(pathname: string | null): string {
+  if (pathname?.startsWith("/admin-migrate/events")) return "/admin-migrate/events";
+  if (pathname?.startsWith("/admin/events")) return "/admin/events";
+  return "/old-admin/events";
+}
+
+export function eventsHubBasePath(pathname: string | null): string {
+  if (pathname?.startsWith("/admin-migrate/events")) return "/admin-migrate/events";
+  if (pathname?.startsWith("/admin/events")) return "/admin/events";
+  return "/old-admin/events-hub";
 }

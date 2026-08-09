@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { usePeople, useMemberships, type PersonWithMembership } from "hooks";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
@@ -9,9 +9,12 @@ import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
 import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
+import { ListToolbar } from "@/components/patterns/foundation/ListToolbar";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Text } from "@/components/patterns/primitives/Text";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
+import { useAdminBasePath } from "@/components/patterns/client-templates/shared/useAdminBasePath";
+import { useIsMobileAdmin } from "@/components/patterns/client-templates-migrate/mobile";
 import { MembersTable } from "./MembersTable";
 import { NeighborsTable } from "./NeighborsTable";
 import { VolunteersTable } from "./VolunteersTable";
@@ -19,7 +22,9 @@ import { MemberDetailPanel } from "./MemberDetailPanel";
 import { NeighborDetailPanel } from "./NeighborDetailPanel";
 import { VolunteerDetailPanel } from "./VolunteerDetailPanel";
 import { AddPersonModal } from "./AddPersonModal";
+import { EditPersonModal } from "./EditPersonModal";
 import type { MemberRow, NeighborRow, VolunteerRow } from "./types";
+import type { PeopleUpdate, MembershipsUpdate } from "@/types/database";
 import { hookFiltersForView, toMemberRow, toNeighborRow, toVolunteerRow, VOLUNTEERED_BEFORE_TAG } from "./adapters";
 
 type PeopleView = "members" | "neighbors" | "volunteers";
@@ -40,13 +45,27 @@ type Selection =
   | { kind: "volunteer"; row: VolunteerRow };
 
 function PeopleDemoInner() {
+  const router = useRouter();
+  const base = useAdminBasePath();
+  const isMobile = useIsMobileAdmin();
   const searchParams = useSearchParams();
   const initial = searchParams.get("view");
   const [view, setView] = useState<PeopleView>(isPeopleView(initial) ? initial : "members");
 
-  const filters = useMemo(() => hookFiltersForView(view), [view]);
-  const { people, loading, error, create, refetch } = usePeople({ filters });
-  const { create: createMembership } = useMemberships();
+  useEffect(() => {
+    if (!isMobile) return;
+    const tab =
+      initial === "volunteers" ? "volunteers" : initial === "neighbors" ? "neighbors" : "people";
+    router.replace(`${base}/database?tab=${tab}`);
+  }, [isMobile, initial, router, base]);
+
+  const [search, setSearch] = useState("");
+  const filters = useMemo(
+    () => ({ ...hookFiltersForView(view), search: search || undefined }),
+    [view, search]
+  );
+  const { people, loading, error, create, update, refetch } = usePeople({ filters });
+  const { create: createMembership, update: updateMembership } = useMemberships();
 
   const members: MemberRow[] = useMemo(
     () => (view === "members" ? people.map(toMemberRow) : []),
@@ -63,6 +82,22 @@ function PeopleDemoInner() {
 
   const [selection, setSelection] = useState<Selection | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const selectedPerson = selection ? people.find((person) => person.id === selection.row.id) ?? null : null;
+
+  async function handleSaveEdit(
+    personId: string,
+    personData: PeopleUpdate,
+    membershipId: string | null,
+    membershipData: MembershipsUpdate
+  ) {
+    await update(personId, personData);
+    if (membershipId) {
+      await updateMembership(membershipId, membershipData);
+    }
+    await refetch();
+  }
 
   function selectView(next: PeopleView) {
     setView(next);
@@ -96,6 +131,8 @@ function PeopleDemoInner() {
     await refetch();
   }
 
+  if (isMobile) return null;
+
   const body =
     view === "neighbors" ? (
       <NeighborsTable data={neighbors} onSelect={(row) => setSelection({ kind: "neighbor", row })} />
@@ -123,7 +160,16 @@ function PeopleDemoInner() {
               ),
             }}
             controls={
-              <ViewTabs aria-label="People views">
+              <ViewTabs
+                aria-label="People views"
+                endContent={
+                  <ListToolbar
+                    searchValue={search}
+                    onSearchChange={setSearch}
+                    searchPlaceholder="Search people…"
+                  />
+                }
+              >
                 {VIEW_TABS.map((tab) => (
                   <ViewTab
                     key={tab.key}
@@ -137,11 +183,11 @@ function PeopleDemoInner() {
           />
         }
         sideContent={
-          selection ? (
-            <OutlinedPanel onClose={() => setSelection(null)}>
-              {selection.kind === "member" ? <MemberDetailPanel member={selection.row} /> : null}
-              {selection.kind === "neighbor" ? <NeighborDetailPanel neighbor={selection.row} /> : null}
-              {selection.kind === "volunteer" ? <VolunteerDetailPanel volunteer={selection.row} /> : null}
+          selection && selectedPerson ? (
+            <OutlinedPanel onClose={() => setSelection(null)} onEdit={() => setIsEditOpen(true)}>
+              {selection.kind === "member" ? <MemberDetailPanel member={selection.row} person={selectedPerson} /> : null}
+              {selection.kind === "neighbor" ? <NeighborDetailPanel neighbor={selection.row} person={selectedPerson} /> : null}
+              {selection.kind === "volunteer" ? <VolunteerDetailPanel volunteer={selection.row} person={selectedPerson} /> : null}
             </OutlinedPanel>
           ) : null
         }
@@ -166,6 +212,13 @@ function PeopleDemoInner() {
         onAddMember={handleAddMember}
         onAddNeighbor={handleAddNeighbor}
         onAddVolunteer={handleAddVolunteer}
+      />
+
+      <EditPersonModal
+        isOpen={isEditOpen}
+        person={selectedPerson}
+        onClose={() => setIsEditOpen(false)}
+        onSave={handleSaveEdit}
       />
     </div>
   );

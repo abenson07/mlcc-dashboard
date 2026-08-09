@@ -70,6 +70,7 @@ type EventContextValue = {
   updateEvent: (patch: EventsUpdate) => Promise<void>;
   publishEvent: () => Promise<void>;
   unpublishEvent: () => Promise<void>;
+  uploadCoverImage: (file: File) => Promise<string>;
 };
 
 const EventContext = createContext<EventContextValue | null>(null);
@@ -91,6 +92,7 @@ export function EventProvider({
     update,
     publish,
     unpublish,
+    uploadCoverImage,
   } = useEvent(eventId);
 
   const readOnly = eventRow ? isEventReadOnly(eventRow, event?.fieldData ?? {}) : false;
@@ -322,6 +324,7 @@ export function EventProvider({
       updateEvent,
       publishEvent,
       unpublishEvent,
+      uploadCoverImage,
     }),
     [
       eventId,
@@ -347,6 +350,7 @@ export function EventProvider({
       updateEvent,
       publishEvent,
       unpublishEvent,
+      uploadCoverImage,
     ],
   );
 

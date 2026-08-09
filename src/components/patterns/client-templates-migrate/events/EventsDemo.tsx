@@ -9,13 +9,27 @@ import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
 import { Button } from "@/components/patterns/primitives/Button";
 import type { EventSummary } from "@/data/mocks/events";
+import {
+  MobileAdminShell,
+  MobileEventsPage,
+  useIsMobileAdmin,
+} from "@/components/patterns/client-templates-migrate/mobile";
 import { EventsListPage } from "./EventsListPage";
 import { NewEventModal } from "./NewEventModal";
 
 export function EventsDemo() {
   const router = useRouter();
+  const isMobile = useIsMobileAdmin();
   const { create } = useEvents();
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  if (isMobile) {
+    return (
+      <MobileAdminShell active="events">
+        <MobileEventsPage />
+      </MobileAdminShell>
+    );
+  }
 
   async function handleCreateEvent(event: Omit<EventSummary, "id">) {
     const startsAt = event.date ? new Date(`${event.date}T00:00:00`).toISOString() : new Date().toISOString();

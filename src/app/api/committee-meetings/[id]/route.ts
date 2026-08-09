@@ -4,6 +4,7 @@ import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRo
 
 const MEETING_SELECT = `
   *,
+  events ( id, name, starts_at, ends_at ),
   committee_meeting_attendees (
     id,
     person_id,
@@ -93,9 +94,52 @@ export async function PATCH(
     patch.agenda_json = o.agenda_json;
   }
 
-  const transcriptLocked = existing.minutes_status !== "draft";
-  if (!transcriptLocked && (typeof o.raw_transcript === "string" || o.raw_transcript === null)) {
+  const minutesLocked =
+    existing.minutes_status !== "draft" &&
+    existing.minutes_status !== "error" &&
+    existing.minutes_status !== "submitted";
+
+  if (!minutesLocked && (typeof o.raw_transcript === "string" || o.raw_transcript === null)) {
     patch.raw_transcript = o.raw_transcript;
+  }
+
+  if (
+    !minutesLocked &&
+    o.structured_minutes &&
+    typeof o.structured_minutes === "object"
+  ) {
+    patch.structured_minutes = o.structured_minutes;
+  }
+
+  if (
+    !minutesLocked &&
+    (o.minutes_source === "written" ||
+      o.minutes_source === "transcript" ||
+      o.minutes_source === "audio" ||
+      o.minutes_source === "file" ||
+      o.minutes_source === null)
+  ) {
+    patch.minutes_source = o.minutes_source;
+  }
+
+  if (
+    !minutesLocked &&
+    (typeof o.minutes_attachment_url === "string" || o.minutes_attachment_url === null)
+  ) {
+    patch.minutes_attachment_url = o.minutes_attachment_url;
+  }
+
+  if (!minutesLocked && (typeof o.audio_url === "string" || o.audio_url === null)) {
+    patch.audio_url = o.audio_url;
+  }
+
+  // Written path: save minutes as submitted (not yet published to website).
+  if (
+    !minutesLocked &&
+    o.minutes_status === "submitted" &&
+    (existing.minutes_status === "draft" || existing.minutes_status === "error")
+  ) {
+    patch.minutes_status = "submitted";
   }
 
   const { data, error } = await supabase

@@ -21,8 +21,10 @@ export function ComingSoon({ label, fullPage }: ComingSoonProps) {
         padding: fullPage ? "80px 24px" : "32px 20px",
         height: fullPage ? "100%" : undefined,
         color: "var(--linear-color-ink-subtle)",
-        border: fullPage ? undefined : "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: fullPage ? undefined : "var(--linear-color-panel)",
+        border: fullPage ? undefined : "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: fullPage ? undefined : "var(--linear-radius-md)",
+        boxShadow: fullPage ? undefined : "var(--linear-shadow-panel)",
       }}
     >
       <Construction size={20} strokeWidth={1.5} />

@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useBusinesses } from "hooks";
 import { supabaseClient } from "@/lib/supabaseClient";
@@ -10,9 +10,12 @@ import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
 import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
+import { ListToolbar } from "@/components/patterns/foundation/ListToolbar";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Text } from "@/components/patterns/primitives/Text";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
+import { useAdminBasePath } from "@/components/patterns/client-templates/shared/useAdminBasePath";
+import { useIsMobileAdmin } from "@/components/patterns/client-templates-migrate/mobile";
 import { BusinessMembersPage } from "./BusinessMembersPage";
 import { SponsorsPage } from "./SponsorsPage";
 import { AllBusinessesTable } from "./AllBusinessesTable";
@@ -20,8 +23,10 @@ import { BusinessMemberDetailPanel } from "./BusinessMemberDetailPanel";
 import { BusinessSponsorDetailPanel } from "./BusinessSponsorDetailPanel";
 import { BusinessDetailPanel } from "./BusinessDetailPanel";
 import { AddBusinessModal } from "./AddBusinessModal";
+import { EditBusinessModal } from "./EditBusinessModal";
 import type { BusinessMemberRow, BusinessRow, SponsorRow } from "./types";
 import { hookFiltersForView, toBusinessMemberRow, toBusinessRow, toSponsorRow } from "./adapters";
+import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
 
 type BusinessesView = "members" | "sponsors" | "all";
 
@@ -35,13 +40,26 @@ type Selection =
   | { kind: "business"; row: BusinessRow };
 
 function BusinessesDemoInner() {
+  const router = useRouter();
+  const base = useAdminBasePath();
+  const isMobile = useIsMobileAdmin();
+
+  useEffect(() => {
+    if (!isMobile) return;
+    router.replace(`${base}/database?tab=businesses`);
+  }, [isMobile, router, base]);
+
   const searchParams = useSearchParams();
   const initial = searchParams.get("view");
   const [view, setView] = useState<BusinessesView>(
     isBusinessesView(initial) ? initial : "members",
   );
 
-  const filters = useMemo(() => hookFiltersForView(view), [view]);
+  const [search, setSearch] = useState("");
+  const filters = useMemo(
+    () => ({ ...hookFiltersForView(view), search: search || undefined }),
+    [view, search]
+  );
   const { businesses, loading, error, create, update, refetch } = useBusinesses({ filters });
 
   const businessMembers: BusinessMemberRow[] = useMemo(
@@ -59,6 +77,22 @@ function BusinessesDemoInner() {
 
   const [selection, setSelection] = useState<Selection | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const selectedBusiness = selection ? businesses.find((b) => b.id === selection.row.id) ?? null : null;
+
+  async function handleSaveEdit(
+    businessId: string,
+    businessData: BusinessesUpdate,
+    membershipId: string | null,
+    membershipData: BusinessMembershipsUpdate
+  ) {
+    await update(businessId, businessData);
+    if (membershipId && supabaseClient) {
+      await supabaseClient.from("business_memberships").update(membershipData).eq("id", membershipId);
+    }
+    await refetch();
+  }
 
   function selectView(next: BusinessesView) {
     setView(next);
@@ -101,6 +135,8 @@ function BusinessesDemoInner() {
     await refetch();
   }
 
+  if (isMobile) return null;
+
   const body =
     view === "all" ? (
       <AllBusinessesTable data={allBusinesses} onSelect={(row) => setSelection({ kind: "business", row })} />
@@ -132,7 +168,16 @@ function BusinessesDemoInner() {
               ),
             }}
             controls={
-              <ViewTabs aria-label="Businesses views">
+              <ViewTabs
+                aria-label="Businesses views"
+                endContent={
+                  <ListToolbar
+                    searchValue={search}
+                    onSearchChange={setSearch}
+                    searchPlaceholder="Search businesses…"
+                  />
+                }
+              >
                 <ViewTab
                   label="Members"
                   selected={view === "members"}
@@ -153,13 +198,17 @@ function BusinessesDemoInner() {
           />
         }
         sideContent={
-          selection ? (
-            <OutlinedPanel onClose={() => setSelection(null)}>
+          selection && selectedBusiness ? (
+            <OutlinedPanel onClose={() => setSelection(null)} onEdit={() => setIsEditOpen(true)}>
               {selection.kind === "businessMember" ? (
-                <BusinessMemberDetailPanel businessMember={selection.row} />
+                <BusinessMemberDetailPanel businessMember={selection.row} business={selectedBusiness} />
               ) : null}
-              {selection.kind === "sponsor" ? <BusinessSponsorDetailPanel sponsor={selection.row} /> : null}
-              {selection.kind === "business" ? <BusinessDetailPanel business={selection.row} /> : null}
+              {selection.kind === "sponsor" ? (
+                <BusinessSponsorDetailPanel sponsor={selection.row} business={selectedBusiness} />
+              ) : null}
+              {selection.kind === "business" ? (
+                <BusinessDetailPanel business={selection.row} rawBusiness={selectedBusiness} />
+              ) : null}
             </OutlinedPanel>
           ) : null
         }
@@ -184,6 +233,13 @@ function BusinessesDemoInner() {
         onAddMember={handleAddMember}
         onAddSponsor={handleAddSponsor}
         onAddBusiness={handleAddBusiness}
+      />
+
+      <EditBusinessModal
+        isOpen={isEditOpen}
+        business={selectedBusiness}
+        onClose={() => setIsEditOpen(false)}
+        onSave={handleSaveEdit}
       />
     </div>
   );

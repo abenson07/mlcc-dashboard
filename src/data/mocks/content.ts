@@ -4,7 +4,9 @@ export type Story = {
   id: string;
   title: string;
   author: string;
+  topic: string;
   status: ContentStatus;
+  publishedAt: string;
   body: string;
 };
 
@@ -14,6 +16,15 @@ export type Faq = {
   answer: string;
   pages: string[];
 };
+
+export const CURRENT_USER_NAME = "Kyle Brower";
+
+export const availableTopics: string[] = [
+  "Community",
+  "Events",
+  "Volunteering",
+  "Announcements",
+];
 
 export const availablePages: string[] = [
   "Homepage",
@@ -29,22 +40,28 @@ export const sampleStories: Story[] = [
     id: "story-1",
     title: "Summer Social recap: a record turnout",
     author: "Priya Anand",
+    topic: "Events",
     status: "Published",
-    body: "<p>Over 200 neighbors joined us for this year's Summer Social...</p>",
+    publishedAt: "Aug 3, 2026",
+    body: "<p>Over 200 neighbors joined us for this year's Summer Social, making it the best-attended event the neighborhood has hosted in years.</p>",
   },
   {
     id: "story-2",
     title: "Meet the new Volunteer Committee chair",
     author: "Marcus Ianelli",
+    topic: "Volunteering",
     status: "Published",
-    body: "<p>We're excited to welcome Marcus Ianelli as the new chair...</p>",
+    publishedAt: "Jul 22, 2026",
+    body: "<p>We're excited to welcome Marcus Ianelli as the new chair of the Volunteer Committee.</p>",
   },
   {
     id: "story-3",
     title: "Fall leaflet drive: what to expect",
     author: "Dana Whitfield",
+    topic: "Announcements",
     status: "Draft",
-    body: "<p>Volunteers will begin distributing leaflets the first week of October...</p>",
+    publishedAt: "Aug 8, 2026",
+    body: "<p>Volunteers will begin distributing leaflets the first week of October, covering every block in the neighborhood.</p>",
   },
 ];
 

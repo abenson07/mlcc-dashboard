@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { Avatar } from "@/components/patterns/primitives/Avatar";
 import { Text } from "@/components/patterns/primitives/Text";
-import { sampleEventVolunteers, type EventVolunteerRow } from "@/data/mocks/events";
+import { useEventContext } from "@/components/integrated/events/EventContext";
+import type { EventVolunteerRow } from "./VolunteersPage";
 
 export type VolunteersListSectionProps = {
   onSelectVolunteer?: (row: EventVolunteerRow) => void;
@@ -10,22 +12,39 @@ export type VolunteersListSectionProps = {
 };
 
 const STATUS_COLOR: Record<EventVolunteerRow["status"], string> = {
-  Confirmed: "#27a644",
-  Invited: "#f2c94c",
-  Declined: "#8a8f98",
+  Accepted: "#27a644",
+  Pending: "#f2c94c",
 };
 
 const PREVIEW_LIMIT = 5;
 
 /**
- * Short volunteers preview for the Overview page — a plain Name / Role /
- * Status list (not the grouped table), matching the boxed shape of
- * `EventTasksSection` for a side-by-side layout.
+ * Short volunteers preview for the Overview page from linked volunteer asks.
  */
-export function VolunteersListSection({ onSelectVolunteer, onSeeAllVolunteers }: VolunteersListSectionProps) {
-  const volunteers = sampleEventVolunteers;
+export function VolunteersListSection({
+  onSelectVolunteer,
+  onSeeAllVolunteers,
+}: VolunteersListSectionProps) {
+  const { volunteerAsks } = useEventContext();
+
+  const volunteers: EventVolunteerRow[] = useMemo(() => {
+    const rows: EventVolunteerRow[] = [];
+    for (const ask of volunteerAsks) {
+      for (const signup of ask.signups) {
+        rows.push({
+          id: signup.id,
+          name: signup.person?.full_name ?? "Unknown",
+          role: ask.title,
+          email: signup.person?.email ?? signup.person?.phone ?? "—",
+          status: signup.status === "pending" ? "Pending" : "Accepted",
+        });
+      }
+    }
+    return rows;
+  }, [volunteerAsks]);
+
   const preview = volunteers.slice(0, PREVIEW_LIMIT);
-  const confirmedCount = volunteers.filter((v) => v.status === "Confirmed").length;
+  const acceptedCount = volunteers.filter((v) => v.status === "Accepted").length;
 
   return (
     <section
@@ -36,14 +55,23 @@ export function VolunteersListSection({ onSelectVolunteer, onSeeAllVolunteers }:
         flexDirection: "column",
         gap: 4,
         padding: 20,
-        border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+        background: "var(--linear-color-panel)",
+        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
+        boxShadow: "var(--linear-shadow-panel)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 8,
+        }}
+      >
         <Text weight="semibold">Volunteers</Text>
         <Text size="sm" color="secondary">
-          {confirmedCount} confirmed
+          {acceptedCount} accepted
         </Text>
       </div>
 

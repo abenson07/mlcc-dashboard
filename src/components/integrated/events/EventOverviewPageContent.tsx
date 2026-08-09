@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { IconCalendar, IconPlus } from "@/components/leaflet/icons";
-import { formatEventTimeRange } from "@/lib/events/eventData";
+import { eventsHubBasePath, eventsListBasePath, formatEventTimeRange } from "@/lib/events/eventData";
 import { useEventContext } from "./EventContext";
 import PublishEventButton from "./PublishEventButton";
 
 export default function EventOverviewPageContent() {
+  const pathname = usePathname();
+  const eventsBasePath = eventsListBasePath(pathname);
+  const eventsHubPath = eventsHubBasePath(pathname);
   const {
     eventId,
     event,
@@ -34,7 +38,7 @@ export default function EventOverviewPageContent() {
     return (
       <div className="lf-empty-page">
         <h1 className="lf-h2">Event not found</h1>
-        <Link href="/old-admin/events" className="lf-link">Back to events</Link>
+        <Link href={eventsBasePath} className="lf-link">Back to events</Link>
       </div>
     );
   }
@@ -108,7 +112,7 @@ export default function EventOverviewPageContent() {
               </span>
             </label>
           ))}
-          <Link href={`/old-admin/events-hub/${eventId}/schedule`} className="lf-see-all">
+          <Link href={`${eventsHubPath}/${eventId}/schedule`} className="lf-see-all">
             See all items in checklist ({tasks.length})
           </Link>
         </section>
@@ -132,10 +136,10 @@ export default function EventOverviewPageContent() {
                 <span className="lf-status-badge lf-status-badge--green">Confirmed</span>
               </div>
             ))}
-            <Link href={`/old-admin/events-hub/${eventId}/volunteers`} className="lf-see-all">
+            <Link href={`${eventsHubPath}/${eventId}/volunteers`} className="lf-see-all">
               See all
             </Link>
-            <Link href={`/old-admin/events-hub/${eventId}/volunteers`} className="lf-view-all-btn">
+            <Link href={`${eventsHubPath}/${eventId}/volunteers`} className="lf-view-all-btn">
               <IconPlus />
               Add volunteer
             </Link>
@@ -178,7 +182,7 @@ export default function EventOverviewPageContent() {
               </>
             )}
             <div className="lf-card-footer">
-              <Link href={`/old-admin/events-hub/${eventId}/sponsorship`} className="lf-see-all">
+              <Link href={`${eventsHubPath}/${eventId}/sponsorship`} className="lf-see-all">
                 See all
               </Link>
             </div>

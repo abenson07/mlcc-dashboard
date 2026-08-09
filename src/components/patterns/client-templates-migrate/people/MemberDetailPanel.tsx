@@ -2,11 +2,10 @@
 
 import { Avatar } from "@/components/patterns/primitives/Avatar";
 import { VStack } from "@/components/patterns/primitives/Stack";
-import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
-import { Calendar, Mail, Tag } from "lucide-react";
-import { SideContentField } from "@/components/patterns/foundation/side-content";
+import type { PersonWithMembership } from "hooks";
 import type { MemberRow, MembershipType } from "./types";
+import { ContactSection, MembershipSection, VolunteerSection } from "./PersonSections";
 
 const MEMBERSHIP_TYPE_LABEL: Record<MembershipType, string> = {
   household: "Household",
@@ -18,10 +17,11 @@ const MEMBERSHIP_TYPE_LABEL: Record<MembershipType, string> = {
 
 export type MemberDetailPanelProps = {
   member: MemberRow;
+  person: PersonWithMembership;
 };
 
 /** Member detail — shown in the outlined side panel when a row is selected from Members. */
-export function MemberDetailPanel({ member }: MemberDetailPanelProps) {
+export function MemberDetailPanel({ member, person }: MemberDetailPanelProps) {
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -34,28 +34,9 @@ export function MemberDetailPanel({ member }: MemberDetailPanelProps) {
         </div>
       </div>
 
-      <List
-        density="compact"
-        header={
-          <Text type="label" color="secondary">
-            Membership
-          </Text>
-        }
-      >
-        <SideContentField icon={<Tag size={16} strokeWidth={1.75} />} label={MEMBERSHIP_TYPE_LABEL[member.membershipType]} />
-        <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Member since ${member.memberSince}`} />
-      </List>
-
-      <List
-        density="compact"
-        header={
-          <Text type="label" color="secondary">
-            Contact
-          </Text>
-        }
-      >
-        <SideContentField icon={<Mail size={16} strokeWidth={1.75} />} label={member.email} />
-      </List>
+      <ContactSection person={person} />
+      <MembershipSection person={person} />
+      <VolunteerSection person={person} />
     </VStack>
   );
 }

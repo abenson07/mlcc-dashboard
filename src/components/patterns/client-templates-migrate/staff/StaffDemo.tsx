@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
-import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
+import { EmptyStateCard, OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { StaffTable } from "./StaffTable";
 import { StaffProfilePanel } from "./StaffProfilePanel";
@@ -23,10 +24,16 @@ export type StaffDemoProps = {
 };
 
 export function StaffDemo({ navigation }: StaffDemoProps = {}) {
-  const [staff, setStaff] = useState<StaffRow[]>(sampleStaff);
+  const { enabled: demo } = useDemoModeOptional();
+  const [staff, setStaff] = useState<StaffRow[]>([]);
   const [view, setView] = useState<StaffView>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  useEffect(() => {
+    setStaff(demo ? sampleStaff : []);
+    setSelectedId(null);
+  }, [demo]);
 
   function changeView(next: StaffView) {
     setView(next);
@@ -41,16 +48,19 @@ export function StaffDemo({ navigation }: StaffDemoProps = {}) {
 
   const selected = staff.find((row) => row.id === selectedId) ?? null;
 
-  const handleAddClass = useCallback((classCode: string) => {
-    if (!selectedId) return;
-    setStaff((current) =>
-      current.map((row) =>
-        row.id === selectedId && !row.classes.includes(classCode)
-          ? { ...row, classes: [...row.classes, classCode] }
-          : row,
-      ),
-    );
-  }, [selectedId]);
+  const handleAddClass = useCallback(
+    (classCode: string) => {
+      if (!selectedId) return;
+      setStaff((current) =>
+        current.map((row) =>
+          row.id === selectedId && !row.classes.includes(classCode)
+            ? { ...row, classes: [...row.classes, classCode] }
+            : row,
+        ),
+      );
+    },
+    [selectedId],
+  );
 
   return (
     <div style={{ height: "100%" }}>
@@ -74,15 +84,17 @@ export function StaffDemo({ navigation }: StaffDemoProps = {}) {
           <CanvasHeader
             topbar={{
               title: "Staff",
-              endActions: [
-                {
-                  type: "custom",
-                  id: "add-staff",
-                  label: "Add staff",
-                  icon: <Plus size={16} strokeWidth={1.75} />,
-                  onClick: () => setIsAddOpen(true),
-                },
-              ],
+              endActions: demo
+                ? [
+                    {
+                      type: "custom" as const,
+                      id: "add-staff",
+                      label: "Add staff",
+                      icon: <Plus size={16} strokeWidth={1.75} />,
+                      onClick: () => setIsAddOpen(true),
+                    },
+                  ]
+                : undefined,
             }}
             controls={
               <ViewTabs aria-label="Staff views">
@@ -102,16 +114,26 @@ export function StaffDemo({ navigation }: StaffDemoProps = {}) {
           />
         }
       >
-        <StaffTable data={filteredStaff} onSelectStaff={(row) => setSelectedId(row.id)} />
-
-        <AddStaffModal
-          isOpen={isAddOpen}
-          onClose={() => setIsAddOpen(false)}
-          onAdd={(row) => {
-            setStaff((current) => [...current, row]);
-            setIsAddOpen(false);
-          }}
-        />
+        {!demo ? (
+          <div style={{ padding: "32px 24px" }}>
+            <EmptyStateCard
+              variant="plain"
+              label="Staff directory not wired yet — turn on demo mode to preview"
+            />
+          </div>
+        ) : (
+          <>
+            <StaffTable data={filteredStaff} onSelectStaff={(row) => setSelectedId(row.id)} />
+            <AddStaffModal
+              isOpen={isAddOpen}
+              onClose={() => setIsAddOpen(false)}
+              onAdd={(row) => {
+                setStaff((current) => [...current, row]);
+                setIsAddOpen(false);
+              }}
+            />
+          </>
+        )}
       </FoundationLayout>
     </div>
   );

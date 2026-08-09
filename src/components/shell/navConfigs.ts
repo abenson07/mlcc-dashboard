@@ -555,7 +555,7 @@ export function buildShellPreviewEventL2Config(
             icon: LayoutDashboard,
             href: `${eventBase}/overview`,
           },
-          { id: "details", label: "Event details", icon: FileText, href: "#", notReady: true },
+          { id: "details", label: "Event details", icon: FileText, href: `${eventBase}/details` },
           { id: "tasks", label: "Tasks", icon: ListTodo, href: "#", notReady: true },
           { id: "financials", label: "Financials", icon: HandCoins, href: "#", notReady: true },
           { id: "committees", label: "Committees", icon: Users, href: "#", notReady: true },

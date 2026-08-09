@@ -10,4 +10,5 @@ export type ActionItem = {
   dueDate: string;
   assignee: ActionItemAssignee;
   linkedMeeting: string;
+  status?: "open" | "done" | "canceled";
 };
