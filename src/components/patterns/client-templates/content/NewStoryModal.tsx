@@ -49,6 +49,8 @@ export function NewStoryModal({ isOpen, onClose, onCreate }: NewStoryModalProps)
       topic: availableTopics[0],
       status,
       publishedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      imageUrl: "",
+      description: "",
       body: "",
     });
     onClose();

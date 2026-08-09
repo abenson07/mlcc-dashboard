@@ -110,6 +110,10 @@ export const COMMITTEE_LABELS: Record<CommitteeSlug, string> = {
   businesses: "Businesses",
 };
 
+export function isCommitteeSlug(value: string): value is CommitteeSlug {
+  return Object.prototype.hasOwnProperty.call(COMMITTEE_LABELS, value);
+}
+
 export const WEBSITE_COMMITTEE_SLUG: Partial<Record<CommitteeSlug, string>> = {
   outreach: "advocacy",
   hub: "emergency-hub",

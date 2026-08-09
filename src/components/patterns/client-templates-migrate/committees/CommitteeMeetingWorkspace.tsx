@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Text } from "@/components/patterns/primitives/Text";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
@@ -10,6 +11,7 @@ import {
   useCommitteeMeetingById,
   useOutstandingActionItems,
   usePeople,
+  useDemoGuard,
   textToAgendaJson,
   textToStructuredMinutes,
   structuredMinutesToText,
@@ -145,21 +147,42 @@ export function CommitteeMeetingWorkspace({ meetingId }: CommitteeMeetingWorkspa
     meeting,
     loading,
     error,
-    patchMeeting,
-    postAgenda,
-    submitMinutes,
-    publishMinutes,
-    transcribeAudio,
-    uploadMinutesFile,
+    patchMeeting: patchMeetingReal,
+    postAgenda: postAgendaReal,
+    submitMinutes: submitMinutesReal,
+    publishMinutes: publishMinutesReal,
+    transcribeAudio: transcribeAudioReal,
+    uploadMinutesFile: uploadMinutesFileReal,
     refetch,
   } = useCommitteeMeetingById(meetingId);
+  const { enabled: demo } = useDemoGuard();
+
+  async function demoSkip(action: string) {
+    toast.success(`${action} — demo mode, not saved`);
+  }
+
+  const patchMeeting: typeof patchMeetingReal = (patch) =>
+    demo ? demoSkip("Meeting updated") : patchMeetingReal(patch);
+  const postAgenda: typeof postAgendaReal = () => (demo ? demoSkip("Agenda posted") : postAgendaReal());
+  const submitMinutes: typeof submitMinutesReal = () =>
+    demo ? demoSkip("Minutes generated") : submitMinutesReal();
+  const publishMinutes: typeof publishMinutesReal = (payload) =>
+    demo ? demoSkip("Minutes published") : publishMinutesReal(payload);
+  const transcribeAudio: typeof transcribeAudioReal = (file) =>
+    demo ? demoSkip("Audio transcribed") : transcribeAudioReal(file);
+  const uploadMinutesFile: typeof uploadMinutesFileReal = (file) =>
+    demo ? demoSkip("File uploaded") : uploadMinutesFileReal(file);
 
   const {
     items: outstanding,
-    patchActionItem,
-    createActionItem,
+    patchActionItem: patchActionItemReal,
+    createActionItem: createActionItemReal,
     refetch: refetchOutstanding,
   } = useOutstandingActionItems(meetingId);
+  const patchActionItem: typeof patchActionItemReal = (id, patch) =>
+    demo ? demoSkip("Action item updated") : patchActionItemReal(id, patch);
+  const createActionItem: typeof createActionItemReal = (payload) =>
+    demo ? demoSkip("Action item added") : createActionItemReal(payload);
 
   const { people } = usePeople({ autoFetch: true });
   const peopleOptions = useMemo(

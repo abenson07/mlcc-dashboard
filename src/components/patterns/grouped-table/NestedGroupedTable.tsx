@@ -10,7 +10,8 @@ export type NestedGroupedTableProps<T extends Record<string, unknown>> = Omit<
   GroupedTableProps<T>,
   "appearance" | "listChrome"
 > & {
-  title?: string;
+  /** Section title, or custom left-slot content (e.g. view tabs). */
+  title?: ReactNode;
   titleActions?: ReactNode;
   onFilterClick?: () => void;
   onAddClick?: () => void;
@@ -60,17 +61,21 @@ export function NestedGroupedTable<T extends Record<string, unknown>>({
           paddingInline: 4,
         }}
       >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 13,
-            lineHeight: "20px",
-            fontWeight: 500,
-            color: "var(--linear-color-ink)",
-          }}
-        >
-          {title}
-        </h2>
+        {typeof title === "string" ? (
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 13,
+              lineHeight: "20px",
+              fontWeight: 500,
+              color: "var(--linear-color-ink)",
+            }}
+          >
+            {title}
+          </h2>
+        ) : (
+          title
+        )}
         <div style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
           {titleActions}
           <IconButton

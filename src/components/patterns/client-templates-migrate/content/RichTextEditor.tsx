@@ -2,6 +2,8 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
 import { Bold, Italic, List, ListOrdered } from "lucide-react";
 import { IconButton } from "@/components/patterns/shared/IconButton";
 
@@ -16,7 +18,11 @@ export type RichTextEditorProps = {
 
 export function RichTextEditor({ label, content, onChange, placeholder, bare = false }: RichTextEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit.configure({ heading: { levels: [2, 3] } })],
+    extensions: [
+      StarterKit.configure({ heading: { levels: [2, 3] } }),
+      Image,
+      Link.configure({ openOnClick: false }),
+    ],
     content: content || "<p></p>",
     immediatelyRender: false,
     onUpdate: ({ editor: ed }) => onChange(ed.getHTML()),

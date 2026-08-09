@@ -1,9 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiBase } from "@/lib/apiBase";
 import type { CommitteeSlug, MinutesStatus, StructuredMinutes } from "schemas/committee_meetings";
 import type { ActionItemStatus } from "schemas/action_items";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { getSampleCommitteeMeetings } from "@/data/mocks/committees";
 
 export const COMMITTEE_MEETINGS_LIST_KEY = ["committee-meetings", "list"] as const;
 export const COMMITTEE_MEETING_BY_ID_KEY = ["committee-meetings", "by-id"] as const;
@@ -99,19 +102,25 @@ async function fetchOutstanding(meetingId: string): Promise<MeetingActionItem[]>
 }
 
 export function useCommitteeMeetingsList(committee: CommitteeSlug | null) {
+  const { enabled: demo } = useDemoModeOptional();
   const queryClient = useQueryClient();
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [...COMMITTEE_MEETINGS_LIST_KEY, committee],
     queryFn: () => fetchMeetings(committee!),
-    enabled: Boolean(committee),
+    enabled: Boolean(committee) && !demo,
   });
 
+  const demoMeetings = useMemo(() => {
+    if (!demo || !committee) return [] as CommitteeMeetingListRow[];
+    return getSampleCommitteeMeetings(committee) as CommitteeMeetingListRow[];
+  }, [demo, committee]);
+
   return {
-    meetings: data ?? [],
-    loading: isLoading,
-    error: error ? (error instanceof Error ? error.message : String(error)) : null,
+    meetings: demo ? demoMeetings : (data ?? []),
+    loading: demo ? false : isLoading,
+    error: demo ? null : error ? (error instanceof Error ? error.message : String(error)) : null,
     refetch: async () => {
-      await refetch();
+      if (!demo) await refetch();
     },
     invalidate: () =>
       queryClient.invalidateQueries({ queryKey: [...COMMITTEE_MEETINGS_LIST_KEY, committee] }),

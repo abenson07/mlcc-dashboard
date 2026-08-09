@@ -12,15 +12,16 @@ export type RouteDetailPanelProps = {
   route: LeafletRouteRow;
 };
 
-/** Open/skipped route detail — shown in the outlined side panel when a route row is selected. */
+/** Route detail — shown in the outlined side panel when a route row is selected. */
 export function RouteDetailPanel({ route }: RouteDetailPanelProps) {
   const isSkipped = route.status === "skipped";
+  const isAssigned = route.status === "in-progress";
 
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Text size="sm" color="secondary">
-          {isSkipped ? "Skipped route" : "Open route"}
+          {isSkipped ? "Skipped route" : isAssigned ? "Assigned route" : "Open route"}
         </Text>
         <Text style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.01em" }}>{route.name}</Text>
       </div>
@@ -36,11 +37,24 @@ export function RouteDetailPanel({ route }: RouteDetailPanelProps) {
         <SideContentField icon={<MapPin size={16} strokeWidth={1.75} />} label={route.detail} />
         <SideContentField
           icon={<User size={16} strokeWidth={1.75} />}
-          label={isSkipped ? "Needs a substitute deliverer" : "Unassigned"}
+          label={
+            isSkipped
+              ? "Needs a substitute deliverer"
+              : isAssigned
+                ? "Assigned"
+                : "Unassigned"
+          }
         />
       </List>
 
-      <Button label={isSkipped ? "Find substitute" : "Assign deliverer"} variant="secondary" size="sm" width="100%" />
+      <Button
+        label={
+          isSkipped ? "Find substitute" : isAssigned ? "Change deliverer" : "Assign deliverer"
+        }
+        variant="secondary"
+        size="sm"
+        width="100%"
+      />
     </VStack>
   );
 }

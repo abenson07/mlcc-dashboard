@@ -8,6 +8,7 @@ import { HStack, VStack } from "@/components/patterns/primitives/Stack";
 import { Icon } from "@/components/patterns/primitives/Icon";
 import { Text } from "@/components/patterns/primitives/Text";
 import type { EventSummary } from "@/data/mocks/events";
+import { COMMITTEE_LABELS } from "schemas/committee_meetings";
 
 export type EventCardProps = {
   event: EventSummary;
@@ -36,7 +37,7 @@ export function EventCard({ event }: EventCardProps) {
             <Text weight="semibold" display="block" style={{ flex: 1 }}>
               {event.title}
             </Text>
-            <Badge label={event.category} />
+            <Badge label={COMMITTEE_LABELS[event.committee]} />
           </HStack>
           <Text color="secondary">{event.description}</Text>
           <HStack gap={2} align="center">

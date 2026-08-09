@@ -92,3 +92,16 @@ export type {
   WebflowEventItemDTO,
   WebflowOptionChoice,
 } from "./useWebflowEvents";
+export { useDemoGuard } from "./useDemoGuard";
+export {
+  useCommitteeInitiatives,
+  useCommitteeInitiative,
+  COMMITTEE_INITIATIVES_KEY,
+} from "./useCommitteeInitiatives";
+export {
+  useCommitteeProfile,
+  useCommitteeMembers,
+  mapProfileToDetail,
+  COMMITTEE_PROFILE_KEY,
+  COMMITTEE_MEMBERS_KEY,
+} from "./useCommitteeSettings";

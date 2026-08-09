@@ -71,14 +71,16 @@ function matchesSearch(invoice: StripeInvoiceTableRow, search: string): boolean 
   );
 }
 
-function buildColumns(
+export function buildInvoiceColumns(
   onSelect?: (row: StripeInvoiceTableRow) => void,
+  options?: { even?: boolean },
 ): TableColumn<StripeInvoiceTableRow>[] {
+  const even = options?.even === true;
   return [
     {
       key: "customer",
       header: "Customer",
-      width: proportional(1, { minWidth: 180 }),
+      width: even ? proportional(1.4, { minWidth: 140 }) : proportional(1, { minWidth: 180 }),
       renderCell: (row) => (
         <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink)" }}>
@@ -90,7 +92,7 @@ function buildColumns(
     {
       key: "number",
       header: "Invoice #",
-      width: pixel(120),
+      width: even ? proportional(1, { minWidth: 100 }) : pixel(120),
       renderCell: (row) => (
         <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.number ?? "—"}</span>
@@ -100,7 +102,7 @@ function buildColumns(
     {
       key: "category",
       header: "Category",
-      width: pixel(160),
+      width: even ? proportional(1.2, { minWidth: 110 }) : pixel(160),
       renderCell: (row) => (
         <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>
@@ -112,7 +114,7 @@ function buildColumns(
     {
       key: "amount",
       header: "Amount",
-      width: pixel(100),
+      width: even ? proportional(0.9, { minWidth: 90 }) : pixel(100),
       renderCell: (row) => (
         <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink)" }}>{formatUsd(row.amount_due)}</span>
@@ -122,7 +124,7 @@ function buildColumns(
     {
       key: "dueDate",
       header: "Due",
-      width: pixel(120),
+      width: even ? proportional(1, { minWidth: 100 }) : pixel(120),
       renderCell: (row) => (
         <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <span style={{ color: "var(--linear-color-ink-subtle)" }}>
@@ -134,7 +136,7 @@ function buildColumns(
     {
       key: "status",
       header: "Status",
-      width: pixel(120),
+      width: even ? proportional(1, { minWidth: 100 }) : pixel(120),
       renderCell: (row) => (
         <RowClickCell onClick={onSelect ? () => onSelect(row) : undefined}>
           <StatusPill invoice={row} />
@@ -158,7 +160,7 @@ export function InvoicingInvoicesPage({
   onSelectInvoice,
 }: InvoicingInvoicesPageProps) {
   const { invoices, loading, error } = useStripeInvoices();
-  const columns = useMemo(() => buildColumns(onSelectInvoice), [onSelectInvoice]);
+  const columns = useMemo(() => buildInvoiceColumns(onSelectInvoice), [onSelectInvoice]);
 
   const filtered = useMemo(
     () =>

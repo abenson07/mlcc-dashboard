@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
 import { redirect } from "next/navigation";
+import { Toaster } from "sonner";
 import { createClient } from "@/lib/supabase/server";
 import { ThemeProvider } from "@/components/patterns/foundation/ThemeContext";
 import { DemoModeProvider } from "@/components/patterns/foundation/DemoModeContext";
@@ -33,6 +34,7 @@ export default async function AdminMigrateLayout({ children }: { children: React
         <ThemeProvider>
           <DemoModeProvider>{children}</DemoModeProvider>
         </ThemeProvider>
+        <Toaster richColors position="bottom-right" />
       </QueryProvider>
     </div>
   );

@@ -12,6 +12,8 @@ export type {
 export { WorkspaceMark } from "./WorkspaceMark";
 export { TryButton } from "./TryButton";
 export type { TryButtonProps } from "./TryButton";
+export { DemoModeCard } from "./DemoModeCard";
+export type { DemoModeCardProps } from "./DemoModeCard";
 export { SidebarSection } from "./SidebarSection";
 export type { SidebarSectionProps } from "./SidebarSection";
 export { SidebarGroup } from "./SidebarGroup";

@@ -98,11 +98,11 @@ export function LayoutPanel({
             : "none",
         ...(isElevated
           ? {
-              background: "var(--linear-color-panel)",
+              background: "var(--linear-color-side-panel)",
               border:
                 "var(--linear-border-width) solid var(--linear-color-panel-border)",
               borderRadius: "var(--linear-radius-lg)",
-              boxShadow: "var(--linear-shadow-panel)",
+              boxShadow: "var(--linear-shadow-side-panel)",
             }
           : null),
         ...style,

@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { useAllSponsorships, useBusinesses, useStripeInvoices } from "hooks";
+import { useAllSponsorships, useBusinesses, useStripeInvoices, useDemoGuard } from "hooks";
 import { ClassContentPage } from "@/components/patterns/client-templates/shared";
+import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Button } from "@/components/patterns/primitives/Button";
 import { getApiBase } from "@/lib/apiBase";
@@ -13,6 +14,7 @@ import {
   isOpenPastDue,
 } from "@/components/billing/invoiceUtils";
 import type { StripeInvoiceTableRow } from "@/components/billing/InvoicesListTable";
+import { buildInvoiceColumns } from "./InvoicingInvoicesPage";
 
 const UPCOMING_WINDOW_SECONDS = 14 * 24 * 60 * 60;
 
@@ -52,12 +54,22 @@ function ReminderRow({
   businessName: string;
   isPastDue: boolean;
 }) {
+  const { enabled: demo, sendDemoEmail } = useDemoGuard();
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
   async function sendReminder() {
     setSending(true);
     try {
+      if (demo) {
+        await sendDemoEmail({
+          subject: `Invoice reminder — ${businessName}`,
+          text: `This is a reminder that an invoice for ${businessName} (${formatUsd(invoice.amount_due)}) is due ${formatDueDate(invoice.due_date)}.`,
+          context: businessName,
+        });
+        setSent(true);
+        return;
+      }
       const res = await fetch(
         `${getApiBase()}/api/stripe/invoices/${encodeURIComponent(invoice.id)}/remind`,
         { method: "POST" },
@@ -159,10 +171,14 @@ export type InvoicingOverviewPageProps = {
   onSelectInvoice?: (row: StripeInvoiceTableRow) => void;
 };
 
-export function InvoicingOverviewPage({ onSelectInvoice: _onSelectInvoice }: InvoicingOverviewPageProps) {
+export function InvoicingOverviewPage({ onSelectInvoice }: InvoicingOverviewPageProps) {
   const { invoices, loading: invoicesLoading } = useStripeInvoices();
   const { businesses } = useBusinesses();
   const { sponsorships } = useAllSponsorships();
+  const openInvoiceColumns = useMemo(
+    () => buildInvoiceColumns(onSelectInvoice, { even: true }),
+    [onSelectInvoice],
+  );
 
   const openInvoices = useMemo(() => invoices.filter((i) => i.status === "open"), [invoices]);
   const pastDue = useMemo(() => openInvoices.filter(isOpenPastDue), [openInvoices]);
@@ -170,7 +186,10 @@ export function InvoicingOverviewPage({ onSelectInvoice: _onSelectInvoice }: Inv
 
   function nameFor(invoice: StripeInvoiceTableRow): string {
     const match = businesses.find(
-      (b) => b.email && invoice.customer_email && b.email.toLowerCase() === invoice.customer_email.toLowerCase(),
+      (b) =>
+        b.email &&
+        invoice.customer_email &&
+        b.email.toLowerCase() === invoice.customer_email.toLowerCase(),
     );
     return match?.business_name ?? customerLabelFromEmail(invoice.customer_email);
   }
@@ -227,11 +246,33 @@ export function InvoicingOverviewPage({ onSelectInvoice: _onSelectInvoice }: Inv
               <ReminderRow key={invoice.id} invoice={invoice} businessName={nameFor(invoice)} isPastDue />
             ))}
             {upcoming.map((invoice) => (
-              <ReminderRow key={invoice.id} invoice={invoice} businessName={nameFor(invoice)} isPastDue={false} />
+              <ReminderRow
+                key={invoice.id}
+                invoice={invoice}
+                businessName={nameFor(invoice)}
+                isPastDue={false}
+              />
             ))}
           </div>
         )}
       </Card>
+
+      <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <Text weight="semibold">Open invoices</Text>
+        <div style={{ marginInline: -8 }}>
+          <GroupedTable
+            data={openInvoices}
+            columns={openInvoiceColumns}
+            getRowKey={(row) => row.id}
+            listChrome
+          />
+          {!invoicesLoading && openInvoices.length === 0 ? (
+            <div style={{ padding: 24 }}>
+              <Text color="secondary">No open invoices right now.</Text>
+            </div>
+          ) : null}
+        </div>
+      </section>
     </ClassContentPage>
   );
 }

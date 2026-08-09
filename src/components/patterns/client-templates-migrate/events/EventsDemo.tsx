@@ -36,7 +36,13 @@ export function EventsDemo() {
     const created = await create({
       name: event.title,
       starts_at: startsAt,
-      field_data: { location: event.location, description: event.description },
+      committee: event.committee,
+      field_data: {
+        location: event.location,
+        description: event.description,
+        committee: event.committee,
+        kind: "council",
+      },
     });
     if (created) router.push(`/admin-migrate/events/${created.id}`);
   }

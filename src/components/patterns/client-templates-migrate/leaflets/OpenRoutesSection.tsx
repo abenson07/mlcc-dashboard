@@ -10,7 +10,7 @@ export type OpenRoutesSectionProps = {
 
 const STATUS_COLOR: Record<LeafletRouteRow["status"], string> = {
   unassigned: "#eb5757",
-  "in-progress": "#f2c94c",
+  "in-progress": "#27a644",
   skipped: "#8a8f98",
 };
 

@@ -1,14 +1,20 @@
 "use client";
 
 import { useMemo } from "react";
+import { Plus } from "lucide-react";
 import { Avatar } from "@/components/patterns/primitives/Avatar";
 import { Text } from "@/components/patterns/primitives/Text";
+import { IconButton } from "@/components/patterns/shared/IconButton";
+import { EmptyStateCard } from "@/components/patterns/client-templates/shared";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { useEventContext } from "@/components/integrated/events/EventContext";
+import { eventMocksFor } from "@/data/mocks/events";
 import type { EventVolunteerRow } from "./VolunteersPage";
 
 export type VolunteersListSectionProps = {
   onSelectVolunteer?: (row: EventVolunteerRow) => void;
   onSeeAllVolunteers?: () => void;
+  onAddVolunteer?: () => void;
 };
 
 const STATUS_COLOR: Record<EventVolunteerRow["status"], string> = {
@@ -18,18 +24,18 @@ const STATUS_COLOR: Record<EventVolunteerRow["status"], string> = {
 
 const PREVIEW_LIMIT = 5;
 
-/**
- * Short volunteers preview for the Overview page from linked volunteer asks.
- */
 export function VolunteersListSection({
   onSelectVolunteer,
   onSeeAllVolunteers,
+  onAddVolunteer,
 }: VolunteersListSectionProps) {
-  const { volunteerAsks } = useEventContext();
+  const { enabled: demo } = useDemoModeOptional();
+  const { eventId, volunteerAsks } = useEventContext();
+  const asks = demo ? eventMocksFor(eventId).volunteerAsks : volunteerAsks;
 
   const volunteers: EventVolunteerRow[] = useMemo(() => {
     const rows: EventVolunteerRow[] = [];
-    for (const ask of volunteerAsks) {
+    for (const ask of asks) {
       for (const signup of ask.signups) {
         rows.push({
           id: signup.id,
@@ -41,10 +47,9 @@ export function VolunteersListSection({
       }
     }
     return rows;
-  }, [volunteerAsks]);
+  }, [asks]);
 
   const preview = volunteers.slice(0, PREVIEW_LIMIT);
-  const acceptedCount = volunteers.filter((v) => v.status === "Accepted").length;
 
   return (
     <section
@@ -70,15 +75,24 @@ export function VolunteersListSection({
         }}
       >
         <Text weight="semibold">Volunteers</Text>
-        <Text size="sm" color="secondary">
-          {acceptedCount} accepted
-        </Text>
+        {onAddVolunteer ? (
+          <IconButton
+            label="Add volunteer"
+            variant="ghost"
+            size="sm"
+            icon={<Plus size={16} strokeWidth={1.75} />}
+            onClick={onAddVolunteer}
+          />
+        ) : null}
       </div>
 
       {preview.length === 0 ? (
-        <Text size="sm" color="secondary">
-          No volunteers signed up yet.
-        </Text>
+        <EmptyStateCard
+          variant="pill"
+          label="Add new volunteer"
+          onClick={onAddVolunteer}
+          minHeight={72}
+        />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {preview.map((volunteer) => (
@@ -132,7 +146,7 @@ export function VolunteersListSection({
         </div>
       )}
 
-      {onSeeAllVolunteers ? (
+      {onSeeAllVolunteers && preview.length > 0 ? (
         <button
           type="button"
           onClick={onSeeAllVolunteers}

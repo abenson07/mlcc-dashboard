@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
-import { usePeople, useMemberships, type PersonWithMembership } from "hooks";
+import { toast } from "sonner";
+import { usePeople, useMemberships, useDemoGuard, type PersonWithMembership } from "hooks";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
@@ -64,8 +65,14 @@ function PeopleDemoInner() {
     () => ({ ...hookFiltersForView(view), search: search || undefined }),
     [view, search]
   );
-  const { people, loading, error, create, update, refetch } = usePeople({ filters });
+  const { people: peopleRaw, loading, error, create, update, refetch } = usePeople({ filters });
   const { create: createMembership, update: updateMembership } = useMemberships();
+  const { enabled: demo, overlay } = useDemoGuard();
+
+  const people = useMemo(
+    () => (demo ? peopleRaw.map((person) => overlay.apply("people", person)) : peopleRaw),
+    [demo, peopleRaw, overlay],
+  );
 
   const members: MemberRow[] = useMemo(
     () => (view === "members" ? people.map(toMemberRow) : []),
@@ -92,6 +99,11 @@ function PeopleDemoInner() {
     membershipId: string | null,
     membershipData: MembershipsUpdate
   ) {
+    if (demo) {
+      overlay.patch("people", personId, { ...personData, ...membershipData });
+      toast.success("Person updated — demo mode, saved locally only");
+      return;
+    }
     await update(personId, personData);
     if (membershipId) {
       await updateMembership(membershipId, membershipData);
@@ -105,6 +117,10 @@ function PeopleDemoInner() {
   }
 
   async function handleAddMember(row: Omit<MemberRow, "id">) {
+    if (demo) {
+      toast.success("Member added — demo mode, not saved");
+      return;
+    }
     const membership = await createMembership({
       tier: row.membershipType,
       status: "active",
@@ -119,11 +135,19 @@ function PeopleDemoInner() {
   }
 
   async function handleAddNeighbor(row: Omit<NeighborRow, "id">) {
+    if (demo) {
+      toast.success("Neighbor added — demo mode, not saved");
+      return;
+    }
     await create({ full_name: row.name, email: row.email, address: row.address });
     await refetch();
   }
 
   async function handleAddVolunteer(row: Omit<VolunteerRow, "id">) {
+    if (demo) {
+      toast.success("Volunteer added — demo mode, not saved");
+      return;
+    }
     const tags = [row.interestArea, row.hasVolunteeredBefore ? VOLUNTEERED_BEFORE_TAG : null].filter(
       (tag): tag is string => Boolean(tag)
     );

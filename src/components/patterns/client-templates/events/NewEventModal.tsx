@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
-import type { EventCategory, EventSummary } from "@/data/mocks/events";
+import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
+import type { EventSummary } from "@/data/mocks/events";
 
 export type NewEventModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onCreate?: (event: Omit<EventSummary, "id">) => void;
+  defaultCommittee?: CommitteeSlug;
+  committeeLocked?: boolean;
 };
 
-const CATEGORIES: EventCategory[] = ["Community", "Social", "Recreation", "Meeting"];
+const COMMITTEE_OPTIONS = Object.entries(COMMITTEE_LABELS) as [CommitteeSlug, string][];
 
 const fieldLabelStyle = { fontSize: 12, color: "var(--linear-color-ink-subtle)" } as const;
 const selectStyle = {
@@ -29,11 +32,17 @@ const selectStyle = {
 };
 
 /** Starter form for a new event — just enough to create the record and open its detail page. */
-export function NewEventModal({ isOpen, onClose, onCreate }: NewEventModalProps) {
+export function NewEventModal({
+  isOpen,
+  onClose,
+  onCreate,
+  defaultCommittee = "events",
+  committeeLocked = false,
+}: NewEventModalProps) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
-  const [category, setCategory] = useState<EventCategory>(CATEGORIES[0]);
+  const [committee, setCommittee] = useState<CommitteeSlug>(defaultCommittee);
   const [description, setDescription] = useState("");
 
   useEffect(() => {
@@ -41,9 +50,9 @@ export function NewEventModal({ isOpen, onClose, onCreate }: NewEventModalProps)
     setTitle("");
     setDate("");
     setLocation("");
-    setCategory(CATEGORIES[0]);
+    setCommittee(defaultCommittee);
     setDescription("");
-  }, [isOpen]);
+  }, [isOpen, defaultCommittee]);
 
   function handleSubmit() {
     if (!title.trim() || !date) return;
@@ -51,7 +60,7 @@ export function NewEventModal({ isOpen, onClose, onCreate }: NewEventModalProps)
       title: title.trim(),
       date,
       location: location.trim(),
-      category,
+      committee,
       description: description.trim(),
     });
     onClose();
@@ -85,15 +94,20 @@ export function NewEventModal({ isOpen, onClose, onCreate }: NewEventModalProps)
         <TextInput label="Location" value={location} onChange={setLocation} />
 
         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={fieldLabelStyle}>Category</span>
+          <span style={fieldLabelStyle}>Committee</span>
           <select
-            value={category}
-            onChange={(event) => setCategory(event.target.value as EventCategory)}
-            style={selectStyle}
+            value={committee}
+            disabled={committeeLocked}
+            onChange={(event) => setCommittee(event.target.value as CommitteeSlug)}
+            style={{
+              ...selectStyle,
+              opacity: committeeLocked ? 0.7 : 1,
+              cursor: committeeLocked ? "not-allowed" : undefined,
+            }}
           >
-            {CATEGORIES.map((option) => (
-              <option key={option} value={option}>
-                {option}
+            {COMMITTEE_OPTIONS.map(([slug, label]) => (
+              <option key={slug} value={slug}>
+                {label}
               </option>
             ))}
           </select>

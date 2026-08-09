@@ -10,6 +10,7 @@ export type ActionItem = {
   dueDate: string;
   assignee: ActionItemAssignee;
   linkedMeeting: string;
+  status: "open" | "done" | "canceled";
 };
 
 export const sampleActionItems: ActionItem[] = [
@@ -20,6 +21,7 @@ export const sampleActionItems: ActionItem[] = [
     dueDate: "Aug 8, 2026",
     assignee: { type: "committee", name: "Events Committee" },
     linkedMeeting: "Board Meeting — Jul 14, 2026",
+    status: "open",
   },
   {
     id: "ai-2",
@@ -28,6 +30,7 @@ export const sampleActionItems: ActionItem[] = [
     dueDate: "Aug 1, 2026",
     assignee: { type: "person", name: "Dana Whitfield" },
     linkedMeeting: "Finance Committee — Jul 9, 2026",
+    status: "open",
   },
   {
     id: "ai-3",
@@ -36,6 +39,7 @@ export const sampleActionItems: ActionItem[] = [
     dueDate: "Aug 15, 2026",
     assignee: { type: "committee", name: "Volunteer Committee" },
     linkedMeeting: "Board Meeting — Jul 14, 2026",
+    status: "open",
   },
   {
     id: "ai-4",
@@ -44,6 +48,7 @@ export const sampleActionItems: ActionItem[] = [
     dueDate: "Jul 30, 2026",
     assignee: { type: "person", name: "Marcus Ianelli" },
     linkedMeeting: "Leaflet Ops — Jul 21, 2026",
+    status: "open",
   },
   {
     id: "ai-5",
@@ -52,6 +57,7 @@ export const sampleActionItems: ActionItem[] = [
     dueDate: "Aug 5, 2026",
     assignee: { type: "person", name: "Priya Anand" },
     linkedMeeting: "Comms Sync — Jul 16, 2026",
+    status: "open",
   },
   {
     id: "ai-6",
@@ -60,5 +66,6 @@ export const sampleActionItems: ActionItem[] = [
     dueDate: "Aug 12, 2026",
     assignee: { type: "committee", name: "Communications Committee" },
     linkedMeeting: "Board Meeting — Jul 14, 2026",
+    status: "open",
   },
 ];

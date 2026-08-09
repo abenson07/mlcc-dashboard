@@ -1,9 +1,16 @@
 import type { Events, EventPublishStatus, Sponsorships } from "@/types/database";
 import { buildSponsorshipTiers } from "@/components/leaflet/leafletData";
+import { isCommitteeSlug, type CommitteeSlug } from "schemas/committee_meetings";
 import type { EventQrLink } from "./eventQr";
 
 export type EventKind = "council" | "external" | "committee_meeting";
 export type { EventQrLink };
+
+export type EventDocumentAsset = {
+  id: string;
+  label: string;
+  url?: string | null;
+};
 
 /** Conventional keys stored in `events.field_data` jsonb. */
 export type EventFieldData = {
@@ -20,8 +27,12 @@ export type EventFieldData = {
   qr_codes?: EventQrLink[];
   webflow_item_id?: string;
   address?: string;
+  /** True when location is free-text (not from Places) — address row is shown. */
+  location_is_generic?: boolean;
   sponsorship_goal_cents?: number;
   marketing?: { shortDescription: string; body: string; generatedAt: string };
+  /** Poster / social / custom materials (admin-migrate Settings). */
+  documents?: EventDocumentAsset[];
 };
 
 export type EventListItem = {
@@ -36,7 +47,7 @@ export type EventListItem = {
   daysUntil: number;
   distributionLabel: string;
   kind: EventKind;
-  committee?: string;
+  committee?: CommitteeSlug;
   publishStatus: EventPublishStatus;
 };
 
@@ -47,6 +58,7 @@ export type EventEdition = {
   ends_at: string | null;
   event_template_id: string | null;
   slug: string | null;
+  committee?: CommitteeSlug;
   fieldData: EventFieldData;
   /** ISO date (YYYY-MM-DD) for task due-date anchor */
   anchorDate: string | null;
@@ -104,6 +116,13 @@ export function parseEventFieldData(raw: Record<string, unknown> | null | undefi
         ? (fd.marketing as EventFieldData["marketing"])
         : undefined,
   };
+}
+
+/** Prefer typed `events.committee`; fall back to legacy field_data.committee slug. */
+export function resolveEventCommittee(row: Events): CommitteeSlug | undefined {
+  if (row.committee && isCommitteeSlug(row.committee)) return row.committee;
+  const fromField = parseEventFieldData(row.field_data).committee;
+  return fromField && isCommitteeSlug(fromField) ? fromField : undefined;
 }
 
 export function eventPrimaryIso(row: Events): string | null {
@@ -194,7 +213,7 @@ export function mapEventListItem(row: Events): EventListItem {
     daysUntil: daysUntilEvent(iso),
     distributionLabel: formatEventDateRange(row),
     kind: fieldData.kind ?? "council",
-    committee: fieldData.committee,
+    committee: resolveEventCommittee(row),
     publishStatus: row.publish_status,
   };
 }
@@ -210,6 +229,7 @@ export function mapEventEdition(row: Events): EventEdition {
     ends_at: row.ends_at,
     event_template_id: row.event_template_id,
     slug: row.slug,
+    committee: resolveEventCommittee(row),
     fieldData,
     anchorDate: eventAnchorDate(row),
     distributionLabel: formatEventDateRange(row),

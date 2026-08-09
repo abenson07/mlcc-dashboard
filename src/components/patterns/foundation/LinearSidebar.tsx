@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Building2,
   CalendarDays,
@@ -28,12 +29,14 @@ import {
 } from "@/components/patterns/shared/dropdown";
 import { useEvents, useStories } from "hooks";
 import { getCurrentPersonId } from "@/lib/people/currentPerson";
+import { clearOverlay } from "@/lib/demo/demoOverlay";
 import { AddPromotionModal, NewEventModal } from "@/components/patterns/client-templates/events";
 import { NewStoryModal } from "@/components/patterns/client-templates/content";
 import { useAdminBasePath } from "@/components/patterns/client-templates/shared";
 import type { EventPromotionType, EventSummary } from "@/data/mocks/events";
 import type { Story } from "@/data/mocks/content";
 import {
+  DemoModeCard,
   MenuItem,
   NavBottom,
   SidebarHeader,
@@ -46,6 +49,7 @@ import {
 } from "./sidebar";
 import { useThemeMode } from "./ThemeContext";
 import { useDemoModeOptional } from "./DemoModeContext";
+import { DemoModeConfirmModal, type DemoModeConfirmModalTarget } from "./DemoModeConfirmModal";
 import "./sidebar/sidebar.css";
 
 type DemoItem = {
@@ -71,7 +75,7 @@ const group1Items: DemoItem[] = [
     label: "Inbox",
     icon: <Inbox size={16} strokeWidth={1.75} />,
     path: "/inbox",
-    hasContent: false,
+    hasContent: true,
   },
 ];
 
@@ -209,8 +213,13 @@ function MigrateCreateModals({
   const router = useRouter();
   const { create: createStory } = useStories({ autoFetch: false });
   const { create: createEvent } = useEvents({ autoFetch: false });
+  const { enabled: demo } = useDemoModeOptional();
 
   async function handleCreateStory(story: Omit<Story, "id">) {
+    if (demo) {
+      toast.success("Story created — demo mode, not saved");
+      return;
+    }
     const authorId = await getCurrentPersonId();
     const created = await createStory({
       title: story.title,
@@ -222,11 +231,21 @@ function MigrateCreateModals({
   }
 
   async function handleCreateEvent(event: Omit<EventSummary, "id">) {
+    if (demo) {
+      toast.success("Event created — demo mode, not saved");
+      return;
+    }
     const startsAt = event.date ? new Date(`${event.date}T00:00:00`).toISOString() : new Date().toISOString();
     const created = await createEvent({
       name: event.title,
       starts_at: startsAt,
-      field_data: { location: event.location, description: event.description },
+      committee: event.committee,
+      field_data: {
+        location: event.location,
+        description: event.description,
+        committee: event.committee,
+        kind: "council",
+      },
     });
     if (created) router.push(hrefFor(`/events/${created.id}`));
   }
@@ -248,7 +267,7 @@ export type LinearSidebarProps = {
  */
 export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const { mode, toggle } = useThemeMode();
-  const { enabled: demoEnabled, toggle: toggleDemo } = useDemoModeOptional();
+  const { enabled: demoEnabled, setEnabled: setDemoEnabled } = useDemoModeOptional();
   const pathname = usePathname();
   const router = useRouter();
   const basePath = useAdminBasePath();
@@ -256,7 +275,18 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const [isNewStoryOpen, setIsNewStoryOpen] = useState(false);
   const [isNewEventOpen, setIsNewEventOpen] = useState(false);
   const [promotionModalType, setPromotionModalType] = useState<EventPromotionType | null>(null);
+  const [demoTransition, setDemoTransition] = useState<DemoModeConfirmModalTarget | null>(null);
   const isMigrate = basePath === "/admin-migrate";
+
+  function requestDemoTransition(target: DemoModeConfirmModalTarget) {
+    setDemoTransition(target);
+  }
+
+  function confirmDemoTransition() {
+    if (demoTransition === "live") clearOverlay();
+    if (demoTransition) setDemoEnabled(demoTransition === "demo");
+    setDemoTransition(null);
+  }
 
   function hrefFor(path: string): string {
     return `${basePath}${path}`;
@@ -304,7 +334,7 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
             <DropdownItem
               label={demoEnabled ? "Exit demo mode" : "Enter demo mode"}
               icon={<FlaskConical size={16} strokeWidth={1.75} />}
-              onSelect={toggleDemo}
+              onSelect={() => requestDemoTransition(demoEnabled ? "live" : "demo")}
             />
           ) : null}
         </WorkspaceMenu>
@@ -406,14 +436,12 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
         </SidebarSection>
       </SidebarScrollArea>
 
+      {isMigrate && demoEnabled ? (
+        <DemoModeCard onExitClick={() => requestDemoTransition("live")} />
+      ) : null}
+
       <NavBottom
-        start={
-          isMigrate && demoEnabled ? (
-            <TryButton label="Demo on" onClick={toggleDemo} />
-          ) : (
-            <TryButton />
-          )
-        }
+        start={isMigrate ? null : <TryButton />}
         end={
           <SidebarIconButton
             label="Help"
@@ -442,6 +470,14 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
         onClose={() => setPromotionModalType(null)}
         onAdd={() => {}}
       />
+      {isMigrate ? (
+        <DemoModeConfirmModal
+          isOpen={demoTransition !== null}
+          target={demoTransition ?? "demo"}
+          onCancel={() => setDemoTransition(null)}
+          onConfirm={confirmDemoTransition}
+        />
+      ) : null}
     </div>
   );
 }

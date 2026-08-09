@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
-import { useBusinesses } from "hooks";
+import { toast } from "sonner";
+import { useBusinesses, useDemoGuard } from "hooks";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
@@ -60,7 +61,13 @@ function BusinessesDemoInner() {
     () => ({ ...hookFiltersForView(view), search: search || undefined }),
     [view, search]
   );
-  const { businesses, loading, error, create, update, refetch } = useBusinesses({ filters });
+  const { businesses: businessesRaw, loading, error, create, update, refetch } = useBusinesses({ filters });
+  const { enabled: demo, overlay } = useDemoGuard();
+
+  const businesses = useMemo(
+    () => (demo ? businessesRaw.map((b) => overlay.apply("businesses", b)) : businessesRaw),
+    [demo, businessesRaw, overlay],
+  );
 
   const businessMembers: BusinessMemberRow[] = useMemo(
     () => (view === "members" ? businesses.map(toBusinessMemberRow) : []),
@@ -87,6 +94,11 @@ function BusinessesDemoInner() {
     membershipId: string | null,
     membershipData: BusinessMembershipsUpdate
   ) {
+    if (demo) {
+      overlay.patch("businesses", businessId, { ...businessData, ...membershipData });
+      toast.success("Business updated — demo mode, saved locally only");
+      return;
+    }
     await update(businessId, businessData);
     if (membershipId && supabaseClient) {
       await supabaseClient.from("business_memberships").update(membershipData).eq("id", membershipId);
@@ -102,11 +114,19 @@ function BusinessesDemoInner() {
   const isFullBleed = view === "all";
 
   async function handleAddBusiness(row: Omit<BusinessRow, "id">) {
+    if (demo) {
+      toast.success("Business added — demo mode, not saved");
+      return;
+    }
     await create({ business_name: row.businessName, contact_name: row.contactName, phone: row.phone });
     await refetch();
   }
 
   async function handleAddMember(row: Omit<BusinessMemberRow, "id">) {
+    if (demo) {
+      toast.success("Member added — demo mode, not saved");
+      return;
+    }
     const business = await create({ business_name: row.businessName });
     if (business && supabaseClient) {
       const { data: membership } = await supabaseClient
@@ -122,6 +142,10 @@ function BusinessesDemoInner() {
   }
 
   async function handleAddSponsor(row: Omit<SponsorRow, "id">) {
+    if (demo) {
+      toast.success("Sponsor added — demo mode, not saved");
+      return;
+    }
     const business = await create({ business_name: row.businessName });
     if (business && supabaseClient) {
       await supabaseClient.from("sponsorships").insert({

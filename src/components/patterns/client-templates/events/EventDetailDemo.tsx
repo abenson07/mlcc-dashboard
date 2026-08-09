@@ -18,12 +18,9 @@ import { BudgetDetailPanel } from "./BudgetDetailPanel";
 import { SponsorshipInvoiceDetailPanel } from "./SponsorshipInvoiceDetailPanel";
 import { SponsorDetailPanel } from "./SponsorDetailPanel";
 import {
+  eventMocksFor,
   eventTaskGroupForDueDate,
   formatEventTaskDueLabel,
-  sampleEventBudgetSummary,
-  sampleEventDetail,
-  sampleEventPromotionItems,
-  sampleEventTasks,
   type EventBudgetRow,
   type EventPromotionItem,
   type EventSponsorRow,
@@ -31,6 +28,10 @@ import {
   type EventTaskRow,
   type EventVolunteerRow,
 } from "@/data/mocks/events";
+import { COMMITTEE_LABELS } from "schemas/committee_meetings";
+
+/** Static pattern-library demo — this page isn't tied to a real/curated event, always shows the movie night. */
+const mocks = eventMocksFor("evt-movies-tower");
 
 type EventDetailView = "overview" | "volunteers" | "tasks" | "budget" | "promotion";
 
@@ -48,8 +49,8 @@ export type EventDetailDemoProps = {
 export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   const [view, setView] = useState<EventDetailView>("overview");
   const [selection, setSelection] = useState<Selection>(null);
-  const [tasks, setTasks] = useState<EventTaskRow[]>(sampleEventTasks);
-  const [promotionItems, setPromotionItems] = useState<EventPromotionItem[]>(sampleEventPromotionItems);
+  const [tasks, setTasks] = useState<EventTaskRow[]>(mocks.tasks);
+  const [promotionItems, setPromotionItems] = useState<EventPromotionItem[]>(mocks.promotionItems);
 
   function changeView(next: EventDetailView) {
     setView(next);
@@ -79,7 +80,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   }
 
   function addTask({ title, dueDate }: { title: string; dueDate: string }) {
-    const group = eventTaskGroupForDueDate(dueDate);
+    const group = eventTaskGroupForDueDate(dueDate, mocks.dateIso);
     const isOverdue = group === "Past due";
     setTasks((prev) => [
       ...prev,
@@ -134,8 +135,8 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
       </div>
     ) : (
       <EventOverviewPage
-        event={sampleEventDetail}
-        budgetSummary={sampleEventBudgetSummary}
+        event={mocks.detail}
+        budgetSummary={mocks.budgetSummary}
         tasks={tasks}
         onToggleTask={toggleTask}
         onSeeAllTasks={() => changeView("tasks")}
@@ -171,8 +172,8 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         header={
           <CanvasHeader
             topbar={{
-              title: sampleEventDetail.title,
-              titleAdornment: <Badge label={sampleEventDetail.category} />,
+              title: mocks.detail.title,
+              titleAdornment: <Badge label={COMMITTEE_LABELS[mocks.detail.committee]} />,
               hasFavorite: true,
             }}
             controls={

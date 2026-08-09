@@ -1,9 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiBase } from "@/lib/apiBase";
 import type { CommitteeInterests, CommitteeInterestStatus } from "@/types/database";
 import type { CommitteeSlug } from "schemas/committee_meetings";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { getSamplePendingInterests } from "@/data/mocks/committees";
 
 export const COMMITTEE_INTERESTS_QUERY_KEY = ["committee_interests"] as const;
 
@@ -42,13 +45,23 @@ export function useCommitteeInterests(params: {
   autoFetch?: boolean;
 } = {}) {
   const { committee = null, status = null, eventId = null, autoFetch = true } = params;
+  const { enabled: demo } = useDemoModeOptional();
   const queryClient = useQueryClient();
+
+  const useDemoInterests = demo && Boolean(committee) && !eventId;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: committeeInterestsQueryKey({ committee, status, eventId }),
     queryFn: () => fetchInterests({ committee, status, eventId }),
-    enabled: autoFetch,
+    enabled: autoFetch && !useDemoInterests,
   });
+
+  const demoInterests = useMemo(() => {
+    if (!useDemoInterests || !committee) return [] as CommitteeInterests[];
+    const rows = getSamplePendingInterests(committee);
+    if (status) return rows.filter((r) => r.status === status);
+    return rows;
+  }, [useDemoInterests, committee, status]);
 
   async function invalidate() {
     await queryClient.invalidateQueries({ queryKey: COMMITTEE_INTERESTS_QUERY_KEY });
@@ -86,11 +99,17 @@ export function useCommitteeInterests(params: {
   }
 
   return {
-    interests: data ?? [],
-    loading: isLoading,
-    error: error ? (error instanceof Error ? error.message : String(error)) : null,
+    interests: useDemoInterests ? demoInterests : (data ?? []),
+    loading: useDemoInterests ? false : isLoading,
+    error: useDemoInterests
+      ? null
+      : error
+        ? error instanceof Error
+          ? error.message
+          : String(error)
+        : null,
     refetch: async () => {
-      await refetch();
+      if (!useDemoInterests) await refetch();
     },
     respondWithEmail,
     markHandled,

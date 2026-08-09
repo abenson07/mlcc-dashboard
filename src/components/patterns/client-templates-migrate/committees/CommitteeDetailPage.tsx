@@ -1,30 +1,35 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import {
-  HandHelping,
-  Users2,
-  Megaphone,
-  ClipboardList,
-  Sparkles,
-} from "lucide-react";
+import { ClipboardList, Plus, Users2 } from "lucide-react";
 import { ClassContentPage } from "@/components/patterns/client-templates/shared";
 import { ContentListRow } from "@/components/patterns/client-templates-migrate/content/ContentListRow";
+import { Avatar } from "@/components/patterns/primitives/Avatar";
 import { Text } from "@/components/patterns/primitives/Text";
+import { Button } from "@/components/patterns/primitives/Button";
+import { IconButton } from "@/components/patterns/shared/IconButton";
+import { EmptyStateCard } from "@/components/patterns/client-templates/shared";
 import {
   useAllActionItems,
   useCommitteeInterests,
+  useCommitteeMeetingsList,
   useCommitteeVolunteerAsks,
-  useEvents,
+  useDemoGuard,
   type VolunteerAskWithSignups,
 } from "hooks";
 import type { CommitteeInterests } from "@/types/database";
-import type { CommitteeDetail, CommitteeMemberRow } from "@/data/mocks/committees";
+import {
+  sampleCommitteeMembers,
+  countChairs,
+  displayMemberTitle,
+  type CommitteeDetail,
+  type CommitteeMemberRow,
+} from "@/data/mocks/committees";
 import type { CommitteeSlug } from "schemas/committee_meetings";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { CommitteeInfoBox } from "./CommitteeInfoBox";
-import { CommitteeMembersSection } from "./CommitteeMembersSection";
-import { CommitteeMeetingsSection } from "./CommitteeMeetingsSection";
 import { CommitteeHubSection } from "./CommitteeHubSection";
 import { InterestResponseModal } from "./InterestResponseModal";
 import { CreateVolunteerAskModal } from "./CreateVolunteerAskModal";
@@ -32,9 +37,9 @@ import { CreateVolunteerAskModal } from "./CreateVolunteerAskModal";
 export type CommitteeDetailPageProps = {
   committee: CommitteeDetail;
   committeeSlug: CommitteeSlug;
+  members?: CommitteeMemberRow[];
   onSelectMember?: (row: CommitteeMemberRow) => void;
   onSelectMeeting?: (meetingId: string) => void;
-  onScheduleMeeting?: () => void;
 };
 
 function formatWhen(iso: string | null | undefined): string {
@@ -50,33 +55,34 @@ function formatWhen(iso: string | null | undefined): string {
   }
 }
 
-function sourceLabel(source: CommitteeInterests["source"]): string {
-  switch (source) {
-    case "join-card":
-      return "Wants to join";
-    case "meeting-signup":
-      return "Meeting interest";
-    case "zoning-workshop":
-      return "Zoning workshop";
-    case "volunteer-opportunity":
-      return "Volunteer opportunity";
-    default:
-      return "Interest";
-  }
+function cardStyle(): CSSProperties {
+  return {
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    padding: 20,
+    background: "var(--linear-color-panel)",
+    border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
+    borderRadius: "var(--linear-radius-md)",
+    boxShadow: "var(--linear-shadow-panel)",
+    minHeight: 0,
+  };
 }
 
 /**
- * Committee ops hub: pending interest, volunteer asks, members/meetings,
- * events, action items, and a stub for initiatives.
+ * Committee Overview — details + next meeting, members/pending, volunteer needs, action items.
  */
 export function CommitteeDetailPage({
   committee,
   committeeSlug,
+  members: membersProp,
   onSelectMember,
   onSelectMeeting,
-  onScheduleMeeting,
 }: CommitteeDetailPageProps) {
   const router = useRouter();
+  const { enabled: demoMode } = useDemoModeOptional();
+  const { enabled: demo, guard, sendDemoEmail } = useDemoGuard();
   const [selectedInterest, setSelectedInterest] = useState<CommitteeInterests | null>(null);
   const [askModalOpen, setAskModalOpen] = useState(false);
   const [editingAsk, setEditingAsk] = useState<VolunteerAskWithSignups | null>(null);
@@ -95,15 +101,30 @@ export function CommitteeDetailPage({
     refetch: refetchAsks,
   } = useCommitteeVolunteerAsks(committeeSlug);
 
-  const { events, loading: eventsLoading } = useEvents();
+  const { meetings } = useCommitteeMeetingsList(committeeSlug);
   const { items: actionItems, loading: actionsLoading } = useAllActionItems();
 
-  const committeeEvents = useMemo(() => {
-    return events.filter((e) => {
-      if (e.kind === "committee_meeting") return false;
-      return e.committee === committeeSlug;
-    });
-  }, [events, committeeSlug]);
+  const members =
+    membersProp ?? (demoMode ? sampleCommitteeMembers : []);
+
+  const chairCount = countChairs(members);
+
+  const nextMeeting = useMemo(() => {
+    const upcoming = meetings
+      .filter((m) => {
+        const starts = m.events?.starts_at;
+        if (!starts) return false;
+        return new Date(starts).getTime() >= Date.now() && m.minutes_status !== "ready";
+      })
+      .sort((a, b) => {
+        const aT = a.events?.starts_at ? new Date(a.events.starts_at).getTime() : 0;
+        const bT = b.events?.starts_at ? new Date(b.events.starts_at).getTime() : 0;
+        return aT - bT;
+      });
+    return upcoming[0] ?? null;
+  }, [meetings]);
+
+  const volunteerNeeds = useMemo(() => [...openAsks, ...filledAsks], [openAsks, filledAsks]);
 
   const committeeActionItems = useMemo(() => {
     return actionItems.filter(
@@ -112,156 +133,221 @@ export function CommitteeDetailPage({
     );
   }, [actionItems, committeeSlug]);
 
+  const nextMeetingDate = nextMeeting?.events?.starts_at
+    ? new Date(nextMeeting.events.starts_at).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
   return (
     <ClassContentPage>
-      <CommitteeInfoBox committee={committee} />
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 16 }}>
-        <CommitteeHubSection
-          title="Pending interest"
-          isEmpty={!interestsLoading && interests.length === 0}
-          emptyLabel="No pending signups"
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {interests.map((interest) => (
-              <ContentListRow
-                key={interest.id}
-                icon={<HandHelping size={16} strokeWidth={1.75} />}
-                title={interest.name}
-                subtitle={[
-                  sourceLabel(interest.source),
-                  interest.opportunity_title,
-                  interest.contact,
-                  formatWhen(interest.created_at),
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                onClick={() => setSelectedInterest(interest)}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "4fr 1fr",
+          gap: 16,
+          alignItems: "stretch",
+        }}
+        className="committee-overview-top"
+      >
+        <style>{`
+          @media (max-width: 900px) {
+            .committee-overview-top {
+              grid-template-columns: minmax(0, 1fr) !important;
+            }
+          }
+        `}</style>
+        <CommitteeInfoBox committee={committee} />
+        <section style={cardStyle()}>
+          <Text weight="semibold">Next meeting</Text>
+          {nextMeeting ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+              <Text size="sm" color="secondary">
+                {nextMeetingDate}
+              </Text>
+              <Text weight="medium">{nextMeeting.events?.name ?? "Committee meeting"}</Text>
+              <Button
+                label="See details"
+                variant="secondary"
+                size="sm"
+                onClick={() => onSelectMeeting?.(nextMeeting.id)}
               />
-            ))}
-          </div>
-        </CommitteeHubSection>
+            </div>
+          ) : (
+            <Text size="sm" color="secondary" style={{ marginTop: 8 }}>
+              No upcoming meeting scheduled.
+            </Text>
+          )}
+        </section>
+      </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-            alignItems: "start",
-          }}
-        >
-          <CommitteeHubSection
-            title="Open volunteer asks"
-            actionLabel="New ask"
-            onAction={() => {
-              setEditingAsk(null);
-              setAskModalOpen(true);
+      <CommitteeHubSection
+        title="Action items"
+        isEmpty={!actionsLoading && committeeActionItems.length === 0}
+        emptyLabel="No open action items"
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {committeeActionItems.map((item) => (
+            <ContentListRow
+              key={item.id}
+              icon={<ClipboardList size={16} strokeWidth={1.75} />}
+              title={item.title}
+              subtitle={[
+                item.assignee?.full_name ?? "Unassigned",
+                formatWhen(item.due_at),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              onClick={() => router.push("/admin-migrate/action-items")}
+            />
+          ))}
+        </div>
+      </CommitteeHubSection>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 16,
+          alignItems: "start",
+        }}
+        className="committee-overview-mid"
+      >
+        <style>{`
+          @media (max-width: 900px) {
+            .committee-overview-mid {
+              grid-template-columns: minmax(0, 1fr) !important;
+            }
+          }
+        `}</style>
+
+        <section style={cardStyle()}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 8,
             }}
-            isEmpty={!asksLoading && openAsks.length === 0}
-            emptyLabel="No open asks"
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {openAsks.map((ask) => (
-                <ContentListRow
-                  key={ask.id}
-                  icon={<Users2 size={16} strokeWidth={1.75} />}
-                  title={ask.title}
-                  subtitle={`${ask.signup_count}/${ask.quantity} filled${ask.auto_accept ? " · Auto-accept" : ""}${ask.event?.name ? ` · ${ask.event.name}` : ""}`}
-                  onClick={() => {
-                    setEditingAsk(ask);
-                    setAskModalOpen(true);
-                  }}
-                />
-              ))}
-            </div>
-          </CommitteeHubSection>
-
-          <CommitteeHubSection
-            title="Filled asks"
-            isEmpty={!asksLoading && filledAsks.length === 0}
-            emptyLabel="No filled asks yet"
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {filledAsks.map((ask) => (
-                <ContentListRow
-                  key={ask.id}
-                  icon={<Users2 size={16} strokeWidth={1.75} />}
-                  title={ask.title}
-                  subtitle={`${ask.signup_count}/${ask.quantity} filled`}
-                  onClick={() => {
-                    setEditingAsk(ask);
-                    setAskModalOpen(true);
-                  }}
-                />
-              ))}
-            </div>
-          </CommitteeHubSection>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-            alignItems: "start",
-          }}
-        >
-          <CommitteeMembersSection onSelectMember={onSelectMember} />
-          <CommitteeMeetingsSection
-            committee={committeeSlug}
-            onSchedule={onScheduleMeeting}
-            onSelectMeeting={onSelectMeeting}
-          />
-        </div>
-
-        <CommitteeHubSection
-          title="Events"
-          isEmpty={!eventsLoading && committeeEvents.length === 0}
-          emptyLabel="No events linked to this committee"
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {committeeEvents.map((event) => (
-              <ContentListRow
-                key={event.id}
-                icon={<Megaphone size={16} strokeWidth={1.75} />}
-                title={event.title}
-                subtitle={[event.date, event.location].filter(Boolean).join(" · ")}
-                onClick={() => router.push(`/admin-migrate/events/${event.id}`)}
-              />
-            ))}
-          </div>
-        </CommitteeHubSection>
-
-        <CommitteeHubSection
-          title="Action items"
-          isEmpty={!actionsLoading && committeeActionItems.length === 0}
-          emptyLabel="No open action items"
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {committeeActionItems.map((item) => (
-              <ContentListRow
-                key={item.id}
-                icon={<ClipboardList size={16} strokeWidth={1.75} />}
-                title={item.title}
-                subtitle={
-                  item.assignee?.full_name
-                    ? `Assigned to ${item.assignee.full_name}`
-                    : "Unassigned"
-                }
-                onClick={() => router.push("/admin-migrate/action-items")}
-              />
-            ))}
-          </div>
-        </CommitteeHubSection>
-
-        <CommitteeHubSection title="Initiatives" isEmpty emptyLabel="Initiatives coming soon">
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Sparkles size={14} strokeWidth={1.75} color="var(--linear-color-ink-subtle)" />
+            <Text weight="semibold">Members</Text>
             <Text size="sm" color="secondary">
-              Track longer-running initiatives here in a later pass.
+              {members.length + interests.length} total
             </Text>
           </div>
-        </CommitteeHubSection>
+          {members.length === 0 && interests.length === 0 && !interestsLoading ? (
+            <EmptyStateCard variant="plain" label="No members or pending interest" minHeight={72} />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {members.map((member) => (
+                <button
+                  key={member.id}
+                  type="button"
+                  onClick={() => onSelectMember?.(member)}
+                  style={{
+                    all: "unset",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 4px",
+                    borderRadius: "var(--linear-radius-sm)",
+                    cursor: onSelectMember ? "pointer" : "default",
+                  }}
+                >
+                  <Avatar name={member.name} size="sm" />
+                  <Text size="sm" style={{ flex: 1, minWidth: 0 }}>
+                    {member.name}
+                  </Text>
+                  <Text size="sm" color="secondary">
+                    {displayMemberTitle(member.role, chairCount)}
+                  </Text>
+                </button>
+              ))}
+              {interests.map((interest) => (
+                <div
+                  key={interest.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 4px",
+                  }}
+                >
+                  <Avatar name={interest.name} size="sm" />
+                  <Text size="sm" style={{ flex: 1, minWidth: 0 }}>
+                    {interest.name}
+                  </Text>
+                  <Button
+                    label="Respond/Accept"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setSelectedInterest(interest)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section style={cardStyle()}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 8,
+            }}
+          >
+            <Text weight="semibold">Volunteer Needs</Text>
+            <IconButton
+              label="Add ask"
+              variant="ghost"
+              size="sm"
+              icon={<Plus size={14} strokeWidth={2} />}
+              onClick={() => {
+                setEditingAsk(null);
+                setAskModalOpen(true);
+              }}
+            />
+          </div>
+          {!asksLoading && volunteerNeeds.length === 0 ? (
+            <EmptyStateCard variant="plain" label="No volunteer needs yet" minHeight={72} />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {volunteerNeeds.map((ask) => (
+                <button
+                  key={ask.id}
+                  type="button"
+                  onClick={() => {
+                    setEditingAsk(ask);
+                    setAskModalOpen(true);
+                  }}
+                  style={{
+                    all: "unset",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 4px",
+                    borderRadius: "var(--linear-radius-sm)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Users2 size={14} strokeWidth={1.75} style={{ color: "var(--linear-color-ink-subtle)" }} />
+                  <Text size="sm" style={{ flex: 1, minWidth: 0 }}>
+                    {ask.title}
+                  </Text>
+                  <Text size="sm" color="secondary">
+                    {ask.signup_count}/{ask.quantity}
+                  </Text>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
 
       <InterestResponseModal
@@ -269,11 +355,22 @@ export function CommitteeDetailPage({
         onClose={() => setSelectedInterest(null)}
         onSend={async (payload) => {
           if (!selectedInterest) return;
+          if (demo) {
+            await sendDemoEmail({
+              subject: payload.subject,
+              text: payload.text,
+              context: `Committee interest reply, originally to ${selectedInterest.contact}`,
+            });
+            setSelectedInterest(null);
+            return;
+          }
           await respondWithEmail(selectedInterest.id, payload);
+          setSelectedInterest(null);
         }}
         onMarkHandled={async () => {
           if (!selectedInterest) return;
-          await markHandled(selectedInterest.id);
+          await guard(() => markHandled(selectedInterest.id), { action: "Interest marked handled" });
+          setSelectedInterest(null);
         }}
       />
 

@@ -7,7 +7,11 @@
  * - kind: "council" | "external" | "committee_meeting"
  * - qr_code_id (legacy), qr_codes: [{ id, description? }]
  * - webflow_item_id (migration bridge), sponsorship_goal_cents, marketing
+ *
+ * Owning committee lives on `committee` (typed column), not Category.
  */
+
+import type { CommitteeSlug } from "./committee_meetings";
 
 export type EventPublishStatus = "draft" | "published";
 
@@ -19,6 +23,7 @@ export interface Events {
   starts_at: string | null;
   ends_at: string | null;
   slug: string | null;
+  committee: CommitteeSlug | null;
   field_data: Record<string, unknown>;
   publish_status: EventPublishStatus;
   created_at: string;
@@ -32,6 +37,7 @@ export interface EventsInsert {
   starts_at?: string | null;
   ends_at?: string | null;
   slug?: string | null;
+  committee?: CommitteeSlug | null;
   field_data?: Record<string, unknown>;
   publish_status?: EventPublishStatus;
 }
@@ -43,6 +49,7 @@ export interface EventsUpdate {
   starts_at?: string | null;
   ends_at?: string | null;
   slug?: string | null;
+  committee?: CommitteeSlug | null;
   field_data?: Record<string, unknown>;
   publish_status?: EventPublishStatus;
 }

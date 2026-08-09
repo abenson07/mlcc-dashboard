@@ -1,23 +1,32 @@
 "use client";
 
+import { Plus, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/patterns/primitives/Checkbox";
 import { Text } from "@/components/patterns/primitives/Text";
+import { IconButton } from "@/components/patterns/shared/IconButton";
+import { EmptyStateCard } from "@/components/patterns/client-templates/shared";
+import {
+  Dropdown,
+  DropdownItem,
+} from "@/components/patterns/shared/dropdown";
+import { useState } from "react";
 import type { EventTaskRow } from "@/data/mocks/events";
 
 export type EventTasksSectionProps = {
   tasks: EventTaskRow[];
   onToggleTask: (id: string) => void;
   onSeeAllTasks?: () => void;
+  onAddTask?: () => void;
 };
 
 const PREVIEW_LIMIT = 4;
 
-/**
- * Short task preview for the Overview page — a handful of open tasks with a
- * link through to the full grouped Tasks view. Mirrors the leaflet
- * overview's Tasks card.
- */
-export function EventTasksSection({ tasks, onToggleTask, onSeeAllTasks }: EventTasksSectionProps) {
+export function EventTasksSection({
+  tasks,
+  onToggleTask,
+  onSeeAllTasks,
+  onAddTask,
+}: EventTasksSectionProps) {
   const openTasks = tasks.filter((task) => !task.isComplete);
   const preview = openTasks.slice(0, PREVIEW_LIMIT);
 
@@ -38,15 +47,24 @@ export function EventTasksSection({ tasks, onToggleTask, onSeeAllTasks }: EventT
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <Text weight="semibold">Tasks</Text>
-        <Text size="sm" color="secondary">
-          {openTasks.length} open task{openTasks.length === 1 ? "" : "s"}
-        </Text>
+        {onAddTask ? (
+          <IconButton
+            label="Add task"
+            variant="ghost"
+            size="sm"
+            icon={<Plus size={16} strokeWidth={1.75} />}
+            onClick={onAddTask}
+          />
+        ) : null}
       </div>
 
       {preview.length === 0 ? (
-        <Text size="sm" color="secondary">
-          No open tasks — you&apos;re all caught up.
-        </Text>
+        <EmptyStateCard
+          variant="pill"
+          label="Add new task"
+          onClick={onAddTask}
+          minHeight={72}
+        />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {preview.map((task) => (
@@ -82,7 +100,7 @@ export function EventTasksSection({ tasks, onToggleTask, onSeeAllTasks }: EventT
         </div>
       )}
 
-      {onSeeAllTasks ? (
+      {onSeeAllTasks && preview.length > 0 ? (
         <button
           type="button"
           onClick={onSeeAllTasks}

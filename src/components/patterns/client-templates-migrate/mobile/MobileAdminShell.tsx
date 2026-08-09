@@ -64,7 +64,7 @@ export function MobileAdminShell({ active, children, hideNav = false }: MobileAd
             paddingInline: 8,
             paddingBottom: "max(6px, env(safe-area-inset-bottom))",
             borderTop: "var(--linear-border-width) solid var(--linear-color-hairline)",
-            background: "var(--linear-color-panel, var(--linear-color-canvas))",
+            background: "var(--linear-color-side-panel, var(--linear-color-canvas))",
           }}
         >
           <div style={{ display: "flex", flex: 1, gap: 2 }}>

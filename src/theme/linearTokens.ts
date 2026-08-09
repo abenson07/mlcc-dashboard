@@ -67,12 +67,15 @@ export const linearTokens = {
       dark: "#191a1b",
     },
     /**
-     * Elevated floating card (e.g. a widget/properties panel inset over the
-     * canvas) — measured from linear.app: light is a pure-white card lifted
-     * by shadow alone (no border); dark must read *lighter* than the canvas
-     * (Linear comment/composer boxes), with a hairline border for separation.
+     * Content cards over the canvas — same hue as the solid panel, at 50%
+     * opacity so the page shows through. Side detail panels use `sidePanel`.
      */
     panel: {
+      light: "lch(100 0 282 / 0.5)",
+      dark: "lch(16.5 2.2 272.695 / 0.5)",
+    },
+    /** Opaque fill for OutlinedPanel / elevated side content. */
+    sidePanel: {
       light: "lch(100 0 282)",
       dark: "lch(16.5 2.2 272.695)",
     },
@@ -123,15 +126,22 @@ export const linearTokens = {
       colorLight: "lch(0 0 0 / 0.02)",
       colorDark: "lch(0 0 0 / 0.24)",
     },
-    /** Floating panel card shadow — measured from linear.app light/dark. */
+    /** Content cards use no drop shadow (`--linear-shadow-panel: none`). */
     panel: {
-      // Ambient layer: present in light, faded out in dark (real dark
-      // shadow is a single tight layer, not a soft ambient one).
+      ambientGeometry: "0px 0px 0px 0px",
+      ambientColorLight: "transparent",
+      ambientColorDark: "transparent",
+      contactGeometry: "0px 0px 0px 0px",
+      contactColorLight: "transparent",
+      contactColorDark: "transparent",
+    },
+    /** Side detail panel shadow — measured from linear.app light/dark. */
+    sidePanel: {
+      // Ambient layer: present in light, faded out in dark.
       ambientGeometry: "0px 3px 6px -2px",
       ambientColorLight: "lch(0 0 0 / 0.02)",
       ambientColorDark: "lch(0 0 0 / 0)",
-      // Contact layer: matches linear.app's dark shadow almost exactly;
-      // light just carries the same 1px spread at a much lower alpha.
+      // Contact layer: matches linear.app's dark shadow almost exactly.
       contactGeometry: "0px 1px 1px 1px",
       contactColorLight: "lch(0 0 0 / 0.04)",
       contactColorDark: "lch(0 0 0 / 0.3)",
@@ -207,6 +217,10 @@ export const linearTokenVars = {
     linearTokens.color.panel.light,
     linearTokens.color.panel.dark,
   ),
+  "--linear-color-side-panel": lightDark(
+    linearTokens.color.sidePanel.light,
+    linearTokens.color.sidePanel.dark,
+  ),
   "--linear-color-panel-border": lightDark(
     linearTokens.color.panelBorder.light,
     linearTokens.color.panelBorder.dark,
@@ -231,12 +245,13 @@ export const linearTokenVars = {
     linearTokens.shadow.canvas.colorLight,
     linearTokens.shadow.canvas.colorDark,
   )}`,
-  "--linear-shadow-panel": `${linearTokens.shadow.panel.ambientGeometry} ${lightDark(
-    linearTokens.shadow.panel.ambientColorLight,
-    linearTokens.shadow.panel.ambientColorDark,
-  )}, ${linearTokens.shadow.panel.contactGeometry} ${lightDark(
-    linearTokens.shadow.panel.contactColorLight,
-    linearTokens.shadow.panel.contactColorDark,
+  "--linear-shadow-panel": "none",
+  "--linear-shadow-side-panel": `${linearTokens.shadow.sidePanel.ambientGeometry} ${lightDark(
+    linearTokens.shadow.sidePanel.ambientColorLight,
+    linearTokens.shadow.sidePanel.ambientColorDark,
+  )}, ${linearTokens.shadow.sidePanel.contactGeometry} ${lightDark(
+    linearTokens.shadow.sidePanel.contactColorLight,
+    linearTokens.shadow.sidePanel.contactColorDark,
   )}`,
   "--linear-space-xs": linearTokens.space.xs,
   "--linear-size-canvas-topbar-min-height":

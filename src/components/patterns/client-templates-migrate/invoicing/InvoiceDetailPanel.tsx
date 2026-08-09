@@ -5,7 +5,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { Button } from "@/components/patterns/primitives/Button";
 import { useQueryClient } from "@tanstack/react-query";
 import { getApiBase } from "@/lib/apiBase";
-import { STRIPE_INVOICES_QUERY_KEY } from "hooks";
+import { STRIPE_INVOICES_QUERY_KEY, useDemoGuard } from "hooks";
 import {
   formatDueDate,
   formatUsd,
@@ -39,6 +39,7 @@ type ManualPaymentMethod = "cash" | "check";
 
 export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
   const queryClient = useQueryClient();
+  const { enabled: demo, sendDemoEmail } = useDemoGuard();
   const [reminding, setReminding] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [confirmMethod, setConfirmMethod] = useState<ManualPaymentMethod | null>(null);
@@ -55,6 +56,21 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
   async function sendReminder() {
     setReminding(true);
     setStatusMessage(null);
+    if (demo) {
+      try {
+        await sendDemoEmail({
+          subject: `Invoice reminder — ${invoice.number ?? invoice.id}`,
+          text: `This is a reminder that invoice ${invoice.number ?? invoice.id} for ${formatUsd(invoice.amount_due)} is due ${formatDueDate(invoice.due_date)}.`,
+          context: invoice.customer_email ?? undefined,
+        });
+        setStatusMessage("Reminder sent.");
+      } catch (e) {
+        setStatusMessage(e instanceof Error ? e.message : "Could not send reminder.");
+      } finally {
+        setReminding(false);
+      }
+      return;
+    }
     try {
       const res = await fetch(
         `${getApiBase()}/api/stripe/invoices/${encodeURIComponent(invoice.id)}/remind`,
@@ -74,6 +90,12 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
   async function recordManualPayment(method: ManualPaymentMethod) {
     setRecordingPayment(true);
     setStatusMessage(null);
+    if (demo) {
+      setStatusMessage(`Marked paid by ${method} — demo mode, not saved.`);
+      setConfirmMethod(null);
+      setRecordingPayment(false);
+      return;
+    }
     try {
       const res = await fetch(
         `${getApiBase()}/api/stripe/invoices/${encodeURIComponent(invoice.id)}/mark-paid`,

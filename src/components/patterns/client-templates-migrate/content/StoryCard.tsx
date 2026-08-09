@@ -19,9 +19,20 @@ function excerpt(html: string): string {
 export function StoryCard({ story, onClick }: StoryCardProps) {
   return (
     <ContentListRow
-      icon={<FileText size={16} strokeWidth={1.75} />}
+      icon={
+        story.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- demo-only external asset from the live marketing site
+          <img
+            src={story.imageUrl}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+          />
+        ) : (
+          <FileText size={16} strokeWidth={1.75} />
+        )
+      }
       title={story.title || "Untitled story"}
-      subtitle={excerpt(story.body)}
+      subtitle={story.description || excerpt(story.body)}
       onClick={onClick}
     />
   );

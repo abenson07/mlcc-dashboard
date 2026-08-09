@@ -1,7 +1,9 @@
 "use client";
 
 import { Text } from "@/components/patterns/primitives/Text";
-import { sampleEventSponsors, type EventSponsorRow } from "@/data/mocks/events";
+import { eventMocksFor, type EventSponsorRow } from "@/data/mocks/events";
+
+const sampleEventSponsors = eventMocksFor("evt-movies-tower").sponsors;
 
 export type SponsorsListSectionProps = {
   onSelectSponsor?: (row: EventSponsorRow) => void;

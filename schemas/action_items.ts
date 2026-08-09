@@ -12,6 +12,7 @@ export interface ActionItems {
   description: string | null;
   assignee_person_id: string | null;
   committee_meeting_id: string | null;
+  initiative_id: string | null;
   status: ActionItemStatus;
   due_at: string | null;
   source: ActionItemSource;
@@ -28,6 +29,7 @@ export interface ActionItemsInsert {
   description?: string | null;
   assignee_person_id?: string | null;
   committee_meeting_id?: string | null;
+  initiative_id?: string | null;
   status?: ActionItemStatus;
   due_at?: string | null;
   source?: ActionItemSource;
@@ -42,6 +44,7 @@ export interface ActionItemsUpdate {
   description?: string | null;
   assignee_person_id?: string | null;
   committee_meeting_id?: string | null;
+  initiative_id?: string | null;
   status?: ActionItemStatus;
   due_at?: string | null;
   source?: ActionItemSource;

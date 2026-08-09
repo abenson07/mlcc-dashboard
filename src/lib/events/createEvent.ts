@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Events, EventsInsert } from "@/types/database";
+import { isCommitteeSlug, type CommitteeSlug } from "schemas/committee_meetings";
 import { parseEventFieldData } from "./eventData";
 import { buildEventQrUrl, eventPageUrl, withEventQrLinks } from "./eventQr";
 import { activateEventResources } from "./spawnEventResources";
@@ -14,10 +15,20 @@ function eventSlug(name: string): string {
 
 export type CreateEventInput = Pick<
   EventsInsert,
-  "name" | "starts_at" | "ends_at" | "event_template_id"
+  "name" | "starts_at" | "ends_at" | "event_template_id" | "committee"
 > & {
   field_data?: Record<string, unknown>;
 };
+
+function resolveCommittee(
+  explicit: CommitteeSlug | null | undefined,
+  fieldData: Record<string, unknown>,
+): CommitteeSlug | null {
+  if (explicit && isCommitteeSlug(explicit)) return explicit;
+  const fromField = fieldData.committee;
+  if (typeof fromField === "string" && isCommitteeSlug(fromField)) return fromField;
+  return null;
+}
 
 export async function createEvent(
   supabase: SupabaseClient,
@@ -44,6 +55,11 @@ export async function createEvent(
     }
   }
 
+  const committee = resolveCommittee(input.committee, mergedFieldData);
+  if (committee) {
+    mergedFieldData = { ...mergedFieldData, committee };
+  }
+
   const slugBase = eventSlug(name);
   const slug = slugBase ? `${slugBase}-${Date.now().toString(36)}` : null;
 
@@ -56,6 +72,7 @@ export async function createEvent(
       starts_at: input.starts_at ?? null,
       ends_at: input.ends_at ?? null,
       event_template_id: input.event_template_id ?? null,
+      committee,
       date: legacyDate,
       slug,
       field_data: mergedFieldData,

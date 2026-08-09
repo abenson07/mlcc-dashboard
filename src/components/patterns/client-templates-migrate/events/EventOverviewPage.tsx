@@ -7,6 +7,7 @@ import { EventTasksSection } from "./EventTasksSection";
 import { VolunteersListSection } from "./VolunteersListSection";
 import { SponsorsListSection } from "./SponsorsListSection";
 import { InvoicesListSection } from "./InvoicesListSection";
+import { SponsorshipLevelsPanel } from "./SponsorshipLevelsPanel";
 import type {
   EventBudgetRow,
   EventBudgetSummary,
@@ -27,12 +28,20 @@ export type EventOverviewPageProps = {
   onSeeAllVolunteers?: () => void;
   onSelectSponsor?: (row: EventSponsorRow) => void;
   onSelectInvoice?: (row: EventBudgetRow) => void;
+  onSeeAllSponsors?: () => void;
+  onSeeAllInvoices?: () => void;
+  onSeeAllLevels?: () => void;
+  onEditDetails?: () => void;
+  onAddTask?: () => void;
+  onAddVolunteer?: () => void;
+  onAddSponsor?: () => void;
+  onAddInvoice?: () => void;
+  onEditBudget?: () => void;
+  onEditLevels?: () => void;
 };
 
 /**
- * Event Detail Overview: info box, budget stacked-bar summary, a
- * two-column Tasks / Volunteers row, then a two-column Sponsors / Invoices
- * row (all boxes share the same shape). Mirrors `ClassDetailPage`.
+ * Event Detail Overview: info box, Tasks/Volunteers, budget, then Sponsors / Invoices / Levels.
  */
 export function EventOverviewPage({
   event,
@@ -45,32 +54,70 @@ export function EventOverviewPage({
   onSeeAllVolunteers,
   onSelectSponsor,
   onSelectInvoice,
+  onSeeAllSponsors,
+  onSeeAllInvoices,
+  onSeeAllLevels,
+  onEditDetails,
+  onAddTask,
+  onAddVolunteer,
+  onAddSponsor,
+  onAddInvoice,
+  onEditBudget,
+  onEditLevels,
 }: EventOverviewPageProps) {
   return (
     <ClassContentPage>
-      <EventInfoBox event={event} />
+      <EventInfoBox event={event} onEditDetails={onEditDetails} />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 16,
+          alignItems: "start",
+        }}
+      >
+        <EventTasksSection
+          tasks={tasks}
+          onToggleTask={onToggleTask}
+          onSeeAllTasks={onSeeAllTasks}
+          onAddTask={onAddTask}
+        />
+        <VolunteersListSection
+          onSelectVolunteer={onSelectVolunteer}
+          onSeeAllVolunteers={onSeeAllVolunteers}
+          onAddVolunteer={onAddVolunteer}
+        />
+      </div>
       <BudgetChart summary={budgetSummary} onViewBudget={onViewBudget} />
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "1fr 1fr 1fr",
           gap: 16,
-          alignItems: "start",
+          alignItems: "stretch",
         }}
+        className="event-overview-bottom"
       >
-        <EventTasksSection tasks={tasks} onToggleTask={onToggleTask} onSeeAllTasks={onSeeAllTasks} />
-        <VolunteersListSection onSelectVolunteer={onSelectVolunteer} onSeeAllVolunteers={onSeeAllVolunteers} />
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
-        <SponsorsListSection onSelectSponsor={onSelectSponsor} />
-        <InvoicesListSection onSelectInvoice={onSelectInvoice} />
+        <style>{`
+          @media (max-width: 900px) {
+            .event-overview-bottom {
+              grid-template-columns: minmax(0, 1fr) !important;
+            }
+          }
+        `}</style>
+        <SponsorsListSection
+          onSelectSponsor={onSelectSponsor}
+          onAddSponsor={onAddSponsor}
+          onEditBudget={onEditBudget}
+          onEditLevels={onEditLevels}
+          onSeeAllSponsors={onSeeAllSponsors}
+        />
+        <InvoicesListSection
+          onSelectInvoice={onSelectInvoice}
+          onAddInvoice={onAddInvoice}
+          onSeeAllInvoices={onSeeAllInvoices}
+        />
+        <SponsorshipLevelsPanel onEdit={onEditLevels} onSeeAllLevels={onSeeAllLevels} />
       </div>
     </ClassContentPage>
   );

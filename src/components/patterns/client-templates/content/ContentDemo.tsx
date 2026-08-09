@@ -36,6 +36,8 @@ function emptyStory(): Story {
     topic: availableTopics[0],
     status: "Draft",
     publishedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    imageUrl: "",
+    description: "",
     body: "",
   };
 }

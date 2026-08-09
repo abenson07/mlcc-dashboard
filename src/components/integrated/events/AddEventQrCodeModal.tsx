@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Text } from "@/components/patterns/primitives/Text";
-import { useQrCodes } from "hooks";
+import { useQrCodes, useDemoGuard } from "hooks";
 import {
   buildEventQrUrl,
   eventPageUrl,
@@ -52,6 +53,7 @@ export function AddEventQrCodeModal({
   onCreated,
 }: AddEventQrCodeModalProps) {
   const { create } = useQrCodes({ autoFetch: false });
+  const { enabled: demo } = useDemoGuard();
   const defaultUrl = eventPageUrl(eventSlug) ?? "";
 
   const [name, setName] = useState("");
@@ -70,13 +72,19 @@ export function AddEventQrCodeModal({
   }, [isOpen, defaultUrl]);
 
   async function handleSubmit() {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setError("Name is required.");
+      return;
+    }
+    if (demo) {
+      toast.success("QR code created — demo mode, not saved");
+      onClose();
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
-      const trimmedName = name.trim();
-      if (!trimmedName) {
-        throw new Error("Name is required.");
-      }
       const normalized = normalizeUrl(url);
       const trackedUrl = buildEventQrUrl({
         baseUrl: normalized,

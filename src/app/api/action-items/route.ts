@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
     description: typeof o.description === "string" ? o.description : null,
     assignee_person_id: typeof o.assignee_person_id === "string" ? o.assignee_person_id : null,
     committee_meeting_id: typeof o.committee_meeting_id === "string" ? o.committee_meeting_id : null,
+    initiative_id: typeof o.initiative_id === "string" ? o.initiative_id : null,
     status: o.status === "done" || o.status === "canceled" ? o.status : "open",
     due_at: typeof o.due_at === "string" ? o.due_at.slice(0, 10) : null,
     source: "manual" as const,

@@ -1,7 +1,9 @@
 "use client";
 
 import { Text } from "@/components/patterns/primitives/Text";
-import { sampleEventSponsorshipLevels } from "@/data/mocks/events";
+import { eventMocksFor } from "@/data/mocks/events";
+
+const sampleEventSponsorshipLevels = eventMocksFor("evt-movies-tower").sponsorshipLevels;
 
 /**
  * Compact list of sponsorship levels and how many of each are filled —

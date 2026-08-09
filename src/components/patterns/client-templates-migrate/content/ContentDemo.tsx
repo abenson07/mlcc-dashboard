@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
-import { useFaqs, usePeople, useStories } from "hooks";
+import { toast } from "sonner";
+import { useFaqs, usePeople, useStories, useDemoGuard } from "hooks";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
@@ -18,6 +19,7 @@ import { StoryFormPanel } from "./StoryFormPanel";
 import { FaqFormPanel } from "./FaqFormPanel";
 import type { Faq, Story } from "./types";
 import { contentStatusToStoryStatus, toFaq, toStory } from "./adapters";
+import { sampleStories } from "@/data/mocks/content";
 
 type ContentView = "stories" | "faqs";
 
@@ -62,6 +64,7 @@ function ContentDemoInner() {
     togglePage,
   } = useFaqs();
   const { people } = usePeople();
+  const { enabled: demo } = useDemoGuard();
 
   const [currentUser, setCurrentUser] = useState<{ id: string; name: string } | null>(null);
   useEffect(() => {
@@ -82,10 +85,22 @@ function ContentDemoInner() {
   }, [people]);
 
   const authorNameById = useMemo(() => new Map(people.map((p) => [p.id, p.full_name])), [people]);
-  const stories: Story[] = useMemo(
-    () => storyRows.map((row) => toStory(row, authorNameById)),
-    [storyRows, authorNameById],
-  );
+  const stories: Story[] = useMemo(() => {
+    if (demo) {
+      return sampleStories.map((s): Story => ({
+        id: s.id,
+        title: s.title,
+        author: s.author,
+        authorId: null,
+        status: s.status,
+        publishedAt: s.publishedAt,
+        body: s.body,
+        imageUrl: s.imageUrl,
+        description: s.description,
+      }));
+    }
+    return storyRows.map((row) => toStory(row, authorNameById));
+  }, [demo, storyRows, authorNameById]);
   const faqs: Faq[] = useMemo(() => faqRows.map(toFaq), [faqRows]);
 
   const [editingStory, setEditingStory] = useState<Story | null>(null);
@@ -112,6 +127,11 @@ function ContentDemoInner() {
   }
 
   async function handleSaveStory(updated: Story) {
+    if (demo) {
+      toast.success(`${updated.id ? "Story updated" : "Story created"} — demo mode, not saved`);
+      closeDetail();
+      return;
+    }
     if (!updated.id) {
       await createStory({
         title: updated.title,
@@ -130,6 +150,11 @@ function ContentDemoInner() {
   }
 
   async function handleSaveFaq(updated: Faq) {
+    if (demo) {
+      toast.success(`${updated.id ? "FAQ updated" : "FAQ created"} — demo mode, not saved`);
+      closeDetail();
+      return;
+    }
     if (!updated.id) {
       const created = await createFaq({ question: updated.question, answer: updated.answer });
       if (created) {
@@ -149,8 +174,8 @@ function ContentDemoInner() {
   }
 
   const isDetailView = editingStory != null || editingFaq != null;
-  const loading = view === "stories" ? storiesLoading : faqsLoading;
-  const error = view === "stories" ? storiesError : faqsError;
+  const loading = demo ? false : view === "stories" ? storiesLoading : faqsLoading;
+  const error = demo ? null : view === "stories" ? storiesError : faqsError;
 
   return (
     <div style={{ height: "100%" }}>

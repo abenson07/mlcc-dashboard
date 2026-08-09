@@ -2,7 +2,9 @@
 
 import { Text } from "@/components/patterns/primitives/Text";
 import { BudgetStatusToken } from "./BudgetStatusToken";
-import { sampleEventBudgetItems, type EventBudgetRow } from "@/data/mocks/events";
+import { eventMocksFor, type EventBudgetRow } from "@/data/mocks/events";
+
+const sampleEventBudgetItems = eventMocksFor("evt-movies-tower").budgetItems;
 
 export type InvoicesListSectionProps = {
   onSelectInvoice?: (row: EventBudgetRow) => void;

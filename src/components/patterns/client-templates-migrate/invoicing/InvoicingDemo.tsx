@@ -1,15 +1,23 @@
 "use client";
 
 import { Suspense, useState, type ReactNode } from "react";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useAllSponsorships,
+  useDemoGuard,
+  useStripeInvoices,
+  type SponsorshipWithParent,
+} from "hooks";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
 import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
 import { ListToolbar } from "@/components/patterns/foundation/ListToolbar";
+import { Button } from "@/components/patterns/primitives/Button";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import type { StripeInvoiceTableRow } from "@/components/billing/InvoicesListTable";
-import type { SponsorshipWithParent } from "hooks";
 import {
   MobileAdminShell,
   MobileInvoicesPage,
@@ -20,6 +28,8 @@ import { InvoicingInvoicesPage } from "./InvoicingInvoicesPage";
 import { InvoicingSponsorshipsPage } from "./InvoicingSponsorshipsPage";
 import { InvoiceDetailPanel } from "./InvoiceDetailPanel";
 import { SponsorshipDetailPanel } from "./SponsorshipDetailPanel";
+import { CreateInvoiceModal } from "./CreateInvoiceModal";
+import { CreateSponsorshipModal } from "./CreateSponsorshipModal";
 
 type InvoicingView = "overview" | "invoices" | "sponsorships";
 
@@ -51,6 +61,9 @@ export type InvoicingDemoProps = {
 
 export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
   const isMobile = useIsMobileAdmin();
+  const { enabled: demo } = useDemoGuard();
+  const { refetch: refetchInvoices } = useStripeInvoices();
+  const { createSponsorship, refetch: refetchSponsorships } = useAllSponsorships();
   const [view, setView] = useState<InvoicingView>("overview");
   const [selection, setSelection] = useState<Selection>(null);
   const [invoiceSearch, setInvoiceSearch] = useState("");
@@ -59,6 +72,8 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
   const [sponsorshipSearch, setSponsorshipSearch] = useState("");
   const [sponsorshipStatusFilter, setSponsorshipStatusFilter] = useState<string[]>([]);
   const [sponsorshipParentFilter, setSponsorshipParentFilter] = useState<string[]>([]);
+  const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
+  const [isCreateSponsorshipOpen, setIsCreateSponsorshipOpen] = useState(false);
 
   if (isMobile) {
     return (
@@ -74,6 +89,31 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
     setView(next);
     setSelection(null);
   }
+
+  async function guardedCreateSponsorship(...args: Parameters<typeof createSponsorship>) {
+    if (demo) {
+      toast.success("Sponsorship created — demo mode, not saved");
+      return null;
+    }
+    return createSponsorship(...args);
+  }
+
+  const topbarAction =
+    view === "invoices" ? (
+      <Button
+        label="New Invoice"
+        variant="secondary"
+        icon={<Plus size={14} strokeWidth={1.75} />}
+        onClick={() => setIsCreateInvoiceOpen(true)}
+      />
+    ) : view === "sponsorships" ? (
+      <Button
+        label="New Sponsorship"
+        variant="secondary"
+        icon={<Plus size={14} strokeWidth={1.75} />}
+        onClick={() => setIsCreateSponsorshipOpen(true)}
+      />
+    ) : null;
 
   const toolbar =
     view === "invoices" ? (
@@ -141,7 +181,7 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
     <div style={{ height: "100%" }}>
       <FoundationLayout
         navigation={navigation ?? <LinearSidebar />}
-        contentMaxWidth={1200}
+        contentMaxWidth={view === "overview" ? 1200 : undefined}
         isSideContentVisible={selection != null}
         sideContent={
           selection ? (
@@ -156,7 +196,10 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
         }
         header={
           <CanvasHeader
-            topbar={{ title: "Invoicing" }}
+            topbar={{
+              title: "Invoicing",
+              endContent: topbarAction,
+            }}
             controls={
               <ViewTabs aria-label="Invoicing views" endContent={toolbar}>
                 <ViewTab
@@ -181,6 +224,24 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
       >
         {body}
       </FoundationLayout>
+
+      <CreateInvoiceModal
+        isOpen={isCreateInvoiceOpen}
+        onClose={() => setIsCreateInvoiceOpen(false)}
+        onCreated={async () => {
+          setIsCreateInvoiceOpen(false);
+          await refetchInvoices();
+        }}
+      />
+      <CreateSponsorshipModal
+        isOpen={isCreateSponsorshipOpen}
+        onClose={() => setIsCreateSponsorshipOpen(false)}
+        onCreated={async () => {
+          setIsCreateSponsorshipOpen(false);
+          await refetchSponsorships();
+        }}
+        createSponsorship={guardedCreateSponsorship}
+      />
     </div>
   );
 }

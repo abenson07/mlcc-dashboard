@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Checkbox } from "@/components/patterns/primitives/Checkbox";
@@ -17,6 +17,44 @@ import {
   type EventTaskGroupLabel,
   type EventTaskRow,
 } from "@/data/mocks/events";
+
+const panelCardStyle: CSSProperties = {
+  boxSizing: "border-box",
+  display: "flex",
+  flexDirection: "column",
+  gap: 2,
+  padding: 20,
+  background: "var(--linear-color-panel)",
+  border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
+  borderRadius: "var(--linear-radius-md)",
+  boxShadow: "var(--linear-shadow-panel)",
+};
+
+function TaskGroupCard({
+  label,
+  accent,
+  children,
+}: {
+  label: string;
+  accent?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section style={panelCardStyle}>
+      <Text
+        weight="semibold"
+        color="secondary"
+        style={{
+          marginBottom: 8,
+          ...(accent ? { color: "#eb5757" } : undefined),
+        }}
+      >
+        {label}
+      </Text>
+      {children}
+    </section>
+  );
+}
 
 export type EventTasksPageProps = {
   tasks: EventTaskRow[];
@@ -206,20 +244,15 @@ export function EventTasksPage({ tasks, onToggleTask, onAddTask, onRemoveTask }:
           </div>
 
           {activeGroups.length === 0 ? (
-            <Text size="sm" color="secondary">
-              No open tasks for this event.
-            </Text>
+            <section style={panelCardStyle}>
+              <Text size="sm" color="secondary">
+                No open tasks for this event.
+              </Text>
+            </section>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {activeGroups.map(({ label, tasks: groupTasksList }) => (
-                <div key={label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Text
-                    type="label"
-                    color="secondary"
-                    style={label === "Past due" ? { color: "#eb5757" } : undefined}
-                  >
-                    {label}
-                  </Text>
+                <TaskGroupCard key={label} label={label} accent={label === "Past due"}>
                   {groupTasksList.map((task) => (
                     <TaskRow
                       key={task.id}
@@ -229,7 +262,7 @@ export function EventTasksPage({ tasks, onToggleTask, onAddTask, onRemoveTask }:
                     />
                   ))}
                   <AddTaskRow onAdd={onAddTask} />
-                </div>
+                </TaskGroupCard>
               ))}
             </div>
           )}
@@ -244,12 +277,9 @@ export function EventTasksPage({ tasks, onToggleTask, onAddTask, onRemoveTask }:
               </Text>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {completedGroups.map(({ label, tasks: groupTasksList }) => (
-                <div key={label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Text type="label" color="secondary">
-                    {label}
-                  </Text>
+                <TaskGroupCard key={label} label={label}>
                   {groupTasksList.map((task) => (
                     <TaskRow
                       key={task.id}
@@ -258,7 +288,7 @@ export function EventTasksPage({ tasks, onToggleTask, onAddTask, onRemoveTask }:
                       onRemove={() => onRemoveTask(task.id)}
                     />
                   ))}
-                </div>
+                </TaskGroupCard>
               ))}
             </div>
           </section>

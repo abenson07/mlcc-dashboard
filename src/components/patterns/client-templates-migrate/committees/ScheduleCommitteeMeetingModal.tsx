@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { Text } from "@/components/patterns/primitives/Text";
-import { createCommitteeMeetingApi } from "hooks";
+import { createCommitteeMeetingApi, useDemoGuard } from "hooks";
 import type { CommitteeSlug } from "schemas/committee_meetings";
 import { committeeDisplayName } from "./committeeSlug";
 
@@ -36,6 +37,7 @@ export function ScheduleCommitteeMeetingModal({
   onClose,
   onCreated,
 }: ScheduleCommitteeMeetingModalProps) {
+  const { enabled: demo } = useDemoGuard();
   const [startsAt, setStartsAt] = useState("");
   const [locationType, setLocationType] = useState<"in_person" | "remote" | "hybrid">("in_person");
   const [location, setLocation] = useState("");
@@ -53,6 +55,11 @@ export function ScheduleCommitteeMeetingModal({
   async function handleSubmit() {
     if (!startsAt) {
       setError("Start date/time is required");
+      return;
+    }
+    if (demo) {
+      toast.success("Meeting scheduled — demo mode, not saved");
+      onClose();
       return;
     }
     setSubmitting(true);

@@ -2,12 +2,22 @@
 
 import { Avatar } from "@/components/patterns/primitives/Avatar";
 import { Text } from "@/components/patterns/primitives/Text";
-import { sampleEventVolunteers, type EventVolunteerRow } from "@/data/mocks/events";
+import { type EventVolunteerRow } from "@/data/mocks/events";
 
 export type VolunteersListSectionProps = {
   onSelectVolunteer?: (row: EventVolunteerRow) => void;
   onSeeAllVolunteers?: () => void;
 };
+
+/** Static pattern-library data — this section isn't tied to a real/curated event. */
+const sampleEventVolunteers: EventVolunteerRow[] = [
+  { id: "vol-1", name: "Priya Anand", role: "Event Lead", email: "priya.anand@example.com", status: "Confirmed" },
+  { id: "vol-2", name: "Marcus Ianelli", role: "Setup & Teardown", email: "marcus.ianelli@example.com", status: "Confirmed" },
+  { id: "vol-3", name: "Dana Whitfield", role: "Concessions", email: "dana.whitfield@example.com", status: "Confirmed" },
+  { id: "vol-4", name: "Sam Okafor", role: "Concessions", email: "sam.okafor@example.com", status: "Invited" },
+  { id: "vol-5", name: "Lena Brandt", role: "Parking & Traffic", email: "lena.brandt@example.com", status: "Invited" },
+  { id: "vol-6", name: "Owen Castillo", role: "Parking & Traffic", email: "owen.castillo@example.com", status: "Declined" },
+];
 
 const STATUS_COLOR: Record<EventVolunteerRow["status"], string> = {
   Confirmed: "#27a644",

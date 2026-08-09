@@ -1,14 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAllSponsorships, type SponsorshipWithParent } from "hooks";
 import { pixel, proportional, type TableColumn } from "@/components/patterns/primitives/table";
 import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
 import { RowClickCell, ClassContentPage } from "@/components/patterns/client-templates/shared";
 import { Text } from "@/components/patterns/primitives/Text";
-import { Button } from "@/components/patterns/primitives/Button";
 import { formatUsd } from "@/components/billing/invoiceUtils";
-import { CreateSponsorshipModal } from "./CreateSponsorshipModal";
 
 const STATUS_COLOR: Record<string, string> = {
   pledged: "#8a8f98",
@@ -124,8 +122,7 @@ export function InvoicingSponsorshipsPage({
   parentTypeFilter,
   onSelectSponsorship,
 }: InvoicingSponsorshipsPageProps) {
-  const { sponsorships, loading, error, createSponsorship, refetch } = useAllSponsorships();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { sponsorships, loading, error } = useAllSponsorships();
   const columns = useMemo(() => buildColumns(onSelectSponsorship), [onSelectSponsorship]);
 
   const filtered = useMemo(
@@ -142,33 +139,19 @@ export function InvoicingSponsorshipsPage({
   }
 
   return (
-    <ClassContentPage>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button label="New sponsorship" variant="primary" onClick={() => setIsCreateOpen(true)} />
-      </div>
-      <div style={{ minHeight: 0 }}>
-        <GroupedTable
-          data={filtered}
-          columns={columns}
-          getRowKey={(row) => row.id}
-          groupBy={(row) => row.parentLabel}
-          listChrome
-        />
-        {!loading && filtered.length === 0 ? (
-          <div style={{ padding: 24 }}>
-            <Text color="secondary">No sponsorships match the current filters.</Text>
-          </div>
-        ) : null}
-      </div>
-      <CreateSponsorshipModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onCreated={async () => {
-          setIsCreateOpen(false);
-          await refetch();
-        }}
-        createSponsorship={createSponsorship}
+    <div style={{ height: "100%", minHeight: 0, boxSizing: "border-box", padding: "0 8px" }}>
+      <GroupedTable
+        data={filtered}
+        columns={columns}
+        getRowKey={(row) => row.id}
+        groupBy={(row) => row.parentLabel}
+        listChrome
       />
-    </ClassContentPage>
+      {!loading && filtered.length === 0 ? (
+        <div style={{ padding: 24 }}>
+          <Text color="secondary">No sponsorships match the current filters.</Text>
+        </div>
+      ) : null}
+    </div>
   );
 }

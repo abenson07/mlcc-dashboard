@@ -64,6 +64,7 @@ export default function EventOverviewPageContent() {
         date: null,
         event_template_id: event.event_template_id,
         slug: event.slug,
+        committee: event.committee ?? null,
         field_data: event.fieldData,
         publish_status: event.publishStatus,
         created_at: "",

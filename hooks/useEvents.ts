@@ -14,7 +14,7 @@ import type { Events, EventsUpdate } from "@/types/database";
 export const EVENTS_QUERY_KEY = ["events"] as const;
 
 const EVENTS_SELECT =
-  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, publish_status, created_at, updated_at";
+  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, committee, publish_status, created_at, updated_at";
 
 async function fetchEventsRows(): Promise<Events[]> {
   if (!supabaseClient) {
@@ -52,6 +52,7 @@ export type CreateEventPayload = {
   starts_at: string;
   ends_at?: string | null;
   event_template_id?: string | null;
+  committee?: string | null;
   field_data?: Record<string, unknown>;
 };
 

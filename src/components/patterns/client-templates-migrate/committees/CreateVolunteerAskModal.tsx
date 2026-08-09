@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { Text } from "@/components/patterns/primitives/Text";
 import { getApiBase } from "@/lib/apiBase";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
-import { useEvents, type VolunteerAskWithSignups } from "hooks";
+import { useEvents, useDemoGuard, type VolunteerAskWithSignups } from "hooks";
 import type { VolunteerCommitmentType, VolunteerCommitmentUnit } from "@/types/database";
+import type { SampleVolunteerAsk } from "@/data/mocks/committees";
+import { upsertDemoVolunteerAsk } from "@/lib/demo/demoVolunteerAsks";
 
 export type CreateVolunteerAskModalProps = {
   isOpen: boolean;
@@ -67,6 +70,7 @@ export function CreateVolunteerAskModal({
   onSaved,
 }: CreateVolunteerAskModalProps) {
   const isEdit = ask != null;
+  const { enabled: demo } = useDemoGuard();
   const { events } = useEvents({ autoFetch: isOpen });
   const [form, setForm] = useState<FormState>(() => initialForm(committee, eventId));
   const [submitting, setSubmitting] = useState(false);
@@ -107,6 +111,21 @@ export function CreateVolunteerAskModal({
     }
     if (form.auto_accept && !form.auto_response_body.trim()) {
       setError("Add auto-response details when auto-accept is on");
+      return;
+    }
+
+    if (demo) {
+      const askRow: SampleVolunteerAsk = {
+        id: isEdit && ask ? ask.id : `demo-ask-${committee}-${Date.now()}`,
+        committee,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        quantity: Math.max(1, Number.parseInt(form.quantity, 10) || 1),
+      };
+      upsertDemoVolunteerAsk(askRow);
+      toast.success(`${isEdit ? "Ask updated" : "Ask created"} — demo mode, not saved`);
+      onSaved();
+      onClose();
       return;
     }
 

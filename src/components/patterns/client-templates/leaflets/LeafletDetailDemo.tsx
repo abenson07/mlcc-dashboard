@@ -161,7 +161,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
                   selected={view === "sponsorships"}
                   onClick={() => changeView("sponsorships")}
                 />
-                <ViewTab label="Schedule" selected={view === "schedule"} onClick={() => changeView("schedule")} />
+                <ViewTab label="Tasks" selected={view === "schedule"} onClick={() => changeView("schedule")} />
               </ViewTabs>
             }
           />

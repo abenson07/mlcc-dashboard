@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CalendarCheck, User } from "lucide-react";
 import { Button } from "@/components/patterns/primitives/Button";
 import { HStack } from "@/components/patterns/primitives/Stack";
+import { Text } from "@/components/patterns/primitives/Text";
 import { PropertyChip } from "@/components/patterns/client-templates/shared";
 import { RichTextEditor } from "./RichTextEditor";
 import { todayISODate } from "./adapters";
@@ -37,6 +38,20 @@ export function StoryFormPanel({ story, isNew = false, onSave, onClose }: StoryF
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 16 }}>
+      {draft.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- demo-only external asset from the live marketing site
+        <img
+          src={draft.imageUrl}
+          alt=""
+          style={{
+            width: "100%",
+            maxHeight: 220,
+            objectFit: "cover",
+            borderRadius: "var(--linear-radius-md)",
+          }}
+        />
+      ) : null}
+
       <input
         value={draft.title}
         onChange={(event) => setDraft((d) => ({ ...d, title: event.target.value }))}
@@ -53,6 +68,12 @@ export function StoryFormPanel({ story, isNew = false, onSave, onClose }: StoryF
         }}
       />
 
+      {draft.description ? (
+        <Text color="secondary" size="sm">
+          {draft.description}
+        </Text>
+      ) : null}
+
       <div style={{ flex: 1, minHeight: 0 }}>
         <RichTextEditor
           bare
@@ -60,6 +81,60 @@ export function StoryFormPanel({ story, isNew = false, onSave, onClose }: StoryF
           placeholder="Start writing the story…"
           onChange={(body) => setDraft((d) => ({ ...d, body }))}
         />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <Text type="label" color="secondary">
+          Featured image
+        </Text>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: 10,
+            border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+            borderRadius: "var(--linear-radius-md)",
+          }}
+        >
+          {draft.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- demo-only external asset from the live marketing site
+            <img
+              src={draft.imageUrl}
+              alt=""
+              style={{
+                width: 56,
+                height: 56,
+                objectFit: "cover",
+                borderRadius: "var(--linear-radius-sm)",
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                flexShrink: 0,
+                borderRadius: "var(--linear-radius-sm)",
+                background: "var(--linear-color-sidebar-item-selected)",
+              }}
+            />
+          )}
+          <input
+            value={draft.imageUrl ?? ""}
+            onChange={(event) => setDraft((d) => ({ ...d, imageUrl: event.target.value }))}
+            placeholder="https://…"
+            style={{
+              all: "unset",
+              boxSizing: "border-box",
+              flex: 1,
+              minWidth: 0,
+              fontSize: 13,
+              color: "var(--linear-color-ink)",
+            }}
+          />
+        </div>
       </div>
 
       <div

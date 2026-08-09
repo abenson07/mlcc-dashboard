@@ -13,8 +13,7 @@ import { useEventContext } from "@/components/integrated/events/EventContext";
 import { BudgetChart } from "./BudgetChart";
 import { SponsorshipLevelsPanel } from "./SponsorshipLevelsPanel";
 import {
-  sampleEventBudgetSummary,
-  sampleEventSponsorshipInvoices,
+  eventMocksFor,
   type EventBudgetSummary,
   type EventSponsorshipInvoiceRow,
 } from "@/data/mocks/events";
@@ -97,6 +96,8 @@ function buildColumns(
 
 export type BudgetPageProps = {
   onSelectBudgetItem?: (row: EventSponsorshipInvoiceRow) => void;
+  onAddSponsor?: () => void;
+  onEditLevels?: () => void;
 };
 
 /**
@@ -105,22 +106,27 @@ export type BudgetPageProps = {
  * the fifth), then sponsorship invoices nested below, grouped by payment
  * status.
  */
-export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
+export function BudgetPage({
+  onSelectBudgetItem,
+  onAddSponsor,
+  onEditLevels,
+}: BudgetPageProps) {
   const { enabled: demo } = useDemoModeOptional();
-  const { budget, invoices, sponsorshipTiers } = useEventContext();
+  const { eventId, budget, invoices, sponsorshipTiers } = useEventContext();
   const columns = useMemo(() => buildColumns(onSelectBudgetItem), [onSelectBudgetItem]);
   const groupOrder = useMemo(() => GROUP_ORDER, []);
+  const mocks = demo ? eventMocksFor(eventId) : null;
 
-  const summary: EventBudgetSummary = demo
-    ? sampleEventBudgetSummary
+  const summary: EventBudgetSummary = mocks
+    ? mocks.budgetSummary
     : {
         totalBudget: budget.goal,
         received: budget.raised,
         pending: budget.pledged,
       };
 
-  const invoiceRows: EventSponsorshipInvoiceRow[] = demo
-    ? sampleEventSponsorshipInvoices
+  const invoiceRows: EventSponsorshipInvoiceRow[] = mocks
+    ? mocks.sponsorshipInvoices
     : invoices.map((inv) => ({
         id: inv.id,
         invoiceNumber: inv.invoice,
@@ -134,7 +140,11 @@ export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
   if (!demo && invoiceRows.length === 0 && sponsorshipTiers.length === 0) {
     return (
       <ClassContentPage>
-        <EmptyStateCard variant="plain" label="No sponsorships yet" />
+        <EmptyStateCard
+          variant="pill"
+          label="Add new sponsor"
+          onClick={onAddSponsor}
+        />
       </ClassContentPage>
     );
   }
@@ -153,11 +163,15 @@ export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
           <BudgetChart summary={summary} />
         </div>
         <div style={{ gridColumn: "span 1" }}>
-          <SponsorshipLevelsPanel />
+          <SponsorshipLevelsPanel onEdit={onEditLevels} />
         </div>
       </div>
       {invoiceRows.length === 0 ? (
-        <EmptyStateCard variant="plain" label="No sponsorship invoices yet" />
+        <EmptyStateCard
+          variant="pill"
+          label="Add new sponsor"
+          onClick={onAddSponsor}
+        />
       ) : (
         <NestedGroupedTable
           title="Sponsorship invoices"

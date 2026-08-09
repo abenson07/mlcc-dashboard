@@ -14,11 +14,9 @@ export type OutlinedPanelProps = {
 };
 
 /**
- * Side-content variant that reads as its own floating card — white with a
- * soft shadow in light mode, a bordered dark surface in dark mode (measured
- * off linear.app's Health/Initiatives panel) — rather than sitting flush
- * like `SideContentBar`. Follows the app's light/dark mode like everything
- * else via the `--linear-color-panel*` tokens.
+ * Side detail panel — opaque fill + floating shadow
+ * (`--linear-color-side-panel` / `--linear-shadow-side-panel`), separate from
+ * translucent content cards (`--linear-color-panel` at 50% opacity).
  */
 export function OutlinedPanel({ children, width = 320, onClose, onEdit }: OutlinedPanelProps) {
   useEffect(() => {
@@ -40,11 +38,11 @@ export function OutlinedPanel({ children, width = 320, onClose, onEdit }: Outlin
         height: "100%",
         minHeight: 0,
         overflow: "auto",
-        background: "var(--linear-color-panel)",
+        background: "var(--linear-color-side-panel)",
         border:
           "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-lg)",
-        boxShadow: "var(--linear-shadow-panel)",
+        boxShadow: "var(--linear-shadow-side-panel)",
         padding: 16,
       }}
     >

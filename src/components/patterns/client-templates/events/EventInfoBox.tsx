@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { CalendarDays, Clock, MapPin, User } from "lucide-react";
 import type { EventDetail } from "@/data/mocks/events";
+import { COMMITTEE_LABELS } from "schemas/committee_meetings";
 
 export type EventInfoBoxProps = {
   event: EventDetail;
@@ -27,7 +28,7 @@ function EventMetaItem({ icon, children }: { icon: ReactNode; children: ReactNod
 }
 
 /**
- * Top bounding box for the event detail page — title, category/organizer
+ * Top bounding box for the event detail page — title, committee/organizer
  * summary, and key event metadata. Mirrors `ClassInfoBox`.
  */
 export function EventInfoBox({ event }: EventInfoBoxProps) {
@@ -69,7 +70,7 @@ export function EventInfoBox({ event }: EventInfoBoxProps) {
             color: "var(--linear-color-ink-subtle)",
           }}
         >
-          {event.category} · Organized by {event.organizer}
+          {COMMITTEE_LABELS[event.committee]} · Organized by {event.organizer}
         </p>
 
         <p

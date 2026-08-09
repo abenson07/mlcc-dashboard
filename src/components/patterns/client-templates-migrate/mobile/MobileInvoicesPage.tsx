@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { STRIPE_INVOICES_QUERY_KEY, useEvents, useStripeInvoices } from "hooks";
+import { STRIPE_INVOICES_QUERY_KEY, useEvents, useStripeInvoices, useDemoGuard } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
 import {
   formatDueDate,
@@ -147,6 +147,7 @@ function MobileInvoiceSheet({
   onChanged: () => Promise<void>;
 }) {
   const queryClient = useQueryClient();
+  const { enabled: demo } = useDemoGuard();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [confirmMethod, setConfirmMethod] = useState<"cash" | "check" | null>(null);
@@ -157,6 +158,12 @@ function MobileInvoiceSheet({
     if (!invoice) return;
     setBusy(true);
     setMessage(null);
+    if (demo) {
+      setConfirmMethod(null);
+      setMessage(`Marked paid by ${method} — demo mode, not saved.`);
+      setBusy(false);
+      return;
+    }
     try {
       const res = await fetch(
         `${getApiBase()}/api/stripe/invoices/${encodeURIComponent(invoice.id)}/mark-paid`,
@@ -291,6 +298,7 @@ function MobileCreateInvoice({
   onCreated: () => Promise<void>;
 }) {
   const { events } = useEvents({ autoFetch: open });
+  const { enabled: demo, sendDemoEmail } = useDemoGuard();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
@@ -326,6 +334,23 @@ function MobileCreateInvoice({
     }
     setBusy(true);
     setError(null);
+    if (demo) {
+      try {
+        await sendDemoEmail({
+          subject: `Invoice — ${description.trim() || "Invoice"}`,
+          text: `An invoice for ${amount} would have been issued to ${email.trim()}.`,
+          context: email.trim(),
+        });
+        reset();
+        onClose();
+        await onCreated();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Could not send demo invoice email.");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/stripe/invoices/issue`, {
         method: "POST",

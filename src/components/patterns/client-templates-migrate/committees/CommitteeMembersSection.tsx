@@ -4,7 +4,12 @@ import { Avatar } from "@/components/patterns/primitives/Avatar";
 import { Text } from "@/components/patterns/primitives/Text";
 import { EmptyStateCard } from "@/components/patterns/client-templates/shared";
 import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
-import { sampleCommitteeMembers, type CommitteeMemberRow } from "@/data/mocks/committees";
+import {
+  sampleCommitteeMembers,
+  countChairs,
+  displayMemberTitle,
+  type CommitteeMemberRow,
+} from "@/data/mocks/committees";
 
 export type CommitteeMembersSectionProps = {
   onSelectMember?: (row: CommitteeMemberRow) => void;
@@ -18,6 +23,7 @@ export type CommitteeMembersSectionProps = {
 export function CommitteeMembersSection({ onSelectMember }: CommitteeMembersSectionProps) {
   const { enabled: demo } = useDemoModeOptional();
   const members = demo ? sampleCommitteeMembers : [];
+  const chairCount = countChairs(members);
 
   return (
     <section
@@ -73,7 +79,7 @@ export function CommitteeMembersSection({ onSelectMember }: CommitteeMembersSect
                 {member.name}
               </Text>
               <Text size="sm" color="secondary">
-                {member.role}
+                {displayMemberTitle(member.role, chairCount)}
               </Text>
             </button>
           ))}

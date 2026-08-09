@@ -7,10 +7,11 @@ import { RowClickCell, ClassContentPage } from "@/components/patterns/client-tem
 import { BudgetChart } from "./BudgetChart";
 import { SponsorshipLevelsPanel } from "./SponsorshipLevelsPanel";
 import {
-  sampleEventBudgetSummary,
-  sampleEventSponsorshipInvoices,
+  eventMocksFor,
   type EventSponsorshipInvoiceRow,
 } from "@/data/mocks/events";
+
+const mocks = eventMocksFor("evt-movies-tower");
 
 const GROUP_ORDER = ["Overdue", "Pending", "Paid"];
 
@@ -105,7 +106,7 @@ export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
         }}
       >
         <div style={{ gridColumn: "span 4" }}>
-          <BudgetChart summary={sampleEventBudgetSummary} />
+          <BudgetChart summary={mocks.budgetSummary} />
         </div>
         <div style={{ gridColumn: "span 1" }}>
           <SponsorshipLevelsPanel />
@@ -113,7 +114,7 @@ export function BudgetPage({ onSelectBudgetItem }: BudgetPageProps) {
       </div>
       <NestedGroupedTable
         title="Sponsorship invoices"
-        data={sampleEventSponsorshipInvoices}
+        data={mocks.sponsorshipInvoices}
         columns={columns}
         getRowKey={(row) => row.id}
         groupBy={(row) => row.status}

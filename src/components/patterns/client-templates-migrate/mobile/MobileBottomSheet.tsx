@@ -72,7 +72,7 @@ export function MobileBottomSheet({
           maxHeight,
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
-          background: "var(--linear-color-panel, var(--linear-color-canvas))",
+          background: "var(--linear-color-side-panel, var(--linear-color-canvas))",
           borderTop: "var(--linear-border-width) solid var(--linear-color-hairline)",
           boxShadow: "0 -8px 32px rgba(0,0,0,0.35)",
           paddingBottom: "max(12px, env(safe-area-inset-bottom))",
