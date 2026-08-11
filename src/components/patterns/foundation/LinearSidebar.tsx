@@ -16,9 +16,12 @@ import {
   Megaphone,
   FlaskConical,
   Moon,
+  MoreHorizontal,
   Plus,
+  QrCode,
   Search,
   Settings,
+  Shirt,
   Sun,
   Users,
   Users2,
@@ -106,6 +109,23 @@ const group2Items: DemoItem[] = [
     label: "Invoicing",
     icon: <CreditCard size={16} strokeWidth={1.75} />,
     path: "/invoices",
+    hasContent: true,
+  },
+];
+
+const moreItems: DemoItem[] = [
+  {
+    id: "shirt-preorders",
+    label: "Shirt Preorders",
+    icon: <Shirt size={16} strokeWidth={1.75} />,
+    path: "/shirt-preorders",
+    hasContent: true,
+  },
+  {
+    id: "qr-codes",
+    label: "QR Codes",
+    icon: <QrCode size={16} strokeWidth={1.75} />,
+    path: "/qr-codes",
     hasContent: true,
   },
 ];
@@ -276,7 +296,7 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const [isNewEventOpen, setIsNewEventOpen] = useState(false);
   const [promotionModalType, setPromotionModalType] = useState<EventPromotionType | null>(null);
   const [demoTransition, setDemoTransition] = useState<DemoModeConfirmModalTarget | null>(null);
-  const isMigrate = basePath === "/admin-migrate";
+  const isMigrate = basePath === "/admin";
 
   function requestDemoTransition(target: DemoModeConfirmModalTarget) {
     setDemoTransition(target);
@@ -295,6 +315,18 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   function isSelected(path: string): boolean {
     return pathname === hrefFor(path).split("?")[0];
   }
+
+  // Not part of the primary nav's isSelected matching (they live behind "More"),
+  // so match directly off the current path instead. "More" is just a drawer to
+  // reach these — it never shows as active itself. Whichever item is currently
+  // open gets promoted into the main nav list (next to Invoicing) for as long
+  // as the user stays on that route; it drops back into the "More" drawer as
+  // soon as they navigate elsewhere.
+  function isMorePathSelected(path: string): boolean {
+    return (pathname ?? "").startsWith(hrefFor(path).split("?")[0]);
+  }
+
+  const activeMoreItem = moreItems.find((item) => isMorePathSelected(item.path));
 
   function openCreateOption(next: () => void) {
     setIsCreateMenuOpen(false);
@@ -407,6 +439,35 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
               indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
+          {activeMoreItem ? (
+            <MenuItem
+              key={activeMoreItem.id}
+              label={activeMoreItem.label}
+              icon={activeMoreItem.icon}
+              selected
+              onClick={() => router.push(hrefFor(activeMoreItem.path))}
+              indicator={<ContentStatusDot hasContent={activeMoreItem.hasContent} />}
+            />
+          ) : null}
+          <Dropdown
+            label="More"
+            trigger={
+              <MenuItem
+                label="More"
+                icon={<MoreHorizontal size={16} strokeWidth={1.75} />}
+              />
+            }
+          >
+            {moreItems.map((item) => (
+              <DropdownItem
+                key={item.id}
+                label={item.label}
+                icon={item.icon}
+                selected={item.id === activeMoreItem?.id}
+                onSelect={() => router.push(hrefFor(item.path))}
+              />
+            ))}
+          </Dropdown>
         </SidebarSection>
 
         <SidebarSection title="Database">
