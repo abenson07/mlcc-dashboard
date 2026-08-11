@@ -1,14 +1,5 @@
-import { Suspense } from "react";
-import PeoplePageContent from "@/components/integrated/people/PeoplePageContent";
+import { BusinessesDemo } from "@/components/patterns/client-templates-migrate/businesses";
 
-export default function ShellPreviewBusinessesPage() {
-  return (
-    <Suspense fallback={<p className="lf-meta">Loading businesses…</p>}>
-      <PeoplePageContent
-        embedded
-        basePath="/admin/businesses"
-        defaultFilter="businesses"
-      />
-    </Suspense>
-  );
+export default function BusinessesRoute() {
+  return <BusinessesDemo />;
 }

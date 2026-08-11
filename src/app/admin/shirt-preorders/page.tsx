@@ -1,5 +1,5 @@
-import ShirtPreordersAdminContent from "@/components/commerce/ShirtPreordersAdminContent";
+import { ShirtPreordersDemo } from "@/components/patterns/client-templates-migrate/shirt-preorders";
 
-export default function ShirtPreordersAdminPage() {
-  return <ShirtPreordersAdminContent />;
+export default function ShirtPreordersRoute() {
+  return <ShirtPreordersDemo />;
 }

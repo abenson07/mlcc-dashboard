@@ -1,24 +1,19 @@
-import "@/components/shell/shell.css";
-import "@/components/leaflet/leaflet.css";
-import "@/components/integrated/integrated.css";
-import "flatpickr/dist/flatpickr.css";
-import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
+import type { ReactNode } from "react";
+import { Inter } from "next/font/google";
 import { redirect } from "next/navigation";
-import AdminProviders from "./AdminProviders";
-import ShellPreviewContent from "./ShellPreviewContent";
+import { Toaster } from "sonner";
+import { createClient } from "@/lib/supabase/server";
+import { ThemeProvider } from "@/components/patterns/foundation/ThemeContext";
+import { DemoModeProvider } from "@/components/patterns/foundation/DemoModeContext";
+import { WipFeaturesProvider } from "@/components/patterns/foundation/WipFeaturesContext";
+import { QueryProvider } from "@/providers/QueryProvider";
+import "./isolation.css";
 
 export const dynamic = "force-dynamic";
 
-function ShellPreviewFallback() {
-  return <div className="shell-preview-root shell-app" />;
-}
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AdminMigrateLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -29,10 +24,21 @@ export default async function AdminLayout({
   }
 
   return (
-    <AdminProviders>
-      <Suspense fallback={<ShellPreviewFallback />}>
-        <ShellPreviewContent>{children}</ShellPreviewContent>
-      </Suspense>
-    </AdminProviders>
+    <div
+      className={`admin-migrate-root ${inter.variable}`}
+      style={{
+        height: "100vh",
+        fontFamily: "var(--font-inter), system-ui, sans-serif",
+      }}
+    >
+      <QueryProvider>
+        <ThemeProvider>
+          <WipFeaturesProvider>
+            <DemoModeProvider>{children}</DemoModeProvider>
+          </WipFeaturesProvider>
+        </ThemeProvider>
+        <Toaster richColors position="bottom-right" />
+      </QueryProvider>
+    </div>
   );
 }
