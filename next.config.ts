@@ -259,9 +259,63 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: false,
       },
+      // Legacy /admin deep links from the old shell-preview admin — that content
+      // moved to /admin-retire and /admin now serves the admin-migrate build,
+      // which reshapes several of these routes. Map old shapes to their closest
+      // new equivalent.
       {
-        source: "/admin/leaflet/substitutions",
-        destination: "/admin/leaflet/skipped-routes",
+        source: "/admin/events/:id/overview",
+        destination: "/admin/events/:id",
+        permanent: true,
+      },
+      {
+        source: "/admin/events/:id/details",
+        destination: "/admin/events/:id?view=details",
+        permanent: true,
+      },
+      {
+        source: "/admin/faqs",
+        destination: "/admin/content?view=faqs",
+        permanent: true,
+      },
+      {
+        source: "/admin/stories",
+        destination: "/admin/content?view=stories",
+        permanent: true,
+      },
+      {
+        source: "/admin/invoice",
+        destination: "/admin/invoices",
+        permanent: true,
+      },
+      {
+        source: "/admin/leaflet",
+        destination: "/admin/leaflets",
+        permanent: true,
+      },
+      {
+        source: "/admin/leaflet/:path*",
+        destination: "/admin/leaflets",
+        permanent: true,
+      },
+      {
+        source: "/admin/members",
+        destination: "/admin/people?view=members",
+        permanent: true,
+      },
+      {
+        source: "/admin/neighbors",
+        destination: "/admin/people?view=neighbors",
+        permanent: true,
+      },
+      {
+        source: "/admin/site",
+        destination: "/admin",
+        permanent: true,
+      },
+      {
+        source: "/admin/widgets",
+        destination: "/admin",
         permanent: true,
       },
       // Legacy /dashboard links point at the /admin app now.

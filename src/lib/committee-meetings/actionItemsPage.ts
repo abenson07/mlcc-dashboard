@@ -44,7 +44,7 @@ export function actionItemDueLabel(dueAt: string | null): string {
 }
 
 export function actionItemIsOverdue(dueAt: string | null, status: ActionItemStatus): boolean {
-  if (status === "done" || !dueAt) return false;
+  if (status === "done" || status === "canceled" || !dueAt) return false;
   const d = new Date(`${dueAt.slice(0, 10)}T00:00:00`);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -88,7 +88,7 @@ export function groupActionItemsByMeeting(items: ActionItemListRow[]): ActionIte
       });
     }
     const group = map.get(key)!;
-    if (item.status === "done") group.doneItems.push(item);
+    if (item.status === "done" || item.status === "canceled") group.doneItems.push(item);
     else group.openItems.push(item);
   }
 

@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import ActionItemsPageContent from "@/components/integrated/action-items/ActionItemsPageContent";
+import { ActionItemsDemo } from "@/components/patterns/client-templates-migrate/action-items";
 
-export default function ShellPreviewActionItemsPage() {
-  return (
-    <Suspense fallback={<p className="lf-meta">Loading action items…</p>}>
-      <ActionItemsPageContent embedded />
-    </Suspense>
-  );
+export default function ActionItemsRoute() {
+  return <ActionItemsDemo />;
 }

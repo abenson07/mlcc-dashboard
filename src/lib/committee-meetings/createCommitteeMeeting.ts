@@ -25,6 +25,7 @@ export async function createCommitteeMeeting(
     starts_at: input.starts_at,
     ends_at: input.ends_at ?? null,
     event_template_id: null,
+    committee: input.committee,
     field_data: {
       kind: "committee_meeting",
       committee: input.committee,

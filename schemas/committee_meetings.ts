@@ -16,6 +16,8 @@ export type MeetingLocationType = "in_person" | "remote" | "hybrid";
 
 export type MinutesStatus = "draft" | "submitted" | "processing" | "ready" | "error";
 
+export type MinutesSource = "written" | "transcript" | "audio" | "file";
+
 export type MeetingMinutesBlock =
   | { kind: "heading"; text: string }
   | { kind: "paragraph"; text: string }
@@ -37,6 +39,9 @@ export interface CommitteeMeetings {
   structured_minutes: StructuredMinutes | null;
   minutes_status: MinutesStatus;
   minutes_error: string | null;
+  minutes_source: MinutesSource | null;
+  minutes_attachment_url: string | null;
+  audio_url: string | null;
   submitted_at: string | null;
   submitted_by: string | null;
   website_slug: string | null;
@@ -55,6 +60,9 @@ export interface CommitteeMeetingsInsert {
   structured_minutes?: StructuredMinutes | null;
   minutes_status?: MinutesStatus;
   minutes_error?: string | null;
+  minutes_source?: MinutesSource | null;
+  minutes_attachment_url?: string | null;
+  audio_url?: string | null;
   submitted_at?: string | null;
   submitted_by?: string | null;
   website_slug?: string | null;
@@ -70,6 +78,9 @@ export interface CommitteeMeetingsUpdate {
   structured_minutes?: StructuredMinutes | null;
   minutes_status?: MinutesStatus;
   minutes_error?: string | null;
+  minutes_source?: MinutesSource | null;
+  minutes_attachment_url?: string | null;
+  audio_url?: string | null;
   submitted_at?: string | null;
   submitted_by?: string | null;
   website_slug?: string | null;
@@ -98,6 +109,10 @@ export const COMMITTEE_LABELS: Record<CommitteeSlug, string> = {
   executive_board: "Executive Board",
   businesses: "Businesses",
 };
+
+export function isCommitteeSlug(value: string): value is CommitteeSlug {
+  return Object.prototype.hasOwnProperty.call(COMMITTEE_LABELS, value);
+}
 
 export const WEBSITE_COMMITTEE_SLUG: Partial<Record<CommitteeSlug, string>> = {
   outreach: "advocacy",

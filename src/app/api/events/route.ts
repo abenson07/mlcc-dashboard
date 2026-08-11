@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/require-session";
 import { createEvent } from "@/lib/events/createEvent";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
+import { isCommitteeSlug } from "schemas/committee_meetings";
 
 const EVENTS_SELECT =
-  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, publish_status, created_at, updated_at";
+  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, committee, publish_status, created_at, updated_at";
 
 export async function GET() {
   const session = await requireSession();
@@ -40,6 +41,8 @@ export async function POST(request: NextRequest) {
   const ends_at = typeof o.ends_at === "string" ? o.ends_at.trim() : null;
   const event_template_id =
     typeof o.event_template_id === "string" ? o.event_template_id.trim() : null;
+  const committeeRaw = typeof o.committee === "string" ? o.committee.trim() : null;
+  const committee = committeeRaw && isCommitteeSlug(committeeRaw) ? committeeRaw : null;
   const field_data =
     o.field_data && typeof o.field_data === "object" && !Array.isArray(o.field_data)
       ? (o.field_data as Record<string, unknown>)
@@ -56,6 +59,7 @@ export async function POST(request: NextRequest) {
       starts_at,
       ends_at: ends_at || null,
       event_template_id: event_template_id || null,
+      committee,
       field_data,
     });
     return NextResponse.json({ ok: true, event });

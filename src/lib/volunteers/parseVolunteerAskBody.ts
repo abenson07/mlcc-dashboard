@@ -2,6 +2,8 @@ import type {
   VolunteerCommitmentType,
   VolunteerCommitmentUnit,
 } from "@/types/database";
+import type { CommitteeSlug } from "schemas/committee_meetings";
+import { isCommitteeSlug } from "@/lib/committees/committeeSlug";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -15,6 +17,11 @@ export type ParsedVolunteerAskBody = {
   quantity: number;
   webflowEventItemId: string | null;
   event_id: string | null;
+  committee: CommitteeSlug | null;
+  auto_accept: boolean;
+  auto_response_body: string | null;
+  /** True when the client explicitly sent auto_accept (so PATCH can leave it alone otherwise). */
+  auto_accept_provided: boolean;
 };
 
 export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | null {
@@ -39,6 +46,17 @@ export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | nu
   const eventIdRaw = typeof b.event_id === "string" ? b.event_id.trim() : "";
   const event_id = eventIdRaw && UUID_RE.test(eventIdRaw) ? eventIdRaw : null;
 
+  const committeeRaw = typeof b.committee === "string" ? b.committee.trim() : "";
+  const committee = isCommitteeSlug(committeeRaw) ? committeeRaw : null;
+
+  const hasAutoAccept = "auto_accept" in b;
+  const auto_accept = b.auto_accept === true;
+  const autoBodyRaw =
+    typeof b.auto_response_body === "string" ? b.auto_response_body.trim() : "";
+  const auto_response_body = autoBodyRaw || null;
+
+  if (hasAutoAccept && auto_accept && !auto_response_body) return null;
+
   return {
     title,
     description:
@@ -51,5 +69,9 @@ export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | nu
     quantity,
     webflowEventItemId: webflowEventItemId || null,
     event_id,
+    committee,
+    auto_accept: hasAutoAccept ? auto_accept : false,
+    auto_response_body: hasAutoAccept ? auto_response_body : null,
+    auto_accept_provided: hasAutoAccept,
   };
 }

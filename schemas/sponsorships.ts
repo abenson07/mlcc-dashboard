@@ -16,6 +16,8 @@ export interface Sponsorships {
   description: string | null;
   image_url: string | null;
   quantity: number;
+  /** Catalog sponsorship_items row this was purchased against, if any. */
+  sponsorship_item_id: string | null;
 }
 
 export interface SponsorshipsInsert {
@@ -29,6 +31,7 @@ export interface SponsorshipsInsert {
   description?: string | null;
   image_url?: string | null;
   quantity?: number;
+  sponsorship_item_id?: string | null;
 }
 
 export interface SponsorshipsUpdate {
@@ -42,4 +45,5 @@ export interface SponsorshipsUpdate {
   description?: string | null;
   image_url?: string | null;
   quantity?: number;
+  sponsorship_item_id?: string | null;
 }

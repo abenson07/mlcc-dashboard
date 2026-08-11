@@ -2,7 +2,25 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabaseClient";
+import {
+  isSponsorshipTierPlaceholder,
+  SPONSORSHIP_TIER_PLACEHOLDER_MEMO,
+  type SponsorshipTierSeed,
+} from "@/lib/sponsorship/tierPlaceholders";
 import type { Sponsorships, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
+
+function eventTierPlaceholderRows(eventId: string, tiers: SponsorshipTierSeed[]) {
+  return tiers.map((tier) => ({
+    event_id: eventId,
+    leaflet_id: null,
+    business_id: null,
+    description: tier.name,
+    amount: tier.amount,
+    quantity: tier.quantity,
+    status: null,
+    memo: SPONSORSHIP_TIER_PLACEHOLDER_MEMO,
+  }));
+}
 
 export function useEventSponsorships(eventId: string | null) {
   const queryClient = useQueryClient();
@@ -22,11 +40,12 @@ export function useEventSponsorships(eventId: string | null) {
     enabled: Boolean(eventId),
   });
 
-  const pledged = sponsorships.filter((s) => s.status === "pledged");
-  const paid = sponsorships.filter((s) => s.status === "paid");
+  const actual = sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s));
+  const pledged = actual.filter((s) => s.status === "pledged");
+  const paid = actual.filter((s) => s.status === "paid");
   const raised = paid.reduce((sum, s) => sum + (s.amount ?? 0), 0);
   const pledgedAmount = pledged.reduce((sum, s) => sum + (s.amount ?? 0), 0);
-  const goal = sponsorships.reduce((sum, s) => sum + (s.amount ?? 0), 0);
+  const goal = actual.reduce((sum, s) => sum + (s.amount ?? 0), 0);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ["sponsorships", "event"] });
@@ -61,6 +80,40 @@ export function useEventSponsorships(eventId: string | null) {
     onSuccess: () => invalidate(),
   });
 
+  const saveTiersMutation = useMutation({
+    mutationFn: async (tiers: SponsorshipTierSeed[]) => {
+      if (!supabaseClient || !eventId) {
+        throw new Error("Supabase client is not initialized");
+      }
+
+      const { data: existing, error: fetchError } = await supabaseClient
+        .from("sponsorships")
+        .select("id, business_id, memo")
+        .eq("event_id", eventId);
+      if (fetchError) throw fetchError;
+
+      const placeholderIds = (existing ?? [])
+        .filter((s) => isSponsorshipTierPlaceholder(s))
+        .map((s) => s.id);
+
+      if (placeholderIds.length) {
+        const { error: deleteError } = await supabaseClient
+          .from("sponsorships")
+          .delete()
+          .in("id", placeholderIds);
+        if (deleteError) throw deleteError;
+      }
+
+      if (tiers.length) {
+        const { error: insertError } = await supabaseClient
+          .from("sponsorships")
+          .insert(eventTierPlaceholderRows(eventId, tiers));
+        if (insertError) throw insertError;
+      }
+    },
+    onSuccess: () => invalidate(),
+  });
+
   return {
     sponsorships,
     pledged,
@@ -77,5 +130,7 @@ export function useEventSponsorships(eventId: string | null) {
       createMutation.mutateAsync(payload),
     updateSponsorship: (id: string, patch: SponsorshipsUpdate) =>
       updateMutation.mutateAsync({ id, patch }),
+    saveSponsorshipTiers: (tiers: SponsorshipTierSeed[]) =>
+      saveTiersMutation.mutateAsync(tiers),
   };
 }

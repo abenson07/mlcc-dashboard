@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Events, EventsInsert } from "@/types/database";
+import { isCommitteeSlug, type CommitteeSlug } from "schemas/committee_meetings";
 import { parseEventFieldData } from "./eventData";
+import { buildEventQrUrl, eventPageUrl, withEventQrLinks } from "./eventQr";
 import { activateEventResources } from "./spawnEventResources";
 
 function eventSlug(name: string): string {
@@ -13,10 +15,20 @@ function eventSlug(name: string): string {
 
 export type CreateEventInput = Pick<
   EventsInsert,
-  "name" | "starts_at" | "ends_at" | "event_template_id"
+  "name" | "starts_at" | "ends_at" | "event_template_id" | "committee"
 > & {
   field_data?: Record<string, unknown>;
 };
+
+function resolveCommittee(
+  explicit: CommitteeSlug | null | undefined,
+  fieldData: Record<string, unknown>,
+): CommitteeSlug | null {
+  if (explicit && isCommitteeSlug(explicit)) return explicit;
+  const fromField = fieldData.committee;
+  if (typeof fromField === "string" && isCommitteeSlug(fromField)) return fromField;
+  return null;
+}
 
 export async function createEvent(
   supabase: SupabaseClient,
@@ -43,6 +55,11 @@ export async function createEvent(
     }
   }
 
+  const committee = resolveCommittee(input.committee, mergedFieldData);
+  if (committee) {
+    mergedFieldData = { ...mergedFieldData, committee };
+  }
+
   const slugBase = eventSlug(name);
   const slug = slugBase ? `${slugBase}-${Date.now().toString(36)}` : null;
 
@@ -55,6 +72,7 @@ export async function createEvent(
       starts_at: input.starts_at ?? null,
       ends_at: input.ends_at ?? null,
       event_template_id: input.event_template_id ?? null,
+      committee,
       date: legacyDate,
       slug,
       field_data: mergedFieldData,
@@ -72,29 +90,35 @@ export async function createEvent(
     await activateEventResources(supabase, event as Events);
   }
 
-  if (!fieldData.qr_code_id && slug) {
-    const publicUrl =
-      process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-      "https://mapleleafcommunity.org";
+  if (!fieldData.qr_code_id && !fieldData.qr_codes?.length && slug) {
+    const pageUrl = eventPageUrl(slug);
+    if (!pageUrl) return event as Events;
+
+    const qrUrl = buildEventQrUrl({
+      baseUrl: pageUrl,
+      campaign: slug,
+      content: "event-page",
+    });
     const { data: qr, error: qrError } = await supabase
       .from("qr_codes")
       .insert({
         name: `${name} event QR`,
-        url: `${publicUrl}/events/${slug}`,
+        url: qrUrl,
       })
       .select()
       .single();
 
     if (!qrError && qr) {
+      const nextFieldData = withEventQrLinks(mergedFieldData, [
+        { id: qr.id, description: "Default event page QR" },
+      ]);
       const { error: updateError } = await supabase
         .from("events")
-        .update({
-          field_data: { ...mergedFieldData, qr_code_id: qr.id },
-        })
+        .update({ field_data: nextFieldData })
         .eq("id", event.id);
 
       if (!updateError) {
-        return { ...event, field_data: { ...mergedFieldData, qr_code_id: qr.id } };
+        return { ...event, field_data: nextFieldData };
       }
     }
   }

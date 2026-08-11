@@ -65,7 +65,10 @@ export default function CreateEventModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md p-6">
       <h2 className="lf-h2" style={{ fontSize: 18 }}>New event</h2>
-      <p className="lf-page-desc">Creates a dashboard event and spawns checklist tasks from the template.</p>
+      <p className="lf-page-desc">
+        Creates a dashboard event in draft state. Pick an event type to start from a preset, or
+        leave it as a custom event.
+      </p>
       <form onSubmit={handleSubmit} style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 14 }}>
         <div>
           <Label htmlFor="event-name">Event name</Label>
@@ -96,7 +99,7 @@ export default function CreateEventModal({
         </div>
         {templates.length > 0 && (
           <div>
-            <Label htmlFor="event-template">Template</Label>
+            <Label htmlFor="event-template">Event type</Label>
             <select
               id="event-template"
               className="lf-select"
@@ -104,7 +107,7 @@ export default function CreateEventModal({
               onChange={(e) => setTemplateId(e.target.value)}
               style={{ width: "100%" }}
             >
-              <option value="">No template</option>
+              <option value="">Custom event</option>
               {templates.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}

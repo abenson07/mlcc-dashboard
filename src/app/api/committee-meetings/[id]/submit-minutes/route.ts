@@ -12,7 +12,7 @@ type AttendeeRow = {
 };
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await requireSession();
@@ -20,6 +20,14 @@ export async function POST(
 
   const { id } = await params;
   const supabase = await getSupabaseForLeafletRoutes();
+
+  let skipPublish = false;
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+    skipPublish = body.skipPublish === true;
+  } catch {
+    // empty body is fine (old-admin)
+  }
 
   const { data: meeting, error: fetchError } = await supabase
     .from("committee_meetings")
@@ -44,7 +52,7 @@ export async function POST(
   }
 
   const status = meeting.minutes_status as string;
-  if (status !== "draft" && status !== "error") {
+  if (status !== "draft" && status !== "error" && status !== "submitted") {
     return NextResponse.json(
       { error: "Minutes have already been submitted" },
       { status: 400 },
@@ -61,6 +69,7 @@ export async function POST(
     .update({
       minutes_status: "processing",
       minutes_error: null,
+      minutes_source: meeting.minutes_source ?? "transcript",
       submitted_at: new Date().toISOString(),
       submitted_by: session.user.id,
       updated_at: new Date().toISOString(),
@@ -92,9 +101,9 @@ export async function POST(
       .from("committee_meetings")
       .update({
         structured_minutes: result.structured_minutes,
-        minutes_status: "ready",
+        minutes_status: skipPublish ? "submitted" : "ready",
         minutes_error: null,
-        website_slug,
+        website_slug: skipPublish ? meeting.website_slug : website_slug,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id);

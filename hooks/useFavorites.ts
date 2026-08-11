@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { getApiBase } from "@/lib/apiBase";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import type { UserFavorites } from "@/types/database";
@@ -35,29 +36,59 @@ export function useFavorites() {
 
   const addFavorite = useCallback(
     async ({ name, route }: { name: string; route: string }) => {
-      const res = await fetch(`${getApiBase()}/api/favorites`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, route: normalizeRoute(route) }),
-      });
-      const body = (await res.json()) as { error?: string; favorite?: UserFavorites };
-      if (!res.ok) throw new Error(body.error ?? "Failed to add favorite");
-      await queryClient.invalidateQueries({ queryKey: FAVORITES_QUERY_KEY });
-      return body.favorite;
+      const normalizedRoute = normalizeRoute(route);
+      const previous = queryClient.getQueryData<UserFavorites[]>(FAVORITES_QUERY_KEY) ?? [];
+      const optimistic: UserFavorites = {
+        id: `optimistic-${normalizedRoute}`,
+        user_id: "",
+        name,
+        route: normalizedRoute,
+        created_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData<UserFavorites[]>(FAVORITES_QUERY_KEY, [...previous, optimistic]);
+
+      try {
+        const res = await fetch(`${getApiBase()}/api/favorites`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, route: normalizedRoute }),
+        });
+        const body = (await res.json()) as { error?: string; favorite?: UserFavorites };
+        if (!res.ok) throw new Error(body.error ?? "Failed to add favorite");
+        await queryClient.invalidateQueries({ queryKey: FAVORITES_QUERY_KEY });
+        return body.favorite;
+      } catch (err) {
+        queryClient.setQueryData(FAVORITES_QUERY_KEY, previous);
+        toast.error(err instanceof Error ? err.message : "Failed to add favorite");
+        throw err;
+      }
     },
     [queryClient],
   );
 
   const removeFavorite = useCallback(
     async (route: string) => {
-      const res = await fetch(`${getApiBase()}/api/favorites`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ route: normalizeRoute(route) }),
-      });
-      const body = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(body.error ?? "Failed to remove favorite");
-      await queryClient.invalidateQueries({ queryKey: FAVORITES_QUERY_KEY });
+      const normalizedRoute = normalizeRoute(route);
+      const previous = queryClient.getQueryData<UserFavorites[]>(FAVORITES_QUERY_KEY) ?? [];
+      queryClient.setQueryData<UserFavorites[]>(
+        FAVORITES_QUERY_KEY,
+        previous.filter((fav) => normalizeRoute(fav.route) !== normalizedRoute),
+      );
+
+      try {
+        const res = await fetch(`${getApiBase()}/api/favorites`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ route: normalizedRoute }),
+        });
+        const body = (await res.json()) as { error?: string };
+        if (!res.ok) throw new Error(body.error ?? "Failed to remove favorite");
+        await queryClient.invalidateQueries({ queryKey: FAVORITES_QUERY_KEY });
+      } catch (err) {
+        queryClient.setQueryData(FAVORITES_QUERY_KEY, previous);
+        toast.error(err instanceof Error ? err.message : "Failed to remove favorite");
+        throw err;
+      }
     },
     [queryClient],
   );

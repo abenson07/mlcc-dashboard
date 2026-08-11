@@ -13,6 +13,7 @@ import {
   defaultSponsorshipTierSeeds,
   isSponsorshipTierPlaceholder,
   resolveSponsorshipTierSeeds,
+  type SponsorshipTierSeed,
 } from "@/lib/sponsorship/tierPlaceholders";
 import type {
   CommStage,
@@ -495,8 +496,9 @@ export function mapSponsors(
   sponsorships: (Sponsorships & {
     businesses?: { business_name: string | null; email: string | null } | null;
   })[],
+  tierSeedsOverride?: SponsorshipTierSeed[],
 ): Sponsor[] {
-  const tierSeeds = resolveSponsorshipTierSeeds(sponsorships);
+  const tierSeeds = tierSeedsOverride ?? resolveSponsorshipTierSeeds(sponsorships);
   return sponsorships.filter((s) => !isSponsorshipTierPlaceholder(s)).map((s) => ({
     id: s.id,
     business: s.businesses?.business_name ?? s.description ?? "—",

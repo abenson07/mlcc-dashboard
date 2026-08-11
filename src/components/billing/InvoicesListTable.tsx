@@ -13,4 +13,6 @@ export type StripeInvoiceTableRow = {
   created_by_name: string | null;
   event_id: string | null;
   event_name: string | null;
+  leaflet_id: string | null;
+  sponsorship_id: string | null;
 };

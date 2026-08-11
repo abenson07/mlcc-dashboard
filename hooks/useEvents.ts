@@ -14,7 +14,7 @@ import type { Events, EventsUpdate } from "@/types/database";
 export const EVENTS_QUERY_KEY = ["events"] as const;
 
 const EVENTS_SELECT =
-  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, publish_status, created_at, updated_at";
+  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, committee, publish_status, created_at, updated_at";
 
 async function fetchEventsRows(): Promise<Events[]> {
   if (!supabaseClient) {
@@ -52,6 +52,7 @@ export type CreateEventPayload = {
   starts_at: string;
   ends_at?: string | null;
   event_template_id?: string | null;
+  committee?: string | null;
   field_data?: Record<string, unknown>;
 };
 
@@ -178,6 +179,20 @@ export function useEvent(eventId: string | null, { autoFetch = true } = {}) {
 
   const event: EventEdition | null = data ? mapEventEdition(data) : null;
 
+  const uploadCoverImage = async (file: File): Promise<string> => {
+    if (!supabaseClient) throw new Error("Supabase client is not initialized");
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error: uploadError } = await supabaseClient.storage
+      .from("event-images")
+      .upload(path, file, { contentType: file.type || undefined });
+    if (uploadError) throw uploadError;
+    const { data: publicUrlData } = supabaseClient.storage
+      .from("event-images")
+      .getPublicUrl(path);
+    return publicUrlData.publicUrl;
+  };
+
   return {
     event,
     eventRow: data ?? null,
@@ -189,5 +204,6 @@ export function useEvent(eventId: string | null, { autoFetch = true } = {}) {
     update: (patch: EventsUpdate) => updateMutation.mutateAsync(patch),
     publish: () => publishMutation.mutateAsync(),
     unpublish: () => unpublishMutation.mutateAsync(),
+    uploadCoverImage,
   };
 }

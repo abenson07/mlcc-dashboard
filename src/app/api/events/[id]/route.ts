@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/require-session";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
+import { isCommitteeSlug } from "schemas/committee_meetings";
 import type { EventsUpdate } from "@/types/database";
 
 const EVENTS_SELECT =
-  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, publish_status, created_at, updated_at";
+  "id, name, starts_at, ends_at, field_data, event_template_id, slug, date, committee, publish_status, created_at, updated_at";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -52,6 +53,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     patch.date = o.starts_at.trim().slice(0, 10);
   }
   if (typeof o.ends_at === "string") patch.ends_at = o.ends_at.trim();
+  if (o.committee === null) {
+    patch.committee = null;
+  } else if (typeof o.committee === "string") {
+    const trimmed = o.committee.trim();
+    if (isCommitteeSlug(trimmed)) patch.committee = trimmed;
+  }
   if (o.field_data && typeof o.field_data === "object" && !Array.isArray(o.field_data)) {
     const supabase = await getSupabaseForLeafletRoutes();
     const { data: existing } = await supabase
@@ -64,7 +71,26 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       existing?.field_data && typeof existing.field_data === "object"
         ? (existing.field_data as Record<string, unknown>)
         : {};
-    patch.field_data = { ...prev, ...(o.field_data as Record<string, unknown>) };
+    const nextField = { ...prev, ...(o.field_data as Record<string, unknown>) };
+    if (patch.committee) nextField.committee = patch.committee;
+    else if (patch.committee === null) delete nextField.committee;
+    patch.field_data = nextField;
+  } else if (patch.committee !== undefined) {
+    const supabase = await getSupabaseForLeafletRoutes();
+    const { data: existing } = await supabase
+      .from("events")
+      .select("field_data")
+      .eq("id", id)
+      .maybeSingle();
+
+    const prev =
+      existing?.field_data && typeof existing.field_data === "object"
+        ? (existing.field_data as Record<string, unknown>)
+        : {};
+    const nextField = { ...prev };
+    if (patch.committee) nextField.committee = patch.committee;
+    else delete nextField.committee;
+    patch.field_data = nextField;
   }
 
   if (Object.keys(patch).length === 0) {

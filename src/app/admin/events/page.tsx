@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import EventsListPageContent from "@/components/integrated/events/EventsListPageContent";
+import { EventsDemo } from "@/components/patterns/client-templates-migrate/events";
 
-export default function ShellPreviewEventsPage() {
-  return (
-    <Suspense fallback={<p className="lf-meta">Loading events…</p>}>
-      <EventsListPageContent embedded />
-    </Suspense>
-  );
+export default function EventsRoute() {
+  return <EventsDemo />;
 }

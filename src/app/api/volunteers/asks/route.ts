@@ -33,8 +33,18 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await getSupabaseForVolunteerRoutes();
-  const { webflowEventItemId, event_id: directEventId, ...fields } = parsed;
-  const insertPayload: CreateVolunteerAskBody = { ...fields, event_id: null };
+  const {
+    webflowEventItemId,
+    event_id: directEventId,
+    committee: parsedCommittee,
+    auto_accept_provided: _autoProvided,
+    ...fields
+  } = parsed;
+  const insertPayload: CreateVolunteerAskBody = {
+    ...fields,
+    event_id: null,
+    committee: parsedCommittee ?? "steering",
+  };
 
   try {
     if (directEventId) {
@@ -44,6 +54,28 @@ export async function POST(request: NextRequest) {
         supabase,
         webflowEventItemId
       );
+    }
+
+    // Prefer committee from linked event field_data when caller omitted it.
+    if (!parsedCommittee && insertPayload.event_id) {
+      const { data: eventRow } = await supabase
+        .from("events")
+        .select("field_data")
+        .eq("id", insertPayload.event_id)
+        .maybeSingle();
+      const raw = (eventRow?.field_data as Record<string, unknown> | null)?.committee;
+      if (
+        raw === "events" ||
+        raw === "outreach" ||
+        raw === "hub" ||
+        raw === "leaflet" ||
+        raw === "communications" ||
+        raw === "steering" ||
+        raw === "executive_board" ||
+        raw === "businesses"
+      ) {
+        insertPayload.committee = raw;
+      }
     }
 
     const { data: created, error: insertError } = await supabase

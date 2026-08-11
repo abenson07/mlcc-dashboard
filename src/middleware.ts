@@ -1,7 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const WIP_ROUTE_PREFIXES = [
+  "/admin/committees",
+  "/admin/inbox",
+  "/admin/action-items",
+];
+
+// Per-browser opt-in, toggled from Settings — see WipFeaturesContext.tsx.
+const WIP_FEATURES_COOKIE = "admin-migrate-wip-features";
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isWipRoute = WIP_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+  if (isWipRoute && request.cookies.get(WIP_FEATURES_COOKIE)?.value !== "true") {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

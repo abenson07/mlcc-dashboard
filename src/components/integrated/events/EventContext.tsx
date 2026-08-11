@@ -8,30 +8,64 @@ import {
   type ReactNode,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   useEvent,
   useEvents,
   useEventSponsorships,
   useEventVolunteerAsks,
+  useSponsorshipItemOfferings,
   useTasks,
+  useDemoGuard,
   type VolunteerAskWithSignups,
 } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
 import {
   buildEventBudget,
-  buildSponsorshipTiers,
   eventIdsForInvoiceFilter,
   isEventReadOnly,
   type EventEdition,
   type EventListItem,
 } from "@/lib/events/eventData";
+import { CURATED_DEMO_EVENT_IDS, eventMocksFor, type CuratedDemoEventId } from "@/data/mocks/events";
 import {
   groupScheduleTasks,
   mapSponsors,
   mapTasksForUi,
 } from "@/components/leaflet/leafletData";
 import type { Invoice, Sponsor, SponsorshipTier, Task } from "@/components/leaflet/types";
+import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 import type { EventsUpdate, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
+
+function isCuratedDemoEventId(id: string): id is CuratedDemoEventId {
+  return (CURATED_DEMO_EVENT_IDS as readonly string[]).includes(id);
+}
+
+/** Fake `EventEdition` for a curated demo event id — real `useEvent()` returns null since these ids don't exist in the DB. */
+function demoEventEdition(eventId: string): EventEdition | null {
+  if (!isCuratedDemoEventId(eventId)) return null;
+  const mocks = eventMocksFor(eventId);
+  return {
+    id: eventId,
+    title: mocks.detail.title,
+    starts_at: `${mocks.dateIso}T00:00:00.000Z`,
+    ends_at: null,
+    event_template_id: null,
+    slug: eventId,
+    fieldData: {
+      location: mocks.detail.location,
+      description: mocks.detail.description,
+      status: "confirmed",
+      kind: "council",
+    },
+    anchorDate: mocks.dateIso,
+    distributionLabel: "",
+    daysUntilLabel: "",
+    status: "confirmed",
+    kind: "council",
+    publishStatus: "published",
+  };
+}
 
 type EventBudget = ReturnType<typeof buildEventBudget>;
 
@@ -55,21 +89,25 @@ type EventContextValue = {
     offset_days: number;
     description?: string | null;
   }) => Promise<void>;
+  removeTask: (id: string) => Promise<void>;
   scheduleGroups: ScheduleGroups;
   volunteerAsks: VolunteerAskWithSignups[];
   volunteerSignupTotal: number;
   budget: EventBudget;
   sponsors: Sponsor[];
   sponsorshipTiers: SponsorshipTier[];
+  sponsorshipTierSeeds: SponsorshipTierSeed[];
   invoices: Invoice[];
   createSponsorship: (
     payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">,
   ) => Promise<void>;
   updateSponsorship: (id: string, patch: SponsorshipsUpdate) => Promise<void>;
+  saveSponsorshipTiers: (tiers: SponsorshipTierSeed[]) => Promise<void>;
   refetchAll: () => Promise<void>;
   updateEvent: (patch: EventsUpdate) => Promise<void>;
   publishEvent: () => Promise<void>;
   unpublishEvent: () => Promise<void>;
+  uploadCoverImage: (file: File) => Promise<string>;
 };
 
 const EventContext = createContext<EventContextValue | null>(null);
@@ -83,7 +121,7 @@ export function EventProvider({
 }) {
   const { events, loading: listLoading, error: listError } = useEvents();
   const {
-    event,
+    event: liveEvent,
     eventRow,
     loading: eventLoading,
     error: eventError,
@@ -91,7 +129,11 @@ export function EventProvider({
     update,
     publish,
     unpublish,
+    uploadCoverImage: uploadCoverImageReal,
   } = useEvent(eventId);
+  const { enabled: demo } = useDemoGuard();
+
+  const event = demo ? (demoEventEdition(eventId) ?? liveEvent) : liveEvent;
 
   const readOnly = eventRow ? isEventReadOnly(eventRow, event?.fieldData ?? {}) : false;
 
@@ -101,6 +143,7 @@ export function EventProvider({
     loading: tasksLoading,
     toggleComplete,
     createTask: createTaskMutation,
+    remove: removeTaskMutation,
     refetch: refetchTasks,
   } = useTasks({
     context: "event",
@@ -127,6 +170,13 @@ export function EventProvider({
     updateSponsorship: updateSponsorshipMutation,
   } = useEventSponsorships(eventId);
 
+  const {
+    levels: offeringLevels,
+    tierSeeds: sponsorshipTierSeeds,
+    refetch: refetchOfferings,
+    saveTiers: saveSponsorshipTiersMutation,
+  } = useSponsorshipItemOfferings({ eventId });
+
   const invoiceFilterIds = useMemo(
     () => eventIdsForInvoiceFilter(eventId, event?.fieldData ?? {}),
     [eventId, event?.fieldData],
@@ -146,6 +196,7 @@ export function EventProvider({
           amount_due: number;
           due_date: number | null;
           event_id: string | null;
+          sponsorship_id: string | null;
         }>;
       };
       if (!res.ok) throw new Error(data.error ?? "Failed to load invoices");
@@ -172,36 +223,64 @@ export function EventProvider({
     [sponsorships],
   );
 
-  const sponsors = useMemo(() => mapSponsors(sponsorRows), [sponsorRows]);
+  const sponsors = useMemo(
+    () => mapSponsors(sponsorRows, sponsorshipTierSeeds),
+    [sponsorRows, sponsorshipTierSeeds],
+  );
+
+  const sponsorshipTiers = useMemo(
+    (): SponsorshipTier[] =>
+      offeringLevels.map((l) => {
+        const remaining = Math.max(0, l.quantityAvailable - l.quantityFilled);
+        return {
+          name: l.name,
+          amount: l.amount,
+          quantity: l.quantityAvailable,
+          left: remaining <= 0 ? "Sold out" : `${remaining} Remaining`,
+          remaining,
+          itemId: l.itemId,
+        };
+      }),
+    [offeringLevels],
+  );
 
   const invoices = useMemo((): Invoice[] => {
     const rows = (invoicesQuery.data ?? []).filter(
       (i) => i.event_id && invoiceFilterIds.includes(i.event_id),
     );
-    return rows.map((inv) => ({
-      id: inv.id,
-      invoice: inv.number ?? inv.id.slice(-8),
-      sponsor: inv.customer_email ?? "—",
-      amount: inv.amount_due / 100,
-      dueDate: inv.due_date
-        ? new Date(inv.due_date * 1000).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })
-        : "—",
-      status:
-        inv.status === "paid"
-          ? "Paid"
-          : inv.status === "open"
-            ? "Sent"
-            : inv.status === "draft"
-              ? "Draft"
-              : inv.status === "uncollectible"
-                ? "Overdue"
-                : (inv.status ?? "Draft"),
-    }));
-  }, [invoicesQuery.data, invoiceFilterIds]);
+    const itemNameById = new Map(sponsorshipTiers.filter((t) => t.itemId).map((t) => [t.itemId, t.name]));
+    return rows.map((inv) => {
+      const sponsorship = inv.sponsorship_id
+        ? sponsorships.find((s) => s.id === inv.sponsorship_id)
+        : undefined;
+      const level =
+        (sponsorship?.sponsorship_item_id && itemNameById.get(sponsorship.sponsorship_item_id)) || "—";
+      return {
+        id: inv.id,
+        invoice: inv.number ?? inv.id.slice(-8),
+        sponsor: inv.customer_email ?? "—",
+        amount: inv.amount_due / 100,
+        dueDate: inv.due_date
+          ? new Date(inv.due_date * 1000).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "—",
+        status:
+          inv.status === "paid"
+            ? "Paid"
+            : inv.status === "open"
+              ? "Sent"
+              : inv.status === "draft"
+                ? "Draft"
+                : inv.status === "uncollectible"
+                  ? "Overdue"
+                  : (inv.status ?? "Draft"),
+        level,
+      };
+    });
+  }, [invoicesQuery.data, invoiceFilterIds, sponsorships, sponsorshipTiers]);
 
   const budget = useMemo(
     () =>
@@ -212,11 +291,6 @@ export function EventProvider({
         event?.fieldData.sponsorship_goal_cents,
       ),
     [sponsorships, raised, pledgedAmount, event?.fieldData.sponsorship_goal_cents],
-  );
-
-  const sponsorshipTiers = useMemo(
-    () => buildSponsorshipTiers(sponsorships),
-    [sponsorships],
   );
 
   const toggleTask = useCallback(
@@ -240,6 +314,14 @@ export function EventProvider({
     [readOnly, createTaskMutation],
   );
 
+  const removeTask = useCallback(
+    async (taskId: string) => {
+      if (readOnly) throw new Error("Event is read-only");
+      await removeTaskMutation(taskId);
+    },
+    [readOnly, removeTaskMutation],
+  );
+
   const refetchAll = useCallback(async () => {
     await Promise.all([
       refetchEvent(),
@@ -253,34 +335,77 @@ export function EventProvider({
   const createSponsorship = useCallback(
     async (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => {
       if (readOnly) throw new Error("Event is read-only");
+      if (demo) {
+        toast.success("Sponsorship created — demo mode, not saved");
+        return;
+      }
       await createSponsorshipMutation(payload);
     },
-    [readOnly, createSponsorshipMutation],
+    [readOnly, demo, createSponsorshipMutation],
   );
 
   const updateSponsorship = useCallback(
     async (id: string, patch: SponsorshipsUpdate) => {
       if (readOnly) throw new Error("Event is read-only");
+      if (demo) {
+        toast.success("Sponsorship updated — demo mode, not saved");
+        return;
+      }
       await updateSponsorshipMutation(id, patch);
     },
-    [readOnly, updateSponsorshipMutation],
+    [readOnly, demo, updateSponsorshipMutation],
+  );
+
+  const saveSponsorshipTiers = useCallback(
+    async (tiers: SponsorshipTierSeed[]) => {
+      if (readOnly) throw new Error("Event is read-only");
+      if (demo) {
+        toast.success("Sponsorship levels updated — demo mode, not saved");
+        return;
+      }
+      await saveSponsorshipTiersMutation(tiers);
+    },
+    [readOnly, demo, saveSponsorshipTiersMutation],
   );
 
   const updateEvent = useCallback(
     async (patch: EventsUpdate) => {
       if (readOnly) throw new Error("Event is read-only");
+      if (demo) {
+        toast.success("Event updated — demo mode, not saved");
+        return;
+      }
       await update(patch);
     },
-    [readOnly, update],
+    [readOnly, demo, update],
   );
 
   const publishEvent = useCallback(async () => {
+    if (demo) {
+      toast.success("Event published — demo mode, not saved");
+      return;
+    }
     await publish();
-  }, [publish]);
+  }, [demo, publish]);
 
   const unpublishEvent = useCallback(async () => {
+    if (demo) {
+      toast.success("Event unpublished — demo mode, not saved");
+      return;
+    }
     await unpublish();
-  }, [unpublish]);
+  }, [demo, unpublish]);
+
+  const uploadCoverImage = useCallback(
+    async (file: File) => {
+      if (demo) {
+        toast.success("Cover image updated — demo mode, not saved");
+        return URL.createObjectURL(file);
+      }
+      return uploadCoverImageReal(file);
+    },
+    [demo, uploadCoverImageReal],
+  );
 
   const loading =
     listLoading ||
@@ -309,19 +434,23 @@ export function EventProvider({
       tasksOpenTotal: openCount,
       toggleTask,
       createTask,
+      removeTask,
       scheduleGroups,
       volunteerAsks,
       volunteerSignupTotal,
       budget,
       sponsors,
       sponsorshipTiers,
+      sponsorshipTierSeeds,
       invoices,
       createSponsorship,
       updateSponsorship,
+      saveSponsorshipTiers,
       refetchAll,
       updateEvent,
       publishEvent,
       unpublishEvent,
+      uploadCoverImage,
     }),
     [
       eventId,
@@ -334,19 +463,23 @@ export function EventProvider({
       openCount,
       toggleTask,
       createTask,
+      removeTask,
       scheduleGroups,
       volunteerAsks,
       volunteerSignupTotal,
       budget,
       sponsors,
       sponsorshipTiers,
+      sponsorshipTierSeeds,
       invoices,
       createSponsorship,
       updateSponsorship,
+      saveSponsorshipTiers,
       refetchAll,
       updateEvent,
       publishEvent,
       unpublishEvent,
+      uploadCoverImage,
     ],
   );
 
