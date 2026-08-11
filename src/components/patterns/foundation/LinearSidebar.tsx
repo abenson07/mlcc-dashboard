@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { Suspense, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -271,6 +271,21 @@ type LinearSidebarFavorite = {
  * isolation approach as `MigrateCreateModals` for useEvents/useStories.
  */
 export function LinearSidebar(props: LinearSidebarProps = {}) {
+  return (
+    <Suspense fallback={null}>
+      <LinearSidebarInner {...props} />
+    </Suspense>
+  );
+}
+
+/**
+ * Split out so `useSearchParams()` (used deep inside `LinearSidebarBase` for
+ * active-route matching) is always covered by a Suspense boundary, regardless
+ * of whether the ~40 call sites across admin-preview/admin remember to wrap
+ * it themselves — this component is rendered on nearly every admin page, so
+ * a missed wrapper anywhere fails static prerendering at build time.
+ */
+function LinearSidebarInner(props: LinearSidebarProps) {
   const basePath = useAdminBasePath();
   if (basePath === "/admin") {
     return <LinearSidebarWithFavorites {...props} />;
