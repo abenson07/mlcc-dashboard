@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useMemo, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   Building2,
+  Bug,
   CalendarDays,
   CreditCard,
   FileStack,
@@ -22,7 +23,9 @@ import {
   Search,
   Settings,
   Shirt,
+  Star,
   Sun,
+  Trash2,
   Users,
   Users2,
 } from "lucide-react";
@@ -30,9 +33,11 @@ import {
   Dropdown,
   DropdownItem,
 } from "@/components/patterns/shared/dropdown";
-import { useEvents, useStories } from "hooks";
+import { useEvents, useStories, useCurrentPerson, useFavorites } from "hooks";
 import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import { clearOverlay } from "@/lib/demo/demoOverlay";
+import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
+import { getBestMatchingHref } from "@/lib/nav/getBestMatchingHref";
 import { AddPromotionModal, NewEventModal } from "@/components/patterns/client-templates/events";
 import { NewStoryModal } from "@/components/patterns/client-templates/content";
 import { useAdminBasePath } from "@/components/patterns/client-templates/shared";
@@ -52,17 +57,19 @@ import {
 } from "./sidebar";
 import { useThemeMode } from "./ThemeContext";
 import { useDemoModeOptional } from "./DemoModeContext";
+import { useWipFeaturesOptional } from "./WipFeaturesContext";
 import { DemoModeConfirmModal, type DemoModeConfirmModalTarget } from "./DemoModeConfirmModal";
+import { ReportIssueModal } from "./ReportIssueModal";
 import "./sidebar/sidebar.css";
 
 type DemoItem = {
   id: string;
   label: string;
   icon: ReactNode;
-  /** Path relative to the active base (`/admin-preview` or `/admin-migrate`) — prefixed at render time. */
+  /** Path relative to the active base (`/admin-preview` or `/admin`) — prefixed at render time. */
   path: string;
-  /** Green dot when a real page has been designed; red when it's still a placeholder. */
-  hasContent: boolean;
+  /** Hidden on /admin unless the "Preview features in development" setting is on. */
+  wip?: boolean;
 };
 
 const group1Items: DemoItem[] = [
@@ -71,14 +78,14 @@ const group1Items: DemoItem[] = [
     label: "Action Items",
     icon: <ListChecks size={16} strokeWidth={1.75} />,
     path: "/action-items",
-    hasContent: true,
+    wip: true,
   },
   {
     id: "inbox",
     label: "Inbox",
     icon: <Inbox size={16} strokeWidth={1.75} />,
     path: "/inbox",
-    hasContent: true,
+    wip: true,
   },
 ];
 
@@ -88,28 +95,25 @@ const group2Items: DemoItem[] = [
     label: "Events",
     icon: <CalendarDays size={16} strokeWidth={1.75} />,
     path: "/events",
-    hasContent: true,
   },
   {
     id: "committees",
     label: "Committees",
     icon: <Users2 size={16} strokeWidth={1.75} />,
     path: "/committees",
-    hasContent: true,
+    wip: true,
   },
   {
     id: "leaflets",
     label: "Leaflets",
     icon: <FileText size={16} strokeWidth={1.75} />,
     path: "/leaflets",
-    hasContent: true,
   },
   {
     id: "invoices",
     label: "Invoicing",
     icon: <CreditCard size={16} strokeWidth={1.75} />,
     path: "/invoices",
-    hasContent: true,
   },
 ];
 
@@ -119,14 +123,12 @@ const moreItems: DemoItem[] = [
     label: "Shirt Preorders",
     icon: <Shirt size={16} strokeWidth={1.75} />,
     path: "/shirt-preorders",
-    hasContent: true,
   },
   {
     id: "qr-codes",
     label: "QR Codes",
     icon: <QrCode size={16} strokeWidth={1.75} />,
     path: "/qr-codes",
-    hasContent: true,
   },
 ];
 
@@ -136,60 +138,22 @@ const databaseItems: DemoItem[] = [
     label: "People",
     icon: <Users size={16} strokeWidth={1.75} />,
     path: "/people",
-    hasContent: true,
   },
   {
     id: "businesses",
     label: "Businesses",
     icon: <Building2 size={16} strokeWidth={1.75} />,
     path: "/businesses",
-    hasContent: true,
   },
   {
     id: "content",
     label: "Content",
     icon: <FileStack size={16} strokeWidth={1.75} />,
     path: "/content",
-    hasContent: false,
   },
 ];
 
-const favoriteItems: DemoItem[] = [
-  {
-    id: "fav-volunteers",
-    label: "Volunteers",
-    icon: <Users size={16} strokeWidth={1.75} />,
-    path: "/people?view=volunteers",
-    hasContent: true,
-  },
-  {
-    id: "fav-summer-social",
-    label: "Summer Social Overview",
-    icon: <CalendarDays size={16} strokeWidth={1.75} />,
-    path: "/events",
-    hasContent: false,
-  },
-];
-
-function ContentStatusDot({ hasContent }: { hasContent: boolean }) {
-  return (
-    <span
-      role="img"
-      aria-label={hasContent ? "Content designed" : "Content not yet designed"}
-      title={hasContent ? "Content designed" : "Content not yet designed"}
-      style={{
-        display: "inline-block",
-        width: 6,
-        height: 6,
-        borderRadius: "50%",
-        background: hasContent ? "#27a644" : "#eb5757",
-        flexShrink: 0,
-      }}
-    />
-  );
-}
-
-function KyleBrowerAvatar() {
+function AccountAvatar({ initials }: { initials: string }) {
   return (
     <span
       aria-hidden
@@ -207,14 +171,21 @@ function KyleBrowerAvatar() {
         fontWeight: 600,
       }}
     >
-      KB
+      {initials}
     </span>
   );
 }
 
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "KB";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
 /**
- * Real-data create modals for admin-migrate — split out so `useStories`/`useEvents`
- * (react-query hooks) are only ever mounted inside admin-migrate's QueryClientProvider,
+ * Real-data create modals for /admin — split out so `useStories`/`useEvents`
+ * (react-query hooks) are only ever mounted inside /admin's QueryClientProvider,
  * never inside admin-preview, which has none and must stay free of real Supabase calls.
  */
 function MigrateCreateModals({
@@ -282,13 +253,55 @@ export type LinearSidebarProps = {
   onSettingsClick?: () => void;
 };
 
+type LinearSidebarFavorite = {
+  id: string;
+  name: string;
+  /** Full route (includes basePath), as stored by useFavorites. */
+  route: string;
+};
+
 /**
  * Linear-style sidebar composed from named sidebar primitives.
+ *
+ * Favorites are real, Supabase-backed data (`useFavorites`), but that hook
+ * uses react-query — which only has a `QueryClientProvider` mounted under
+ * `/admin`, not `/admin-preview` (a frozen pattern library). So real
+ * favorites are fetched in this thin wrapper, gated to /admin, and
+ * passed down as plain props to the presentational sidebar below — same
+ * isolation approach as `MigrateCreateModals` for useEvents/useStories.
  */
-export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
+export function LinearSidebar(props: LinearSidebarProps = {}) {
+  const basePath = useAdminBasePath();
+  if (basePath === "/admin") {
+    return <LinearSidebarWithFavorites {...props} />;
+  }
+  return <LinearSidebarBase {...props} favorites={[]} onRemoveFavorite={undefined} />;
+}
+
+function LinearSidebarWithFavorites(props: LinearSidebarProps) {
+  const { favorites, removeFavorite } = useFavorites();
+  return (
+    <LinearSidebarBase
+      {...props}
+      favorites={favorites}
+      onRemoveFavorite={(route: string) => void removeFavorite(route)}
+    />
+  );
+}
+
+function LinearSidebarBase({
+  onSettingsClick,
+  favorites,
+  onRemoveFavorite,
+}: LinearSidebarProps & {
+  favorites: LinearSidebarFavorite[];
+  onRemoveFavorite?: (route: string) => void;
+}) {
   const { mode, toggle } = useThemeMode();
   const { enabled: demoEnabled, setEnabled: setDemoEnabled } = useDemoModeOptional();
+  const { enabled: wipFeaturesEnabled } = useWipFeaturesOptional();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const basePath = useAdminBasePath();
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
@@ -296,7 +309,20 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
   const [isNewEventOpen, setIsNewEventOpen] = useState(false);
   const [promotionModalType, setPromotionModalType] = useState<EventPromotionType | null>(null);
   const [demoTransition, setDemoTransition] = useState<DemoModeConfirmModalTarget | null>(null);
+  const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
   const isMigrate = basePath === "/admin";
+  const { person: currentPerson } = useCurrentPerson();
+  const displayName = currentPerson?.full_name || "Kyle Brower";
+  const initials = initialsFromName(displayName);
+  // admin-preview is a frozen pattern library, not shipped as-is — only /admin
+  // needs its WIP items (committees/inbox/action-items) hidden until opted in.
+  const showWipItems = !isMigrate || wipFeaturesEnabled;
+  const visibleGroup1Items = showWipItems
+    ? group1Items
+    : group1Items.filter((item) => !item.wip);
+  const visibleGroup2Items = showWipItems
+    ? group2Items
+    : group2Items.filter((item) => !item.wip);
 
   function requestDemoTransition(target: DemoModeConfirmModalTarget) {
     setDemoTransition(target);
@@ -312,21 +338,49 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
     return `${basePath}${path}`;
   }
 
+  const currentRoute = useMemo(() => {
+    const search = searchParams.toString();
+    return normalizeRoute(search ? `${pathname}?${search}` : pathname);
+  }, [pathname, searchParams]);
+
+  const activeHref = useMemo(() => {
+    const allHrefs = [
+      ...visibleGroup1Items.map((item) => hrefFor(item.path)),
+      ...visibleGroup2Items.map((item) => hrefFor(item.path)),
+      ...databaseItems.map((item) => hrefFor(item.path)),
+      ...favorites.map((favorite) => favorite.route),
+    ];
+    return getBestMatchingHref(currentRoute, allHrefs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hrefFor/basePath change together; visible*/databaseItems are stable module-level data
+  }, [currentRoute, visibleGroup1Items, visibleGroup2Items, favorites, basePath]);
+
   function isSelected(path: string): boolean {
-    return pathname === hrefFor(path).split("?")[0];
+    return hrefFor(path) === activeHref;
   }
 
-  // Not part of the primary nav's isSelected matching (they live behind "More"),
-  // so match directly off the current path instead. "More" is just a drawer to
-  // reach these — it never shows as active itself. Whichever item is currently
-  // open gets promoted into the main nav list (next to Invoicing) for as long
-  // as the user stays on that route; it drops back into the "More" drawer as
-  // soon as they navigate elsewhere.
+  // Not part of the primary nav's activeHref matching (they live behind "More"),
+  // so match directly off the current path instead.
   function isMorePathSelected(path: string): boolean {
-    return (pathname ?? "").startsWith(hrefFor(path).split("?")[0]);
+    return currentRoute.startsWith(hrefFor(path));
   }
 
+  // "More" is just a drawer to reach these — it never shows as active itself.
+  // Whichever item is currently open gets promoted into the main nav list
+  // (next to Invoicing) for as long as the user stays on that route; it drops
+  // back into the "More" drawer as soon as they navigate elsewhere.
   const activeMoreItem = moreItems.find((item) => isMorePathSelected(item.path));
+
+  // Top-level nav label for the active route (e.g. "Businesses") — the desktop /admin
+  // pages don't render an <h1>, so this is the most reliable "what section is the user in"
+  // signal available to the bug-report modal.
+  const activeSectionLabel = useMemo(() => {
+    const allItems = [...visibleGroup1Items, ...visibleGroup2Items, ...databaseItems];
+    const match = allItems.find((item) => hrefFor(item.path) === activeHref);
+    if (match) return match.label;
+    const favoriteMatch = favorites.find((favorite) => favorite.route === activeHref);
+    return favoriteMatch?.name;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hrefFor/basePath change together
+  }, [activeHref, visibleGroup1Items, visibleGroup2Items, favorites, basePath]);
 
   function openCreateOption(next: () => void) {
     setIsCreateMenuOpen(false);
@@ -345,11 +399,11 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
       }}
     >
       <SidebarHeader>
-        <WorkspaceMenu name="Kyle Brower" icon={<KyleBrowerAvatar />}>
+        <WorkspaceMenu name={displayName} icon={<AccountAvatar initials={initials} />}>
           <DropdownItem
             label="Settings"
             icon={<Settings size={16} strokeWidth={1.75} />}
-            onSelect={onSettingsClick}
+            onSelect={onSettingsClick ?? (() => router.push(hrefFor("/settings")))}
           />
           <DropdownItem
             label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
@@ -416,27 +470,25 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
 
       <SidebarScrollArea>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {group1Items.map((item) => (
+          {visibleGroup1Items.map((item) => (
             <MenuItem
               key={item.id}
               label={item.label}
               icon={item.icon}
               selected={isSelected(item.path)}
               onClick={() => router.push(hrefFor(item.path))}
-              indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
         </div>
 
         <SidebarSection title="Manage">
-          {group2Items.map((item) => (
+          {visibleGroup2Items.map((item) => (
             <MenuItem
               key={item.id}
               label={item.label}
               icon={item.icon}
               selected={isSelected(item.path)}
               onClick={() => router.push(hrefFor(item.path))}
-              indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
           {activeMoreItem ? (
@@ -446,7 +498,6 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
               icon={activeMoreItem.icon}
               selected
               onClick={() => router.push(hrefFor(activeMoreItem.path))}
-              indicator={<ContentStatusDot hasContent={activeMoreItem.hasContent} />}
             />
           ) : null}
           <Dropdown
@@ -478,23 +529,33 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
               icon={item.icon}
               selected={isSelected(item.path)}
               onClick={() => router.push(hrefFor(item.path))}
-              indicator={<ContentStatusDot hasContent={item.hasContent} />}
             />
           ))}
         </SidebarSection>
 
-        <SidebarSection title="Favorites">
-          {favoriteItems.map((item) => (
-            <MenuItem
-              key={item.id}
-              label={item.label}
-              icon={item.icon}
-              selected={isSelected(item.path)}
-              onClick={() => router.push(hrefFor(item.path))}
-              indicator={<ContentStatusDot hasContent={item.hasContent} />}
-            />
-          ))}
-        </SidebarSection>
+        {favorites.length > 0 ? (
+          <SidebarSection title="Favorites">
+            {favorites.map((favorite) => (
+              <MenuItem
+                key={favorite.id}
+                label={favorite.name}
+                icon={<Star size={16} strokeWidth={1.75} />}
+                selected={favorite.route === activeHref}
+                onClick={() => router.push(favorite.route)}
+                action={
+                  onRemoveFavorite ? (
+                    <SidebarIconButton
+                      label={`Remove ${favorite.name} from favorites`}
+                      variant="ghost"
+                      icon={<Trash2 size={14} strokeWidth={1.75} />}
+                      onClick={() => onRemoveFavorite(favorite.route)}
+                    />
+                  ) : undefined
+                }
+              />
+            ))}
+          </SidebarSection>
+        ) : null}
       </SidebarScrollArea>
 
       {isMigrate && demoEnabled ? (
@@ -504,11 +565,19 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
       <NavBottom
         start={isMigrate ? null : <TryButton />}
         end={
-          <SidebarIconButton
-            label="Help"
-            variant="ghost"
-            icon={<HelpCircle size={16} strokeWidth={1.75} />}
-          />
+          <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <SidebarIconButton
+              label="Report bug or request feature"
+              variant="ghost"
+              icon={<Bug size={16} strokeWidth={1.75} />}
+              onClick={() => setIsReportIssueOpen(true)}
+            />
+            <SidebarIconButton
+              label="Help"
+              variant="ghost"
+              icon={<HelpCircle size={16} strokeWidth={1.75} />}
+            />
+          </div>
         }
       />
 
@@ -539,6 +608,11 @@ export function LinearSidebar({ onSettingsClick }: LinearSidebarProps = {}) {
           onConfirm={confirmDemoTransition}
         />
       ) : null}
+      <ReportIssueModal
+        isOpen={isReportIssueOpen}
+        onClose={() => setIsReportIssueOpen(false)}
+        sectionLabel={activeSectionLabel}
+      />
     </div>
   );
 }
