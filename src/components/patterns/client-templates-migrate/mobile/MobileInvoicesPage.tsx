@@ -159,8 +159,10 @@ function MobileInvoiceSheet({
     setBusy(true);
     setMessage(null);
     if (demo) {
+      const { patchDemoEntity } = await import("@/lib/demo/demoStore");
+      patchDemoEntity("invoices", invoice.id, { status: "paid", payment_method: method });
       setConfirmMethod(null);
-      setMessage(`Marked paid by ${method} — demo mode, not saved.`);
+      setMessage(`Marked paid by ${method} — demo mode, saved locally only`);
       setBusy(false);
       return;
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAllSponsorships, type SponsorshipWithParent } from "hooks";
+import { useAllSponsorships, useDemoGuard, type SponsorshipWithParent } from "hooks";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Button } from "@/components/patterns/primitives/Button";
 import { formatUsd } from "@/components/billing/invoiceUtils";
@@ -23,12 +23,17 @@ function Field({ label, value }: { label: string; value: string }) {
 
 export function SponsorshipDetailPanel({ sponsorship }: SponsorshipDetailPanelProps) {
   const { updateSponsorship } = useAllSponsorships();
+  const { enabled: demo } = useDemoGuard();
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(sponsorship.status);
 
   async function markPaid() {
     setSaving(true);
     try {
+      if (demo) {
+        setStatus("paid");
+        return;
+      }
       await updateSponsorship(sponsorship.id, {
         status: "paid",
         paid_date: new Date().toISOString().slice(0, 10),

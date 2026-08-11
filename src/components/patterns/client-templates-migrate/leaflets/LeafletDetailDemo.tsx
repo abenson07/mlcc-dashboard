@@ -42,6 +42,7 @@ import { LeafletInvoiceDetailPanel } from "./LeafletInvoiceDetailPanel";
 import { StoryDetailPanel } from "./StoryDetailPanel";
 import { DelivererPersonPanel } from "./DelivererPersonPanel";
 import { EmailDeliverersModal } from "./EmailDeliverersModal";
+import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToRouteRows } from "./adapters";
 import {
   leafletTaskGroupForDueDate,
@@ -229,8 +230,19 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const [emailOpen, setEmailOpen] = useState(false);
 
   useEffect(() => {
-    setDemoTasks(demo ? sampleLeafletTasks : []);
-  }, [demo]);
+    if (!demo) {
+      setDemoTasks([]);
+      return;
+    }
+    setDemoTasks(
+      listDemoScoped<LeafletTaskRow>("leafletTasks", leafletId || "default") ?? sampleLeafletTasks,
+    );
+  }, [demo, leafletId]);
+
+  function persistDemoTasks(next: LeafletTaskRow[]) {
+    setDemoTasks(next);
+    writeDemoScoped("leafletTasks", leafletId || "default", next);
+  }
 
   const leaflet = useMemo(
     () => (demo ? sampleLeafletDetail : liveLeafletDetail(leafletId, leaflets)),
@@ -339,9 +351,15 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
 
   function toggleTask(id: string) {
     if (demo) {
-      setDemoTasks((prev) =>
-        prev.map((task) => (task.id === id ? { ...task, isComplete: !task.isComplete } : task)),
-      );
+      void guard(async () => undefined, {
+        action: "Task updated",
+        local: () =>
+          persistDemoTasks(
+            demoTasks.map((task) =>
+              task.id === id ? { ...task, isComplete: !task.isComplete } : task,
+            ),
+          ),
+      });
       return;
     }
     const row = leafletTaskRows.find((t) => t.id === id);
@@ -353,17 +371,21 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     if (demo) {
       const group = leafletTaskGroupForDueDate(dueDate);
       const isOverdue = group === "Past due";
-      setDemoTasks((prev) => [
-        ...prev,
-        {
-          id: `lf-task-${Date.now()}`,
-          title,
-          group,
-          dueLabel: formatLeafletTaskDueLabel(dueDate, isOverdue),
-          isComplete: false,
-          isOverdue,
-        },
-      ]);
+      void guard(async () => undefined, {
+        action: "Task added",
+        local: () =>
+          persistDemoTasks([
+            ...demoTasks,
+            {
+              id: `lf-task-${Date.now()}`,
+              title,
+              group,
+              dueLabel: formatLeafletTaskDueLabel(dueDate, isOverdue),
+              isComplete: false,
+              isOverdue,
+            },
+          ]),
+      });
       return;
     }
     void guard(
@@ -377,7 +399,10 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
 
   function removeTask(id: string) {
     if (demo) {
-      setDemoTasks((prev) => prev.filter((task) => task.id !== id));
+      void guard(async () => undefined, {
+        action: "Task removed",
+        local: () => persistDemoTasks(demoTasks.filter((task) => task.id !== id)),
+      });
       return;
     }
     void guard(() => removeLeafletTaskMutation(id), { action: "Task removed" });

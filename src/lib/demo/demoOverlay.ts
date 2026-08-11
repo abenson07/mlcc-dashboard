@@ -1,3 +1,16 @@
+/**
+ * Backward-compatible people/business overlay API over demoStore.
+ * Prefer `@/lib/demo/demoStore` for new code.
+ */
+
+import {
+  applyDemoPatch,
+  clearDemoStore,
+  patchDemoEntity,
+  readDemoStore,
+  type DemoStore,
+} from "./demoStore";
+
 export type DemoOverlayKind = "people" | "businesses";
 
 export type DemoOverlay = {
@@ -5,49 +18,47 @@ export type DemoOverlay = {
   businesses: Record<string, Record<string, unknown>>;
 };
 
-const STORAGE_KEY = "admin-migrate-demo-overlay:v1";
-
-function emptyOverlay(): DemoOverlay {
-  return { people: {}, businesses: {} };
+function toOverlay(store: DemoStore): DemoOverlay {
+  return {
+    people: {
+      ...store.buckets.people.patches,
+      ...store.buckets.people.entities,
+    },
+    businesses: {
+      ...store.buckets.businesses.patches,
+      ...store.buckets.businesses.entities,
+    },
+  };
 }
 
 export function readOverlay(): DemoOverlay {
-  if (typeof window === "undefined") return emptyOverlay();
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyOverlay();
-    const parsed = JSON.parse(raw) as Partial<DemoOverlay>;
-    return { people: parsed.people ?? {}, businesses: parsed.businesses ?? {} };
-  } catch {
-    return emptyOverlay();
-  }
+  return toOverlay(readDemoStore());
 }
 
-function writeOverlay(overlay: DemoOverlay) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(overlay));
-}
-
-/** Merge `patch` into the stored record for `kind`/`id` and persist. Returns the new overlay. */
+/** Merge `patch` into the stored record for `kind`/`id` and persist. */
 export function patchOverlayEntity(
   kind: DemoOverlayKind,
   id: string,
   patch: Record<string, unknown>,
 ): DemoOverlay {
-  const overlay = readOverlay();
-  overlay[kind] = { ...overlay[kind], [id]: { ...overlay[kind][id], ...patch } };
-  writeOverlay(overlay);
-  return overlay;
+  return toOverlay(patchDemoEntity(kind, id, patch));
 }
 
 export function clearOverlay(): DemoOverlay {
-  const overlay = emptyOverlay();
-  writeOverlay(overlay);
-  return overlay;
+  return toOverlay(clearDemoStore());
 }
 
-/** Merge any stored overlay patch for `kind`/`id` over `base`. Returns `base` unchanged if no override exists. */
-export function applyOverlay<T extends { id: string }>(overlay: DemoOverlay, kind: DemoOverlayKind, base: T): T {
+/** Merge any stored overlay patch for `kind`/`id` over `base`. */
+export function applyOverlay<T extends { id: string }>(
+  overlay: DemoOverlay,
+  kind: DemoOverlayKind,
+  base: T,
+): T {
   const patch = overlay[kind][base.id];
   return patch ? { ...base, ...patch } : base;
+}
+
+/** Apply live store patches (preferred when overlay snapshot may be stale). */
+export function applyOverlayLive<T extends { id: string }>(kind: DemoOverlayKind, base: T): T {
+  return applyDemoPatch(kind, base);
 }

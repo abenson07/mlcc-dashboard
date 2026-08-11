@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useEvents } from "hooks";
+import { useDemoGuard, useEvents } from "hooks";
 import { DraftsSection } from "@/components/patterns/client-templates/drafts";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { Text } from "@/components/patterns/primitives/Text";
@@ -22,11 +22,13 @@ function isPastEvent(event: EventSummary): boolean {
 /** Events body — stacked list of upcoming event cards, mirroring Action Items. */
 export function EventsListPage() {
   const { enabled: demo } = useDemoModeOptional();
+  const { store } = useDemoGuard();
   const { events, loading, error } = useEvents();
   const [isPastExpanded, setIsPastExpanded] = useState(false);
   const summaries = useMemo(
-    () => (demo ? sampleEvents : events.map(toEventSummary)),
-    [demo, events],
+    () => (demo ? store.merge<EventSummary>("events", sampleEvents) : events.map(toEventSummary)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [demo, events, store.version],
   );
 
   const upcomingEvents = useMemo(

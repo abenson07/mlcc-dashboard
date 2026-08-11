@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useBusinesses, useDemoGuard } from "hooks";
+import { useBusinesses, useDemoGuard, type BusinessWithDetails } from "hooks";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
@@ -17,6 +17,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import { useAdminBasePath } from "@/components/patterns/client-templates/shared/useAdminBasePath";
 import { useIsMobileAdmin } from "@/components/patterns/client-templates-migrate/mobile";
+import { newDemoId } from "@/lib/demo/demoStore";
 import { BusinessMembersPage } from "./BusinessMembersPage";
 import { SponsorsPage } from "./SponsorsPage";
 import { AllBusinessesTable } from "./AllBusinessesTable";
@@ -28,6 +29,14 @@ import { EditBusinessModal } from "./EditBusinessModal";
 import type { BusinessMemberRow, BusinessRow, SponsorRow } from "./types";
 import { hookFiltersForView, toBusinessMemberRow, toBusinessRow, toSponsorRow } from "./adapters";
 import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
+
+function matchesBusinessesView(business: BusinessWithDetails, view: BusinessesView): boolean {
+  if (view === "members") return Boolean(business.is_member || business.membership);
+  if (view === "sponsors") {
+    return Boolean(business.is_past_sponsor || (business.sponsorships && business.sponsorships.length > 0));
+  }
+  return true;
+}
 
 type BusinessesView = "members" | "sponsors" | "all";
 
@@ -62,12 +71,14 @@ function BusinessesDemoInner() {
     [view, search]
   );
   const { businesses: businessesRaw, loading, error, create, update, refetch } = useBusinesses({ filters });
-  const { enabled: demo, overlay } = useDemoGuard();
+  const { enabled: demo, overlay, store } = useDemoGuard();
 
-  const businesses = useMemo(
-    () => (demo ? businessesRaw.map((b) => overlay.apply("businesses", b)) : businessesRaw),
-    [demo, businessesRaw, overlay],
-  );
+  const businesses = useMemo(() => {
+    if (!demo) return businessesRaw;
+    return store
+      .merge<BusinessWithDetails>("businesses", businessesRaw)
+      .filter((b) => matchesBusinessesView(b, view));
+  }, [demo, businessesRaw, store, view, store.version]);
 
   const businessMembers: BusinessMemberRow[] = useMemo(
     () => (view === "members" ? businesses.map(toBusinessMemberRow) : []),
@@ -142,7 +153,17 @@ function BusinessesDemoInner() {
 
   async function handleAddBusiness(row: Omit<BusinessRow, "id">) {
     if (demo) {
-      toast.success("Business added — demo mode, not saved");
+      overlay.upsert("businesses", {
+        id: newDemoId("biz"),
+        business_name: row.businessName,
+        contact_name: row.contactName,
+        phone: row.phone,
+        is_member: false,
+        is_past_sponsor: false,
+        sponsorships: [],
+        membership: null,
+      });
+      toast.success("Business added — demo mode, saved locally only");
       return;
     }
     await create({ business_name: row.businessName, contact_name: row.contactName, phone: row.phone });
@@ -151,7 +172,23 @@ function BusinessesDemoInner() {
 
   async function handleAddMember(row: Omit<BusinessMemberRow, "id">) {
     if (demo) {
-      toast.success("Member added — demo mode, not saved");
+      const id = newDemoId("biz");
+      const membershipId = newDemoId("biz-mem");
+      const renewal = new Date().toISOString().slice(0, 10);
+      overlay.upsert("businesses", {
+        id,
+        business_name: row.businessName,
+        is_member: true,
+        is_past_sponsor: false,
+        membership_id: membershipId,
+        sponsorships: [],
+        membership: {
+          id: membershipId,
+          status: row.status,
+          last_renewal: renewal,
+        },
+      });
+      toast.success("Member added — demo mode, saved locally only");
       return;
     }
     const business = await create({ business_name: row.businessName });
@@ -170,7 +207,25 @@ function BusinessesDemoInner() {
 
   async function handleAddSponsor(row: Omit<SponsorRow, "id">) {
     if (demo) {
-      toast.success("Sponsor added — demo mode, not saved");
+      const id = newDemoId("biz");
+      const paid = new Date().toISOString().slice(0, 10);
+      overlay.upsert("businesses", {
+        id,
+        business_name: row.businessName,
+        is_member: false,
+        is_past_sponsor: true,
+        sponsorships: [
+          {
+            id: newDemoId("spon"),
+            business_id: id,
+            amount: row.amount,
+            status: "paid",
+            paid_date: paid,
+          },
+        ],
+        membership: null,
+      });
+      toast.success("Sponsor added — demo mode, saved locally only");
       return;
     }
     const business = await create({ business_name: row.businessName });

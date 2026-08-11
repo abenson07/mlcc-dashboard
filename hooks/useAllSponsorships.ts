@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { isSponsorshipTierPlaceholder } from "@/lib/sponsorship/tierPlaceholders";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { sampleSponsorships } from "@/data/mocks/invoices";
 import { useEvents } from "./useEvents";
 import { useLeaflets } from "./useLeaflets";
 import type { Sponsorships, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
@@ -31,15 +33,18 @@ async function fetchAllSponsorships(): Promise<Sponsorships[]> {
 
 export function useAllSponsorships() {
   const queryClient = useQueryClient();
+  const { enabled: demo } = useDemoModeOptional();
   const { events } = useEvents();
   const { leaflets } = useLeaflets();
 
   const { data: rawSponsorships = [], isLoading, error, refetch } = useQuery({
     queryKey: ALL_SPONSORSHIPS_QUERY_KEY,
     queryFn: fetchAllSponsorships,
+    enabled: !demo,
   });
 
   const sponsorships = useMemo<SponsorshipWithParent[]>(() => {
+    if (demo) return sampleSponsorships as SponsorshipWithParent[];
     return rawSponsorships
       .filter((s) => !isSponsorshipTierPlaceholder(s))
       .map((s) => {
@@ -65,8 +70,7 @@ export function useAllSponsorships() {
         }
         return { ...s, parentType: null, parentLabel: "Unassigned", parentYear: null };
       });
-  }, [rawSponsorships, events, leaflets]);
-
+  }, [demo, rawSponsorships, events, leaflets]);
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ALL_SPONSORSHIPS_QUERY_KEY });
     void queryClient.invalidateQueries({ queryKey: ["sponsorships", "event"] });
@@ -112,10 +116,16 @@ export function useAllSponsorships() {
 
   return {
     sponsorships,
-    loading: isLoading,
-    error: error ? (error instanceof Error ? error.message : "Failed to load sponsorships") : null,
+    loading: demo ? false : isLoading,
+    error: demo
+      ? null
+      : error
+        ? error instanceof Error
+          ? error.message
+          : "Failed to load sponsorships"
+        : null,
     refetch: async () => {
-      await refetch();
+      if (!demo) await refetch();
     },
     createSponsorship: (args: {
       eventId?: string | null;

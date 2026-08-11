@@ -35,7 +35,7 @@ export function DemoModeCard({ onExitClick }: DemoModeCardProps) {
             color: "var(--linear-color-ink-subtle)",
           }}
         >
-          Currently in demo mode. All changes are not saved.
+          Currently in demo mode. Changes are saved on this device only — not to the database.
         </span>
       </div>
       <button

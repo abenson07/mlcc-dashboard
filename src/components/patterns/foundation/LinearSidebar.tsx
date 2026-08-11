@@ -35,7 +35,7 @@ import {
 } from "@/components/patterns/shared/dropdown";
 import { useEvents, useStories, useCurrentPerson, useFavorites } from "hooks";
 import { getCurrentPersonId } from "@/lib/people/currentPerson";
-import { clearOverlay } from "@/lib/demo/demoOverlay";
+import { clearDemoStore, newDemoId, upsertDemoEntity } from "@/lib/demo/demoStore";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import { getBestMatchingHref } from "@/lib/nav/getBestMatchingHref";
 import { AddPromotionModal, NewEventModal } from "@/components/patterns/client-templates/events";
@@ -208,7 +208,16 @@ function MigrateCreateModals({
 
   async function handleCreateStory(story: Omit<Story, "id">) {
     if (demo) {
-      toast.success("Story created — demo mode, not saved");
+      const id = newDemoId("story");
+      upsertDemoEntity("stories", {
+        id,
+        title: story.title,
+        status: story.status,
+        body: story.body || "",
+        author: story.author,
+      });
+      toast.success("Story created — demo mode, saved locally only");
+      router.push(hrefFor(`/content?view=stories&selected=${id}`));
       return;
     }
     const authorId = await getCurrentPersonId();
@@ -223,7 +232,17 @@ function MigrateCreateModals({
 
   async function handleCreateEvent(event: Omit<EventSummary, "id">) {
     if (demo) {
-      toast.success("Event created — demo mode, not saved");
+      const id = newDemoId("evt");
+      upsertDemoEntity("events", {
+        id,
+        title: event.title,
+        date: event.date,
+        location: event.location,
+        committee: event.committee,
+        description: event.description,
+      });
+      toast.success("Event created — demo mode, saved locally only");
+      router.push(hrefFor(`/events/${id}`));
       return;
     }
     const startsAt = event.date ? new Date(`${event.date}T00:00:00`).toISOString() : new Date().toISOString();
@@ -344,7 +363,7 @@ function LinearSidebarBase({
   }
 
   function confirmDemoTransition() {
-    if (demoTransition === "live") clearOverlay();
+    if (demoTransition === "live") clearDemoStore();
     if (demoTransition) setDemoEnabled(demoTransition === "demo");
     setDemoTransition(null);
   }

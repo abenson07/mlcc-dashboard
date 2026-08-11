@@ -89,7 +89,9 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
     setRecordingPayment(true);
     setStatusMessage(null);
     if (demo) {
-      setStatusMessage(`Marked paid by ${method} — demo mode, not saved.`);
+      const { patchDemoEntity } = await import("@/lib/demo/demoStore");
+      patchDemoEntity("invoices", invoice.id, { status: "paid", payment_method: method });
+      setStatusMessage(`Marked paid by ${method} — demo mode, saved locally only`);
       setConfirmMethod(null);
       setRecordingPayment(false);
       return;

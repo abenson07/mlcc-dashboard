@@ -36,6 +36,7 @@ import {
 import type { Invoice, Sponsor, SponsorshipTier, Task } from "@/components/leaflet/types";
 import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 import type { EventsUpdate, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
+import { newDemoId, patchDemoEntity, upsertDemoEntity } from "@/lib/demo/demoStore";
 
 function isCuratedDemoEventId(id: string): id is CuratedDemoEventId {
   return (CURATED_DEMO_EVENT_IDS as readonly string[]).includes(id);
@@ -336,19 +337,25 @@ export function EventProvider({
     async (payload: Omit<SponsorshipsInsert, "event_id" | "leaflet_id">) => {
       if (readOnly) throw new Error("Event is read-only");
       if (demo) {
-        toast.success("Sponsorship created — demo mode, not saved");
+        upsertDemoEntity("sponsorships", {
+          id: newDemoId("spon"),
+          event_id: eventId,
+          ...payload,
+        });
+        toast.success("Sponsorship created — demo mode, saved locally only");
         return;
       }
       await createSponsorshipMutation(payload);
     },
-    [readOnly, demo, createSponsorshipMutation],
+    [readOnly, demo, createSponsorshipMutation, eventId],
   );
 
   const updateSponsorship = useCallback(
     async (id: string, patch: SponsorshipsUpdate) => {
       if (readOnly) throw new Error("Event is read-only");
       if (demo) {
-        toast.success("Sponsorship updated — demo mode, not saved");
+        patchDemoEntity("sponsorships", id, patch as Record<string, unknown>);
+        toast.success("Sponsorship updated — demo mode, saved locally only");
         return;
       }
       await updateSponsorshipMutation(id, patch);
@@ -360,51 +367,61 @@ export function EventProvider({
     async (tiers: SponsorshipTierSeed[]) => {
       if (readOnly) throw new Error("Event is read-only");
       if (demo) {
-        toast.success("Sponsorship levels updated — demo mode, not saved");
+        upsertDemoEntity("events", {
+          id: `tiers-${eventId}`,
+          event_id: eventId,
+          tiers: tiers as unknown as Record<string, unknown>[],
+        });
+        toast.success("Sponsorship levels updated — demo mode, saved locally only");
         return;
       }
       await saveSponsorshipTiersMutation(tiers);
     },
-    [readOnly, demo, saveSponsorshipTiersMutation],
+    [readOnly, demo, saveSponsorshipTiersMutation, eventId],
   );
 
   const updateEvent = useCallback(
     async (patch: EventsUpdate) => {
       if (readOnly) throw new Error("Event is read-only");
       if (demo) {
-        toast.success("Event updated — demo mode, not saved");
+        patchDemoEntity("events", eventId, patch as Record<string, unknown>);
+        toast.success("Event updated — demo mode, saved locally only");
         return;
       }
       await update(patch);
     },
-    [readOnly, demo, update],
+    [readOnly, demo, update, eventId],
   );
 
   const publishEvent = useCallback(async () => {
     if (demo) {
-      toast.success("Event published — demo mode, not saved");
+      patchDemoEntity("events", eventId, { publishStatus: "published", publish_status: "published" });
+      toast.success("Event published — demo mode, saved locally only");
       return;
     }
     await publish();
-  }, [demo, publish]);
+  }, [demo, publish, eventId]);
 
   const unpublishEvent = useCallback(async () => {
     if (demo) {
-      toast.success("Event unpublished — demo mode, not saved");
+      patchDemoEntity("events", eventId, { publishStatus: "draft", publish_status: "draft" });
+      toast.success("Event unpublished — demo mode, saved locally only");
       return;
     }
     await unpublish();
-  }, [demo, unpublish]);
+  }, [demo, unpublish, eventId]);
 
   const uploadCoverImage = useCallback(
     async (file: File) => {
       if (demo) {
-        toast.success("Cover image updated — demo mode, not saved");
-        return URL.createObjectURL(file);
+        const url = URL.createObjectURL(file);
+        patchDemoEntity("events", eventId, { cover_image_url: url });
+        toast.success("Cover image updated — demo mode, saved locally only");
+        return url;
       }
       return uploadCoverImageReal(file);
     },
-    [demo, uploadCoverImageReal],
+    [demo, uploadCoverImageReal, eventId],
   );
 
   const loading =

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, MoreHorizontal } from "lucide-react";
 import { Text } from "@/components/patterns/primitives/Text";
 import { IconButton } from "@/components/patterns/shared/IconButton";
@@ -9,6 +9,8 @@ import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { useEventContext } from "@/components/integrated/events/EventContext";
 import { eventMocksFor, type EventSponsorRow } from "@/data/mocks/events";
+import { listDemoScoped } from "@/lib/demo/demoStore";
+import { useDemoGuard } from "hooks";
 
 export type SponsorsListSectionProps = {
   onSelectSponsor?: (row: EventSponsorRow) => void;
@@ -34,20 +36,28 @@ export function SponsorsListSection({
   onSeeAllSponsors,
 }: SponsorsListSectionProps) {
   const { enabled: demo } = useDemoModeOptional();
+  const { store } = useDemoGuard();
   const { eventId, sponsors: liveSponsors } = useEventContext();
-  const sponsors: EventSponsorRow[] = demo
-    ? eventMocksFor(eventId).sponsors
-    : liveSponsors.map((s) => ({
-        id: s.id,
-        name: s.business,
-        tier: s.level,
-        status:
-          s.status === "paid" || s.status === "confirmed"
-            ? ("Confirmed" as const)
-            : s.status === "declined"
-              ? ("Declined" as const)
-              : ("Pending" as const),
-      }));
+  const sponsors: EventSponsorRow[] = useMemo(() => {
+    if (demo) {
+      return (
+        listDemoScoped<EventSponsorRow>("sponsorships", eventId) ??
+        eventMocksFor(eventId).sponsors
+      );
+    }
+    return liveSponsors.map((s) => ({
+      id: s.id,
+      name: s.business,
+      tier: s.level,
+      status:
+        s.status === "paid" || s.status === "confirmed"
+          ? ("Confirmed" as const)
+          : s.status === "declined"
+            ? ("Declined" as const)
+            : ("Pending" as const),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, eventId, liveSponsors, store.version]);
   const [menuOpen, setMenuOpen] = useState(false);
   const preview = sponsors.slice(0, PREVIEW_LIMIT);
 

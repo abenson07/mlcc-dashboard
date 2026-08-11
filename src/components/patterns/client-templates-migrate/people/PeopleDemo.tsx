@@ -16,6 +16,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import { useAdminBasePath } from "@/components/patterns/client-templates/shared/useAdminBasePath";
 import { useIsMobileAdmin } from "@/components/patterns/client-templates-migrate/mobile";
+import { newDemoId } from "@/lib/demo/demoStore";
 import { MembersTable } from "./MembersTable";
 import { NeighborsTable } from "./NeighborsTable";
 import { VolunteersTable } from "./VolunteersTable";
@@ -27,6 +28,16 @@ import { EditPersonModal } from "./EditPersonModal";
 import type { MemberRow, NeighborRow, VolunteerRow } from "./types";
 import type { PeopleUpdate, MembershipsUpdate } from "@/types/database";
 import { hookFiltersForView, toMemberRow, toNeighborRow, toVolunteerRow, VOLUNTEERED_BEFORE_TAG } from "./adapters";
+
+function matchesPeopleView(person: PersonWithMembership, view: PeopleView): boolean {
+  if (view === "members") {
+    return Boolean(person.membership_id || person.membership);
+  }
+  if (view === "volunteers") {
+    return (person.roles ?? []).some((role) => role.toLowerCase() === "volunteer");
+  }
+  return true;
+}
 
 type PeopleView = "members" | "neighbors" | "volunteers";
 
@@ -67,12 +78,14 @@ function PeopleDemoInner() {
   );
   const { people: peopleRaw, loading, error, create, update, refetch } = usePeople({ filters });
   const { create: createMembership, update: updateMembership } = useMemberships();
-  const { enabled: demo, overlay } = useDemoGuard();
+  const { enabled: demo, overlay, store } = useDemoGuard();
 
-  const people = useMemo(
-    () => (demo ? peopleRaw.map((person) => overlay.apply("people", person)) : peopleRaw),
-    [demo, peopleRaw, overlay],
-  );
+  const people = useMemo(() => {
+    if (!demo) return peopleRaw;
+    return store
+      .merge<PersonWithMembership>("people", peopleRaw)
+      .filter((person) => matchesPeopleView(person, view));
+  }, [demo, peopleRaw, store, view, store.version]);
 
   const members: MemberRow[] = useMemo(
     () => (view === "members" ? people.map(toMemberRow) : []),
@@ -139,7 +152,26 @@ function PeopleDemoInner() {
 
   async function handleAddMember(row: Omit<MemberRow, "id">) {
     if (demo) {
-      toast.success("Member added — demo mode, not saved");
+      const id = newDemoId("person");
+      const membershipId = newDemoId("membership");
+      const start = new Date().toISOString().slice(0, 10);
+      overlay.upsert("people", {
+        id,
+        full_name: row.name,
+        email: row.email,
+        membership_id: membershipId,
+        roles: [],
+        tags: [],
+        created_at: new Date().toISOString(),
+        membership: {
+          id: membershipId,
+          tier: row.membershipType === "no-tier" ? null : row.membershipType,
+          status: "active",
+          start_date: start,
+          last_renewal: start,
+        },
+      });
+      toast.success("Member added — demo mode, saved locally only");
       return;
     }
     const membership = await createMembership({
@@ -157,7 +189,18 @@ function PeopleDemoInner() {
 
   async function handleAddNeighbor(row: Omit<NeighborRow, "id">) {
     if (demo) {
-      toast.success("Neighbor added — demo mode, not saved");
+      overlay.upsert("people", {
+        id: newDemoId("person"),
+        full_name: row.name,
+        email: row.email,
+        address: row.address,
+        membership_id: null,
+        roles: [],
+        tags: [],
+        created_at: new Date().toISOString(),
+        membership: null,
+      });
+      toast.success("Neighbor added — demo mode, saved locally only");
       return;
     }
     await create({ full_name: row.name, email: row.email, address: row.address });
@@ -166,7 +209,20 @@ function PeopleDemoInner() {
 
   async function handleAddVolunteer(row: Omit<VolunteerRow, "id">) {
     if (demo) {
-      toast.success("Volunteer added — demo mode, not saved");
+      const tags = [row.interestArea, row.hasVolunteeredBefore ? VOLUNTEERED_BEFORE_TAG : null].filter(
+        (tag): tag is string => Boolean(tag),
+      );
+      overlay.upsert("people", {
+        id: newDemoId("person"),
+        full_name: row.name,
+        email: row.email,
+        membership_id: null,
+        roles: ["volunteer"],
+        tags,
+        created_at: new Date().toISOString(),
+        membership: null,
+      });
+      toast.success("Volunteer added — demo mode, saved locally only");
       return;
     }
     const tags = [row.interestArea, row.hasVolunteeredBefore ? VOLUNTEERED_BEFORE_TAG : null].filter(

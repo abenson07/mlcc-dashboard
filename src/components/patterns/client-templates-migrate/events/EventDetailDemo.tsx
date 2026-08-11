@@ -49,6 +49,7 @@ import {
   eventMocksFor,
   eventTaskGroupForDueDate,
   formatEventTaskDueLabel,
+  type DemoVolunteerAsk,
   type EventBudgetRow,
   type EventBudgetSummary,
   type EventDetail,
@@ -57,6 +58,11 @@ import {
   type EventTaskGroupLabel,
   type EventTaskRow,
 } from "@/data/mocks/events";
+import {
+  listDemoScoped,
+  newDemoId,
+  writeDemoScoped,
+} from "@/lib/demo/demoStore";
 import type { EventVolunteerRow } from "./VolunteersPage";
 import type { Task } from "@/components/leaflet/types";
 
@@ -195,13 +201,47 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   );
   const [selection, setSelection] = useState<Selection>(null);
   const [demoTasks, setDemoTasks] = useState<EventTaskRow[]>([]);
+  const [demoAsks, setDemoAsks] = useState<DemoVolunteerAsk[]>([]);
+  const [demoSponsors, setDemoSponsors] = useState<EventSponsorRow[]>([]);
+  const [demoBudgetSummary, setDemoBudgetSummary] = useState<EventBudgetSummary | null>(null);
   const [modal, setModal] = useState<ModalKind>(null);
 
   const mocks = useMemo(() => (demo ? eventMocksFor(eventId) : null), [demo, eventId]);
 
   useEffect(() => {
-    setDemoTasks(mocks ? mocks.tasks : []);
-  }, [mocks]);
+    if (!mocks) {
+      setDemoTasks([]);
+      setDemoAsks([]);
+      setDemoSponsors([]);
+      setDemoBudgetSummary(null);
+      return;
+    }
+    setDemoTasks(listDemoScoped<EventTaskRow>("eventTasks", eventId) ?? mocks.tasks);
+    setDemoAsks(listDemoScoped<DemoVolunteerAsk>("eventAsks", eventId) ?? mocks.volunteerAsks);
+    setDemoSponsors(listDemoScoped<EventSponsorRow>("sponsorships", eventId) ?? mocks.sponsors);
+    const storedBudget = listDemoScoped<EventBudgetSummary & { id: string }>("events", `budget-${eventId}`);
+    setDemoBudgetSummary(storedBudget?.[0] ?? mocks.budgetSummary);
+  }, [mocks, eventId]);
+
+  function persistDemoTasks(next: EventTaskRow[]) {
+    setDemoTasks(next);
+    writeDemoScoped("eventTasks", eventId, next);
+  }
+
+  function persistDemoAsks(next: DemoVolunteerAsk[]) {
+    setDemoAsks(next);
+    writeDemoScoped("eventAsks", eventId, next);
+  }
+
+  function persistDemoSponsors(next: EventSponsorRow[]) {
+    setDemoSponsors(next);
+    writeDemoScoped("sponsorships", eventId, next);
+  }
+
+  function persistDemoBudget(next: EventBudgetSummary) {
+    setDemoBudgetSummary(next);
+    writeDemoScoped("events", `budget-${eventId}`, [{ id: "summary", ...next }]);
+  }
 
   const liveTasks = useMemo(() => contextTasks.map(toEventTaskRow), [contextTasks]);
   const tasks = mocks ? demoTasks : liveTasks;
@@ -212,15 +252,15 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   );
 
   const budgetSummary: EventBudgetSummary = useMemo(() => {
-    if (mocks) return mocks.budgetSummary;
+    if (mocks) return demoBudgetSummary ?? mocks.budgetSummary;
     return {
       totalBudget: budget.goal,
       received: budget.raised,
       pending: budget.pledged,
     };
-  }, [mocks, budget.goal, budget.raised, budget.pledged]);
+  }, [mocks, demoBudgetSummary, budget.goal, budget.raised, budget.pledged]);
 
-  const asksForModal = mocks?.volunteerAsks ?? volunteerAsks;
+  const asksForModal = mocks ? demoAsks : volunteerAsks;
   const levelsForModal = mocks
     ? mocks.sponsorshipLevels.map((l) => ({
         id: l.id,
@@ -264,9 +304,16 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
 
   function toggleTask(id: string) {
     if (mocks) {
-      setDemoTasks((prev) =>
-        prev.map((task) => (task.id === id ? { ...task, isComplete: !task.isComplete } : task)),
-      );
+      void guard(async () => undefined, {
+        action: "Task updated",
+        local: () => {
+          persistDemoTasks(
+            demoTasks.map((task) =>
+              task.id === id ? { ...task, isComplete: !task.isComplete } : task,
+            ),
+          );
+        },
+      });
       return;
     }
     void guard(() => Promise.resolve(contextToggleTask(id)), { action: "Task updated" });
@@ -275,10 +322,10 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   function addTaskLocal({ title, dueDate }: { title: string; dueDate: string }) {
     const group = eventTaskGroupForDueDate(dueDate, mocks?.dateIso ?? dueDate);
     const isOverdue = group === "Past due";
-    setDemoTasks((prev) => [
-      ...prev,
+    persistDemoTasks([
+      ...demoTasks,
       {
-        id: `task-${Date.now()}`,
+        id: newDemoId("task"),
         title,
         group,
         dueLabel: formatEventTaskDueLabel(dueDate, isOverdue),
@@ -286,11 +333,15 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         isOverdue,
       },
     ]);
+    toast.success("Task added — demo mode, saved locally only");
   }
 
   function removeTask(id: string) {
     if (mocks) {
-      setDemoTasks((prev) => prev.filter((task) => task.id !== id));
+      void guard(async () => undefined, {
+        action: "Task removed",
+        local: () => persistDemoTasks(demoTasks.filter((task) => task.id !== id)),
+      });
       return;
     }
     void guard(() => contextRemoveTask(id), { action: "Task removed" });
@@ -336,7 +387,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
     ) : view === "volunteers" ? (
       <VolunteersPage
         onSelectVolunteer={selectVolunteer}
-        demoAsks={mocks?.volunteerAsks}
+        demoAsks={mocks ? demoAsks : undefined}
         onAddVolunteer={() => setModal("volunteer")}
       />
     ) : view === "budget" ? (
@@ -540,7 +591,35 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
               }
               await refetchAll();
             },
-            { action: "Volunteer added" },
+            {
+              action: "Volunteer added",
+              local: () => {
+                const askIds = payload.askIds.length
+                  ? payload.askIds
+                  : demoAsks[0]
+                    ? [demoAsks[0].id]
+                    : [];
+                const next = demoAsks.map((ask) => {
+                  if (!askIds.includes(ask.id)) return ask;
+                  const signup = {
+                    id: newDemoId("signup"),
+                    status: "accepted" as const,
+                    person: {
+                      full_name: payload.name,
+                      email: payload.email || null,
+                    },
+                  };
+                  const signups = [...ask.signups, signup];
+                  return {
+                    ...ask,
+                    signups,
+                    signup_count: signups.length,
+                    remaining_slots: Math.max(0, ask.quantity - signups.length),
+                  };
+                });
+                persistDemoAsks(next);
+              },
+            },
           );
         }}
       />
@@ -584,7 +663,36 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
               }
               await refetchAll();
             },
-            { action: payload.inKind ? "Donation added" : "Sponsor added" },
+            {
+              action: payload.inKind ? "Donation added" : "Sponsor added",
+              local: () => {
+                const level =
+                  levelsForModal.find((l) => l.id === payload.levelId) ?? levelsForModal[0];
+                const amount = payload.inKind
+                  ? Number.parseFloat(payload.donationAmount || "0") || 0
+                  : Number(String(level?.price ?? "0").replace(/[^0-9.]/g, "")) || 0;
+                persistDemoSponsors([
+                  ...demoSponsors,
+                  {
+                    id: newDemoId("sponsor"),
+                    name: payload.businessName || "New sponsor",
+                    tier: payload.inKind ? "In-kind" : (level?.name ?? "Sponsor"),
+                    status: payload.alreadyPaid || payload.inKind ? "Confirmed" : "Pending",
+                  },
+                ]);
+                if (demoBudgetSummary) {
+                  persistDemoBudget({
+                    ...demoBudgetSummary,
+                    received:
+                      demoBudgetSummary.received +
+                      (payload.alreadyPaid || payload.inKind ? amount : 0),
+                    pending:
+                      demoBudgetSummary.pending +
+                      (payload.alreadyPaid || payload.inKind ? 0 : amount),
+                  });
+                }
+              },
+            },
           );
         }}
       />
@@ -600,7 +708,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
 
       <EditBudgetAmountModal
         isOpen={modal === "budget"}
-        currentCents={budget.goal * 100}
+        currentCents={(demoBudgetSummary?.totalBudget ?? budget.goal) * 100}
         onClose={() => setModal(null)}
         onSubmit={async (goalCents) => {
           await guard(
@@ -613,7 +721,15 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
               });
               await refetchAll();
             },
-            { action: "Budget updated" },
+            {
+              action: "Budget updated",
+              local: () => {
+                const current = demoBudgetSummary ?? mocks?.budgetSummary;
+                if (current) {
+                  persistDemoBudget({ ...current, totalBudget: goalCents / 100 });
+                }
+              },
+            },
           );
         }}
       />

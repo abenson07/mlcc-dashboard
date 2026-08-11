@@ -78,7 +78,14 @@ export function AddEventQrCodeModal({
       return;
     }
     if (demo) {
-      toast.success("QR code created — demo mode, not saved");
+      const { newDemoId, upsertDemoEntity } = await import("@/lib/demo/demoStore");
+      upsertDemoEntity("qrCodes", {
+        id: newDemoId("qr"),
+        name: trimmedName,
+        url: url.trim() || defaultUrl,
+        eventSlug,
+      });
+      toast.success("QR code created — demo mode, saved locally only");
       onClose();
       return;
     }

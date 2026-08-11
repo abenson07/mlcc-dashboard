@@ -29,6 +29,12 @@ import {
   type CommitteeMemberTitle,
 } from "@/data/mocks/committees";
 import { listDemoInitiatives, upsertDemoInitiative } from "@/lib/demo/demoInitiatives";
+import {
+  listDemoScoped,
+  newDemoId,
+  upsertDemoEntity,
+  writeDemoScoped,
+} from "@/lib/demo/demoStore";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
 import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { NewEventModal } from "@/components/patterns/client-templates-migrate/events/NewEventModal";
@@ -105,6 +111,17 @@ export function CommitteeDetailDemo() {
     sampleCommitteeMembers.map((m) => ({ ...m })),
   );
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!demo || !slug) return;
+    const stored = listDemoScoped<CommitteeMemberRow>("committeeMembers", slug);
+    if (stored) setDemoMembers(stored);
+  }, [demo, slug]);
+
+  function persistDemoMembers(next: CommitteeMemberRow[]) {
+    setDemoMembers(next);
+    if (slug) writeDemoScoped("committeeMembers", slug, next);
+  }
 
   const {
     initiatives: liveInitiatives,
@@ -228,7 +245,21 @@ export function CommitteeDetailDemo() {
   async function handleCreateEvent(event: Omit<EventSummary, "id">) {
     if (!slug) return;
     if (demo) {
-      await guard(async () => undefined, { action: "Event created" });
+      const id = newDemoId("evt");
+      await guard(async () => undefined, {
+        action: "Event created",
+        local: () => {
+          upsertDemoEntity("events", {
+            id,
+            title: event.title,
+            date: event.date,
+            location: event.location,
+            committee: event.committee || slug,
+            description: event.description,
+          });
+        },
+      });
+      router.push(`/admin/events/${id}`);
       return;
     }
     const startsAt = event.date
@@ -257,7 +288,15 @@ export function CommitteeDetailDemo() {
     setBusy(true);
     try {
       if (demo) {
-        await guard(async () => undefined, { action: "Committee settings saved" });
+        await guard(async () => undefined, {
+          action: "Committee settings saved",
+          local: () => {
+            upsertDemoEntity("accountSettings", {
+              ...committee,
+              id: `committee-${slug}`,
+            });
+          },
+        });
         return;
       }
       await saveProfile({
@@ -286,6 +325,13 @@ export function CommitteeDetailDemo() {
       if (demo) {
         await guard(async () => undefined, {
           action: next === "published" ? "Committee published" : "Committee unpublished",
+          local: () => {
+            upsertDemoEntity("accountSettings", {
+              ...(committee ?? {}),
+              id: `committee-${slug}`,
+              publishStatus: next,
+            });
+          },
         });
         return;
       }
@@ -308,10 +354,11 @@ export function CommitteeDetailDemo() {
 
   async function handleChangeMemberTitle(memberId: string, title: CommitteeMemberTitle) {
     if (demo) {
-      setDemoMembers((prev) =>
-        prev.map((m) => (m.id === memberId ? { ...m, role: title } : m)),
-      );
-      await guard(async () => undefined, { action: "Member title updated" });
+      const next = demoMembers.map((m) => (m.id === memberId ? { ...m, role: title } : m));
+      await guard(async () => undefined, {
+        action: "Member title updated",
+        local: () => persistDemoMembers(next),
+      });
       return;
     }
     await updateMemberTitle(memberId, title);
@@ -319,8 +366,11 @@ export function CommitteeDetailDemo() {
 
   async function handleRemoveMember(memberId: string) {
     if (demo) {
-      setDemoMembers((prev) => prev.filter((m) => m.id !== memberId));
-      await guard(async () => undefined, { action: "Member removed" });
+      const next = demoMembers.filter((m) => m.id !== memberId);
+      await guard(async () => undefined, {
+        action: "Member removed",
+        local: () => persistDemoMembers(next),
+      });
       return;
     }
     await removeMember(memberId);
@@ -328,20 +378,22 @@ export function CommitteeDetailDemo() {
 
   async function handleAddMember(person: { id: string; name: string; email: string }) {
     if (demo) {
-      setDemoMembers((prev) => {
-        if (prev.some((m) => (m.personId ?? m.id) === person.id)) return prev;
-        return [
-          ...prev,
-          {
-            id: `demo-${person.id}`,
-            personId: person.id,
-            name: person.name,
-            email: person.email,
-            role: "Member",
-          },
-        ];
+      await guard(async () => undefined, {
+        action: "Member added",
+        local: () => {
+          if (demoMembers.some((m) => (m.personId ?? m.id) === person.id)) return;
+          persistDemoMembers([
+            ...demoMembers,
+            {
+              id: `demo-${person.id}`,
+              personId: person.id,
+              name: person.name,
+              email: person.email,
+              role: "Member",
+            },
+          ]);
+        },
       });
-      await guard(async () => undefined, { action: "Member added" });
       return;
     }
     await addMember(person.id, "Member");

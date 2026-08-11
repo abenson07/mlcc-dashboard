@@ -123,7 +123,7 @@ export function CreateVolunteerAskModal({
         quantity: Math.max(1, Number.parseInt(form.quantity, 10) || 1),
       };
       upsertDemoVolunteerAsk(askRow);
-      toast.success(`${isEdit ? "Ask updated" : "Ask created"} — demo mode, not saved`);
+      toast.success(`${isEdit ? "Ask updated" : "Ask created"} — demo mode, saved locally only`);
       onSaved();
       onClose();
       return;

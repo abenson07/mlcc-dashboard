@@ -78,7 +78,7 @@ function ContentDemoInner() {
     update: updateBanner,
   } = useBanners();
   const { people } = usePeople();
-  const { enabled: demo } = useDemoGuard();
+  const { enabled: demo, store } = useDemoGuard();
 
   const [currentUser, setCurrentUser] = useState<{ id: string; name: string } | null>(null);
   useEffect(() => {
@@ -101,22 +101,34 @@ function ContentDemoInner() {
   const authorNameById = useMemo(() => new Map(people.map((p) => [p.id, p.full_name])), [people]);
   const stories: Story[] = useMemo(() => {
     if (demo) {
-      return sampleStories.map((s): Story => ({
-        id: s.id,
-        title: s.title,
-        author: s.author,
-        authorId: null,
-        status: s.status,
-        publishedAt: s.publishedAt,
-        body: s.body,
-        imageUrl: s.imageUrl,
-        description: s.description,
-      }));
+      const seed = sampleStories.map(
+        (s): Story => ({
+          id: s.id,
+          title: s.title,
+          author: s.author,
+          authorId: null,
+          status: s.status,
+          publishedAt: s.publishedAt,
+          body: s.body,
+          imageUrl: s.imageUrl,
+          description: s.description,
+        }),
+      );
+      return store.merge<Story>("stories", seed);
     }
     return storyRows.map((row) => toStory(row, authorNameById));
-  }, [demo, storyRows, authorNameById]);
-  const faqs: Faq[] = useMemo(() => faqRows.map(toFaq), [faqRows]);
-  const banners: Banner[] = useMemo(() => bannerRows.map(toBanner), [bannerRows]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, storyRows, authorNameById, store.version]);
+  const faqs: Faq[] = useMemo(() => {
+    const base = faqRows.map(toFaq);
+    return demo ? store.merge<Faq>("faqs", base) : base;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, faqRows, store.version]);
+  const banners: Banner[] = useMemo(() => {
+    const base = bannerRows.map(toBanner);
+    return demo ? store.merge<Banner>("banners", base) : base;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, bannerRows, store.version]);
   const activeBanners = useMemo(() => banners.filter((b) => bannerIsCurrentlyActive(b)), [banners]);
   const inactiveBanners = useMemo(() => banners.filter((b) => !bannerIsCurrentlyActive(b)), [banners]);
 
@@ -149,7 +161,11 @@ function ContentDemoInner() {
 
   async function handleSaveStory(updated: Story) {
     if (demo) {
-      toast.success(`${updated.id ? "Story updated" : "Story created"} — demo mode, not saved`);
+      const id = updated.id || `story-${Date.now().toString(36)}`;
+      store.upsert("stories", { ...updated, id });
+      toast.success(
+        `${updated.id ? "Story updated" : "Story created"} — demo mode, saved locally only`,
+      );
       closeDetail();
       return;
     }
@@ -172,7 +188,9 @@ function ContentDemoInner() {
 
   async function handleSaveFaq(updated: Faq) {
     if (demo) {
-      toast.success(`${updated.id ? "FAQ updated" : "FAQ created"} — demo mode, not saved`);
+      const id = updated.id || `faq-${Date.now().toString(36)}`;
+      store.upsert("faqs", { ...updated, id });
+      toast.success(`${updated.id ? "FAQ updated" : "FAQ created"} — demo mode, saved locally only`);
       closeDetail();
       return;
     }
@@ -196,7 +214,11 @@ function ContentDemoInner() {
 
   async function handleSaveBanner(updated: Banner) {
     if (demo) {
-      toast.success(`${updated.id ? "Banner updated" : "Banner created"} — demo mode, not saved`);
+      const id = updated.id || `banner-${Date.now().toString(36)}`;
+      store.upsert("banners", { ...updated, id });
+      toast.success(
+        `${updated.id ? "Banner updated" : "Banner created"} — demo mode, saved locally only`,
+      );
       closeDetail();
       return;
     }

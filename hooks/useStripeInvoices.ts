@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getApiBase } from "@/lib/apiBase";
 import type { StripeInvoiceTableRow } from "@/components/billing/InvoicesListTable";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { sampleStripeInvoices } from "@/data/mocks/invoices";
 
 export const STRIPE_INVOICES_QUERY_KEY = ["stripe-invoices"] as const;
 
@@ -19,17 +21,25 @@ async function fetchStripeInvoices(): Promise<StripeInvoiceTableRow[]> {
 }
 
 export function useStripeInvoices() {
+  const { enabled: demo } = useDemoModeOptional();
   const { data: invoices = [], isLoading, error, refetch } = useQuery({
     queryKey: STRIPE_INVOICES_QUERY_KEY,
     queryFn: fetchStripeInvoices,
+    enabled: !demo,
   });
 
   return {
-    invoices,
-    loading: isLoading,
-    error: error ? (error instanceof Error ? error.message : "Failed to load invoices") : null,
+    invoices: demo ? sampleStripeInvoices : invoices,
+    loading: demo ? false : isLoading,
+    error: demo
+      ? null
+      : error
+        ? error instanceof Error
+          ? error.message
+          : "Failed to load invoices"
+        : null,
     refetch: async () => {
-      await refetch();
+      if (!demo) await refetch();
     },
   };
 }

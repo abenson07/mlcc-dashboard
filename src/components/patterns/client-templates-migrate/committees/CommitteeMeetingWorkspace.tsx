@@ -157,21 +157,38 @@ export function CommitteeMeetingWorkspace({ meetingId }: CommitteeMeetingWorkspa
   } = useCommitteeMeetingById(meetingId);
   const { enabled: demo } = useDemoGuard();
 
-  async function demoSkip(action: string) {
-    toast.success(`${action} — demo mode, not saved`);
+  async function demoSkip(action: string, patch?: Record<string, unknown>) {
+    if (patch && meetingId) {
+      const { patchDemoEntity } = await import("@/lib/demo/demoStore");
+      patchDemoEntity("committeeMeetings", meetingId, patch);
+    }
+    toast.success(`${action} — demo mode, saved locally only`);
   }
 
   const patchMeeting: typeof patchMeetingReal = (patch) =>
-    demo ? demoSkip("Meeting updated") : patchMeetingReal(patch);
-  const postAgenda: typeof postAgendaReal = () => (demo ? demoSkip("Agenda posted") : postAgendaReal());
+    demo
+      ? demoSkip("Meeting updated", patch as Record<string, unknown>).then(() => undefined)
+      : patchMeetingReal(patch);
+  const postAgenda: typeof postAgendaReal = () =>
+    demo ? demoSkip("Agenda posted", { agenda_posted: true }).then(() => undefined) : postAgendaReal();
   const submitMinutes: typeof submitMinutesReal = () =>
-    demo ? demoSkip("Minutes generated") : submitMinutesReal();
+    demo
+      ? demoSkip("Minutes generated", { minutes_status: "draft" }).then(() => undefined)
+      : submitMinutesReal();
   const publishMinutes: typeof publishMinutesReal = (payload) =>
-    demo ? demoSkip("Minutes published") : publishMinutesReal(payload);
+    demo
+      ? demoSkip("Minutes published", { minutes_status: "published", ...(payload as object) }).then(
+          () => undefined,
+        )
+      : publishMinutesReal(payload);
   const transcribeAudio: typeof transcribeAudioReal = (file) =>
-    demo ? demoSkip("Audio transcribed") : transcribeAudioReal(file);
+    demo
+      ? demoSkip("Audio transcribed", { audio_name: file.name }).then(() => undefined)
+      : transcribeAudioReal(file);
   const uploadMinutesFile: typeof uploadMinutesFileReal = (file) =>
-    demo ? demoSkip("File uploaded") : uploadMinutesFileReal(file);
+    demo
+      ? demoSkip("File uploaded", { minutes_file: file.name }).then(() => undefined)
+      : uploadMinutesFileReal(file);
 
   const {
     items: outstanding,

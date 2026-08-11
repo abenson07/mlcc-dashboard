@@ -33,7 +33,9 @@ export function MarkAsPaidControl({ invoiceId, isPaid, onPaid }: MarkAsPaidContr
     setRecording(true);
     setStatusMessage(null);
     if (demo) {
-      setStatusMessage(`Marked paid by ${method} — demo mode, not saved.`);
+      const { patchDemoEntity } = await import("@/lib/demo/demoStore");
+      patchDemoEntity("invoices", invoiceId, { status: "paid", payment_method: method });
+      setStatusMessage(`Marked paid by ${method} — demo mode, saved locally only`);
       setConfirmMethod(null);
       setRecording(false);
       return;

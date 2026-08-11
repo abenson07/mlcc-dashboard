@@ -18,6 +18,7 @@ import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { validateEmail, validatePhone } from "@/lib/validation";
 import { useCurrentPerson, useMyCommitteeMemberships, usePeople } from "hooks";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
+import { getDemoEntity, upsertDemoEntity, writeDemoScoped, listDemoScoped } from "@/lib/demo/demoStore";
 import { SettingsRow } from "./SettingsRow";
 
 function Divider() {
@@ -190,9 +191,15 @@ export function AccountSettingsPage() {
 
   useEffect(() => {
     if (demo) {
-      setName(DEMO_NAME);
-      setEmail(DEMO_EMAIL);
-      setPhone(DEMO_PHONE);
+      const profile = getDemoEntity<{ id: string; name?: string; email?: string; phone?: string }>(
+        "accountSettings",
+        "profile",
+      );
+      setName(profile?.name ?? DEMO_NAME);
+      setEmail(profile?.email ?? DEMO_EMAIL);
+      setPhone(profile?.phone ?? DEMO_PHONE);
+      const memberships = listDemoScoped<Membership>("accountSettings", "memberships");
+      setDemoMemberships(memberships ?? DEMO_MEMBERSHIPS);
       return;
     }
     if (currentPerson) {
@@ -201,6 +208,11 @@ export function AccountSettingsPage() {
       setPhone(currentPerson.phone ?? "");
     }
   }, [demo, currentPerson]);
+
+  function persistDemoMemberships(next: Membership[]) {
+    setDemoMemberships(next);
+    writeDemoScoped("accountSettings", "memberships", next);
+  }
 
   const dirty =
     !demo &&
@@ -211,7 +223,13 @@ export function AccountSettingsPage() {
 
   async function handleSave() {
     if (demo) {
-      toast.success("Saved — demo mode, not saved");
+      upsertDemoEntity("accountSettings", {
+        id: "profile",
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+      });
+      toast.success("Saved — demo mode, saved locally only");
       return;
     }
     if (!currentPerson) return;
@@ -242,8 +260,10 @@ export function AccountSettingsPage() {
 
   async function handleRemove(membership: Membership) {
     if (demo) {
-      setDemoMemberships((prev) => prev.filter((m) => m.id !== membership.id));
-      toast.success(`Removed from ${COMMITTEE_LABELS[membership.committee]} — demo mode, not saved`);
+      persistDemoMemberships(demoMemberships.filter((m) => m.id !== membership.id));
+      toast.success(
+        `Removed from ${COMMITTEE_LABELS[membership.committee]} — demo mode, saved locally only`,
+      );
       return;
     }
     try {
@@ -256,8 +276,8 @@ export function AccountSettingsPage() {
 
   async function handleChangeTitle(membership: Membership, title: "chair" | "member") {
     if (demo) {
-      setDemoMemberships((prev) =>
-        prev.map((m) => (m.id === membership.id ? { ...m, title } : m)),
+      persistDemoMemberships(
+        demoMemberships.map((m) => (m.id === membership.id ? { ...m, title } : m)),
       );
       return;
     }
@@ -270,11 +290,11 @@ export function AccountSettingsPage() {
 
   async function handleAdd(committee: CommitteeSlug) {
     if (demo) {
-      setDemoMemberships((prev) => [
-        ...prev,
+      persistDemoMemberships([
+        ...demoMemberships,
         { id: `demo-${committee}`, committee, title: "member" },
       ]);
-      toast.success(`Joined ${COMMITTEE_LABELS[committee]} — demo mode, not saved`);
+      toast.success(`Joined ${COMMITTEE_LABELS[committee]} — demo mode, saved locally only`);
       return;
     }
     try {

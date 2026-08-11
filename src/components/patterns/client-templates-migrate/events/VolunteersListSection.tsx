@@ -8,7 +8,9 @@ import { IconButton } from "@/components/patterns/shared/IconButton";
 import { EmptyStateCard } from "@/components/patterns/client-templates/shared";
 import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
 import { useEventContext } from "@/components/integrated/events/EventContext";
-import { eventMocksFor } from "@/data/mocks/events";
+import { eventMocksFor, type DemoVolunteerAsk } from "@/data/mocks/events";
+import { listDemoScoped } from "@/lib/demo/demoStore";
+import { useDemoGuard } from "hooks";
 import type { EventVolunteerRow } from "./VolunteersPage";
 
 export type VolunteersListSectionProps = {
@@ -30,8 +32,17 @@ export function VolunteersListSection({
   onAddVolunteer,
 }: VolunteersListSectionProps) {
   const { enabled: demo } = useDemoModeOptional();
+  const { store } = useDemoGuard();
   const { eventId, volunteerAsks } = useEventContext();
-  const asks = demo ? eventMocksFor(eventId).volunteerAsks : volunteerAsks;
+  const asks = useMemo(() => {
+    if (!demo) return volunteerAsks;
+    return (
+      listDemoScoped<DemoVolunteerAsk>("eventAsks", eventId) ??
+      eventMocksFor(eventId).volunteerAsks
+    );
+    // store.version refreshes after local volunteer adds
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, eventId, volunteerAsks, store.version]);
 
   const volunteers: EventVolunteerRow[] = useMemo(() => {
     const rows: EventVolunteerRow[] = [];

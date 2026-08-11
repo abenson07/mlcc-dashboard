@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { useDeliveries, useDemoGuard } from "hooks";
@@ -11,6 +11,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { IconButton } from "@/components/patterns/shared/IconButton";
 import type { LeafletRouteRow } from "@/data/mocks/leaflets";
+import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
   RemoveRoutesConfirmModal,
@@ -118,10 +119,21 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
   const { deliveries, update, refetch } = useDeliveries(leafletId, {
     enabled: !isDemo && Boolean(leafletId),
   });
+  const scopeKey = leafletId || "default";
   const [localRoutes, setLocalRoutes] = useState<LeafletRouteRow[]>(() => sampleAllRouteRows());
   const [skipRow, setSkipRow] = useState<LeafletRouteRow | null>(null);
   const [removeRow, setRemoveRow] = useState<LeafletRouteRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isDemo) return;
+    setLocalRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
+  }, [isDemo, scopeKey]);
+
+  function persistRoutes(next: LeafletRouteRow[]) {
+    setLocalRoutes(next);
+    writeDemoScoped("leafletRoutes", scopeKey, next);
+  }
 
   const routes = isDemo ? localRoutes : deliveriesToRouteRows(deliveries);
 
@@ -177,14 +189,14 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
     setSubmitting(true);
     try {
       if (isDemo) {
-        setLocalRoutes((prev) =>
-          prev.map((r) =>
+        persistRoutes(
+          localRoutes.map((r) =>
             r.id === skipRow.id
               ? { ...r, status: "skipped", detail: "Needs a substitute" }
               : r,
           ),
         );
-        toast.success("Route skipped — demo mode, not saved");
+        toast.success("Route skipped — demo mode, saved locally only");
       } else {
         await update(skipRow.id, { is_skipped: true, response: "needs_cover" });
         await refetch();
@@ -203,14 +215,14 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
     setSubmitting(true);
     try {
       if (isDemo) {
-        setLocalRoutes((prev) =>
-          prev.map((r) =>
+        persistRoutes(
+          localRoutes.map((r) =>
             r.id === removeRow.id
               ? { ...r, status: "unassigned", detail: "Unassigned", initials: "—" }
               : r,
           ),
         );
-        toast.success("Route removed — demo mode, not saved");
+        toast.success("Route removed — demo mode, saved locally only");
       } else {
         await update(removeRow.id, {
           person_id: null,

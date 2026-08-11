@@ -18,6 +18,7 @@ import {
   type LeafletDelivererRouteRow,
   type LeafletDelivererRow,
 } from "@/data/mocks/leaflets";
+import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToDelivererRows, sampleOpenDeliveriesForPicker } from "./adapters";
 import { AddRouteModal } from "./AddRouteModal";
 import {
@@ -308,6 +309,7 @@ export function LeafletDeliverersPage({
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const scopeKey = leafletId || "default";
   const [localDeliverers, setLocalDeliverers] = useState<LeafletDelivererRow[]>(sampleDeliverers);
   const [addFor, setAddFor] = useState<LeafletDelivererRow | null>(null);
   const [skipTarget, setSkipTarget] = useState<{
@@ -322,8 +324,16 @@ export function LeafletDeliverersPage({
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isDemo) setLocalDeliverers(sampleDeliverers);
-  }, [isDemo]);
+    if (!isDemo) return;
+    setLocalDeliverers(
+      listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
+    );
+  }, [isDemo, scopeKey]);
+
+  function persistDeliverers(next: LeafletDelivererRow[]) {
+    setLocalDeliverers(next);
+    writeDemoScoped("leafletDeliverers", scopeKey, next);
+  }
 
   const liveDeliverers = useMemo(
     () => (isDemo ? [] : deliveriesToDelivererRows(deliveries)),
@@ -363,8 +373,8 @@ export function LeafletDeliverersPage({
 
   async function handleAssign(deliverer: LeafletDelivererRow, delivery: DeliveryWithRelations) {
     if (isDemo) {
-      setLocalDeliverers((prev) =>
-        prev.map((d) =>
+      persistDeliverers(
+        localDeliverers.map((d) =>
           d.id === deliverer.id
             ? {
                 ...d,
@@ -383,7 +393,7 @@ export function LeafletDeliverersPage({
             : d,
         ),
       );
-      toast.success("Route added — demo mode, not saved");
+      toast.success("Route added — demo mode, saved locally only");
       return;
     }
     await update(delivery.id, {
@@ -402,11 +412,11 @@ export function LeafletDeliverersPage({
       await applyUpdates(
         skipTarget.deliveryIds,
         { is_skipped: true, response: "needs_cover" },
-        "Routes skipped — demo mode, not saved",
+        "Routes skipped — demo mode, saved locally only",
       );
       if (isDemo) {
-        setLocalDeliverers((prev) =>
-          prev.map((d) => ({
+        persistDeliverers(
+          localDeliverers.map((d) => ({
             ...d,
             routes: d.routes.map((r) =>
               skipTarget.deliveryIds.includes(r.deliveryId ?? r.id)
@@ -431,11 +441,11 @@ export function LeafletDeliverersPage({
       await applyUpdates(
         removeTarget.deliveryIds,
         { person_id: null, is_skipped: false, response: "pending" },
-        "Routes removed — demo mode, not saved",
+        "Routes removed — demo mode, saved locally only",
       );
       if (isDemo) {
-        setLocalDeliverers((prev) =>
-          prev
+        persistDeliverers(
+          localDeliverers
             .map((d) => ({
               ...d,
               routes: d.routes.filter(

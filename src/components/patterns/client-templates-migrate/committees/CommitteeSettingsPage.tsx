@@ -544,7 +544,7 @@ export function CommitteeSettingsPage({
                               variant="secondary"
                               onClick={() => {
                                 setEditingDemoAskId(null);
-                                toast.success("Volunteer ask updated — demo mode, no changes saved");
+                                toast.success("Volunteer ask updated — demo mode, saved locally only");
                               }}
                             />
                             <IconButton

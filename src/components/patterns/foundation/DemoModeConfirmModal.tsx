@@ -17,12 +17,12 @@ export type DemoModeConfirmModalProps = {
 const copy: Record<DemoModeConfirmModalTarget, { title: string; body: string; confirmLabel: string }> = {
   demo: {
     title: "Enter demo mode?",
-    body: "You're about to switch to demo mode. Everything you see from here on — events, people, committees, and more — is sample data. Nothing you do in here will be saved.",
+    body: "You're about to switch to demo mode. Everything you see from here on — events, people, committees, and more — is sample data. Changes are saved on this device only and never written to the database. Exiting demo mode clears them.",
     confirmLabel: "Enter demo mode",
   },
   live: {
     title: "Exit demo mode?",
-    body: "You're about to switch back to live mode. You'll be working with real data again, and any changes you make will be saved.",
+    body: "You're about to switch back to live mode. Local demo changes on this device will be cleared. You'll be working with real data again, and any changes you make will be saved to the database.",
     confirmLabel: "Exit demo mode",
   },
 };

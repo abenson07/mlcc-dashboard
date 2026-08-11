@@ -8,6 +8,7 @@ import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { Text } from "@/components/patterns/primitives/Text";
 import { createCommitteeMeetingApi, useDemoGuard } from "hooks";
 import type { CommitteeSlug } from "schemas/committee_meetings";
+import { newDemoId, upsertDemoEntity } from "@/lib/demo/demoStore";
 import { committeeDisplayName } from "./committeeSlug";
 
 export type ScheduleCommitteeMeetingModalProps = {
@@ -58,7 +59,18 @@ export function ScheduleCommitteeMeetingModal({
       return;
     }
     if (demo) {
-      toast.success("Meeting scheduled — demo mode, not saved");
+      const id = newDemoId("meeting");
+      const eventId = newDemoId("evt");
+      upsertDemoEntity("committeeMeetings", {
+        id,
+        event_id: eventId,
+        committee,
+        starts_at: new Date(startsAt).toISOString(),
+        location_type: locationType,
+        location: location.trim() || null,
+      });
+      toast.success("Meeting scheduled — demo mode, saved locally only");
+      onCreated({ id, event_id: eventId });
       onClose();
       return;
     }
