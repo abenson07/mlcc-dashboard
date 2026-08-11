@@ -6,7 +6,7 @@ export default function ShellPreviewBusinessesPage() {
     <Suspense fallback={<p className="lf-meta">Loading businesses…</p>}>
       <PeoplePageContent
         embedded
-        basePath="/admin/businesses"
+        basePath="/admin-retire/businesses"
         defaultFilter="businesses"
       />
     </Suspense>

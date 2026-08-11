@@ -45,14 +45,14 @@ export default function ShellPreviewNav() {
           type: "item" as const,
           id: leaflet.id,
           label: leaflet.title,
-          href: `/admin/leaflet?leaflet=${leaflet.id}`,
+          href: `/admin-retire/leaflet?leaflet=${leaflet.id}`,
         })),
         { type: "divider" },
         {
           type: "item",
           id: "all",
           label: "See all leaflets",
-          href: "/admin/leaflets",
+          href: "/admin-retire/leaflets",
         },
       ];
 
@@ -60,7 +60,7 @@ export default function ShellPreviewNav() {
         contextLabel: activeLeaflet?.title ?? "Leaflet",
         dropdownItems,
         activeDropdownItemId:
-          pathname === "/admin/leaflets" ? "all" : (activeLeaflet?.id ?? "current"),
+          pathname === "/admin-retire/leaflets" ? "all" : (activeLeaflet?.id ?? "current"),
       });
     }
 
@@ -74,14 +74,14 @@ export default function ShellPreviewNav() {
             type: "item" as const,
             id: event.id,
             label: event.title,
-            href: `/admin/events/${event.id}/overview`,
+            href: `/admin-retire/events/${event.id}/overview`,
           })),
         { type: "divider" },
         {
           type: "item",
           id: "all",
           label: "See all events",
-          href: "/admin/events",
+          href: "/admin-retire/events",
         },
       ];
 

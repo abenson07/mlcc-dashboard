@@ -40,7 +40,7 @@ const WORKSPACE_DROPDOWN: DropdownItem[] = [
   { type: "item", id: "logout", label: "Log out" },
 ];
 
-const SHELL_PREVIEW_BASE = "/admin";
+const SHELL_PREVIEW_BASE = "/admin-retire";
 
 const SHELL_PREVIEW_WORKSPACE_DROPDOWN: DropdownItem[] = [
   { type: "item", id: "settings", label: "Settings" },
@@ -315,7 +315,7 @@ const SHELL_PREVIEW_BREADCRUMB_LABELS: Record<string, string> = {
 export function parseShellPreviewEventId(pathname: string): string | null {
   const normalizedPath =
     pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
-  const match = normalizedPath.match(/^\/admin\/events\/([^/]+)/);
+  const match = normalizedPath.match(/^\/admin-retire\/events\/([^/]+)/);
   return match?.[1] ?? null;
 }
 

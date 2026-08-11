@@ -6,7 +6,7 @@ export default function ShellPreviewMembersPage() {
     <Suspense fallback={<p className="lf-meta">Loading members…</p>}>
       <PeoplePageContent
         embedded
-        basePath="/admin/members"
+        basePath="/admin-retire/members"
         defaultFilter="members"
       />
     </Suspense>

@@ -11,7 +11,7 @@ export default function ShellPreviewLeafletPage() {
 
   useEffect(() => {
     if (!loading && !activeLeaflet && !leaflet) {
-      router.replace("/admin/leaflets");
+      router.replace("/admin-retire/leaflets");
     }
   }, [loading, activeLeaflet, leaflet, router]);
 
