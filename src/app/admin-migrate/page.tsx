@@ -12,18 +12,18 @@ export default function AdminMigrateIndexPage() {
   const { enabled: wipFeaturesEnabled } = useWipFeaturesOptional();
 
   const pages = [
-    { href: "/admin-migrate/database", label: "Database (mobile)" },
-    { href: "/admin-migrate/events", label: "Events" },
-    { href: "/admin-migrate/invoices", label: "Invoices" },
-    { href: "/admin-migrate/promotions", label: "Promotions (mobile)" },
-    { href: "/admin-migrate/people", label: "People" },
+    { href: "/admin/database", label: "Database (mobile)" },
+    { href: "/admin/events", label: "Events" },
+    { href: "/admin/invoices", label: "Invoices" },
+    { href: "/admin/promotions", label: "Promotions (mobile)" },
+    { href: "/admin/people", label: "People" },
     ...(wipFeaturesEnabled
-      ? [{ href: "/admin-migrate/committees", label: "Committees" }]
+      ? [{ href: "/admin/committees", label: "Committees" }]
       : []),
   ];
 
   useEffect(() => {
-    if (isMobile) router.replace("/admin-migrate/database");
+    if (isMobile) router.replace("/admin/database");
   }, [isMobile, router]);
 
   if (isMobile) return null;
