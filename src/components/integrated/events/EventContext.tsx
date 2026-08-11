@@ -14,6 +14,7 @@ import {
   useEvents,
   useEventSponsorships,
   useEventVolunteerAsks,
+  useSponsorshipItemOfferings,
   useTasks,
   useDemoGuard,
   type VolunteerAskWithSignups,
@@ -21,7 +22,6 @@ import {
 import { getApiBase } from "@/lib/apiBase";
 import {
   buildEventBudget,
-  buildSponsorshipTiers,
   eventIdsForInvoiceFilter,
   isEventReadOnly,
   type EventEdition,
@@ -34,10 +34,7 @@ import {
   mapTasksForUi,
 } from "@/components/leaflet/leafletData";
 import type { Invoice, Sponsor, SponsorshipTier, Task } from "@/components/leaflet/types";
-import {
-  resolveSponsorshipTierSeeds,
-  type SponsorshipTierSeed,
-} from "@/lib/sponsorship/tierPlaceholders";
+import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 import type { EventsUpdate, SponsorshipsInsert, SponsorshipsUpdate } from "@/types/database";
 
 function isCuratedDemoEventId(id: string): id is CuratedDemoEventId {
@@ -92,6 +89,7 @@ type EventContextValue = {
     offset_days: number;
     description?: string | null;
   }) => Promise<void>;
+  removeTask: (id: string) => Promise<void>;
   scheduleGroups: ScheduleGroups;
   volunteerAsks: VolunteerAskWithSignups[];
   volunteerSignupTotal: number;
@@ -145,6 +143,7 @@ export function EventProvider({
     loading: tasksLoading,
     toggleComplete,
     createTask: createTaskMutation,
+    remove: removeTaskMutation,
     refetch: refetchTasks,
   } = useTasks({
     context: "event",
@@ -169,8 +168,14 @@ export function EventProvider({
     refetch: refetchSponsorships,
     createSponsorship: createSponsorshipMutation,
     updateSponsorship: updateSponsorshipMutation,
-    saveSponsorshipTiers: saveSponsorshipTiersMutation,
   } = useEventSponsorships(eventId);
+
+  const {
+    levels: offeringLevels,
+    tierSeeds: sponsorshipTierSeeds,
+    refetch: refetchOfferings,
+    saveTiers: saveSponsorshipTiersMutation,
+  } = useSponsorshipItemOfferings({ eventId });
 
   const invoiceFilterIds = useMemo(
     () => eventIdsForInvoiceFilter(eventId, event?.fieldData ?? {}),
@@ -191,6 +196,7 @@ export function EventProvider({
           amount_due: number;
           due_date: number | null;
           event_id: string | null;
+          sponsorship_id: string | null;
         }>;
       };
       if (!res.ok) throw new Error(data.error ?? "Failed to load invoices");
@@ -217,36 +223,64 @@ export function EventProvider({
     [sponsorships],
   );
 
-  const sponsors = useMemo(() => mapSponsors(sponsorRows), [sponsorRows]);
+  const sponsors = useMemo(
+    () => mapSponsors(sponsorRows, sponsorshipTierSeeds),
+    [sponsorRows, sponsorshipTierSeeds],
+  );
+
+  const sponsorshipTiers = useMemo(
+    (): SponsorshipTier[] =>
+      offeringLevels.map((l) => {
+        const remaining = Math.max(0, l.quantityAvailable - l.quantityFilled);
+        return {
+          name: l.name,
+          amount: l.amount,
+          quantity: l.quantityAvailable,
+          left: remaining <= 0 ? "Sold out" : `${remaining} Remaining`,
+          remaining,
+          itemId: l.itemId,
+        };
+      }),
+    [offeringLevels],
+  );
 
   const invoices = useMemo((): Invoice[] => {
     const rows = (invoicesQuery.data ?? []).filter(
       (i) => i.event_id && invoiceFilterIds.includes(i.event_id),
     );
-    return rows.map((inv) => ({
-      id: inv.id,
-      invoice: inv.number ?? inv.id.slice(-8),
-      sponsor: inv.customer_email ?? "—",
-      amount: inv.amount_due / 100,
-      dueDate: inv.due_date
-        ? new Date(inv.due_date * 1000).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })
-        : "—",
-      status:
-        inv.status === "paid"
-          ? "Paid"
-          : inv.status === "open"
-            ? "Sent"
-            : inv.status === "draft"
-              ? "Draft"
-              : inv.status === "uncollectible"
-                ? "Overdue"
-                : (inv.status ?? "Draft"),
-    }));
-  }, [invoicesQuery.data, invoiceFilterIds]);
+    const itemNameById = new Map(sponsorshipTiers.filter((t) => t.itemId).map((t) => [t.itemId, t.name]));
+    return rows.map((inv) => {
+      const sponsorship = inv.sponsorship_id
+        ? sponsorships.find((s) => s.id === inv.sponsorship_id)
+        : undefined;
+      const level =
+        (sponsorship?.sponsorship_item_id && itemNameById.get(sponsorship.sponsorship_item_id)) || "—";
+      return {
+        id: inv.id,
+        invoice: inv.number ?? inv.id.slice(-8),
+        sponsor: inv.customer_email ?? "—",
+        amount: inv.amount_due / 100,
+        dueDate: inv.due_date
+          ? new Date(inv.due_date * 1000).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "—",
+        status:
+          inv.status === "paid"
+            ? "Paid"
+            : inv.status === "open"
+              ? "Sent"
+              : inv.status === "draft"
+                ? "Draft"
+                : inv.status === "uncollectible"
+                  ? "Overdue"
+                  : (inv.status ?? "Draft"),
+        level,
+      };
+    });
+  }, [invoicesQuery.data, invoiceFilterIds, sponsorships, sponsorshipTiers]);
 
   const budget = useMemo(
     () =>
@@ -257,16 +291,6 @@ export function EventProvider({
         event?.fieldData.sponsorship_goal_cents,
       ),
     [sponsorships, raised, pledgedAmount, event?.fieldData.sponsorship_goal_cents],
-  );
-
-  const sponsorshipTiers = useMemo(
-    () => buildSponsorshipTiers(sponsorships),
-    [sponsorships],
-  );
-
-  const sponsorshipTierSeeds = useMemo(
-    () => resolveSponsorshipTierSeeds(sponsorships),
-    [sponsorships],
   );
 
   const toggleTask = useCallback(
@@ -288,6 +312,14 @@ export function EventProvider({
       await createTaskMutation(payload);
     },
     [readOnly, createTaskMutation],
+  );
+
+  const removeTask = useCallback(
+    async (taskId: string) => {
+      if (readOnly) throw new Error("Event is read-only");
+      await removeTaskMutation(taskId);
+    },
+    [readOnly, removeTaskMutation],
   );
 
   const refetchAll = useCallback(async () => {
@@ -402,6 +434,7 @@ export function EventProvider({
       tasksOpenTotal: openCount,
       toggleTask,
       createTask,
+      removeTask,
       scheduleGroups,
       volunteerAsks,
       volunteerSignupTotal,
@@ -430,6 +463,7 @@ export function EventProvider({
       openCount,
       toggleTask,
       createTask,
+      removeTask,
       scheduleGroups,
       volunteerAsks,
       volunteerSignupTotal,

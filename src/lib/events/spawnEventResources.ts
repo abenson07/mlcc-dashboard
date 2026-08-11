@@ -1,38 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Events } from "@/types/database";
-import {
-  defaultSponsorshipTierSeeds,
-  SPONSORSHIP_TIER_PLACEHOLDER_MEMO,
-  type SponsorshipTierSeed,
-} from "@/lib/sponsorship/tierPlaceholders";
+import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 
 export type { SponsorshipTierSeed };
-
-export function parseSponsorshipTiersFromFieldData(
-  fieldData: Record<string, unknown> | null | undefined,
-): SponsorshipTierSeed[] {
-  const raw = fieldData?.sponsorship_tiers;
-  if (!Array.isArray(raw) || raw.length === 0) {
-    return defaultSponsorshipTierSeeds();
-  }
-
-  const tiers: SponsorshipTierSeed[] = [];
-  for (const item of raw) {
-    if (!item || typeof item !== "object") continue;
-    const o = item as Record<string, unknown>;
-    const name = typeof o.name === "string" ? o.name.trim() : "";
-    const amount = Number(o.amount);
-    const quantity = Number(o.quantity);
-    if (!name || !Number.isFinite(amount) || amount <= 0) continue;
-    tiers.push({
-      name,
-      amount,
-      quantity: Number.isFinite(quantity) && quantity >= 1 ? quantity : 1,
-    });
-  }
-
-  return tiers.length > 0 ? tiers : defaultSponsorshipTierSeeds();
-}
 
 export async function spawnEventTasks(
   supabase: SupabaseClient,
@@ -76,32 +46,45 @@ export async function spawnEventTasks(
   return { spawned: tasks.length, skipped: false };
 }
 
+/**
+ * Seeds this event's sponsorship_item_offerings from the sponsorship_item_templates
+ * suggested for its event_template — same copy-on-activate shape as spawnEventTasks.
+ * Real purchases live in `sponsorships` (with `sponsorship_item_id` set), never here.
+ */
 export async function spawnEventSponsorshipTiers(
   supabase: SupabaseClient,
-  event: Pick<Events, "id">,
-  fieldData: Record<string, unknown> | null | undefined,
+  event: Pick<Events, "id" | "event_template_id">,
 ): Promise<{ spawned: number; skipped: boolean }> {
+  if (!event.event_template_id) {
+    return { spawned: 0, skipped: true };
+  }
+
   const { count, error: countError } = await supabase
-    .from("sponsorships")
+    .from("sponsorship_item_offerings")
     .select("id", { count: "exact", head: true })
     .eq("event_id", event.id);
 
   if (countError) throw new Error(countError.message);
   if ((count ?? 0) > 0) return { spawned: 0, skipped: true };
 
-  const tiers = parseSponsorshipTiersFromFieldData(fieldData);
-  const rows = tiers.map((tier) => ({
+  const { data: itemTemplates, error: templatesError } = await supabase
+    .from("sponsorship_item_templates")
+    .select("sponsorship_item_id, quantity_available")
+    .eq("context", "event")
+    .eq("is_active", true)
+    .eq("event_template_id", event.event_template_id);
+
+  if (templatesError) throw new Error(templatesError.message);
+  if (!itemTemplates?.length) return { spawned: 0, skipped: true };
+
+  const rows = itemTemplates.map((t) => ({
     event_id: event.id,
     leaflet_id: null,
-    business_id: null,
-    description: tier.name,
-    amount: tier.amount,
-    quantity: tier.quantity,
-    status: null,
-    memo: SPONSORSHIP_TIER_PLACEHOLDER_MEMO,
+    sponsorship_item_id: t.sponsorship_item_id,
+    quantity_available: t.quantity_available,
   }));
 
-  const { error: insertError } = await supabase.from("sponsorships").insert(rows);
+  const { error: insertError } = await supabase.from("sponsorship_item_offerings").insert(rows);
   if (insertError) throw new Error(insertError.message);
 
   return { spawned: rows.length, skipped: false };
@@ -111,14 +94,9 @@ export async function activateEventResources(
   supabase: SupabaseClient,
   event: Events,
 ): Promise<{ tasksSpawned: number; sponsorshipsSpawned: number }> {
-  const fieldData =
-    event.field_data && typeof event.field_data === "object"
-      ? (event.field_data as Record<string, unknown>)
-      : {};
-
   const [tasks, sponsorships] = await Promise.all([
     spawnEventTasks(supabase, event),
-    spawnEventSponsorshipTiers(supabase, event, fieldData),
+    spawnEventSponsorshipTiers(supabase, event),
   ]);
 
   return {

@@ -153,6 +153,8 @@ export type Invoice = {
   amount: number;
   dueDate: string;
   status: string;
+  /** Catalog sponsorship_items name, resolved via the invoice's sponsorship_id metadata — unset (or "—") when unresolved. */
+  level?: string;
 };
 
 export type SponsorshipTier = {
@@ -161,6 +163,8 @@ export type SponsorshipTier = {
   quantity: number;
   left: string;
   remaining: number;
+  /** Real `sponsorship_items.id` this tier is backed by, when sourced from the catalog. */
+  itemId?: string;
 };
 
 export type PastDeliverer = {

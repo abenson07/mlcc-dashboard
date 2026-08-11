@@ -17,6 +17,11 @@ export { useEvents, EVENTS_QUERY_KEY, useEvent, type CreateEventPayload } from "
 export { useEventTemplates, EVENT_TEMPLATES_QUERY_KEY } from "./useEventTemplates";
 export { useEventSponsorships } from "./useEventSponsorships";
 export {
+  useSponsorshipItemOfferings,
+  type OfferingLevel,
+  type OfferingsParent,
+} from "./useSponsorshipItemOfferings";
+export {
   useAllSponsorships,
   ALL_SPONSORSHIPS_QUERY_KEY,
   type SponsorshipWithParent,
@@ -37,6 +42,7 @@ export { useQrCodes, QR_CODES_QUERY_KEY } from "./useQrCodes";
 export { useEventQrCodes, type EventQrCodeRow } from "./useEventQrCodes";
 export { useDashboard } from "./useDashboard";
 export { useWebflowEvents, WEBFLOW_EVENTS_QUERY_KEY } from "./useWebflowEvents";
+export { useBanners, BANNERS_QUERY_KEY } from "./useBanners";
 export { useLeaflets, LEAFLETS_QUERY_KEY } from "./useLeaflets";
 export { useDeliveries, type DeliveryWithRelations } from "./useDeliveries";
 export { useTasks, taskDueDate } from "./useTasks";
@@ -105,3 +111,8 @@ export {
   COMMITTEE_PROFILE_KEY,
   COMMITTEE_MEMBERS_KEY,
 } from "./useCommitteeSettings";
+export { useCurrentPerson, type CurrentPerson } from "./useCurrentPerson";
+export {
+  useMyCommitteeMemberships,
+  type MyCommitteeMembership,
+} from "./useMyCommitteeMemberships";

@@ -1,9 +1,6 @@
 import Link from "next/link";
 
-const pages = [
-  { href: "/admin-preview/classes", label: "Demo" },
-  { href: "/admin-preview/drafts", label: "Drafts" },
-];
+const pages = [{ href: "/admin-preview/classes", label: "Demo" }];
 
 export default function AdminPreviewIndexPage() {
   return (

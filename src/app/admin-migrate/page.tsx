@@ -4,20 +4,23 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useIsMobileAdmin } from "@/components/patterns/client-templates-migrate/mobile";
-
-const pages = [
-  { href: "/admin-migrate/database", label: "Database (mobile)" },
-  { href: "/admin-migrate/events", label: "Events" },
-  { href: "/admin-migrate/invoices", label: "Invoices" },
-  { href: "/admin-migrate/promotions", label: "Promotions (mobile)" },
-  { href: "/admin-migrate/people", label: "People" },
-  { href: "/admin-migrate/committees", label: "Committees" },
-  { href: "/admin-migrate/drafts", label: "Drafts" },
-];
+import { useWipFeaturesOptional } from "@/components/patterns/foundation/WipFeaturesContext";
 
 export default function AdminMigrateIndexPage() {
   const router = useRouter();
   const isMobile = useIsMobileAdmin();
+  const { enabled: wipFeaturesEnabled } = useWipFeaturesOptional();
+
+  const pages = [
+    { href: "/admin-migrate/database", label: "Database (mobile)" },
+    { href: "/admin-migrate/events", label: "Events" },
+    { href: "/admin-migrate/invoices", label: "Invoices" },
+    { href: "/admin-migrate/promotions", label: "Promotions (mobile)" },
+    { href: "/admin-migrate/people", label: "People" },
+    ...(wipFeaturesEnabled
+      ? [{ href: "/admin-migrate/committees", label: "Committees" }]
+      : []),
+  ];
 
   useEffect(() => {
     if (isMobile) router.replace("/admin-migrate/database");

@@ -17,7 +17,6 @@ import {
   Settings,
   Sun,
   Users,
-  UserSquare,
 } from "lucide-react";
 import {
   Dropdown,
@@ -235,12 +234,6 @@ export function MigrateSidebar({ onSettingsClick }: MigrateSidebarProps = {}) {
               label="Courses"
               icon={<BookOpen size={16} strokeWidth={1.75} />}
               onSelect={() => router.push("/admin-migrate/courses")}
-            />
-            <DropdownItem
-              label="Staff"
-              icon={<UserSquare size={16} strokeWidth={1.75} />}
-              selected={pathname === "/admin-migrate/staff"}
-              onSelect={() => router.push("/admin-migrate/staff")}
             />
             <DropdownItem
               label="Payouts"

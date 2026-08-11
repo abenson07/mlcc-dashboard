@@ -25,6 +25,7 @@ export type DashboardInvoiceRow = {
   event_id: string | null;
   event_name: string | null;
   leaflet_id: string | null;
+  sponsorship_id: string | null;
 };
 
 function customerEmail(inv: Stripe.Invoice): string | null {
@@ -85,6 +86,7 @@ export async function listDashboardInvoices(
       event_id: inv.metadata?.[METADATA_KEYS.eventId]?.trim() ?? null,
       event_name: inv.metadata?.[METADATA_KEYS.eventName]?.trim() ?? null,
       leaflet_id: inv.metadata?.[METADATA_KEYS.leafletId]?.trim() ?? null,
+      sponsorship_id: inv.metadata?.[METADATA_KEYS.sponsorshipId]?.trim() ?? null,
     })),
   );
 }

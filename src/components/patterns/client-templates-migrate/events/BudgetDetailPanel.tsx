@@ -1,12 +1,13 @@
 "use client";
 
-import { Button } from "@/components/patterns/primitives/Button";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Building2, CalendarDays, CircleDollarSign } from "lucide-react";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
 import type { EventBudgetRow } from "@/data/mocks/events";
+import { MarkAsPaidControl } from "@/components/patterns/client-templates/shared";
+import { useEventContext } from "@/components/integrated/events/EventContext";
 
 export type BudgetDetailPanelProps = {
   item: EventBudgetRow;
@@ -17,6 +18,7 @@ export type BudgetDetailPanelProps = {
  * row is selected from the Overview's Invoices section.
  */
 export function BudgetDetailPanel({ item }: BudgetDetailPanelProps) {
+  const { refetchAll } = useEventContext();
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -52,7 +54,7 @@ export function BudgetDetailPanel({ item }: BudgetDetailPanelProps) {
         />
       </List>
 
-      <Button label="Mark as paid" variant="secondary" size="sm" width="100%" />
+      <MarkAsPaidControl invoiceId={item.id} isPaid={item.status === "Paid"} onPaid={refetchAll} />
     </VStack>
   );
 }

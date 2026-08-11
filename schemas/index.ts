@@ -18,6 +18,7 @@ export * from "./volunteers";
 export * from "./committee_interests";
 export * from "./payments";
 export * from "./sponsorships";
+export * from "./sponsorship_items";
 export * from "./tshirt_preorders";
 export * from "./fundraising_donations";
 export * from "./shop_orders";

@@ -4,6 +4,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { sampleSkippedRoutes, type LeafletRouteRow } from "@/data/mocks/leaflets";
 
 export type SkippedRoutesSectionProps = {
+  routes?: LeafletRouteRow[];
   onSelectRoute?: (row: LeafletRouteRow) => void;
 };
 
@@ -11,8 +12,8 @@ export type SkippedRoutesSectionProps = {
  * Skipped-routes box for the Overview page — pairs with the Sponsorships
  * summary in the final row, same boxed shape as `SponsorsListSection`.
  */
-export function SkippedRoutesSection({ onSelectRoute }: SkippedRoutesSectionProps) {
-  const routes = sampleSkippedRoutes;
+export function SkippedRoutesSection({ routes: routesProp, onSelectRoute }: SkippedRoutesSectionProps) {
+  const routes = routesProp ?? sampleSkippedRoutes;
 
   return (
     <section

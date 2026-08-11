@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
@@ -15,7 +15,7 @@ import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
 import { Badge } from "@/components/patterns/primitives/Badge";
 import { Button } from "@/components/patterns/primitives/Button";
-import { EmptyStateCard, OutlinedPanel } from "@/components/patterns/client-templates/shared";
+import { ComingSoon, EmptyStateCard, OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import { useEventContext } from "@/components/integrated/events/EventContext";
 import EventDetailsPanel from "@/components/integrated/events/EventDetailsPanel";
 import EditSponsorshipTiersModal from "@/components/sponsorship/EditSponsorshipTiersModal";
@@ -27,13 +27,13 @@ import {
 import type { EventEdition } from "@/lib/events/eventData";
 import { COMMITTEE_LABELS } from "schemas/committee_meetings";
 import { supabaseClient } from "@/lib/supabaseClient";
-import { useDemoGuard } from "hooks";
+import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
+import { useDemoGuard, useFavorites } from "hooks";
 import { EventDraftBanner } from "./EventDraftBanner";
 import { EventOverviewPage } from "./EventOverviewPage";
 import { VolunteersPage } from "./VolunteersPage";
 import { BudgetPage } from "./BudgetPage";
 import { EventTasksPage } from "./EventTasksPage";
-import { EventPromotionPage } from "./EventPromotionPage";
 import { VolunteerDetailPanel } from "./VolunteerDetailPanel";
 import { BudgetDetailPanel } from "./BudgetDetailPanel";
 import { SponsorshipInvoiceDetailPanel } from "./SponsorshipInvoiceDetailPanel";
@@ -52,14 +52,40 @@ import {
   type EventBudgetRow,
   type EventBudgetSummary,
   type EventDetail,
-  type EventPromotionItem,
   type EventSponsorRow,
   type EventSponsorshipInvoiceRow,
+  type EventTaskGroupLabel,
   type EventTaskRow,
 } from "@/data/mocks/events";
 import type { EventVolunteerRow } from "./VolunteersPage";
+import type { Task } from "@/components/leaflet/types";
+
+/** Live `context.tasks` uses the shared leaflet/event schedule shape — remap into this page's `EventTaskRow` shape. */
+function toEventTaskRow(task: Task): EventTaskRow {
+  const group: EventTaskGroupLabel =
+    task.group === "Six months out" ? "6 months out" : (task.group as EventTaskGroupLabel);
+  return {
+    id: task.id,
+    title: task.title,
+    group,
+    dueLabel: task.dueLabel,
+    isComplete: task.is_complete,
+    isOverdue: Boolean(task.isOverdue),
+  };
+}
 
 type EventDetailView = "overview" | "details" | "volunteers" | "tasks" | "budget" | "promotion";
+
+function isEventDetailView(value: string | null): value is EventDetailView {
+  return (
+    value === "overview" ||
+    value === "details" ||
+    value === "volunteers" ||
+    value === "tasks" ||
+    value === "budget" ||
+    value === "promotion"
+  );
+}
 
 const EVENT_VIEW_LABELS: Record<Exclude<EventDetailView, "overview">, string> = {
   details: "Settings",
@@ -141,15 +167,21 @@ export type EventDetailDemoProps = {
 
 export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isMobile = useIsMobileAdmin();
   const { enabled: demo } = useDemoModeOptional();
   const { guard } = useDemoGuard();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const {
     eventId,
     event,
     budget,
     volunteerAsks,
+    tasks: contextTasks,
+    toggleTask: contextToggleTask,
     createTask,
+    removeTask: contextRemoveTask,
     createSponsorship,
     updateEvent,
     saveSponsorshipTiers,
@@ -157,18 +189,22 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
     sponsorshipTiers,
     refetchAll,
   } = useEventContext();
-  const [view, setView] = useState<EventDetailView>("overview");
+  const initialView = searchParams.get("view");
+  const [view, setView] = useState<EventDetailView>(
+    isEventDetailView(initialView) ? initialView : "overview",
+  );
   const [selection, setSelection] = useState<Selection>(null);
-  const [tasks, setTasks] = useState<EventTaskRow[]>([]);
-  const [promotionItems, setPromotionItems] = useState<EventPromotionItem[]>([]);
+  const [demoTasks, setDemoTasks] = useState<EventTaskRow[]>([]);
   const [modal, setModal] = useState<ModalKind>(null);
 
   const mocks = useMemo(() => (demo ? eventMocksFor(eventId) : null), [demo, eventId]);
 
   useEffect(() => {
-    setTasks(mocks ? mocks.tasks : []);
-    setPromotionItems(mocks ? mocks.promotionItems : []);
+    setDemoTasks(mocks ? mocks.tasks : []);
   }, [mocks]);
+
+  const liveTasks = useMemo(() => contextTasks.map(toEventTaskRow), [contextTasks]);
+  const tasks = mocks ? demoTasks : liveTasks;
 
   const overviewEvent = useMemo(
     () => (mocks ? mocks.detail : liveEventDetail(event)),
@@ -192,7 +228,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         price: l.price,
       }))
     : sponsorshipTiers.map((t, i) => ({
-        id: `tier-${i}`,
+        id: t.itemId ?? `tier-${i}`,
         name: t.name,
         price: `$${t.amount.toLocaleString()}`,
       }));
@@ -227,15 +263,19 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   }
 
   function toggleTask(id: string) {
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, isComplete: !task.isComplete } : task)),
-    );
+    if (mocks) {
+      setDemoTasks((prev) =>
+        prev.map((task) => (task.id === id ? { ...task, isComplete: !task.isComplete } : task)),
+      );
+      return;
+    }
+    void guard(() => Promise.resolve(contextToggleTask(id)), { action: "Task updated" });
   }
 
   function addTaskLocal({ title, dueDate }: { title: string; dueDate: string }) {
     const group = eventTaskGroupForDueDate(dueDate, mocks?.dateIso ?? dueDate);
     const isOverdue = group === "Past due";
-    setTasks((prev) => [
+    setDemoTasks((prev) => [
       ...prev,
       {
         id: `task-${Date.now()}`,
@@ -249,16 +289,13 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   }
 
   function removeTask(id: string) {
-    setTasks((prev) => prev.filter((task) => task.id !== id));
+    if (mocks) {
+      setDemoTasks((prev) => prev.filter((task) => task.id !== id));
+      return;
+    }
+    void guard(() => contextRemoveTask(id), { action: "Task removed" });
   }
 
-  function insertPromotionItem(index: number, item: Omit<EventPromotionItem, "id">) {
-    setPromotionItems((prev) => {
-      const next = [...prev];
-      next.splice(index, 0, { ...item, id: `promo-${Date.now()}` });
-      return next;
-    });
-  }
 
   const isFullBleed = view === "details";
   const eventTitle = event?.title ?? (mocks ? mocks.detail.title : "Event");
@@ -271,7 +308,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
 
   const eventsCrumb: CanvasTopbarBreadcrumb = {
     label: "Events",
-    onClick: () => router.push("/admin-migrate/events"),
+    onClick: () => router.push("/admin/events"),
   };
   const eventCrumb: CanvasTopbarBreadcrumb = {
     label: eventTitle,
@@ -280,6 +317,9 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
   const topbarTitle = view === "overview" ? eventTitle : EVENT_VIEW_LABELS[view];
   const topbarBreadcrumbs: CanvasTopbarBreadcrumb[] =
     view === "overview" ? [eventsCrumb] : [eventsCrumb, eventCrumb];
+  const currentRoute = normalizeRoute(
+    searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname,
+  );
 
   const body =
     view === "details" ? (
@@ -323,34 +363,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         />
       )
     ) : view === "promotion" ? (
-      <div
-        style={{
-          height: "100%",
-          minHeight: 0,
-          overflow: "auto",
-          boxSizing: "border-box",
-          padding: "32px 24px 64px",
-        }}
-      >
-        {promotionItems.length === 0 ? (
-          <EmptyStateCard
-            variant="pill"
-            label="Add new promotion"
-            onClick={() =>
-              insertPromotionItem(0, {
-                type: "email",
-                channel: "Newsletter",
-                title: "New promotion",
-                description: "",
-                sendDate: "TBD",
-                status: "Draft",
-              })
-            }
-          />
-        ) : (
-          <EventPromotionPage items={promotionItems} onInsertAt={insertPromotionItem} />
-        )}
-      </div>
+      <ComingSoon label="Promotion" fullPage />
     ) : (
       <EventOverviewPage
         event={overviewEvent}
@@ -412,6 +425,9 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
                   />
                 ) : undefined,
               hasFavorite: true,
+              isFavorite: isFavorite(currentRoute),
+              onFavoriteClick: () =>
+                void toggleFavorite({ name: topbarTitle, route: currentRoute }),
               endContent:
                 view === "volunteers" ? (
                   <Button
@@ -467,7 +483,10 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         eventTitle={eventTitle}
         onClose={() => setModal(null)}
         onSubmit={async (payload) => {
-          addTaskLocal({ title: payload.title, dueDate: payload.dueDate });
+          if (mocks) {
+            addTaskLocal({ title: payload.title, dueDate: payload.dueDate });
+            return;
+          }
           await guard(
             async () => {
               const offset = daysOffsetFromAnchor(payload.dueDate, event?.anchorDate ?? null);
@@ -546,11 +565,13 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
               } else {
                 const level =
                   levelsForModal.find((l) => l.id === payload.levelId) ?? levelsForModal[0];
+                const matchingTier = sponsorshipTiers.find((t) => t.name === level?.name);
                 const amountFromPrice = level?.price
                   ? Number(String(level.price).replace(/[^0-9.]/g, ""))
-                  : sponsorshipTiers.find((t) => t.name === level?.name)?.amount ?? 0;
+                  : matchingTier?.amount ?? 0;
                 await createSponsorship({
                   business_id: payload.businessId,
+                  sponsorship_item_id: matchingTier?.itemId ?? null,
                   description: level?.name ?? "Sponsorship",
                   amount: amountFromPrice,
                   quantity: 1,

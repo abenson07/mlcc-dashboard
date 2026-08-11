@@ -131,7 +131,7 @@ export function BudgetPage({
         id: inv.id,
         invoiceNumber: inv.invoice,
         business: inv.sponsor,
-        level: "—",
+        level: inv.level ?? "—",
         amount: formatMoney(inv.amount),
         dueDate: inv.dueDate,
         status: mapInvoiceStatus(inv.status),

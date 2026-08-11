@@ -9,6 +9,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { sampleLeafletStories, type LeafletStoryRow } from "@/data/mocks/leaflets";
 
 export type StoriesTableSectionProps = {
+  stories?: LeafletStoryRow[];
   onSelectStory?: (row: LeafletStoryRow) => void;
 };
 
@@ -77,13 +78,14 @@ function buildColumns(onSelectStory?: (row: LeafletStoryRow) => void): TableColu
  * flat inline table (no grouping), same nested-table chrome as the
  * Sponsorships tab's invoices table.
  */
-export function StoriesTableSection({ onSelectStory }: StoriesTableSectionProps) {
+export function StoriesTableSection({ stories: storiesProp, onSelectStory }: StoriesTableSectionProps) {
   const columns = useMemo(() => buildColumns(onSelectStory), [onSelectStory]);
+  const stories = storiesProp ?? sampleLeafletStories;
 
   return (
     <NestedGroupedTable
       title="Stories"
-      data={sampleLeafletStories}
+      data={stories}
       columns={columns}
       getRowKey={(row) => row.id}
     />

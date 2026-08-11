@@ -9,6 +9,7 @@ import { SponsorshipLevelsPanel } from "./SponsorshipLevelsPanel";
 import {
   sampleLeafletBudgetSummary,
   sampleLeafletSponsorshipInvoices,
+  type LeafletBudgetSummary,
   type LeafletSponsorshipInvoiceRow,
 } from "@/data/mocks/leaflets";
 
@@ -79,6 +80,9 @@ function buildColumns(
 
 export type LeafletSponsorshipsPageProps = {
   onSelectInvoice?: (row: LeafletSponsorshipInvoiceRow) => void;
+  invoices?: LeafletSponsorshipInvoiceRow[];
+  budgetSummary?: LeafletBudgetSummary;
+  leafletId?: string | null;
 };
 
 /**
@@ -86,9 +90,15 @@ export type LeafletSponsorshipsPageProps = {
  * Invoices views into one, same shape as Events' `BudgetPage`: a five-column
  * summary row (chart + levels), then invoices grouped by payment status.
  */
-export function LeafletSponsorshipsPage({ onSelectInvoice }: LeafletSponsorshipsPageProps) {
+export function LeafletSponsorshipsPage({
+  onSelectInvoice,
+  invoices: invoicesProp,
+  budgetSummary,
+  leafletId,
+}: LeafletSponsorshipsPageProps) {
   const columns = useMemo(() => buildColumns(onSelectInvoice), [onSelectInvoice]);
   const groupOrder = useMemo(() => GROUP_ORDER, []);
+  const invoices = invoicesProp ?? sampleLeafletSponsorshipInvoices;
 
   return (
     <ClassContentPage>
@@ -101,15 +111,15 @@ export function LeafletSponsorshipsPage({ onSelectInvoice }: LeafletSponsorships
         }}
       >
         <div style={{ gridColumn: "span 4" }}>
-          <BudgetChart summary={sampleLeafletBudgetSummary} />
+          <BudgetChart summary={budgetSummary ?? sampleLeafletBudgetSummary} />
         </div>
         <div style={{ gridColumn: "span 1" }}>
-          <SponsorshipLevelsPanel />
+          <SponsorshipLevelsPanel leafletId={leafletId} />
         </div>
       </div>
       <NestedGroupedTable
         title="Sponsorship invoices"
-        data={sampleLeafletSponsorshipInvoices}
+        data={invoices}
         columns={columns}
         getRowKey={(row) => row.id}
         groupBy={(row) => row.status}

@@ -4,6 +4,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { sampleOpenRoutes, type LeafletRouteRow } from "@/data/mocks/leaflets";
 
 export type OpenRoutesSectionProps = {
+  routes?: LeafletRouteRow[];
   onSelectRoute?: (row: LeafletRouteRow) => void;
   onSeeAllOpenRoutes?: () => void;
 };
@@ -20,8 +21,12 @@ const PREVIEW_LIMIT = 5;
  * Open-routes preview for the Overview page — replaces `VolunteersListSection`
  * in the Tasks/Volunteers row for leaflets.
  */
-export function OpenRoutesSection({ onSelectRoute, onSeeAllOpenRoutes }: OpenRoutesSectionProps) {
-  const routes = sampleOpenRoutes;
+export function OpenRoutesSection({
+  routes: routesProp,
+  onSelectRoute,
+  onSeeAllOpenRoutes,
+}: OpenRoutesSectionProps) {
+  const routes = routesProp ?? sampleOpenRoutes;
   const preview = routes.slice(0, PREVIEW_LIMIT);
 
   return (

@@ -4,6 +4,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { sampleLeafletSponsors, type LeafletSponsorRow } from "@/data/mocks/leaflets";
 
 export type LeafletSponsorsSectionProps = {
+  sponsors?: LeafletSponsorRow[];
   onSelectSponsor?: (row: LeafletSponsorRow) => void;
 };
 
@@ -17,8 +18,11 @@ const STATUS_COLOR: Record<LeafletSponsorRow["status"], string> = {
  * Sponsorships summary box for the Overview page — pairs with
  * `SkippedRoutesSection` in the final row, mirrors `SponsorsListSection`.
  */
-export function LeafletSponsorsSection({ onSelectSponsor }: LeafletSponsorsSectionProps) {
-  const sponsors = sampleLeafletSponsors;
+export function LeafletSponsorsSection({
+  sponsors: sponsorsProp,
+  onSelectSponsor,
+}: LeafletSponsorsSectionProps) {
+  const sponsors = sponsorsProp ?? sampleLeafletSponsors;
   const confirmedCount = sponsors.filter((s) => s.status === "Confirmed").length;
 
   return (

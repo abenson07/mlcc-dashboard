@@ -10,6 +10,7 @@ import { SkippedRoutesSection } from "./SkippedRoutesSection";
 import { LeafletSponsorsSection } from "./LeafletSponsorsSection";
 import { StoriesTableSection } from "./StoriesTableSection";
 import type {
+  LeafletBudgetSummary,
   LeafletDetail,
   LeafletRouteRow,
   LeafletSponsorRow,
@@ -30,6 +31,12 @@ export type LeafletOverviewPageProps = {
   onSelectSkippedRoute?: (row: LeafletRouteRow) => void;
   onSelectSponsor?: (row: LeafletSponsorRow) => void;
   onSelectStory?: (row: LeafletStoryRow) => void;
+  budgetSummary?: LeafletBudgetSummary;
+  openRoutes?: LeafletRouteRow[];
+  skippedRoutes?: LeafletRouteRow[];
+  sponsors?: LeafletSponsorRow[];
+  stories?: LeafletStoryRow[];
+  reminderDescription?: string;
 };
 
 /**
@@ -50,6 +57,12 @@ export function LeafletOverviewPage({
   onSelectSkippedRoute,
   onSelectSponsor,
   onSelectStory,
+  budgetSummary,
+  openRoutes,
+  skippedRoutes,
+  sponsors,
+  stories,
+  reminderDescription,
 }: LeafletOverviewPageProps) {
   return (
     <ClassContentPage>
@@ -64,10 +77,10 @@ export function LeafletOverviewPage({
         }}
       >
         <div style={{ gridColumn: "span 4" }}>
-          <BudgetChart summary={sampleLeafletBudgetSummary} onViewBudget={onViewSponsorships} />
+          <BudgetChart summary={budgetSummary ?? sampleLeafletBudgetSummary} onViewBudget={onViewSponsorships} />
         </div>
         <div style={{ gridColumn: "span 1" }}>
-          <NextStepBox onSend={onSendReminder} />
+          <NextStepBox description={reminderDescription} onSend={onSendReminder} />
         </div>
       </div>
 
@@ -80,7 +93,11 @@ export function LeafletOverviewPage({
         }}
       >
         <LeafletTasksSection tasks={tasks} onToggleTask={onToggleTask} onSeeAllTasks={onSeeAllTasks} />
-        <OpenRoutesSection onSelectRoute={onSelectOpenRoute} onSeeAllOpenRoutes={onSeeAllOpenRoutes} />
+        <OpenRoutesSection
+          routes={openRoutes}
+          onSelectRoute={onSelectOpenRoute}
+          onSeeAllOpenRoutes={onSeeAllOpenRoutes}
+        />
       </div>
 
       <div
@@ -91,11 +108,11 @@ export function LeafletOverviewPage({
           alignItems: "start",
         }}
       >
-        <SkippedRoutesSection onSelectRoute={onSelectSkippedRoute} />
-        <LeafletSponsorsSection onSelectSponsor={onSelectSponsor} />
+        <SkippedRoutesSection routes={skippedRoutes} onSelectRoute={onSelectSkippedRoute} />
+        <LeafletSponsorsSection sponsors={sponsors} onSelectSponsor={onSelectSponsor} />
       </div>
 
-      <StoriesTableSection onSelectStory={onSelectStory} />
+      <StoriesTableSection stories={stories} onSelectStory={onSelectStory} />
     </ClassContentPage>
   );
 }
