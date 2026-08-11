@@ -57,7 +57,7 @@ export function LeafletsListPage() {
                 <button
                   key={leaflet.id}
                   type="button"
-                  onClick={() => router.push(`/admin-migrate/leaflets/${leaflet.id}`)}
+                  onClick={() => router.push(`/admin/leaflets/${leaflet.id}`)}
                   style={{
                     all: "unset",
                     boxSizing: "border-box",

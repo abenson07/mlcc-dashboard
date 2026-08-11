@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       `• *${item.title}*`,
       `• Assignee: ${assigneeName}`,
       `• Due: ${due}`,
-      `• View in dashboard: /admin-migrate/action-items`,
+      `• View in dashboard: /admin/action-items`,
     ].join("\n");
 
     await postToSlack(text, slackCommitteeName(committee));

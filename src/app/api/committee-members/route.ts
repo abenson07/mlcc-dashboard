@@ -21,12 +21,20 @@ export async function GET(request: NextRequest) {
   if (!session.ok) return session.response;
 
   const committee = request.nextUrl.searchParams.get("committee");
-  if (!committee || !isCommitteeSlug(committee)) {
+  const personId = request.nextUrl.searchParams.get("person_id");
+
+  if (!committee && !personId) {
+    return NextResponse.json(
+      { error: "committee or person_id query param is required" },
+      { status: 400 },
+    );
+  }
+  if (committee && !isCommitteeSlug(committee)) {
     return NextResponse.json({ error: "committee query param is required" }, { status: 400 });
   }
 
   const supabase = await getSupabaseForLeafletRoutes();
-  const { data, error } = await supabase
+  let query = supabase
     .from("committee_members")
     .select(
       `
@@ -34,8 +42,12 @@ export async function GET(request: NextRequest) {
       people:person_id ( id, full_name, email )
     `,
     )
-    .eq("committee", committee as CommitteeSlug)
     .order("created_at", { ascending: true });
+
+  if (committee) query = query.eq("committee", committee as CommitteeSlug);
+  if (personId) query = query.eq("person_id", personId);
+
+  const { data, error } = await query;
 
   if (error) {
     if (isMissingTable(error)) {

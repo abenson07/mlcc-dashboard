@@ -39,6 +39,7 @@ export function Layout({ content, end, height = "auto", padding = 0 }: LayoutPro
       style={{
         display: "flex",
         flexDirection: "row",
+        alignItems: "flex-start",
         height: height === "fill" ? "100%" : "auto",
         minHeight: 0,
         boxSizing: "border-box",

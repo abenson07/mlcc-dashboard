@@ -174,13 +174,13 @@ export function CommitteeInitiativeDemo() {
               breadcrumbs: [
                 {
                   label: "Committees",
-                  onClick: () => router.push("/admin-migrate/committees"),
+                  onClick: () => router.push("/admin/committees"),
                 },
                 {
                   label: `${committeeLabel} Committee`,
                   onClick: () =>
                     router.push(
-                      `/admin-migrate/committees/${encodeURIComponent(rawCommitteeId)}?view=initiatives`,
+                      `/admin/committees/${encodeURIComponent(rawCommitteeId)}?view=initiatives`,
                     ),
                 },
               ],

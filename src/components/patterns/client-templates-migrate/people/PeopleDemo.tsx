@@ -111,6 +111,27 @@ function PeopleDemoInner() {
     await refetch();
   }
 
+  /** Inline field commit from a Person detail panel — same demo-guard shape as `handleSaveEdit`. */
+  async function commitPersonField(personId: string, data: PeopleUpdate) {
+    if (demo) {
+      overlay.patch("people", personId, data as Record<string, unknown>);
+      toast.success("Person updated — demo mode, saved locally only");
+      return;
+    }
+    await update(personId, data);
+    await refetch();
+  }
+
+  async function commitMembershipField(membershipId: string, personId: string, data: MembershipsUpdate) {
+    if (demo) {
+      overlay.patch("people", personId, data as Record<string, unknown>);
+      toast.success("Person updated — demo mode, saved locally only");
+      return;
+    }
+    await updateMembership(membershipId, data);
+    await refetch();
+  }
+
   function selectView(next: PeopleView) {
     setView(next);
     setSelection(null);
@@ -208,10 +229,46 @@ function PeopleDemoInner() {
         }
         sideContent={
           selection && selectedPerson ? (
-            <OutlinedPanel onClose={() => setSelection(null)} onEdit={() => setIsEditOpen(true)}>
-              {selection.kind === "member" ? <MemberDetailPanel member={selection.row} person={selectedPerson} /> : null}
-              {selection.kind === "neighbor" ? <NeighborDetailPanel neighbor={selection.row} person={selectedPerson} /> : null}
-              {selection.kind === "volunteer" ? <VolunteerDetailPanel volunteer={selection.row} person={selectedPerson} /> : null}
+            <OutlinedPanel
+              onClose={() => setSelection(null)}
+              onEdit={selection.kind === "member" ? undefined : () => setIsEditOpen(true)}
+            >
+              {selection.kind === "member" ? (
+                <MemberDetailPanel
+                  member={selection.row}
+                  person={selectedPerson}
+                  onUpdatePerson={(data) => commitPersonField(selectedPerson.id, data)}
+                  onUpdateMembership={(data) =>
+                    selectedPerson.membership
+                      ? commitMembershipField(selectedPerson.membership.id, selectedPerson.id, data)
+                      : undefined
+                  }
+                />
+              ) : null}
+              {selection.kind === "neighbor" ? (
+                <NeighborDetailPanel
+                  neighbor={selection.row}
+                  person={selectedPerson}
+                  onUpdatePerson={(data) => commitPersonField(selectedPerson.id, data)}
+                  onUpdateMembership={(data) =>
+                    selectedPerson.membership
+                      ? commitMembershipField(selectedPerson.membership.id, selectedPerson.id, data)
+                      : undefined
+                  }
+                />
+              ) : null}
+              {selection.kind === "volunteer" ? (
+                <VolunteerDetailPanel
+                  volunteer={selection.row}
+                  person={selectedPerson}
+                  onUpdatePerson={(data) => commitPersonField(selectedPerson.id, data)}
+                  onUpdateMembership={(data) =>
+                    selectedPerson.membership
+                      ? commitMembershipField(selectedPerson.membership.id, selectedPerson.id, data)
+                      : undefined
+                  }
+                />
+              ) : null}
             </OutlinedPanel>
           ) : null
         }

@@ -6,3 +6,4 @@ export { SettingsPlaceholderPanel } from "./SettingsPlaceholderPanel";
 export type { SettingsPlaceholderPanelProps } from "./SettingsPlaceholderPanel";
 export { SettingsRow } from "./SettingsRow";
 export type { SettingsRowProps } from "./SettingsRow";
+export { AccountSettingsPage } from "./AccountSettingsPage";

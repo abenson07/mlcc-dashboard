@@ -7,6 +7,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { Calendar, DollarSign, Trophy } from "lucide-react";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
 import type { BusinessWithDetails } from "hooks";
+import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
 import type { SponsorRow } from "./types";
 import { SponsorshipLevelBadge } from "./SponsorshipLevelBadge";
 import { DetailsSection, MembershipSection } from "./BusinessSections";
@@ -20,10 +21,17 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 export type BusinessSponsorDetailPanelProps = {
   sponsor: SponsorRow;
   business: BusinessWithDetails;
+  onUpdateBusiness: (data: BusinessesUpdate) => void | Promise<void>;
+  onUpdateMembership: (data: BusinessMembershipsUpdate) => void | Promise<void>;
 };
 
 /** Sponsor detail — shown in the outlined side panel when a row is selected from Sponsors. */
-export function BusinessSponsorDetailPanel({ sponsor, business }: BusinessSponsorDetailPanelProps) {
+export function BusinessSponsorDetailPanel({
+  sponsor,
+  business,
+  onUpdateBusiness,
+  onUpdateMembership,
+}: BusinessSponsorDetailPanelProps) {
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -50,8 +58,8 @@ export function BusinessSponsorDetailPanel({ sponsor, business }: BusinessSponso
         <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Sponsor since ${sponsor.sponsorSince}`} />
       </List>
 
-      <DetailsSection business={business} />
-      <MembershipSection business={business} />
+      <DetailsSection business={business} onCommit={onUpdateBusiness} />
+      <MembershipSection business={business} onCommit={onUpdateMembership} />
     </VStack>
   );
 }

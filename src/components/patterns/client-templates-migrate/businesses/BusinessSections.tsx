@@ -1,8 +1,8 @@
 "use client";
 
-import { Calendar, CircleDot, DollarSign, Globe, Mail, MapPin, Phone, UserRound } from "lucide-react";
-import { SideContentSection, SideContentField } from "@/components/patterns/foundation/side-content";
+import { DetailField, DetailRow, DetailSection, DetailSelectField } from "@/components/patterns/foundation/detail";
 import type { BusinessWithDetails } from "hooks";
+import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
 import { BusinessMembershipStatusToken } from "./BusinessMembershipStatusToken";
 import { normalizeMembershipStatus } from "./adapters";
 
@@ -11,6 +11,13 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 0,
 });
+
+const MEMBERSHIP_STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "pending", label: "Pending" },
+  { value: "past_due", label: "Past due" },
+  { value: "lapsed", label: "Lapsed" },
+];
 
 function formatDisplayDate(value: string | null | undefined): string {
   if (!value) return "—";
@@ -21,35 +28,72 @@ function formatDisplayDate(value: string | null | undefined): string {
   }
 }
 
-/** Contact info — always shown, each field only if set. */
-export function DetailsSection({ business }: { business: BusinessWithDetails }) {
+/** Contact info — editable inline, each field committing on blur. */
+export function DetailsSection({
+  business,
+  onCommit,
+}: {
+  business: BusinessWithDetails;
+  onCommit: (data: BusinessesUpdate) => void | Promise<void>;
+}) {
   return (
-    <SideContentSection title="Details">
-      {business.contact_name ? (
-        <SideContentField icon={<UserRound size={16} strokeWidth={1.75} />} label={business.contact_name} />
-      ) : null}
-      {business.phone ? <SideContentField icon={<Phone size={16} strokeWidth={1.75} />} label={business.phone} /> : null}
-      {business.email ? <SideContentField icon={<Mail size={16} strokeWidth={1.75} />} label={business.email} /> : null}
-      {business.address ? <SideContentField icon={<MapPin size={16} strokeWidth={1.75} />} label={business.address} /> : null}
-      {business.website ? <SideContentField icon={<Globe size={16} strokeWidth={1.75} />} label={business.website} /> : null}
-    </SideContentSection>
+    <DetailSection title="Details" isFirst>
+      <DetailField
+        label="Contact name"
+        value={business.contact_name ?? ""}
+        onCommit={(next) => onCommit({ contact_name: next.trim() || null })}
+      />
+      <DetailField
+        label="Phone"
+        value={business.phone ?? ""}
+        onCommit={(next) => onCommit({ phone: next.trim() || null })}
+      />
+      <DetailField
+        label="Email"
+        value={business.email ?? ""}
+        onCommit={(next) => onCommit({ email: next.trim() || null })}
+      />
+      <DetailField
+        label="Address"
+        value={business.address ?? ""}
+        onCommit={(next) => onCommit({ address: next.trim() || null })}
+      />
+      <DetailField
+        label="Website"
+        value={business.website ?? ""}
+        onCommit={(next) => onCommit({ website: next.trim() || null })}
+      />
+    </DetailSection>
   );
 }
 
 /** Only renders when the business has a linked business_memberships record. */
-export function MembershipSection({ business }: { business: BusinessWithDetails }) {
+export function MembershipSection({
+  business,
+  onCommit,
+}: {
+  business: BusinessWithDetails;
+  onCommit: (data: BusinessMembershipsUpdate) => void | Promise<void>;
+}) {
   const membership = business.membership;
   if (!membership) return null;
 
   return (
-    <SideContentSection title="Membership">
-      <SideContentField
-        icon={<CircleDot size={16} strokeWidth={1.75} />}
-        endContent={<BusinessMembershipStatusToken status={normalizeMembershipStatus(membership.status)} />}
+    <DetailSection title="Membership">
+      <DetailSelectField
         label="Status"
+        value={normalizeMembershipStatus(membership.status)}
+        options={MEMBERSHIP_STATUS_OPTIONS}
+        onCommit={(next) => onCommit({ status: next })}
       />
-      <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Renews ${formatDisplayDate(membership.last_renewal)}`} />
-    </SideContentSection>
+      <DetailRow
+        label="Renews"
+        value={formatDisplayDate(membership.last_renewal)}
+        valueContent={
+          <BusinessMembershipStatusToken status={normalizeMembershipStatus(membership.status)} />
+        }
+      />
+    </DetailSection>
   );
 }
 
@@ -59,21 +103,25 @@ export function SponsorshipHistorySection({ business }: { business: BusinessWith
   if (sponsorships.length === 0) return null;
 
   return (
-    <SideContentSection title="Sponsorship history">
+    <DetailSection title="Sponsorship history">
       {sponsorships.map((sponsorship) => (
-        <SideContentField
+        <DetailRow
           key={sponsorship.id}
-          icon={<DollarSign size={16} strokeWidth={1.75} />}
-          label={`${currencyFormatter.format(sponsorship.amount ?? 0)}${sponsorship.status ? ` · ${sponsorship.status}` : ""}`}
-          endContent={
-            sponsorship.paid_date ? (
-              <span style={{ fontSize: 12, color: "var(--linear-color-ink-subtle)" }}>
-                {formatDisplayDate(sponsorship.paid_date)}
+          label={sponsorship.status ? sponsorship.status : "Sponsorship"}
+          valueContent={
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+              <span style={{ fontSize: 13, fontWeight: 510, color: "var(--linear-color-ink)" }}>
+                {currencyFormatter.format(sponsorship.amount ?? 0)}
               </span>
-            ) : undefined
+              {sponsorship.paid_date ? (
+                <span style={{ fontSize: 12, color: "var(--linear-color-ink-subtle)" }}>
+                  {formatDisplayDate(sponsorship.paid_date)}
+                </span>
+              ) : null}
+            </div>
           }
         />
       ))}
-    </SideContentSection>
+    </DetailSection>
   );
 }

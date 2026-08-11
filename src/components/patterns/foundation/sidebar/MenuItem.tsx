@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { MenuItemCount } from "./MenuItemCount";
 
@@ -32,10 +32,14 @@ export function MenuItem({
   onExpandClick,
   hugExpand = false,
 }: MenuItemProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const isExpandable = expanded !== undefined || onExpandClick != null;
   const foreground = selected
     ? "var(--linear-color-ink)"
     : "var(--linear-color-sidebar-item-idle)";
+  const background = selected || isHovered
+    ? "var(--linear-color-sidebar-item-selected)"
+    : "transparent";
 
   return (
     <div
@@ -53,6 +57,8 @@ export function MenuItem({
           onClick?.();
           if (isExpandable) onExpandClick?.();
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         style={{
           all: "unset",
           boxSizing: "border-box",
@@ -67,9 +73,7 @@ export function MenuItem({
           paddingRight: action ? 32 : 8,
           borderRadius: 6,
           color: foreground,
-          background: selected
-            ? "var(--linear-color-sidebar-item-selected)"
-            : "transparent",
+          background,
         }}
       >
         <span

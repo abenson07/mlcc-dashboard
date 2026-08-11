@@ -1,6 +1,7 @@
 import type { FaqWithPages } from "hooks";
 import type { Stories, StoryStatus } from "@/types/database";
-import type { ContentStatus, Faq, Story } from "./types";
+import type { BannerView } from "@/lib/webflow/banners";
+import type { Banner, ContentStatus, Faq, Story } from "./types";
 
 function formatDate(isoDate: string | null): string | null {
   if (!isoDate) return null;
@@ -39,4 +40,24 @@ export function toFaq(row: FaqWithPages): Faq {
     answer: row.answer,
     pages: row.pages,
   };
+}
+
+export function toBanner(row: BannerView): Banner {
+  return {
+    id: row.id,
+    title: row.name,
+    ctaText: row.message,
+    link: row.linkUrl,
+    active: row.active,
+    expiresAt: row.expiresAt,
+  };
+}
+
+/** Active list = `active` flag on AND not yet past `expiresAt`; everything else is Inactive. */
+export function bannerIsCurrentlyActive(banner: Banner, nowMs: number = Date.now()): boolean {
+  if (!banner.active) return false;
+  if (!banner.expiresAt) return true;
+  const expMs = Date.parse(banner.expiresAt);
+  if (Number.isNaN(expMs)) return true;
+  return nowMs <= expMs;
 }

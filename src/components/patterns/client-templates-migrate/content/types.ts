@@ -21,3 +21,13 @@ export type Faq = {
   answer: string;
   pages: string[];
 };
+
+export type Banner = {
+  id: string;
+  title: string;
+  ctaText: string;
+  link: string;
+  active: boolean;
+  /** ISO datetime string, or null if unset. Backend has no start-date field — this is the "active until" end date. */
+  expiresAt: string | null;
+};

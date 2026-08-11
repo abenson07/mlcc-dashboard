@@ -34,8 +34,10 @@ export function OutlinedPanel({ children, width = 320, onClose, onEdit }: Outlin
       style={{
         boxSizing: "border-box",
         width,
+        maxWidth: "100%",
         flexShrink: 0,
-        height: "100%",
+        height: "fit-content",
+        maxHeight: "100%",
         minHeight: 0,
         overflow: "auto",
         background: "var(--linear-color-side-panel)",

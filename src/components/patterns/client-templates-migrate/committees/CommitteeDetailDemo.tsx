@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
@@ -40,7 +40,9 @@ import {
   useCommitteeProfile,
   useDemoGuard,
   useEvents,
+  useFavorites,
 } from "hooks";
+import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 
 type CommitteeView = "overview" | "events" | "initiatives" | "settings";
 
@@ -81,9 +83,15 @@ function buildCommitteeDetail(
 export function CommitteeDetailDemo() {
   const params = useParams<{ committeeId: string }>();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { enabled: demo } = useDemoModeOptional();
   const { guard } = useDemoGuard();
   const { create: createEvent } = useEvents({ autoFetch: false });
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const currentRoute = normalizeRoute(
+    searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname,
+  );
   const rawId = typeof params?.committeeId === "string" ? params.committeeId : "events";
   const slug = resolveCommitteeSlug(rawId);
   const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -181,7 +189,7 @@ export function CommitteeDetailDemo() {
 
   function goToMeeting(meetingId: string) {
     router.push(
-      `/admin-migrate/committees/${encodeURIComponent(rawId)}/meetings/${encodeURIComponent(meetingId)}`,
+      `/admin/committees/${encodeURIComponent(rawId)}/meetings/${encodeURIComponent(meetingId)}`,
     );
   }
 
@@ -200,7 +208,7 @@ export function CommitteeDetailDemo() {
       setDemoInitiatives((prev) => [initiative, ...prev]);
       await guard(async () => undefined, { action: "Initiative created" });
       router.push(
-        `/admin-migrate/committees/${encodeURIComponent(rawId)}/initiatives/${encodeURIComponent(initiative.id)}`,
+        `/admin/committees/${encodeURIComponent(rawId)}/initiatives/${encodeURIComponent(initiative.id)}`,
       );
       return;
     }
@@ -208,7 +216,7 @@ export function CommitteeDetailDemo() {
     try {
       const created = await createInitiative({ title });
       router.push(
-        `/admin-migrate/committees/${encodeURIComponent(rawId)}/initiatives/${encodeURIComponent(created.id)}`,
+        `/admin/committees/${encodeURIComponent(rawId)}/initiatives/${encodeURIComponent(created.id)}`,
       );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to create initiative");
@@ -238,7 +246,7 @@ export function CommitteeDetailDemo() {
           kind: "council",
         },
       });
-      if (created) router.push(`/admin-migrate/events/${created.id}`);
+      if (created) router.push(`/admin/events/${created.id}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to create event");
     }
@@ -370,7 +378,7 @@ export function CommitteeDetailDemo() {
         onAddInitiative={() => void handleAddInitiative()}
         onSelectInitiative={(initiativeId) => {
           router.push(
-            `/admin-migrate/committees/${encodeURIComponent(rawId)}/initiatives/${encodeURIComponent(initiativeId)}`,
+            `/admin/committees/${encodeURIComponent(rawId)}/initiatives/${encodeURIComponent(initiativeId)}`,
           );
         }}
       />
@@ -415,10 +423,13 @@ export function CommitteeDetailDemo() {
                 />
               ),
               hasFavorite: true,
+              isFavorite: isFavorite(currentRoute),
+              onFavoriteClick: () =>
+                void toggleFavorite({ name: committee.name, route: currentRoute }),
               breadcrumbs: [
                 {
                   label: "Committees",
-                  onClick: () => router.push("/admin-migrate/committees"),
+                  onClick: () => router.push("/admin/committees"),
                 },
               ],
               endContent:
@@ -482,7 +493,7 @@ export function CommitteeDetailDemo() {
         onClose={() => setScheduleOpen(false)}
         onCreated={(meeting) => {
           router.push(
-            `/admin-migrate/committees/${encodeURIComponent(rawId)}/meetings/${encodeURIComponent(meeting.id)}`,
+            `/admin/committees/${encodeURIComponent(rawId)}/meetings/${encodeURIComponent(meeting.id)}`,
           );
         }}
       />

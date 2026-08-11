@@ -106,6 +106,33 @@ function BusinessesDemoInner() {
     await refetch();
   }
 
+  /** Inline field commit from the Business detail panel — same demo-guard shape as `handleSaveEdit`. */
+  async function commitBusinessField(businessId: string, data: BusinessesUpdate) {
+    if (demo) {
+      overlay.patch("businesses", businessId, data as Record<string, unknown>);
+      toast.success("Business updated — demo mode, saved locally only");
+      return;
+    }
+    await update(businessId, data);
+    await refetch();
+  }
+
+  async function commitMembershipField(
+    membershipId: string,
+    businessId: string,
+    data: BusinessMembershipsUpdate
+  ) {
+    if (demo) {
+      overlay.patch("businesses", businessId, data as Record<string, unknown>);
+      toast.success("Business updated — demo mode, saved locally only");
+      return;
+    }
+    if (supabaseClient) {
+      await supabaseClient.from("business_memberships").update(data).eq("id", membershipId);
+    }
+    await refetch();
+  }
+
   function selectView(next: BusinessesView) {
     setView(next);
     setSelection(null);
@@ -223,15 +250,40 @@ function BusinessesDemoInner() {
         }
         sideContent={
           selection && selectedBusiness ? (
-            <OutlinedPanel onClose={() => setSelection(null)} onEdit={() => setIsEditOpen(true)}>
+            <OutlinedPanel
+              onClose={() => setSelection(null)}
+              onEdit={selection.kind === "business" ? undefined : () => setIsEditOpen(true)}
+            >
               {selection.kind === "businessMember" ? (
-                <BusinessMemberDetailPanel businessMember={selection.row} business={selectedBusiness} />
+                <BusinessMemberDetailPanel
+                  businessMember={selection.row}
+                  business={selectedBusiness}
+                  onUpdateBusiness={(data) => commitBusinessField(selectedBusiness.id, data)}
+                />
               ) : null}
               {selection.kind === "sponsor" ? (
-                <BusinessSponsorDetailPanel sponsor={selection.row} business={selectedBusiness} />
+                <BusinessSponsorDetailPanel
+                  sponsor={selection.row}
+                  business={selectedBusiness}
+                  onUpdateBusiness={(data) => commitBusinessField(selectedBusiness.id, data)}
+                  onUpdateMembership={(data) =>
+                    selectedBusiness.membership
+                      ? commitMembershipField(selectedBusiness.membership.id, selectedBusiness.id, data)
+                      : undefined
+                  }
+                />
               ) : null}
               {selection.kind === "business" ? (
-                <BusinessDetailPanel business={selection.row} rawBusiness={selectedBusiness} />
+                <BusinessDetailPanel
+                  business={selection.row}
+                  rawBusiness={selectedBusiness}
+                  onUpdateBusiness={(data) => commitBusinessField(selectedBusiness.id, data)}
+                  onUpdateMembership={(data) =>
+                    selectedBusiness.membership
+                      ? commitMembershipField(selectedBusiness.membership.id, selectedBusiness.id, data)
+                      : undefined
+                  }
+                />
               ) : null}
             </OutlinedPanel>
           ) : null

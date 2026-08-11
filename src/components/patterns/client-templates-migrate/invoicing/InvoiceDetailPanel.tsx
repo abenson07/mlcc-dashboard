@@ -3,10 +3,19 @@
 import { useState } from "react";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Button } from "@/components/patterns/primitives/Button";
+import { VStack } from "@/components/patterns/primitives/Stack";
+import {
+  DetailActionBar,
+  DetailRow,
+  DetailSection,
+  DetailTimeline,
+  type DetailTimelineStep,
+} from "@/components/patterns/foundation/detail";
 import { useQueryClient } from "@tanstack/react-query";
 import { getApiBase } from "@/lib/apiBase";
 import { STRIPE_INVOICES_QUERY_KEY, useDemoGuard } from "hooks";
 import {
+  customerLabelFromEmail,
   formatDueDate,
   formatUsd,
   mercuryInvoiceDisplayStatus,
@@ -23,17 +32,6 @@ const STATUS_HEX: Record<"warning" | "info" | "success", string> = {
   info: "#f2c94c",
   success: "#27a644",
 };
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Text size="sm" color="secondary">
-        {label}
-      </Text>
-      <Text weight="medium">{value}</Text>
-    </div>
-  );
-}
 
 type ManualPaymentMethod = "cash" | "check";
 
@@ -117,47 +115,56 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
     }
   }
 
+  const timelineSteps: DetailTimelineStep[] = [
+    { label: "Invoice created", meta: formatDueDate(invoice.created) },
+  ];
+  if (invoice.customer_email) {
+    timelineSteps.push({
+      label: `Sent to ${customerLabelFromEmail(invoice.customer_email)}`,
+      meta: invoice.customer_email,
+      isDestination: displayStatus !== "Paid",
+    });
+  }
+  if (displayStatus === "Paid") {
+    timelineSteps.push({ label: "Paid", isDestination: true });
+  }
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <Text size="sm" color="secondary">
-          {invoice.number ? `Invoice ${invoice.number}` : invoice.id}
+    <VStack gap={5}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              height: 22,
+              paddingInline: 8,
+              borderRadius: 999,
+              background: `${statusColor}1A`,
+              color: statusColor,
+              fontSize: 12,
+              fontWeight: 500,
+            }}
+          >
+            {displayStatus}
+          </span>
+          <Text size="sm" color="secondary">
+            {invoice.number ? `Invoice ${invoice.number}` : invoice.id}
+          </Text>
+        </div>
+        <Text style={{ fontSize: 28, fontWeight: 600, letterSpacing: "-0.01em" }}>
+          {formatUsd(invoice.amount_due)}
         </Text>
-        <span
-          style={{
-            display: "inline-flex",
-            alignSelf: "flex-start",
-            alignItems: "center",
-            height: 22,
-            paddingInline: 8,
-            borderRadius: 999,
-            background: `${statusColor}1A`,
-            color: statusColor,
-            fontSize: 12,
-            fontWeight: 500,
-          }}
-        >
-          {displayStatus}
-        </span>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {invoice.customer_email ? (
-          <Field label="Recipient" value={invoice.customer_email} />
-        ) : null}
-        <Field label="Amount due" value={formatUsd(invoice.amount_due)} />
-        <Field label="Due" value={formatDueDate(invoice.due_date)} />
-        {invoice.event_name ? <Field label="Event" value={invoice.event_name} /> : null}
-        {invoice.sponsorship_category ? (
-          <Field label="Category" value={invoice.sponsorship_category} />
-        ) : null}
-      </div>
+      <DetailTimeline steps={timelineSteps} />
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      <DetailActionBar>
         {isOpen ? (
           <Button
             label={reminding ? "Sending…" : "Send reminder"}
             variant="secondary"
+            size="sm"
             onClick={() => void sendReminder()}
           />
         ) : null}
@@ -168,24 +175,22 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
             rel="noopener noreferrer"
             style={{ textDecoration: "none" }}
           >
-            <Button label="Open pay page" variant="ghost" />
+            <Button label="Open pay page" variant="ghost" size="sm" />
           </a>
         ) : null}
-      </div>
+      </DetailActionBar>
+
+      <DetailSection>
+        {invoice.customer_email ? <DetailRow label="Recipient" value={invoice.customer_email} /> : null}
+        <DetailRow label="Due" value={formatDueDate(invoice.due_date)} />
+        {invoice.event_name ? <DetailRow label="Event" value={invoice.event_name} /> : null}
+        {invoice.sponsorship_category ? (
+          <DetailRow label="Category" value={invoice.sponsorship_category} />
+        ) : null}
+      </DetailSection>
 
       {isOpen ? (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            paddingTop: 12,
-            borderTop: "var(--linear-border-width) solid var(--linear-color-hairline)",
-          }}
-        >
-          <Text size="sm" weight="medium">
-            Record manual payment
-          </Text>
+        <DetailSection title="Record manual payment">
           <Text size="sm" color="secondary">
             Use this when a sponsor paid by cash or check instead of card — this marks the
             invoice paid in Stripe and records how.
@@ -197,6 +202,7 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
                 display: "flex",
                 flexDirection: "column",
                 gap: 8,
+                marginTop: 8,
                 padding: 10,
                 borderRadius: 8,
                 border: "var(--linear-border-width) solid var(--linear-color-hairline)",
@@ -216,12 +222,12 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
               </div>
             </div>
           ) : (
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
               <Button label="Paid by cash" variant="secondary" onClick={() => setConfirmMethod("cash")} />
               <Button label="Paid by check" variant="secondary" onClick={() => setConfirmMethod("check")} />
             </div>
           )}
-        </div>
+        </DetailSection>
       ) : null}
 
       {statusMessage ? (
@@ -229,6 +235,6 @@ export function InvoiceDetailPanel({ invoice }: InvoiceDetailPanelProps) {
           {statusMessage}
         </Text>
       ) : null}
-    </div>
+    </VStack>
   );
 }

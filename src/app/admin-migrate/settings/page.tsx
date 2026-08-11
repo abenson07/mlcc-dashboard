@@ -1,5 +1,5 @@
-import { SettingsDemo } from "@/components/patterns/client-templates-migrate/settings";
+import { AccountSettingsPage } from "@/components/patterns/client-templates-migrate/settings";
 
 export default function SettingsPreviewPage() {
-  return <SettingsDemo />;
+  return <AccountSettingsPage />;
 }

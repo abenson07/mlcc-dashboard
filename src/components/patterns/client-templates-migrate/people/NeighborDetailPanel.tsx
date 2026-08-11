@@ -7,16 +7,24 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { Calendar } from "lucide-react";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
 import type { PersonWithMembership } from "hooks";
+import type { PeopleUpdate, MembershipsUpdate } from "@/types/database";
 import type { NeighborRow } from "./types";
 import { ContactSection, MembershipSection, VolunteerSection } from "./PersonSections";
 
 export type NeighborDetailPanelProps = {
   neighbor: NeighborRow;
   person: PersonWithMembership;
+  onUpdatePerson: (data: PeopleUpdate) => void | Promise<void>;
+  onUpdateMembership: (data: MembershipsUpdate) => void | Promise<void>;
 };
 
 /** Neighbor detail — shown in the outlined side panel when a row is selected from Neighbors. */
-export function NeighborDetailPanel({ neighbor, person }: NeighborDetailPanelProps) {
+export function NeighborDetailPanel({
+  neighbor,
+  person,
+  onUpdatePerson,
+  onUpdateMembership,
+}: NeighborDetailPanelProps) {
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -40,8 +48,8 @@ export function NeighborDetailPanel({ neighbor, person }: NeighborDetailPanelPro
         <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Joined ${neighbor.joinedDate}`} />
       </List>
 
-      <ContactSection person={person} />
-      <MembershipSection person={person} />
+      <ContactSection person={person} onCommit={onUpdatePerson} />
+      <MembershipSection person={person} onCommit={onUpdateMembership} />
       <VolunteerSection person={person} />
     </VStack>
   );

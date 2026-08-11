@@ -4,8 +4,9 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useFaqs, usePeople, useStories, useDemoGuard } from "hooks";
+import { useFaqs, usePeople, useStories, useBanners, useDemoGuard } from "hooks";
 import { supabaseClient } from "@/lib/supabaseClient";
+import type { BannerWriteInput } from "@/lib/webflow/banners";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
@@ -15,16 +16,18 @@ import { VStack } from "@/components/patterns/primitives/Stack";
 import { Text } from "@/components/patterns/primitives/Text";
 import { StoryCard } from "./StoryCard";
 import { FaqCard } from "./FaqCard";
+import { BannerCard } from "./BannerCard";
 import { StoryFormPanel } from "./StoryFormPanel";
 import { FaqFormPanel } from "./FaqFormPanel";
-import type { Faq, Story } from "./types";
-import { contentStatusToStoryStatus, toFaq, toStory } from "./adapters";
+import { BannerFormPanel } from "./BannerFormPanel";
+import type { Banner, Faq, Story } from "./types";
+import { bannerIsCurrentlyActive, contentStatusToStoryStatus, toBanner, toFaq, toStory } from "./adapters";
 import { sampleStories } from "@/data/mocks/content";
 
-type ContentView = "stories" | "faqs";
+type ContentView = "stories" | "faqs" | "banners";
 
 function isContentView(value: string | null): value is ContentView {
-  return value === "stories" || value === "faqs";
+  return value === "stories" || value === "faqs" || value === "banners";
 }
 
 function emptyStory(currentUser: { id: string; name: string } | null): Story {
@@ -41,6 +44,10 @@ function emptyStory(currentUser: { id: string; name: string } | null): Story {
 
 function emptyFaq(): Faq {
   return { id: "", question: "", answer: "", pages: [] };
+}
+
+function emptyBanner(): Banner {
+  return { id: "", title: "", ctaText: "", link: "", active: true, expiresAt: null };
 }
 
 function ContentDemoInner() {
@@ -63,6 +70,13 @@ function ContentDemoInner() {
     update: updateFaq,
     togglePage,
   } = useFaqs();
+  const {
+    banners: bannerRows,
+    loading: bannersLoading,
+    error: bannersError,
+    create: createBanner,
+    update: updateBanner,
+  } = useBanners();
   const { people } = usePeople();
   const { enabled: demo } = useDemoGuard();
 
@@ -102,28 +116,35 @@ function ContentDemoInner() {
     return storyRows.map((row) => toStory(row, authorNameById));
   }, [demo, storyRows, authorNameById]);
   const faqs: Faq[] = useMemo(() => faqRows.map(toFaq), [faqRows]);
+  const banners: Banner[] = useMemo(() => bannerRows.map(toBanner), [bannerRows]);
+  const activeBanners = useMemo(() => banners.filter((b) => bannerIsCurrentlyActive(b)), [banners]);
+  const inactiveBanners = useMemo(() => banners.filter((b) => !bannerIsCurrentlyActive(b)), [banners]);
 
   const [editingStory, setEditingStory] = useState<Story | null>(null);
   const [editingFaq, setEditingFaq] = useState<Faq | null>(null);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   function changeView(next: ContentView) {
     setView(next);
     setEditingStory(null);
     setEditingFaq(null);
+    setEditingBanner(null);
     setIsCreatingNew(false);
   }
 
   function closeDetail() {
     setEditingStory(null);
     setEditingFaq(null);
+    setEditingBanner(null);
     setIsCreatingNew(false);
   }
 
   function startCreate() {
     setIsCreatingNew(true);
     if (view === "stories") setEditingStory(emptyStory(currentUser));
-    else setEditingFaq(emptyFaq());
+    else if (view === "faqs") setEditingFaq(emptyFaq());
+    else setEditingBanner(emptyBanner());
   }
 
   async function handleSaveStory(updated: Story) {
@@ -173,9 +194,35 @@ function ContentDemoInner() {
     closeDetail();
   }
 
-  const isDetailView = editingStory != null || editingFaq != null;
-  const loading = demo ? false : view === "stories" ? storiesLoading : faqsLoading;
-  const error = demo ? null : view === "stories" ? storiesError : faqsError;
+  async function handleSaveBanner(updated: Banner) {
+    if (demo) {
+      toast.success(`${updated.id ? "Banner updated" : "Banner created"} — demo mode, not saved`);
+      closeDetail();
+      return;
+    }
+    const input: BannerWriteInput = {
+      name: updated.title,
+      message: updated.ctaText,
+      linkUrl: updated.link,
+      active: updated.active,
+      expiresAt: updated.expiresAt,
+      urgent: false,
+      editorNotes: "",
+    };
+    if (!updated.id) {
+      await createBanner(input);
+    } else {
+      await updateBanner(updated.id, input);
+    }
+    closeDetail();
+  }
+
+  const viewLabel = view === "stories" ? "story" : view === "faqs" ? "FAQ" : "banner";
+  const isDetailView = editingStory != null || editingFaq != null || editingBanner != null;
+  const loading =
+    demo ? false : view === "stories" ? storiesLoading : view === "faqs" ? faqsLoading : bannersLoading;
+  const error =
+    demo ? null : view === "stories" ? storiesError : view === "faqs" ? faqsError : bannersError;
 
   return (
     <div style={{ height: "100%" }}>
@@ -190,10 +237,14 @@ function ContentDemoInner() {
                     title: isCreatingNew
                       ? view === "stories"
                         ? "New story"
-                        : "New FAQ"
+                        : view === "faqs"
+                          ? "New FAQ"
+                          : "New banner"
                       : view === "stories"
                         ? "Story"
-                        : "FAQ",
+                        : view === "faqs"
+                          ? "FAQ"
+                          : "Banner",
                     breadcrumbs: [{ label: "Content", onClick: closeDetail }],
                   }
                 : { title: "Content" }
@@ -208,11 +259,16 @@ function ContentDemoInner() {
                       onClick={() => changeView("stories")}
                     />
                     <ViewTab label="FAQs" selected={view === "faqs"} onClick={() => changeView("faqs")} />
+                    <ViewTab
+                      label="Banners"
+                      selected={view === "banners"}
+                      onClick={() => changeView("banners")}
+                    />
                   </ViewTabs>
                   <button
                     type="button"
                     onClick={startCreate}
-                    aria-label={view === "stories" ? "New story" : "New FAQ"}
+                    aria-label={`New ${viewLabel}`}
                     style={{
                       all: "unset",
                       cursor: "pointer",
@@ -231,7 +287,7 @@ function ContentDemoInner() {
                     }}
                   >
                     <Plus size={14} strokeWidth={1.75} />
-                    {view === "stories" ? "New story" : "New FAQ"}
+                    {`New ${viewLabel}`}
                   </button>
                 </div>
               )
@@ -250,10 +306,50 @@ function ContentDemoInner() {
             />
           ) : editingFaq ? (
             <FaqFormPanel faq={editingFaq} isNew={isCreatingNew} onClose={closeDetail} onSave={handleSaveFaq} />
+          ) : editingBanner ? (
+            <BannerFormPanel
+              banner={editingBanner}
+              isNew={isCreatingNew}
+              onClose={closeDetail}
+              onSave={handleSaveBanner}
+            />
           ) : error ? (
             <Text color="secondary">Couldn&apos;t load content: {error}</Text>
           ) : loading ? (
             <Text color="secondary">Loading…</Text>
+          ) : view === "banners" ? (
+            <VStack gap={4}>
+              <VStack gap={2}>
+                <Text weight="semibold" size="sm" color="secondary">
+                  Active
+                </Text>
+                <VStack gap={2}>
+                  {activeBanners.map((banner) => (
+                    <BannerCard key={banner.id} banner={banner} onClick={() => setEditingBanner(banner)} />
+                  ))}
+                  {activeBanners.length === 0 ? (
+                    <Text color="secondary" size="sm">
+                      No active banners
+                    </Text>
+                  ) : null}
+                </VStack>
+              </VStack>
+              <VStack gap={2}>
+                <Text weight="semibold" size="sm" color="secondary">
+                  Inactive
+                </Text>
+                <VStack gap={2}>
+                  {inactiveBanners.map((banner) => (
+                    <BannerCard key={banner.id} banner={banner} onClick={() => setEditingBanner(banner)} />
+                  ))}
+                  {inactiveBanners.length === 0 ? (
+                    <Text color="secondary" size="sm">
+                      No inactive banners
+                    </Text>
+                  ) : null}
+                </VStack>
+              </VStack>
+            </VStack>
           ) : (
             <VStack gap={2}>
               {view === "stories"

@@ -7,16 +7,24 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { CircleDot, Sparkles } from "lucide-react";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
 import type { PersonWithMembership } from "hooks";
+import type { PeopleUpdate, MembershipsUpdate } from "@/types/database";
 import type { VolunteerRow } from "./types";
 import { ContactSection, MembershipSection } from "./PersonSections";
 
 export type VolunteerDetailPanelProps = {
   volunteer: VolunteerRow;
   person: PersonWithMembership;
+  onUpdatePerson: (data: PeopleUpdate) => void | Promise<void>;
+  onUpdateMembership: (data: MembershipsUpdate) => void | Promise<void>;
 };
 
 /** Volunteer detail — shown in the outlined side panel when a row is selected from Volunteers. */
-export function VolunteerDetailPanel({ volunteer, person }: VolunteerDetailPanelProps) {
+export function VolunteerDetailPanel({
+  volunteer,
+  person,
+  onUpdatePerson,
+  onUpdateMembership,
+}: VolunteerDetailPanelProps) {
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -44,8 +52,8 @@ export function VolunteerDetailPanel({ volunteer, person }: VolunteerDetailPanel
         <SideContentField icon={<Sparkles size={16} strokeWidth={1.75} />} label={volunteer.interestArea} />
       </List>
 
-      <ContactSection person={person} />
-      <MembershipSection person={person} />
+      <ContactSection person={person} onCommit={onUpdatePerson} />
+      <MembershipSection person={person} onCommit={onUpdateMembership} />
     </VStack>
   );
 }

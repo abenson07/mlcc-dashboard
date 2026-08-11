@@ -1,21 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 
 export type SectionHeaderProps = {
   label: string;
-  expanded: boolean;
-  onToggle: () => void;
   action?: ReactNode;
 };
 
-export function SectionHeader({
-  label,
-  expanded,
-  onToggle,
-  action,
-}: SectionHeaderProps) {
+export function SectionHeader({ label, action }: SectionHeaderProps) {
   return (
     <div
       className="sidebar-section-header"
@@ -27,13 +19,9 @@ export function SectionHeader({
         width: "100%",
       }}
     >
-      <button
-        type="button"
-        onClick={onToggle}
+      <div
         style={{
-          all: "unset",
           boxSizing: "border-box",
-          cursor: "pointer",
           display: "flex",
           alignItems: "center",
           gap: 4,
@@ -54,12 +42,7 @@ export function SectionHeader({
         >
           {label}
         </span>
-        {expanded ? (
-          <ChevronDown size={12} strokeWidth={2} />
-        ) : (
-          <ChevronRight size={12} strokeWidth={2} />
-        )}
-      </button>
+      </div>
       {action ? (
         <span
           className="sidebar-section-header-action"

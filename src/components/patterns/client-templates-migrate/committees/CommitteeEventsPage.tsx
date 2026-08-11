@@ -272,7 +272,7 @@ export function CommitteeEventsPage({
   const publicColumns = useMemo(
     () =>
       buildPublicEventColumns((id) => {
-        router.push(`/admin-migrate/events/${encodeURIComponent(id)}`);
+        router.push(`/admin/events/${encodeURIComponent(id)}`);
       }),
     [router],
   );

@@ -67,11 +67,13 @@ export const linearTokens = {
       dark: "#191a1b",
     },
     /**
-     * Content cards over the canvas — same hue as the solid panel, at 50%
-     * opacity so the page shows through. Side detail panels use `sidePanel`.
+     * Content cards over the canvas — same hue as the solid panel. Dark mode
+     * drops to 50% opacity so the page shows through; light mode stays
+     * opaque (50% read as washed-out against the light canvas). Side detail
+     * panels use `sidePanel`.
      */
     panel: {
-      light: "lch(100 0 282 / 0.5)",
+      light: "lch(100 0 282)",
       dark: "lch(16.5 2.2 272.695 / 0.5)",
     },
     /** Opaque fill for OutlinedPanel / elevated side content. */
@@ -80,7 +82,7 @@ export const linearTokens = {
       dark: "lch(16.5 2.2 272.695)",
     },
     panelBorder: {
-      light: "transparent",
+      light: "lch(0 0 0 / 0.08)",
       dark: "lch(22 2.5 272.695)",
     },
     accent: "#38c768",
@@ -126,13 +128,13 @@ export const linearTokens = {
       colorLight: "lch(0 0 0 / 0.02)",
       colorDark: "lch(0 0 0 / 0.24)",
     },
-    /** Content cards use no drop shadow (`--linear-shadow-panel: none`). */
+    /** Content card shadow — present in light, off in dark (dark panel already reads via its 50% fill). */
     panel: {
-      ambientGeometry: "0px 0px 0px 0px",
-      ambientColorLight: "transparent",
+      ambientGeometry: "0px 3px 6px -2px",
+      ambientColorLight: "lch(0 0 0 / 0.02)",
       ambientColorDark: "transparent",
-      contactGeometry: "0px 0px 0px 0px",
-      contactColorLight: "transparent",
+      contactGeometry: "0px 1px 1px 1px",
+      contactColorLight: "lch(0 0 0 / 0.04)",
       contactColorDark: "transparent",
     },
     /** Side detail panel shadow — measured from linear.app light/dark. */
@@ -245,7 +247,13 @@ export const linearTokenVars = {
     linearTokens.shadow.canvas.colorLight,
     linearTokens.shadow.canvas.colorDark,
   )}`,
-  "--linear-shadow-panel": "none",
+  "--linear-shadow-panel": `${linearTokens.shadow.panel.ambientGeometry} ${lightDark(
+    linearTokens.shadow.panel.ambientColorLight,
+    linearTokens.shadow.panel.ambientColorDark,
+  )}, ${linearTokens.shadow.panel.contactGeometry} ${lightDark(
+    linearTokens.shadow.panel.contactColorLight,
+    linearTokens.shadow.panel.contactColorDark,
+  )}`,
   "--linear-shadow-side-panel": `${linearTokens.shadow.sidePanel.ambientGeometry} ${lightDark(
     linearTokens.shadow.sidePanel.ambientColorLight,
     linearTokens.shadow.sidePanel.ambientColorDark,

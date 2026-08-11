@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { createClient } from "@/lib/supabase/server";
 import { ThemeProvider } from "@/components/patterns/foundation/ThemeContext";
 import { DemoModeProvider } from "@/components/patterns/foundation/DemoModeContext";
+import { WipFeaturesProvider } from "@/components/patterns/foundation/WipFeaturesContext";
 import { QueryProvider } from "@/providers/QueryProvider";
 import "./isolation.css";
 
@@ -32,7 +33,9 @@ export default async function AdminMigrateLayout({ children }: { children: React
     >
       <QueryProvider>
         <ThemeProvider>
-          <DemoModeProvider>{children}</DemoModeProvider>
+          <WipFeaturesProvider>
+            <DemoModeProvider>{children}</DemoModeProvider>
+          </WipFeaturesProvider>
         </ThemeProvider>
         <Toaster richColors position="bottom-right" />
       </QueryProvider>
