@@ -25,29 +25,37 @@ where route like '/admin-migrate/%';
 
 -- 2. Old-admin route shapes -> their new /admin equivalents (same mapping as
 --    the next.config.ts legacy-redirect table).
--- 2a. Exact-path renames.
-create temporary table admin_cutover_exact_map (old_route text primary key, new_route text not null);
-insert into admin_cutover_exact_map (old_route, new_route) values
-  ('/admin/faqs', '/admin/content?view=faqs'),
-  ('/admin/stories', '/admin/content?view=stories'),
-  ('/admin/invoice', '/admin/invoices'),
-  ('/admin/members', '/admin/people?view=members'),
-  ('/admin/neighbors', '/admin/people?view=neighbors'),
-  ('/admin/site', '/admin'),
-  ('/admin/widgets', '/admin');
-
+-- 2a. Exact-path renames. Inlined as a VALUES list rather than a temp table —
+--     Supabase's SQL editor runs through a pooled connection that can switch
+--     backend per statement, and session-scoped temp tables don't survive that.
 delete from public.user_favorites old_row
-using admin_cutover_exact_map m, public.user_favorites new_row
+using (
+  values
+    ('/admin/faqs', '/admin/content?view=faqs'),
+    ('/admin/stories', '/admin/content?view=stories'),
+    ('/admin/invoice', '/admin/invoices'),
+    ('/admin/members', '/admin/people?view=members'),
+    ('/admin/neighbors', '/admin/people?view=neighbors'),
+    ('/admin/site', '/admin'),
+    ('/admin/widgets', '/admin')
+) as m(old_route, new_route), public.user_favorites new_row
 where old_row.route = m.old_route
   and new_row.user_id = old_row.user_id
   and new_row.route = m.new_route;
 
 update public.user_favorites f
 set route = m.new_route
-from admin_cutover_exact_map m
+from (
+  values
+    ('/admin/faqs', '/admin/content?view=faqs'),
+    ('/admin/stories', '/admin/content?view=stories'),
+    ('/admin/invoice', '/admin/invoices'),
+    ('/admin/members', '/admin/people?view=members'),
+    ('/admin/neighbors', '/admin/people?view=neighbors'),
+    ('/admin/site', '/admin'),
+    ('/admin/widgets', '/admin')
+) as m(old_route, new_route)
 where f.route = m.old_route;
-
-drop table admin_cutover_exact_map;
 
 -- 2b. /admin/leaflet and everything under it -> /admin/leaflets (list).
 delete from public.user_favorites old_row
