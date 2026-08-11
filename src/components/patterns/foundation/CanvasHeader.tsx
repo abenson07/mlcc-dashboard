@@ -417,7 +417,7 @@ export type CanvasHeaderProps = {
   children?: ReactNode;
   topbarVariant?: CanvasChromeVariant;
   controlsVariant?: CanvasChromeVariant;
-  /** Controls visibility. @default true */
+  /** Controls visibility. @default true when `controls` is passed, false otherwise */
   isControlsVisible?: boolean;
   /** Controls region content. */
   controls?: ReactNode;
@@ -435,13 +435,14 @@ export function CanvasHeader({
   controls,
   topbarVariant = "default",
   controlsVariant = "default",
-  isControlsVisible = true,
+  isControlsVisible,
 }: CanvasHeaderProps) {
+  const controlsVisible = isControlsVisible ?? Boolean(controls);
   return (
     <header data-slot="canvas-header" style={{ flexShrink: 0 }}>
       {topbar ? <CanvasTopbar variant={topbarVariant} {...topbar} /> : null}
       {children}
-      <CanvasControls variant={controlsVariant} isVisible={isControlsVisible}>
+      <CanvasControls variant={controlsVariant} isVisible={controlsVisible}>
         {controls}
       </CanvasControls>
     </header>
