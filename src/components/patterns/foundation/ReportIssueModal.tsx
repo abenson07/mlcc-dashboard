@@ -105,9 +105,9 @@ export function ReportIssueModal({ isOpen, onClose, sectionLabel }: ReportIssueM
       });
       const data = (await res.json()) as { error?: string; url?: string; identifier?: string };
       if (!res.ok || !data.url || !data.identifier) throw new Error(data?.error || "Failed to create issue.");
-      toast.success(`${data.identifier} created in Linear`, {
-        action: { label: "View", onClick: () => window.open(data.url, "_blank") },
-      });
+      toast.success(
+        "Your feedback/issue has been logged. If it's urgent, please reach out to your IT person to resolve this faster.",
+      );
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to send to Linear.");
