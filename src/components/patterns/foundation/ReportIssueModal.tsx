@@ -50,16 +50,18 @@ function capturePageContext(sectionLabel?: string): PageContext {
   return { breadcrumb, panelOpen: Boolean(panel), panelPreview };
 }
 
-const typeCopy: Record<IssueType, { title: string; placeholder: string; submitLabel: string }> = {
+const typeCopy: Record<IssueType, { title: string; placeholder: string; submitLabel: string; loggedNoun: string }> = {
   bug: {
     title: "Report a bug",
     placeholder: "What happened? What did you expect instead?",
     submitLabel: "Report bug",
+    loggedNoun: "issue",
   },
   feature: {
     title: "Request a feature",
     placeholder: "What would you like to see?",
     submitLabel: "Request feature",
+    loggedNoun: "feedback",
   },
 };
 
@@ -106,7 +108,7 @@ export function ReportIssueModal({ isOpen, onClose, sectionLabel }: ReportIssueM
       const data = (await res.json()) as { error?: string; url?: string; identifier?: string };
       if (!res.ok || !data.url || !data.identifier) throw new Error(data?.error || "Failed to create issue.");
       toast.success(
-        "Your feedback/issue has been logged. If it's urgent, please reach out to your IT person to resolve this faster.",
+        `Your ${typeCopy[type].loggedNoun} has been logged. If it's urgent, please reach out to your IT person to resolve this faster.`,
       );
       onClose();
     } catch (err) {
