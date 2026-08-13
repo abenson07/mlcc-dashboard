@@ -178,7 +178,7 @@ function AccountAvatar({ initials }: { initials: string }) {
 
 function initialsFromName(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "KB";
+  if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
@@ -345,8 +345,8 @@ function LinearSidebarBase({
   const [demoTransition, setDemoTransition] = useState<DemoModeConfirmModalTarget | null>(null);
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
   const isMigrate = basePath === "/admin";
-  const { person: currentPerson } = useCurrentPerson();
-  const displayName = currentPerson?.full_name || "Kyle Brower";
+  const { person: currentPerson, authDisplayName } = useCurrentPerson();
+  const displayName = currentPerson?.full_name?.trim() || authDisplayName || "Account";
   const initials = initialsFromName(displayName);
   // admin-preview is a frozen pattern library, not shipped as-is — only /admin
   // needs its WIP items (committees/inbox/action-items) hidden until opted in.

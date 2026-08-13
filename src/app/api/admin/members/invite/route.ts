@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { findPersonByEmail } from "@/lib/people/findPersonByEmail";
 import { postToSlack } from "@/lib/slack";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
 import { slackCommitteeName } from "@/lib/committee-meetings/slackCommittee";
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "A valid committee is required" }, { status: 400 });
   }
 
-  const trimmedEmail = email.trim();
+  const trimmedEmail = email.trim().toLowerCase();
   const trimmedName = typeof fullName === "string" ? fullName.trim() : "";
 
   const admin = createAdminSupabaseClient();
@@ -72,13 +73,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: roleError.message }, { status: 500 });
   }
 
-  const { data: existingPerson } = await admin
-    .from("people")
-    .select("id, full_name")
-    .eq("email", trimmedEmail)
-    .maybeSingle();
+  const { person: existingPerson } = await findPersonByEmail(admin, trimmedEmail);
 
-  let personId = existingPerson?.id as string | undefined;
+  let personId = existingPerson?.id;
   if (personId) {
     if (!existingPerson?.full_name && trimmedName) {
       await admin.from("people").update({ full_name: trimmedName }).eq("id", personId);

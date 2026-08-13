@@ -21,8 +21,6 @@ export type Faq = {
   pages: string[];
 };
 
-export const CURRENT_USER_NAME = "Kyle Brower";
-
 export const availableTopics: string[] = [
   "Community",
   "Events",
