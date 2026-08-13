@@ -25,6 +25,6 @@ export interface FeatureItem {
 }
 
 export const PROJECT_IDS: Record<FeatureSurface, string> = {
-  dashboard: "d9c77471-1473-469a-a978-8522e9c82319",
+  dashboard: "4d3b6e2d-7ab9-4bee-a6d6-f40d75cd63ad",
   website: "44bafc1d-98a4-4917-adcc-8130b0a4cbf8",
 };

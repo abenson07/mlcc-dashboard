@@ -3,8 +3,8 @@ import { requireSession } from "@/lib/auth/require-session";
 
 const LINEAR_GRAPHQL_URL = "https://api.linear.app/graphql";
 
-// MLCC Dashboard Features (see src/app/api/linear/project-issues/route.ts)
-const DEFAULT_PROJECT_ID = "d9c77471-1473-469a-a978-8522e9c82319";
+// Bugs & Feature Requests (see src/app/api/linear/project-issues/route.ts)
+const DEFAULT_PROJECT_ID = "4d3b6e2d-7ab9-4bee-a6d6-f40d75cd63ad";
 
 type IssueType = "bug" | "feature";
 
