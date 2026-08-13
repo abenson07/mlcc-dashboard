@@ -18,7 +18,7 @@ import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { validateEmail, validatePhone } from "@/lib/validation";
 import { useCurrentPerson, useMyCommitteeMemberships, usePeople } from "hooks";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
-import { getDemoEntity, upsertDemoEntity, writeDemoScoped, listDemoScoped } from "@/lib/demo/demoStore";
+import { upsertDemoEntity, writeDemoScoped, listDemoScoped } from "@/lib/demo/demoStore";
 import { SettingsRow } from "./SettingsRow";
 
 function Divider() {
@@ -53,9 +53,6 @@ type Membership = {
   title: "chair" | "co_chair" | "member";
 };
 
-const DEMO_NAME = "Kyle Brower";
-const DEMO_EMAIL = "kyle.brower@example.com";
-const DEMO_PHONE = "(555) 123-4567";
 const DEMO_MEMBERSHIPS: Membership[] = [
   { id: "demo-events", committee: "events", title: "chair" },
   { id: "demo-outreach", committee: "outreach", title: "member" },
@@ -171,7 +168,13 @@ function MembershipRow({
 export function AccountSettingsPage() {
   const { enabled: demo } = useDemoModeOptional();
   const { enabled: wipFeaturesEnabled, setEnabled: setWipFeaturesEnabled } = useWipFeaturesOptional();
-  const { person: currentPerson, loading: personLoading, refetch: refetchPerson } = useCurrentPerson();
+  const {
+    person: currentPerson,
+    authDisplayName,
+    authEmail,
+    loading: personLoading,
+    refetch: refetchPerson,
+  } = useCurrentPerson();
   const { update: updatePerson } = usePeople({ autoFetch: false });
   const {
     memberships: liveMemberships,
@@ -191,23 +194,13 @@ export function AccountSettingsPage() {
 
   useEffect(() => {
     if (demo) {
-      const profile = getDemoEntity<{ id: string; name?: string; email?: string; phone?: string }>(
-        "accountSettings",
-        "profile",
-      );
-      setName(profile?.name ?? DEMO_NAME);
-      setEmail(profile?.email ?? DEMO_EMAIL);
-      setPhone(profile?.phone ?? DEMO_PHONE);
       const memberships = listDemoScoped<Membership>("accountSettings", "memberships");
       setDemoMemberships(memberships ?? DEMO_MEMBERSHIPS);
-      return;
     }
-    if (currentPerson) {
-      setName(currentPerson.full_name ?? "");
-      setEmail(currentPerson.email ?? "");
-      setPhone(currentPerson.phone ?? "");
-    }
-  }, [demo, currentPerson]);
+    setName(currentPerson?.full_name?.trim() || authDisplayName);
+    setEmail(currentPerson?.email ?? authEmail ?? "");
+    setPhone(currentPerson?.phone ?? "");
+  }, [demo, currentPerson, authDisplayName, authEmail]);
 
   function persistDemoMemberships(next: Membership[]) {
     setDemoMemberships(next);

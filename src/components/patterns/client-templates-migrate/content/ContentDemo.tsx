@@ -1,11 +1,10 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useFaqs, usePeople, useStories, useBanners, useDemoGuard } from "hooks";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { useFaqs, usePeople, useStories, useBanners, useDemoGuard, useCurrentPerson } from "hooks";
 import type { BannerWriteInput } from "@/lib/webflow/banners";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
@@ -30,7 +29,7 @@ function isContentView(value: string | null): value is ContentView {
   return value === "stories" || value === "faqs" || value === "banners";
 }
 
-function emptyStory(currentUser: { id: string; name: string } | null): Story {
+function emptyStory(currentUser: { id: string | null; name: string } | null): Story {
   return {
     id: "",
     title: "",
@@ -79,24 +78,12 @@ function ContentDemoInner() {
   } = useBanners();
   const { people } = usePeople();
   const { enabled: demo, store } = useDemoGuard();
-
-  const [currentUser, setCurrentUser] = useState<{ id: string; name: string } | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    async function resolve() {
-      if (!supabaseClient) return;
-      const {
-        data: { user },
-      } = await supabaseClient.auth.getUser();
-      if (cancelled || !user?.email) return;
-      const match = people.find((p) => p.email === user.email);
-      if (match && !cancelled) setCurrentUser({ id: match.id, name: match.full_name });
-    }
-    resolve();
-    return () => {
-      cancelled = true;
-    };
-  }, [people]);
+  const { person: currentPerson, authDisplayName } = useCurrentPerson();
+  const currentUser = currentPerson
+    ? { id: currentPerson.id, name: currentPerson.full_name.trim() || authDisplayName }
+    : authDisplayName
+      ? { id: null, name: authDisplayName }
+      : null;
 
   const authorNameById = useMemo(() => new Map(people.map((p) => [p.id, p.full_name])), [people]);
   const stories: Story[] = useMemo(() => {

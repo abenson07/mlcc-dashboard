@@ -13,10 +13,10 @@ import { StoryCard } from "./StoryCard";
 import { FaqCard } from "./FaqCard";
 import { StoryFormPanel } from "./StoryFormPanel";
 import { FaqFormPanel } from "./FaqFormPanel";
+import { useCurrentPerson } from "hooks";
 import {
   sampleStories,
   sampleFaqs,
-  CURRENT_USER_NAME,
   availableTopics,
   type Story,
   type Faq,
@@ -28,11 +28,11 @@ function isContentView(value: string | null): value is ContentView {
   return value === "stories" || value === "faqs";
 }
 
-function emptyStory(): Story {
+function emptyStory(author: string): Story {
   return {
     id: `story-${Date.now()}`,
     title: "",
-    author: CURRENT_USER_NAME,
+    author,
     topic: availableTopics[0],
     status: "Draft",
     publishedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
@@ -50,6 +50,8 @@ function ContentDemoInner() {
   const searchParams = useSearchParams();
   const initial = searchParams.get("view");
   const [view, setView] = useState<ContentView>(isContentView(initial) ? initial : "stories");
+  const { person: currentPerson, authDisplayName } = useCurrentPerson();
+  const authorName = currentPerson?.full_name?.trim() || authDisplayName || "Account";
 
   const [stories, setStories] = useState<Story[]>(sampleStories);
   const [faqs, setFaqs] = useState<Faq[]>(sampleFaqs);
@@ -73,7 +75,7 @@ function ContentDemoInner() {
 
   function startCreate() {
     setIsCreatingNew(true);
-    if (view === "stories") setEditingStory(emptyStory());
+    if (view === "stories") setEditingStory(emptyStory(authorName));
     else setEditingFaq(emptyFaq());
   }
 

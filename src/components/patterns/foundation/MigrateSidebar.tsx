@@ -34,6 +34,7 @@ import {
   WorkspaceMenu,
 } from "./sidebar";
 import { useThemeMode } from "./ThemeContext";
+import { useCurrentPerson } from "hooks";
 import { getClasses, type Class } from "@/lib/classes";
 import "./sidebar/sidebar.css";
 
@@ -81,7 +82,7 @@ const primaryItems: DemoItem[] = [
   },
 ];
 
-function KyleBrowerAvatar() {
+function AccountAvatar({ initials }: { initials: string }) {
   return (
     <span
       aria-hidden
@@ -99,9 +100,16 @@ function KyleBrowerAvatar() {
         fontWeight: 600,
       }}
     >
-      KB
+      {initials}
     </span>
   );
+}
+
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
 export type MigrateSidebarProps = {
@@ -120,6 +128,9 @@ export function MigrateSidebar({ onSettingsClick }: MigrateSidebarProps = {}) {
   const { mode, toggle } = useThemeMode();
   const pathname = usePathname();
   const router = useRouter();
+  const { person: currentPerson, authDisplayName } = useCurrentPerson();
+  const displayName = currentPerson?.full_name?.trim() || authDisplayName || "Account";
+  const initials = initialsFromName(displayName);
 
   useEffect(() => {
     let cancelled = false;
@@ -147,7 +158,7 @@ export function MigrateSidebar({ onSettingsClick }: MigrateSidebarProps = {}) {
       }}
     >
       <SidebarHeader>
-        <WorkspaceMenu name="Kyle Brower" icon={<KyleBrowerAvatar />}>
+        <WorkspaceMenu name={displayName} icon={<AccountAvatar initials={initials} />}>
           <DropdownItem
             label="Settings"
             icon={<Settings size={16} strokeWidth={1.75} />}
