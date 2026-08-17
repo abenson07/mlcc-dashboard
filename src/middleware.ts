@@ -52,8 +52,19 @@ export async function middleware(request: NextRequest) {
   return supabaseResponse;
 }
 
+// Only auth-gated surfaces. A catch-all matcher makes every public page
+// (especially `/`) invoke a Fluid function + Supabase getUser() — that was
+// almost all of the project's CPU time. Marketing routes stay off this list
+// so Vercel can serve them from the CDN.
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/admin",
+    "/admin/:path*",
+    "/admin-retire",
+    "/admin-retire/:path*",
+    "/old-admin",
+    "/old-admin/:path*",
+    "/login",
+    "/signup",
   ],
 };

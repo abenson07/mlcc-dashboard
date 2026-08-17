@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import "../marketing.css";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Maple Leaf Community Council",
   description:
