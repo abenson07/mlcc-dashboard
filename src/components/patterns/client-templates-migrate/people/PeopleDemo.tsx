@@ -12,6 +12,11 @@ import { ViewTab } from "@/components/patterns/foundation/ViewTab";
 import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
 import { ListToolbar } from "@/components/patterns/foundation/ListToolbar";
 import { Button } from "@/components/patterns/primitives/Button";
+import { formatMembershipDate, toMembershipTier } from "@/lib/memberships/status";
+import { getApiBase } from "@/lib/apiBase";
+import { supabaseClient } from "@/lib/supabaseClient";
+import { CancelMembershipModal } from "./CancelMembershipModal";
+import type { CancelMode } from "@/lib/memberships/cancelMembership";
 import { Text } from "@/components/patterns/primitives/Text";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import { useAdminBasePath } from "@/components/patterns/client-templates/shared/useAdminBasePath";
@@ -103,6 +108,33 @@ function PeopleDemoInner() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<PersonWithMembership | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [lastPaymentAmount, setLastPaymentAmount] = useState<number | null>(null);
+
+  // The refund confirmation should name the amount rather than say "in full" and
+  // leave the admin guessing, so pull the most recent payment for this member.
+  useEffect(() => {
+    const membershipId = cancelTarget?.membership?.id;
+    if (!membershipId || !supabaseClient) {
+      setLastPaymentAmount(null);
+      return;
+    }
+    let active = true;
+    void supabaseClient
+      .from("payments")
+      .select("amount")
+      .eq("membership_id", membershipId)
+      .order("date", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (active) setLastPaymentAmount((data?.amount as number | undefined) ?? null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [cancelTarget]);
 
   const selectedPerson = selection ? people.find((person) => person.id === selection.row.id) ?? null : null;
 
@@ -117,11 +149,84 @@ function PeopleDemoInner() {
       toast.success("Person updated — demo mode, saved locally only");
       return;
     }
-    await update(personId, personData);
-    if (membershipId) {
-      await updateMembership(membershipId, membershipData);
+    try {
+      await update(personId, personData);
+      if (membershipId) {
+        await updateMembership(membershipId, membershipData);
+      }
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save changes");
+      throw e;
     }
-    await refetch();
+  }
+
+  async function handleCancelMembership(mode: CancelMode) {
+    const membership = cancelTarget?.membership;
+    if (!cancelTarget || !membership) return;
+    const name = cancelTarget.full_name ?? "This member";
+
+    if (demo) {
+      overlay.patch("people", cancelTarget.id, {
+        membership: {
+          ...membership,
+          ...(mode === "at_period_end"
+            ? { cancel_at_period_end: true }
+            : { status: "Cancelled", cancel_at_period_end: false }),
+        },
+      } as Record<string, unknown>);
+      toast.success(
+        mode === "at_period_end"
+          ? `${name}'s membership won't renew — demo mode, saved locally only`
+          : `${name}'s membership cancelled and refunded — demo mode, saved locally only`
+      );
+      setCancelTarget(null);
+      return;
+    }
+
+    setCancelling(true);
+    try {
+      const response = await fetch(
+        `${getApiBase()}/api/admin/memberships/${encodeURIComponent(membership.id)}/cancel`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode }),
+        }
+      );
+      const data = (await response.json()) as {
+        error?: string;
+        endsOn?: string | null;
+        refundAmount?: number | null;
+        warning?: string | null;
+      };
+      if (!response.ok) throw new Error(data.error ?? "Failed to cancel membership");
+
+      if (data.warning) {
+        // The subscription stopped but the money did not move — say so rather
+        // than showing a success toast the admin would reasonably trust.
+        toast.warning(data.warning);
+      } else if (mode === "at_period_end") {
+        const endsOn = formatMembershipDate(data.endsOn ?? null);
+        toast.success(
+          endsOn
+            ? `${name}'s membership won't renew — it ends ${endsOn}`
+            : `${name}'s membership won't renew`
+        );
+      } else {
+        toast.success(
+          data.refundAmount != null
+            ? `${name}'s membership cancelled and $${data.refundAmount.toFixed(2)} refunded`
+            : `${name}'s membership cancelled`
+        );
+      }
+      setCancelTarget(null);
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to cancel membership");
+    } finally {
+      setCancelling(false);
+    }
   }
 
   /** Inline field commit from a Person detail panel — same demo-guard shape as `handleSaveEdit`. */
@@ -131,8 +236,12 @@ function PeopleDemoInner() {
       toast.success("Person updated — demo mode, saved locally only");
       return;
     }
-    await update(personId, data);
-    await refetch();
+    try {
+      await update(personId, data);
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save changes");
+    }
   }
 
   async function commitMembershipField(membershipId: string, personId: string, data: MembershipsUpdate) {
@@ -141,8 +250,12 @@ function PeopleDemoInner() {
       toast.success("Person updated — demo mode, saved locally only");
       return;
     }
-    await updateMembership(membershipId, data);
-    await refetch();
+    try {
+      await updateMembership(membershipId, data);
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save membership changes");
+    }
   }
 
   function selectView(next: PeopleView) {
@@ -165,8 +278,8 @@ function PeopleDemoInner() {
         created_at: new Date().toISOString(),
         membership: {
           id: membershipId,
-          tier: row.membershipType === "no-tier" ? null : row.membershipType,
-          status: "active",
+          tier: row.membershipType === "no-tier" ? null : toMembershipTier(row.membershipType),
+          status: "Active",
           start_date: start,
           last_renewal: start,
         },
@@ -175,14 +288,14 @@ function PeopleDemoInner() {
       return;
     }
     const membership = await createMembership({
-      tier: row.membershipType,
-      status: "active",
+      tier: toMembershipTier(row.membershipType),
+      status: "Active",
       start_date: new Date().toISOString().slice(0, 10),
     });
     await create({
       full_name: row.name,
       email: row.email,
-      membership_id: membership?.id ?? null,
+      membership_id: membership.id,
     });
     await refetch();
   }
@@ -299,6 +412,7 @@ function PeopleDemoInner() {
                       ? commitMembershipField(selectedPerson.membership.id, selectedPerson.id, data)
                       : undefined
                   }
+                  onCancelMembership={() => setCancelTarget(selectedPerson)}
                 />
               ) : null}
               {selection.kind === "neighbor" ? (
@@ -357,6 +471,19 @@ function PeopleDemoInner() {
         onClose={() => setIsEditOpen(false)}
         onSave={handleSaveEdit}
       />
+
+      {cancelTarget ? (
+        <CancelMembershipModal
+          isOpen
+          memberName={cancelTarget.full_name ?? "This member"}
+          endsOn={cancelTarget.membership?.current_period_end ?? null}
+          lastPaymentAmount={lastPaymentAmount}
+          isSubscription={Boolean(cancelTarget.membership?.is_subscription)}
+          submitting={cancelling}
+          onCancel={() => setCancelTarget(null)}
+          onConfirm={(mode) => void handleCancelMembership(mode)}
+        />
+      ) : null}
     </div>
   );
 }

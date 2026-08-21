@@ -251,7 +251,7 @@ export default function BusinessDetailSidebar({
             {item.membership ? (
               <Badge
                 size="sm"
-                color={item.membership.status === "active" ? "success" : "warning"}
+                color={item.membership.status === "Active" ? "success" : "warning"}
               >
                 {item.membership.status}
               </Badge>

@@ -24,6 +24,7 @@ import {
   upsertPersonForShopOrder,
 } from "@/lib/commerce/recordShopPreorder";
 import { findMembershipTier } from "@marketing/data/membership-tiers";
+import { toMembershipTier } from "@/lib/memberships/status";
 import { upsertNewsletterContact, upsertWeeklyDigestContact } from "@/lib/resendContacts";
 
 function parseLineItemsJson(raw: string | undefined): TshirtLineItem[] | null {
@@ -472,8 +473,11 @@ export async function fulfillCheckoutSession(
     }
 
     const membershipRow: MembershipsInsert = {
-      tier: tierDef.slug,
-      status: "active",
+      // Postgres enum labels are Title-cased; writing the lowercase slug here
+      // failed the enum cast, which failed the whole fulfilment and left a
+      // paying member with no database row.
+      tier: toMembershipTier(tierDef.slug),
+      status: "Active",
       last_renewal: null,
       payment_method: "stripe",
       is_subscription: isSubscription,

@@ -131,7 +131,7 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
       const sponsorships = business.sponsorships || [];
       if (filters.status === "active") {
         return (
-          (business.membership && business.membership.status === "active") ||
+          (business.membership && business.membership.status === "Active") ||
           sponsorships.some((s) => s.status === "paid" && s.paid_date)
         );
       }
@@ -139,7 +139,7 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
         return (
           sponsorships.length > 0 &&
           !(
-            (business.membership && business.membership.status === "active") ||
+            (business.membership && business.membership.status === "Active") ||
             sponsorships.some((s) => s.status === "paid" && s.paid_date)
           )
         );
@@ -147,7 +147,7 @@ async function fetchBusinessesData(filters: UseBusinessesOptions["filters"] = {}
       if (filters.status === "yet-to-support") {
         return (
           sponsorships.length === 0 &&
-          (!business.membership || business.membership.status !== "active")
+          (!business.membership || business.membership.status !== "Active")
         );
       }
       return true;

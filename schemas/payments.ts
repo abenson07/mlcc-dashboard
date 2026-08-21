@@ -3,8 +3,9 @@
  * Based on Supabase schema
  */
 
-export type PaymentTypeEnum = string; // public.payment_type_enum
-export type PaymentMethodEnum = string; // public.payment_method_enum
+/** Mirror `public.payment_type_enum` / `public.payment_method_enum` exactly (lowercase labels). */
+export type PaymentTypeEnum = "membership" | "donation";
+export type PaymentMethodEnum = "stripe" | "check" | "cash";
 
 export interface Payments {
   id: string; // uuid
@@ -16,6 +17,9 @@ export interface Payments {
   type: PaymentTypeEnum; // not null
   method: PaymentMethodEnum; // not null
   stripe_transaction_id: string | null; // text
+  refunded_at: string | null; // timestamp with time zone
+  refund_amount: number | null; // numeric
+  stripe_refund_id: string | null; // text
 }
 
 export interface PaymentsInsert {
@@ -27,6 +31,9 @@ export interface PaymentsInsert {
   type: PaymentTypeEnum;
   method: PaymentMethodEnum;
   stripe_transaction_id?: string | null;
+  refunded_at?: string | null;
+  refund_amount?: number | null;
+  stripe_refund_id?: string | null;
 }
 
 export interface PaymentsUpdate {
@@ -38,4 +45,7 @@ export interface PaymentsUpdate {
   type?: PaymentTypeEnum;
   method?: PaymentMethodEnum;
   stripe_transaction_id?: string | null;
+  refunded_at?: string | null;
+  refund_amount?: number | null;
+  stripe_refund_id?: string | null;
 }

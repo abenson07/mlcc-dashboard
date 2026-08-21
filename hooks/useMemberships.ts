@@ -5,8 +5,8 @@ import { supabaseClient } from "@/lib/supabaseClient";
 import type { Memberships, MembershipsInsert, MembershipsUpdate } from "@/types/database";
 
 interface UseMembershipsReturn {
-  create: (data: MembershipsInsert) => Promise<Memberships | null>;
-  update: (id: string, data: MembershipsUpdate) => Promise<Memberships | null>;
+  create: (data: MembershipsInsert) => Promise<Memberships>;
+  update: (id: string, data: MembershipsUpdate) => Promise<Memberships>;
 }
 
 export function useMemberships(): UseMembershipsReturn {
@@ -45,21 +45,14 @@ export function useMemberships(): UseMembershipsReturn {
     },
   });
 
-  const create = async (data: MembershipsInsert): Promise<Memberships | null> => {
-    try {
-      return await createMutation.mutateAsync(data);
-    } catch {
-      return null;
-    }
-  };
+  // These deliberately propagate the underlying Postgres error rather than
+  // returning null. Swallowing it here is how an invalid enum write once
+  // looked like a successful save that silently reverted on refetch.
+  const create = (data: MembershipsInsert): Promise<Memberships> =>
+    createMutation.mutateAsync(data);
 
-  const update = async (id: string, data: MembershipsUpdate): Promise<Memberships | null> => {
-    try {
-      return await updateMutation.mutateAsync({ id, data });
-    } catch {
-      return null;
-    }
-  };
+  const update = (id: string, data: MembershipsUpdate): Promise<Memberships> =>
+    updateMutation.mutateAsync({ id, data });
 
   return { create, update };
 }

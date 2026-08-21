@@ -6,6 +6,8 @@ import Button from "@/components/ui/button/Button";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import { usePeople, useMemberships, type PersonWithMembership } from "hooks";
+import type { MembershipsUpdate } from "@/types/database";
+import { toMembershipStatus, toMembershipTier } from "@/lib/memberships/status";
 
 const MEMBERSHIP_TIERS = ["Household", "Individual", "Senior", "Student"] as const;
 const MEMBERSHIP_STATUSES = ["Active", "Expired", "Donation", "Cancelled"] as const;
@@ -62,9 +64,9 @@ export default function EditPersonModal({ isOpen, onClose, person, onUpdated }: 
       });
       if (!updatedPerson) throw new Error("Failed to save contact information");
 
-      const membershipPatch = {
-        status: membershipStatus || null,
-        tier: membershipTier || null,
+      const membershipPatch: MembershipsUpdate = {
+        status: toMembershipStatus(membershipStatus),
+        tier: toMembershipTier(membershipTier),
         last_renewal: lastRenewal || null,
       };
       const hasMembershipInput = membershipStatus || membershipTier || lastRenewal;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { PersonWithMembership } from "hooks";
 import { useMemberships, usePeople } from "hooks";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { toMembershipTier } from "@/lib/memberships/status";
 import { MobileBottomSheet } from "./MobileBottomSheet";
 import {
   mobileFieldLabelStyle,
@@ -50,13 +51,13 @@ export function MobileQuickAddPerson({ open, onClose, onCreated }: MobileQuickAd
       let membershipId: string | null = null;
       if (makeMember) {
         const membership = await createMembership({
-          tier,
-          status: "active",
+          tier: toMembershipTier(tier),
+          status: "Active",
           start_date: new Date().toISOString().slice(0, 10),
           payment_method: "cash",
           customer_email: email.trim() || null,
         });
-        membershipId = membership?.id ?? null;
+        membershipId = membership.id;
       }
       const person = await create({
         full_name: fullName,
@@ -162,15 +163,13 @@ export function MobileLogCashMembership({
     setError(null);
     try {
       const membership = await createMembership({
-        tier,
-        status: "active",
+        tier: toMembershipTier(tier),
+        status: "Active",
         start_date: new Date().toISOString().slice(0, 10),
         payment_method: "cash",
         customer_email: person.email,
       });
-      if (!membership) throw new Error("Could not create membership.");
-      const updated = await update(person.id, { membership_id: membership.id });
-      if (!updated) throw new Error("Could not link membership.");
+      await update(person.id, { membership_id: membership.id });
       onClose();
       onDone?.();
     } catch (e) {

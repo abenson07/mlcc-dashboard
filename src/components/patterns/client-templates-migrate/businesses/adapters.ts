@@ -1,4 +1,5 @@
 import type { BusinessWithDetails } from "hooks";
+import type { MembershipStatusEnum } from "schemas/memberships";
 import type { BusinessMemberRow, BusinessMembershipStatus, BusinessRow, SponsorRow, SponsorshipLevel } from "./types";
 
 export type BusinessesView = "members" | "sponsors" | "all";
@@ -26,6 +27,20 @@ export function normalizeMembershipStatus(status: string | null | undefined): Bu
   if (normalized.includes("lapse") || normalized.includes("expire") || normalized.includes("cancel")) return "lapsed";
   if (normalized.includes("active")) return "active";
   return "pending";
+}
+
+/**
+ * Inverse of `normalizeMembershipStatus`, for writes. The display vocabulary is
+ * wider than the database's: `membership_status_enum` has no "pending" or
+ * "past due" label, so those cannot be persisted and callers must not offer
+ * them. Returns null rather than guessing.
+ */
+export function toDbMembershipStatus(
+  status: BusinessMembershipStatus,
+): MembershipStatusEnum | null {
+  if (status === "active") return "Active";
+  if (status === "lapsed") return "Expired";
+  return null;
 }
 
 /** Real `sponsorships` has no stored "level" — bucket by amount using the same thresholds the leaflet sponsorship-tier seeds use (`src/lib/sponsorship/tierPlaceholders.ts`). */
