@@ -6,6 +6,7 @@ import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { Text } from "@/components/patterns/primitives/Text";
 import { validateEmail, validatePhone } from "@/lib/validation";
+import { MEMBERSHIP_TIERS, toMembershipTier } from "@/lib/memberships/status";
 import type { PersonWithMembership } from "hooks";
 import type { PeopleUpdate, MembershipsUpdate } from "@/types/database";
 
@@ -23,8 +24,6 @@ const selectStyle = {
   fontFamily: "inherit",
 };
 
-const MEMBERSHIP_TIERS = ["household", "individual", "senior", "student"];
-const MEMBERSHIP_STATUSES = ["active", "pending", "past_due", "lapsed"];
 
 export type EditPersonModalProps = {
   isOpen: boolean;
@@ -39,8 +38,7 @@ export function EditPersonModal({ isOpen, person, onClose, onSave }: EditPersonM
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [tier, setTier] = useState(MEMBERSHIP_TIERS[0]);
-  const [status, setStatus] = useState(MEMBERSHIP_STATUSES[0]);
+  const [tier, setTier] = useState<string>(MEMBERSHIP_TIERS[0]);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -52,7 +50,6 @@ export function EditPersonModal({ isOpen, person, onClose, onSave }: EditPersonM
     setPhone(person.phone ?? "");
     setAddress(person.address ?? "");
     setTier(person.membership?.tier ?? MEMBERSHIP_TIERS[0]);
-    setStatus(person.membership?.status ?? MEMBERSHIP_STATUSES[0]);
     setEmailError(null);
     setPhoneError(null);
   }, [isOpen, person]);
@@ -79,7 +76,8 @@ export function EditPersonModal({ isOpen, person, onClose, onSave }: EditPersonM
           address: address.trim() || null,
         },
         person.membership?.id ?? null,
-        { tier, status }
+        // Status is derived from Stripe + the membership record, never set here.
+        { tier: toMembershipTier(tier) }
       );
       onClose();
     } finally {
@@ -120,28 +118,16 @@ export function EditPersonModal({ isOpen, person, onClose, onSave }: EditPersonM
         <TextInput label="Address" value={address} onChange={setAddress} />
 
         {person.membership ? (
-          <>
-            <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={fieldLabelStyle}>Membership tier</span>
-              <select value={tier} onChange={(event) => setTier(event.target.value)} style={selectStyle}>
-                {MEMBERSHIP_TIERS.map((option) => (
-                  <option key={option} value={option}>
-                    {option[0].toUpperCase() + option.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={fieldLabelStyle}>Membership status</span>
-              <select value={status} onChange={(event) => setStatus(event.target.value)} style={selectStyle}>
-                {MEMBERSHIP_STATUSES.map((option) => (
-                  <option key={option} value={option}>
-                    {option[0].toUpperCase() + option.slice(1).replace("_", " ")}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={fieldLabelStyle}>Membership tier</span>
+            <select value={tier} onChange={(event) => setTier(event.target.value)} style={selectStyle}>
+              {MEMBERSHIP_TIERS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
         ) : null}
       </div>
     </Modal>

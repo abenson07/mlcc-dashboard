@@ -1,6 +1,8 @@
 "use client";
 
 import { Avatar } from "@/components/patterns/primitives/Avatar";
+import { Button } from "@/components/patterns/primitives/Button";
+import { DetailActionBar } from "@/components/patterns/foundation/detail";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { Text } from "@/components/patterns/primitives/Text";
 import type { PersonWithMembership } from "hooks";
@@ -21,6 +23,7 @@ export type MemberDetailPanelProps = {
   person: PersonWithMembership;
   onUpdatePerson: (data: PeopleUpdate) => void | Promise<void>;
   onUpdateMembership: (data: MembershipsUpdate) => void | Promise<void>;
+  onCancelMembership: () => void;
 };
 
 /** Member detail — shown in the outlined side panel when a row is selected from Members. */
@@ -29,7 +32,12 @@ export function MemberDetailPanel({
   person,
   onUpdatePerson,
   onUpdateMembership,
+  onCancelMembership,
 }: MemberDetailPanelProps) {
+  const membership = person.membership;
+  const isCancelled = membership?.status === "Cancelled";
+  const alreadyEnding = Boolean(membership?.cancel_at_period_end);
+
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -41,6 +49,16 @@ export function MemberDetailPanel({
           </Text>
         </div>
       </div>
+
+      {membership && !isCancelled ? (
+        <DetailActionBar>
+          <Button
+            label={alreadyEnding ? "Cancel now and refund" : "Cancel membership"}
+            variant="secondary"
+            onClick={onCancelMembership}
+          />
+        </DetailActionBar>
+      ) : null}
 
       <ContactSection person={person} onCommit={onUpdatePerson} />
       <MembershipSection person={person} onCommit={onUpdateMembership} />

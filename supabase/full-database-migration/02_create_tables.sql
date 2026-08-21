@@ -13,7 +13,10 @@ create table public.memberships (
   stripe_subscription_id text,
   stripe_tier_id text,
   customer_email text,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  cancel_at_period_end boolean not null default false,
+  current_period_end date,
+  canceled_at timestamptz
 );
 
 create table public.business_memberships (
@@ -292,7 +295,10 @@ create table public.payments (
   memo text,
   type public.payment_type_enum not null,
   method public.payment_method_enum not null,
-  stripe_transaction_id text
+  stripe_transaction_id text,
+  refunded_at timestamptz,
+  refund_amount numeric,
+  stripe_refund_id text
 );
 
 create table public.committee_meetings (

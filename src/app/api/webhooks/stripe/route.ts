@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { fulfillCheckoutSession } from "@/lib/commerce/fulfillCheckoutSession";
 import { getStripe } from "@/lib/stripe/server";
+import { isSubscriptionEvent, syncSubscriptionEvent } from "@/lib/memberships/syncSubscriptionEvent";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,15 @@ export async function POST(request: NextRequest) {
       flow: result.flow,
       alreadyFulfilled: result.alreadyFulfilled ?? false,
     });
+  }
+
+  if (isSubscriptionEvent(event.type)) {
+    const result = await syncSubscriptionEvent(event);
+    if (!result.ok) {
+      console.error(`[stripe webhook] ${event.type} sync failed:`, result.error);
+      return NextResponse.json({ error: result.error }, { status: 500 });
+    }
+    return NextResponse.json({ received: true, handled: result.handled, note: result.note });
   }
 
   return NextResponse.json({ received: true, skipped: true });

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { MEMBERSHIP_STATUSES, toMembershipStatus } from "@/lib/memberships/status";
 import { Text } from "@/components/patterns/primitives/Text";
 import { validateEmail, validatePhone } from "@/lib/validation";
 import type { BusinessWithDetails } from "hooks";
@@ -23,7 +24,6 @@ const selectStyle = {
   fontFamily: "inherit",
 };
 
-const MEMBERSHIP_STATUSES = ["active", "pending", "past_due", "lapsed"];
 
 export type EditBusinessModalProps = {
   isOpen: boolean;
@@ -45,7 +45,7 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [website, setWebsite] = useState("");
-  const [status, setStatus] = useState(MEMBERSHIP_STATUSES[0]);
+  const [status, setStatus] = useState<string>(MEMBERSHIP_STATUSES[0]);
   const [renewalDate, setRenewalDate] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -89,7 +89,7 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
           website: website.trim() || null,
         },
         business.membership?.id ?? null,
-        { status, last_renewal: renewalDate }
+        { status: toMembershipStatus(status) ?? undefined, last_renewal: renewalDate }
       );
       onClose();
     } finally {
@@ -138,7 +138,7 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
               <select value={status} onChange={(event) => setStatus(event.target.value)} style={selectStyle}>
                 {MEMBERSHIP_STATUSES.map((option) => (
                   <option key={option} value={option}>
-                    {option[0].toUpperCase() + option.slice(1).replace("_", " ")}
+                    {option}
                   </option>
                 ))}
               </select>

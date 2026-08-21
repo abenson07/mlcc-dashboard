@@ -1,31 +1,19 @@
 "use client";
 
 import { DetailField, DetailRow, DetailSection, DetailSelectField } from "@/components/patterns/foundation/detail";
+import { MembershipStatusToken } from "./MembershipStatusToken";
+import {
+  MEMBERSHIP_TIER_OPTIONS,
+  formatMembershipDate,
+  toMembershipTier,
+} from "@/lib/memberships/status";
 import type { PersonWithMembership } from "hooks";
 import type { PeopleUpdate, MembershipsUpdate } from "@/types/database";
 import { VOLUNTEERED_BEFORE_TAG } from "./adapters";
 
-const MEMBERSHIP_TIER_OPTIONS = [
-  { value: "household", label: "Household" },
-  { value: "individual", label: "Individual" },
-  { value: "senior", label: "Senior" },
-  { value: "student", label: "Student" },
-];
-
-const MEMBERSHIP_STATUS_OPTIONS = [
-  { value: "active", label: "Active" },
-  { value: "pending", label: "Pending" },
-  { value: "past_due", label: "Past due" },
-  { value: "lapsed", label: "Lapsed" },
-];
 
 function formatDisplayDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch {
-    return "—";
-  }
+  return formatMembershipDate(value) ?? "—";
 }
 
 /** Email, phone, address — editable inline, each field committing on blur. */
@@ -69,24 +57,43 @@ export function MembershipSection({
   const membership = person.membership;
   if (!membership) return null;
 
+  const renewsOn = formatMembershipDate(membership.current_period_end);
+  const autoRenewLabel = !membership.is_subscription
+    ? "Off — one-time membership"
+    : membership.cancel_at_period_end
+      ? renewsOn
+        ? `Off — ends ${renewsOn}`
+        : "Off — cancelled"
+      : renewsOn
+        ? `On — renews ${renewsOn}`
+        : "On";
+
   return (
     <DetailSection title="Membership">
       <DetailSelectField
         label="Tier"
         value={membership.tier}
         options={MEMBERSHIP_TIER_OPTIONS}
-        onCommit={(next) => onCommit({ tier: next })}
+        onCommit={(next) => {
+          const tier = toMembershipTier(next);
+          if (tier) onCommit({ tier });
+        }}
       />
-      <DetailSelectField
-        label="Status"
-        value={membership.status}
-        options={MEMBERSHIP_STATUS_OPTIONS}
-        onCommit={(next) => onCommit({ status: next })}
-      />
+      {/*
+        Status is derived, not typed in. It used to be a free-text dropdown whose
+        options didn't exist in the database, so every edit failed silently — and
+        even a successful edit only relabelled the row without touching Stripe.
+        It now changes through real actions: cancelling, or a Stripe webhook.
+      */}
+      <DetailRow label="Status" valueContent={<MembershipStatusToken membership={membership} />} />
       <DetailRow
         label="Member since"
         value={formatDisplayDate(membership.start_date ?? membership.last_renewal)}
       />
+      <DetailRow label="Auto-renew" value={autoRenewLabel} />
+      {membership.last_renewal ? (
+        <DetailRow label="Last renewed" value={formatDisplayDate(membership.last_renewal)} />
+      ) : null}
     </DetailSection>
   );
 }

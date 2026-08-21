@@ -27,7 +27,13 @@ import { BusinessDetailPanel } from "./BusinessDetailPanel";
 import { AddBusinessModal } from "./AddBusinessModal";
 import { EditBusinessModal } from "./EditBusinessModal";
 import type { BusinessMemberRow, BusinessRow, SponsorRow } from "./types";
-import { hookFiltersForView, toBusinessMemberRow, toBusinessRow, toSponsorRow } from "./adapters";
+import {
+  hookFiltersForView,
+  toBusinessMemberRow,
+  toBusinessRow,
+  toDbMembershipStatus,
+  toSponsorRow,
+} from "./adapters";
 import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
 
 function matchesBusinessesView(business: BusinessWithDetails, view: BusinessesView): boolean {
@@ -139,7 +145,11 @@ function BusinessesDemoInner() {
       return;
     }
     if (supabaseClient) {
-      await supabaseClient.from("business_memberships").update(data).eq("id", membershipId);
+      const { error } = await supabaseClient
+        .from("business_memberships")
+        .update(data)
+        .eq("id", membershipId);
+      if (error) throw error;
     }
     await refetch();
   }
@@ -193,11 +203,15 @@ function BusinessesDemoInner() {
     }
     const business = await create({ business_name: row.businessName });
     if (business && supabaseClient) {
-      const { data: membership } = await supabaseClient
+      const { data: membership, error } = await supabaseClient
         .from("business_memberships")
-        .insert({ status: row.status, last_renewal: new Date().toISOString().slice(0, 10) })
+        .insert({
+          status: toDbMembershipStatus(row.status) ?? "Active",
+          last_renewal: new Date().toISOString().slice(0, 10),
+        })
         .select()
         .single();
+      if (error) throw error;
       if (membership) {
         await update(business.id, { membership_id: membership.id, is_member: true });
       }

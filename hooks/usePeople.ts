@@ -25,9 +25,9 @@ interface UsePeopleReturn {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  create: (data: PeopleInsert) => Promise<People | null>;
-  update: (id: string, data: PeopleUpdate) => Promise<People | null>;
-  delete: (id: string) => Promise<boolean>;
+  create: (data: PeopleInsert) => Promise<People>;
+  update: (id: string, data: PeopleUpdate) => Promise<People>;
+  delete: (id: string) => Promise<void>;
 }
 
 async function fetchPeopleData(filters: UsePeopleOptions["filters"] = {}) {
@@ -178,32 +178,15 @@ export function usePeople(options: UsePeopleOptions = {}): UsePeopleReturn {
     },
   });
 
-  const create = async (data: PeopleInsert): Promise<People | null> => {
-    try {
-      const result = await createMutation.mutateAsync(data);
-      return result;
-    } catch {
-      return null;
-    }
-  };
+  // These deliberately propagate the underlying Postgres error rather than
+  // returning null/false. Swallowing it here is how an invalid enum write once
+  // looked like a successful save that silently reverted on refetch.
+  const create = (data: PeopleInsert): Promise<People> => createMutation.mutateAsync(data);
 
-  const update = async (id: string, data: PeopleUpdate): Promise<People | null> => {
-    try {
-      const result = await updateMutation.mutateAsync({ id, data });
-      return result;
-    } catch {
-      return null;
-    }
-  };
+  const update = (id: string, data: PeopleUpdate): Promise<People> =>
+    updateMutation.mutateAsync({ id, data });
 
-  const deletePerson = async (id: string): Promise<boolean> => {
-    try {
-      await deleteMutation.mutateAsync(id);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  const deletePerson = (id: string): Promise<void> => deleteMutation.mutateAsync(id);
 
   return {
     people,

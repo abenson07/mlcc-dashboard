@@ -5,6 +5,7 @@ import type { BusinessWithDetails } from "hooks";
 import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
 import { BusinessMembershipStatusToken } from "./BusinessMembershipStatusToken";
 import { normalizeMembershipStatus } from "./adapters";
+import { MEMBERSHIP_STATUSES, toMembershipStatus } from "@/lib/memberships/status";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -12,12 +13,10 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-const MEMBERSHIP_STATUS_OPTIONS = [
-  { value: "active", label: "Active" },
-  { value: "pending", label: "Pending" },
-  { value: "past_due", label: "Past due" },
-  { value: "lapsed", label: "Lapsed" },
-];
+const MEMBERSHIP_STATUS_OPTIONS = MEMBERSHIP_STATUSES.map((status) => ({
+  value: status,
+  label: status,
+}));
 
 function formatDisplayDate(value: string | null | undefined): string {
   if (!value) return "—";
@@ -82,9 +81,12 @@ export function MembershipSection({
     <DetailSection title="Membership">
       <DetailSelectField
         label="Status"
-        value={normalizeMembershipStatus(membership.status)}
+        value={membership.status}
         options={MEMBERSHIP_STATUS_OPTIONS}
-        onCommit={(next) => onCommit({ status: next })}
+        onCommit={(next) => {
+          const status = toMembershipStatus(next);
+          if (status) onCommit({ status });
+        }}
       />
       <DetailRow
         label="Renews"

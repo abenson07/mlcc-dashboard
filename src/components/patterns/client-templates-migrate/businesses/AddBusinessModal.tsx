@@ -23,7 +23,10 @@ export type AddBusinessModalProps = {
   onAddBusiness: (row: Omit<BusinessRow, "id">) => void;
 };
 
-const STATUSES: BusinessMembershipStatus[] = ["active", "past_due", "pending", "lapsed"];
+// Only the statuses `membership_status_enum` can actually hold — "pending" and
+// "past due" exist in the display vocabulary but have no database label, so
+// offering them here would create a choice that silently fails to save.
+const STATUSES: BusinessMembershipStatus[] = ["active", "lapsed"];
 const STATUS_LABEL: Record<BusinessMembershipStatus, string> = {
   active: "Active",
   past_due: "Past Due",
