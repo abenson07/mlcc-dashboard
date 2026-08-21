@@ -52,10 +52,7 @@ export function CancelMembershipModal({
   const [confirmingRefund, setConfirmingRefund] = useState(false);
 
   const endsOnLabel = formatMembershipDate(endsOn);
-  const refundLabel =
-    lastPaymentAmount != null
-      ? `Cancel immediately and refund $${lastPaymentAmount.toFixed(2)} in full`
-      : "Cancel immediately and refund in full";
+  const refundLabel = "Cancel and refund now";
 
   if (confirmingRefund) {
     return (
@@ -90,8 +87,18 @@ export function CancelMembershipModal({
       onClose={onCancel}
       title="Cancel membership"
       footer={
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <Button label="Keep membership" variant="ghost" onClick={onCancel} />
+        <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            style={{
+              ...linkStyle,
+              ...(submitting ? { opacity: 0.5, cursor: "default" } : null),
+            }}
+            disabled={submitting}
+            onClick={() => setConfirmingRefund(true)}
+          >
+            {refundLabel}
+          </button>
           <Button
             label={submitting ? "Cancelling…" : "Don't renew"}
             variant="primary"
@@ -101,26 +108,21 @@ export function CancelMembershipModal({
         </div>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <Text size="sm">
-          {isSubscription ? (
-            <>
-              {memberName}&rsquo;s membership will not renew and they won&rsquo;t be charged again.
-              {endsOnLabel
-                ? ` They keep their membership until ${endsOnLabel}.`
-                : " They keep their membership until the end of the period they've paid for."}
-            </>
-          ) : (
-            <>
-              {memberName} has a one-time membership, so there is no automatic renewal to stop. You
-              can still end it now and refund what they paid.
-            </>
-          )}
-        </Text>
-        <button type="button" style={linkStyle} onClick={() => setConfirmingRefund(true)}>
-          {refundLabel}
-        </button>
-      </div>
+      <Text size="sm">
+        {isSubscription ? (
+          <>
+            {memberName}&rsquo;s membership will not renew and they won&rsquo;t be charged again.
+            {endsOnLabel
+              ? ` They keep their membership until ${endsOnLabel}.`
+              : " They keep their membership until the end of the period they've paid for."}
+          </>
+        ) : (
+          <>
+            {memberName} has a one-time membership, so there is no automatic renewal to stop. You
+            can still end it now and refund what they paid.
+          </>
+        )}
+      </Text>
     </Modal>
   );
 }
