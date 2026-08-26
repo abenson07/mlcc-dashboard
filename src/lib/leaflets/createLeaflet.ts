@@ -4,7 +4,17 @@ import {
   spawnLeafletSponsorshipTiers,
   tierPlaceholderRows,
 } from "@/lib/leaflets/spawnLeafletSponsorshipTiers";
-import type { Leaflets, LeafletsInsert } from "@/types/database";
+import type { CommSettings, Leaflets, LeafletsInsert } from "@/types/database";
+import {
+  LEAFLET_COMM_STEP_DEFS,
+  isLeafletPipelineStep,
+  snapshotCommSchedule,
+} from "@/lib/leaflets/comm/commSchedule";
+import {
+  DuplicateLeafletTitleError,
+  isDuplicateLeafletTitle,
+  isPostgresUniqueViolation,
+} from "@/lib/leaflets/leafletTitle";
 
 const MEMBERSHIP_QR_BASE = "https://mapleleafcommunity.org/membership";
 const OPEN_ROUTES_QR_URL = "https://mapleleafcommunity.org/leaflet/open-routes";
@@ -28,12 +38,23 @@ function membershipQrUrl(title: string): string {
 export async function createLeaflet(
   supabase: SupabaseClient,
   input: Pick<LeafletsInsert, "title" | "distribution_date"> & {
+    distribution_date_2?: string | null;
     sponsorship_due_date?: string | null;
     delivery_date?: string | null;
     sponsorship_goal_cents?: number | null;
     tierOverrides?: SponsorshipTierSeed[];
   },
 ): Promise<Leaflets> {
+  const { data: existingTitles, error: titlesError } = await supabase
+    .from("leaflets")
+    .select("title");
+  if (titlesError) {
+    throw new Error(titlesError.message);
+  }
+  if (isDuplicateLeafletTitle(input.title, (existingTitles ?? []).map((row) => row.title))) {
+    throw new DuplicateLeafletTitleError(input.title);
+  }
+
   const { data: membershipQr, error: membershipQrError } = await supabase
     .from("qr_codes")
     .insert({
@@ -60,22 +81,40 @@ export async function createLeaflet(
     throw new Error(openRoutesQrError?.message ?? "Failed to create open routes QR code");
   }
 
+  const { data: commSettings } = await supabase
+    .from("comm_settings")
+    .select("step_key, offset_days, is_enabled")
+    .eq("context", "leaflet")
+    .is("event_template_id", null);
+
+  const scheduleSteps =
+    (commSettings as Pick<CommSettings, "step_key" | "offset_days" | "is_enabled">[] | null)
+      ?.filter((row) => row.is_enabled !== false && isLeafletPipelineStep(row.step_key)) ??
+    LEAFLET_COMM_STEP_DEFS;
+
+  const comm_schedule = snapshotCommSchedule(scheduleSteps, input.distribution_date);
+
   const { data: leaflet, error: leafletError } = await supabase
     .from("leaflets")
     .insert({
       title: input.title,
       distribution_date: input.distribution_date,
+      distribution_date_2: input.distribution_date_2?.trim() ? input.distribution_date_2.trim() : null,
       sponsorship_due_date: input.sponsorship_due_date ?? null,
       delivery_date: input.delivery_date ?? null,
       sponsorship_goal_cents: input.sponsorship_goal_cents ?? null,
       status: "planned",
       membership_qr_code_id: membershipQr.id,
       open_routes_qr_code_id: openRoutesQr.id,
+      comm_schedule,
     })
     .select()
     .single();
 
   if (leafletError || !leaflet) {
+    if (isPostgresUniqueViolation(leafletError)) {
+      throw new DuplicateLeafletTitleError(input.title);
+    }
     throw new Error(leafletError?.message ?? "Failed to create leaflet");
   }
 

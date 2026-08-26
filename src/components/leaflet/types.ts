@@ -6,6 +6,7 @@ export type LeafletEdition = {
   id: string;
   title: string;
   distribution_date: string;
+  distribution_date_2?: string | null;
   sponsorship_due_date?: string | null;
   delivery_date?: string | null;
   status: LeafletStatus;
@@ -115,6 +116,7 @@ export type CommStage = {
   name: string;
   state: "completed" | "active" | "upcoming";
   sentDate?: string;
+  scheduledOn?: string;
   timing?: string;
   description?: string;
   sentCount?: number;

@@ -10,13 +10,14 @@ import { RowClickCell, ClassContentPage } from "@/components/patterns/client-tem
 import { Text } from "@/components/patterns/primitives/Text";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { IconButton } from "@/components/patterns/shared/IconButton";
-import type { LeafletRouteRow } from "@/data/mocks/leaflets";
-import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
+import type { LeafletRouteRow, LeafletRouteStatus } from "@/data/mocks/leaflets";
+import { DEMO_STORE_EVENT, listDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
   RemoveRoutesConfirmModal,
   SkipRouteConfirmModal,
 } from "./LeafletRouteActionModals";
+import { applyLeafletDeliveryStatus, routeHasDeliverer } from "./leafletDeliveryStatus";
 
 const GROUP_ORDER = ["unassigned", "in-progress", "skipped"];
 
@@ -32,19 +33,40 @@ const groupColors: Record<string, string> = {
   skipped: "#8a8f98",
 };
 
-function SummaryCard({ title, value, hint }: { title: string; value: number; hint: string }) {
+function SummaryCard({
+  title,
+  value,
+  hint,
+  selected,
+  onClick,
+}: {
+  title: string;
+  value: number;
+  hint: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
   return (
-    <section
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
       style={{
+        all: "unset",
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
         gap: 12,
         padding: 20,
-        background: "var(--linear-color-panel)",
-        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
+        background: selected
+          ? "var(--linear-color-sidebar-item-selected)"
+          : "var(--linear-color-panel)",
+        border: selected
+          ? "var(--linear-border-width) solid var(--linear-color-accent)"
+          : "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
         boxShadow: "var(--linear-shadow-panel)",
+        cursor: "pointer",
       }}
     >
       <Text weight="semibold">{title}</Text>
@@ -54,7 +76,7 @@ function SummaryCard({ title, value, hint }: { title: string; value: number; hin
       <Text size="sm" color="secondary">
         {hint}
       </Text>
-    </section>
+    </button>
   );
 }
 
@@ -66,14 +88,19 @@ export type LeafletRoutesPageProps = {
 
 function RouteActionsCell({
   row,
+  onConfirm,
   onSkip,
   onRemove,
 }: {
   row: LeafletRouteRow;
+  onConfirm: (row: LeafletRouteRow) => void;
   onSkip: (row: LeafletRouteRow) => void;
   onRemove: (row: LeafletRouteRow) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const hasDeliverer = routeHasDeliverer(row);
+  const alreadyConfirmed = row.response === "confirmed" && row.status !== "skipped";
+  if (!hasDeliverer) return null;
   return (
     <div className="leaflet-route-row-actions" style={{ display: "flex", justifyContent: "flex-end" }}>
       <Dropdown
@@ -91,6 +118,15 @@ function RouteActionsCell({
           />
         }
       >
+        {!alreadyConfirmed ? (
+          <DropdownItem
+            label="Confirm route"
+            onSelect={() => {
+              setOpen(false);
+              onConfirm(row);
+            }}
+          />
+        ) : null}
         <DropdownItem
           label="Skip route"
           onSelect={() => {
@@ -124,22 +160,94 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
   const [skipRow, setSkipRow] = useState<LeafletRouteRow | null>(null);
   const [removeRow, setRemoveRow] = useState<LeafletRouteRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<LeafletRouteStatus | null>(null);
 
   useEffect(() => {
     if (!isDemo) return;
-    setLocalRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
+    const load = () => {
+      setLocalRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
+    };
+    load();
+    window.addEventListener(DEMO_STORE_EVENT, load);
+    return () => window.removeEventListener(DEMO_STORE_EVENT, load);
   }, [isDemo, scopeKey]);
-
-  function persistRoutes(next: LeafletRouteRow[]) {
-    setLocalRoutes(next);
-    writeDemoScoped("leafletRoutes", scopeKey, next);
-  }
 
   const routes = isDemo ? localRoutes : deliveriesToRouteRows(deliveries);
 
   const assignedCount = routes.filter((r) => r.status === "in-progress").length;
   const openCount = routes.filter((r) => r.status === "unassigned").length;
   const skippedCount = routes.filter((r) => r.status === "skipped").length;
+  const visibleRoutes = statusFilter ? routes.filter((r) => r.status === statusFilter) : routes;
+
+  function toggleStatusFilter(status: LeafletRouteStatus) {
+    setStatusFilter((current) => (current === status ? null : status));
+  }
+
+  async function applyStatus(
+    row: LeafletRouteRow,
+    action: "confirm" | "skip" | "remove",
+    liveMessage: string,
+    demoMessage: string,
+  ) {
+    await applyLeafletDeliveryStatus({
+      isDemo,
+      scopeKey,
+      deliveryIds: [row.id],
+      action,
+      update,
+      refetch,
+    });
+    toast.success(isDemo ? demoMessage : liveMessage);
+  }
+
+  async function handleConfirm(row: LeafletRouteRow) {
+    try {
+      await applyStatus(
+        row,
+        "confirm",
+        "Route confirmed",
+        "Route confirmed — demo mode, saved locally only",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to confirm");
+    }
+  }
+
+  async function handleSkip() {
+    if (!skipRow) return;
+    setSubmitting(true);
+    try {
+      await applyStatus(
+        skipRow,
+        "skip",
+        "Route skipped",
+        "Route skipped — demo mode, saved locally only",
+      );
+      setSkipRow(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to skip");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleRemove() {
+    if (!removeRow) return;
+    setSubmitting(true);
+    try {
+      await applyStatus(
+        removeRow,
+        "remove",
+        "Deliverer removed",
+        "Route removed — demo mode, saved locally only",
+      );
+      setRemoveRow(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to remove");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const columns = useMemo((): TableColumn<LeafletRouteRow>[] => {
     return [
@@ -170,9 +278,10 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         renderCell: (row) => (
           <RouteActionsCell
             row={row}
+            onConfirm={(r) => void handleConfirm(r)}
             onSkip={setSkipRow}
             onRemove={(r) => {
-              if (r.status === "unassigned") {
+              if (!routeHasDeliverer(r)) {
                 toast.message("Route has no deliverer to remove");
                 return;
               }
@@ -182,63 +291,7 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         ),
       },
     ];
-  }, [onSelectRoute]);
-
-  async function handleSkip() {
-    if (!skipRow) return;
-    setSubmitting(true);
-    try {
-      if (isDemo) {
-        persistRoutes(
-          localRoutes.map((r) =>
-            r.id === skipRow.id
-              ? { ...r, status: "skipped", detail: "Needs a substitute" }
-              : r,
-          ),
-        );
-        toast.success("Route skipped — demo mode, saved locally only");
-      } else {
-        await update(skipRow.id, { is_skipped: true, response: "needs_cover" });
-        await refetch();
-        toast.success("Route skipped");
-      }
-      setSkipRow(null);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to skip");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleRemove() {
-    if (!removeRow) return;
-    setSubmitting(true);
-    try {
-      if (isDemo) {
-        persistRoutes(
-          localRoutes.map((r) =>
-            r.id === removeRow.id
-              ? { ...r, status: "unassigned", detail: "Unassigned", initials: "—" }
-              : r,
-          ),
-        );
-        toast.success("Route removed — demo mode, saved locally only");
-      } else {
-        await update(removeRow.id, {
-          person_id: null,
-          is_skipped: false,
-          response: "pending",
-        });
-        await refetch();
-        toast.success("Deliverer removed");
-      }
-      setRemoveRow(null);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to remove");
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  }, [onSelectRoute, handleConfirm]);
 
   return (
     <ClassContentPage>
@@ -248,18 +301,36 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         .leaflet-route-row-actions:focus-within { opacity: 1; }
       `}</style>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-        <SummaryCard title="Assigned Routes" value={assignedCount} hint="Have a deliverer" />
-        <SummaryCard title="Open Routes" value={openCount} hint="Still need a deliverer" />
-        <SummaryCard title="Skipped Routes" value={skippedCount} hint="Need a substitute" />
+        <SummaryCard
+          title="Assigned Routes"
+          value={assignedCount}
+          hint="Have a deliverer"
+          selected={statusFilter === "in-progress"}
+          onClick={() => toggleStatusFilter("in-progress")}
+        />
+        <SummaryCard
+          title="Open Routes"
+          value={openCount}
+          hint="Still need a deliverer"
+          selected={statusFilter === "unassigned"}
+          onClick={() => toggleStatusFilter("unassigned")}
+        />
+        <SummaryCard
+          title="Skipped Routes"
+          value={skippedCount}
+          hint="Need a substitute"
+          selected={statusFilter === "skipped"}
+          onClick={() => toggleStatusFilter("skipped")}
+        />
       </div>
 
       <div style={{ marginInline: -8, minHeight: 0 }}>
         <GroupedTable
-          data={routes}
+          data={visibleRoutes}
           columns={columns}
           getRowKey={(row) => row.id}
           groupBy={(row) => row.status}
-          groupOrder={GROUP_ORDER}
+          groupOrder={statusFilter ? [statusFilter] : GROUP_ORDER}
           getGroupMeta={(key) => ({ color: groupColors[key], label: GROUP_LABEL[key] ?? key })}
           listChrome
         />

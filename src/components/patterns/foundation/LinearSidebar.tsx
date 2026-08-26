@@ -15,6 +15,7 @@ import {
   ListChecks,
   Mail,
   Megaphone,
+  Newspaper,
   FlaskConical,
   Moon,
   MoreHorizontal,
@@ -33,13 +34,21 @@ import {
   Dropdown,
   DropdownItem,
 } from "@/components/patterns/shared/dropdown";
-import { useEvents, useStories, useCurrentPerson, useFavorites } from "hooks";
+import { useEvents, useLeaflets, useStories, useCurrentPerson, useFavorites } from "hooks";
 import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import { clearDemoStore, newDemoId, upsertDemoEntity } from "@/lib/demo/demoStore";
+import {
+  leafletCommSettingsFromDefs,
+  snapshotCommSchedule,
+} from "@/lib/leaflets/comm/commSchedule";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import { getBestMatchingHref } from "@/lib/nav/getBestMatchingHref";
 import { AddPromotionModal, NewEventModal } from "@/components/patterns/client-templates/events";
 import { NewStoryModal } from "@/components/patterns/client-templates/content";
+import {
+  NewLeafletModal,
+  type NewLeafletDraft,
+} from "@/components/patterns/client-templates-migrate/leaflets/NewLeafletModal";
 import { useAdminBasePath } from "@/components/patterns/client-templates/shared";
 import type { EventPromotionType, EventSummary } from "@/data/mocks/events";
 import type { Story } from "@/data/mocks/content";
@@ -184,7 +193,7 @@ function initialsFromName(name: string): string {
 }
 
 /**
- * Real-data create modals for /admin — split out so `useStories`/`useEvents`
+ * Real-data create modals for /admin — split out so `useStories`/`useEvents`/`useLeaflets`
  * (react-query hooks) are only ever mounted inside /admin's QueryClientProvider,
  * never inside admin-preview, which has none and must stay free of real Supabase calls.
  */
@@ -193,17 +202,22 @@ function MigrateCreateModals({
   onCloseNewStory,
   isNewEventOpen,
   onCloseNewEvent,
+  isNewLeafletOpen,
+  onCloseNewLeaflet,
   hrefFor,
 }: {
   isNewStoryOpen: boolean;
   onCloseNewStory: () => void;
   isNewEventOpen: boolean;
   onCloseNewEvent: () => void;
+  isNewLeafletOpen: boolean;
+  onCloseNewLeaflet: () => void;
   hrefFor: (path: string) => string;
 }) {
   const router = useRouter();
   const { create: createStory } = useStories({ autoFetch: false });
   const { create: createEvent } = useEvents({ autoFetch: false });
+  const { create: createLeaflet } = useLeaflets({ autoFetch: false });
   const { enabled: demo } = useDemoModeOptional();
 
   async function handleCreateStory(story: Omit<Story, "id">) {
@@ -260,10 +274,34 @@ function MigrateCreateModals({
     if (created) router.push(hrefFor(`/events/${created.id}`));
   }
 
+  async function handleCreateLeaflet(draft: NewLeafletDraft) {
+    if (demo) {
+      const id = newDemoId("lf");
+      upsertDemoEntity("leaflets", {
+        id,
+        title: draft.title,
+        distributionDate: draft.distribution_date,
+        distributionDate2: draft.distribution_date_2 ?? undefined,
+        status: "planned",
+        comm_schedule: snapshotCommSchedule(
+          leafletCommSettingsFromDefs(),
+          draft.distribution_date,
+        ),
+        commSent: {},
+      });
+      toast.success("Leaflet created — demo mode, saved locally only");
+      router.push(hrefFor(`/leaflets/${id}`));
+      return;
+    }
+    const created = await createLeaflet(draft);
+    if (created) router.push(hrefFor(`/leaflets/${created.id}`));
+  }
+
   return (
     <>
       <NewStoryModal isOpen={isNewStoryOpen} onClose={onCloseNewStory} onCreate={handleCreateStory} />
       <NewEventModal isOpen={isNewEventOpen} onClose={onCloseNewEvent} onCreate={handleCreateEvent} />
+      <NewLeafletModal isOpen={isNewLeafletOpen} onClose={onCloseNewLeaflet} onCreate={handleCreateLeaflet} />
     </>
   );
 }
@@ -341,6 +379,7 @@ function LinearSidebarBase({
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isNewStoryOpen, setIsNewStoryOpen] = useState(false);
   const [isNewEventOpen, setIsNewEventOpen] = useState(false);
+  const [isNewLeafletOpen, setIsNewLeafletOpen] = useState(false);
   const [promotionModalType, setPromotionModalType] = useState<EventPromotionType | null>(null);
   const [demoTransition, setDemoTransition] = useState<DemoModeConfirmModalTarget | null>(null);
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
@@ -489,6 +528,11 @@ function LinearSidebarBase({
               onSelect={() => openCreateOption(() => setIsNewEventOpen(true))}
             />
             <DropdownItem
+              label="New Leaflet"
+              icon={<Newspaper size={16} strokeWidth={1.75} />}
+              onSelect={() => openCreateOption(() => setIsNewLeafletOpen(true))}
+            />
+            <DropdownItem
               label="New Email"
               icon={<Mail size={16} strokeWidth={1.75} />}
               onSelect={() => openCreateOption(() => setPromotionModalType("email"))}
@@ -621,12 +665,15 @@ function LinearSidebarBase({
           onCloseNewStory={() => setIsNewStoryOpen(false)}
           isNewEventOpen={isNewEventOpen}
           onCloseNewEvent={() => setIsNewEventOpen(false)}
+          isNewLeafletOpen={isNewLeafletOpen}
+          onCloseNewLeaflet={() => setIsNewLeafletOpen(false)}
           hrefFor={hrefFor}
         />
       ) : (
         <>
           <NewStoryModal isOpen={isNewStoryOpen} onClose={() => setIsNewStoryOpen(false)} />
           <NewEventModal isOpen={isNewEventOpen} onClose={() => setIsNewEventOpen(false)} />
+          <NewLeafletModal isOpen={isNewLeafletOpen} onClose={() => setIsNewLeafletOpen(false)} />
         </>
       )}
       <AddPromotionModal

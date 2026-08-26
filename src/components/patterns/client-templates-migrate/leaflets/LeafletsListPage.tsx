@@ -2,10 +2,13 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useLeaflets } from "hooks";
+import { Plus } from "lucide-react";
+import { useDemoGuard, useLeaflets } from "hooks";
 import { Badge } from "@/components/patterns/primitives/Badge";
 import { Text } from "@/components/patterns/primitives/Text";
-import type { LeafletStatus, LeafletSummary } from "@/data/mocks/leaflets";
+import { EmptyStateCard, useAdminBasePath } from "@/components/patterns/client-templates/shared";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { sampleLeaflets, type LeafletStatus, type LeafletSummary } from "@/data/mocks/leaflets";
 import { toLeafletSummary } from "./adapters";
 
 function statusLabel(status: LeafletStatus): string {
@@ -26,21 +29,42 @@ function groupByMonth(leaflets: LeafletSummary[]): [string, LeafletSummary[]][] 
   return Array.from(groups.entries());
 }
 
+export type LeafletsListPageProps = {
+  onCreateClick?: () => void;
+};
+
 /**
  * Leaflets list — month-grouped rows ported from the live admin's
  * `LeafletsListPageContent`, restyled with pattern-library primitives.
  */
-export function LeafletsListPage() {
+export function LeafletsListPage({ onCreateClick }: LeafletsListPageProps = {}) {
   const router = useRouter();
-  const { leaflets, loading, error } = useLeaflets();
-  const summaries = useMemo(() => leaflets.map(toLeafletSummary), [leaflets]);
+  const basePath = useAdminBasePath();
+  const { enabled: demo } = useDemoModeOptional();
+  const { store } = useDemoGuard();
+  const { leaflets, loading, error } = useLeaflets({ autoFetch: !demo });
+  const summaries = useMemo(
+    () => (demo ? store.merge<LeafletSummary>("leaflets", sampleLeaflets) : leaflets.map(toLeafletSummary)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [demo, leaflets, store.version],
+  );
   const byMonth = useMemo(() => groupByMonth(summaries), [summaries]);
 
-  if (error) {
+  if (!demo && error) {
     return <Text color="secondary">Couldn&apos;t load leaflets: {error}</Text>;
   }
-  if (loading) {
+  if (!demo && loading) {
     return <Text color="secondary">Loading…</Text>;
+  }
+
+  if (summaries.length === 0) {
+    return (
+      <EmptyStateCard
+        label="Add leaflet"
+        icon={<Plus size={14} strokeWidth={1.75} />}
+        onClick={onCreateClick}
+      />
+    );
   }
 
   return (
@@ -57,7 +81,7 @@ export function LeafletsListPage() {
                 <button
                   key={leaflet.id}
                   type="button"
-                  onClick={() => router.push(`/admin/leaflets/${leaflet.id}`)}
+                  onClick={() => router.push(`${basePath}/leaflets/${leaflet.id}`)}
                   style={{
                     all: "unset",
                     boxSizing: "border-box",
@@ -104,6 +128,17 @@ export function LeafletsListPage() {
                         day: "numeric",
                         year: "numeric",
                       })}
+                      {leaflet.distributionDate2
+                        ? ` and ${new Date(`${leaflet.distributionDate2}T12:00:00`).toLocaleDateString(
+                            "en-US",
+                            {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )}`
+                        : ""}
                     </Text>
                   </div>
                 </button>

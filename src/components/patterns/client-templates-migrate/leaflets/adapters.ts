@@ -14,6 +14,7 @@ export function toLeafletSummary(row: Leaflets): LeafletSummary {
     id: row.id,
     title: row.title,
     distributionDate: row.distribution_date,
+    distributionDate2: row.distribution_date_2 ?? null,
     status: row.status,
   };
 }
@@ -54,6 +55,7 @@ export function deliveriesToDelivererRows(deliveries: DeliveryWithRelations[]): 
             deliveryId: r.id,
             routeId: r.route_id,
             isSkipped: r.is_skipped,
+            response: r.response,
           }),
         ),
       };
@@ -90,6 +92,10 @@ export function deliveriesToRouteRows(deliveries: DeliveryWithRelations[]): Leaf
       initials: initialsFromName(d.people?.full_name ?? name),
       detail,
       status,
+      routeId: d.route_id,
+      personId: d.person_id,
+      personName: d.people?.full_name ?? null,
+      response: d.response,
     };
   });
 }
@@ -103,6 +109,10 @@ export function sampleAllRouteRows(): LeafletRouteRow[] {
       initials: initialsFromName(d.name),
       detail: `${d.name} · ${route.leafletCount} leaflets`,
       status: "in-progress" as const,
+      routeId: route.routeId ?? route.id,
+      personId: d.id,
+      personName: d.name,
+      response: route.response ?? (d.status === "Confirmed" ? "confirmed" : "pending"),
     })),
   );
   return [...assigned, ...sampleOpenRoutes, ...sampleSkippedRoutes];

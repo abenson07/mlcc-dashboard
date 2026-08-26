@@ -45,5 +45,19 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const isRemove = data.person_id == null && data.is_skipped === false;
+  if (isRemove && typeof data.route_id === "string") {
+    const { error: routeError } = await supabase
+      .from("routes")
+      .update({
+        primary_deliverer_id: null,
+        primary_deliverer_email: null,
+      })
+      .eq("id", data.route_id);
+    if (routeError) {
+      return NextResponse.json({ error: routeError.message }, { status: 500 });
+    }
+  }
+
   return NextResponse.json({ ok: true, delivery: data });
 }

@@ -28,6 +28,7 @@ export type DemoCollectionKind =
   | "sponsorships"
   | "committeeMembers"
   | "committeeMeetings"
+  | "leaflets"
   | "leafletRoutes"
   | "leafletDeliverers"
   | "leafletTasks"
@@ -61,6 +62,7 @@ const COLLECTION_KINDS: DemoCollectionKind[] = [
   "sponsorships",
   "committeeMembers",
   "committeeMeetings",
+  "leaflets",
   "leafletRoutes",
   "leafletDeliverers",
   "leafletTasks",

@@ -11,10 +11,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const STEP_TO_ALIAS = {
   initial_confirmation: "leaflet-initial-confirmation",
+  confirmation_followup: "leaflet-initial-confirmation",
   pre_distribution_reminder: "leaflet-pre-distribution-reminder",
-  distribution_day_pickup: "leaflet-distribution-day-pickup",
-  delivery_complete_prompt: "leaflet-delivery-complete",
-  completion_followup: "leaflet-completion-followup",
 };
 
 function loadEnvLocal() {

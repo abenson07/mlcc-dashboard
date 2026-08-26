@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/require-session";
 import { createLeaflet } from "@/lib/leaflets/createLeaflet";
+import { DuplicateLeafletTitleError } from "@/lib/leaflets/leafletTitle";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
 
 export async function GET() {
@@ -35,6 +36,10 @@ export async function POST(request: NextRequest) {
   const title = typeof o.title === "string" ? o.title.trim() : "";
   const distribution_date =
     typeof o.distribution_date === "string" ? o.distribution_date.trim() : "";
+  const distribution_date_2 =
+    typeof o.distribution_date_2 === "string" && o.distribution_date_2.trim()
+      ? o.distribution_date_2.trim()
+      : null;
   const sponsorship_due_date =
     typeof o.sponsorship_due_date === "string" && o.sponsorship_due_date.trim()
       ? o.sponsorship_due_date.trim()
@@ -59,6 +64,7 @@ export async function POST(request: NextRequest) {
     const leaflet = await createLeaflet(supabase, {
       title,
       distribution_date,
+      distribution_date_2,
       sponsorship_due_date,
       delivery_date,
       sponsorship_goal_cents,
@@ -67,6 +73,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, leaflet });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to create leaflet";
+    if (err instanceof DuplicateLeafletTitleError) {
+      return NextResponse.json({ error: message }, { status: 409 });
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

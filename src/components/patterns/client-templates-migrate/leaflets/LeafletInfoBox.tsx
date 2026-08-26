@@ -78,6 +78,9 @@ export function LeafletInfoBox({ leaflet }: LeafletInfoBoxProps) {
         </LeafletMetaItem>
         <LeafletMetaItem icon={<CalendarDays size={14} strokeWidth={1.75} />}>
           Distribution: {formatDistributionDate(leaflet.distributionDate)}
+          {leaflet.distributionDate2
+            ? ` and ${formatDistributionDate(leaflet.distributionDate2)}`
+            : ""}
         </LeafletMetaItem>
       </div>
     </header>

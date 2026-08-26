@@ -9,6 +9,7 @@ export type NextStepBoxProps = {
   description?: string;
   sendLabel?: string;
   onSend?: () => void;
+  showSend?: boolean;
 };
 
 /**
@@ -20,6 +21,7 @@ export function NextStepBox({
   description = "3 sponsors still owe payment before this issue goes to print.",
   sendLabel = "Send",
   onSend,
+  showSend = true,
 }: NextStepBoxProps) {
   return (
     <section
@@ -44,14 +46,16 @@ export function NextStepBox({
       <Text size="sm" color="secondary" style={{ flex: 1 }}>
         {description}
       </Text>
-      <Button
-        label={sendLabel}
-        variant="secondary"
-        size="sm"
-        width="100%"
-        icon={<Send size={14} strokeWidth={1.75} />}
-        onClick={onSend}
-      />
+      {showSend ? (
+        <Button
+          label={sendLabel}
+          variant="secondary"
+          size="sm"
+          width="100%"
+          icon={<Send size={14} strokeWidth={1.75} />}
+          onClick={onSend}
+        />
+      ) : null}
     </section>
   );
 }

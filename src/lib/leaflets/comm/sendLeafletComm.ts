@@ -3,6 +3,7 @@ import type { CommSettings, Deliveries, Leaflets, People, Routes } from "@/types
 import { getResend, getResendFromEmail } from "@/lib/resend";
 import { buildRespondUrl, type RespondMode } from "@/lib/leaflets/signRespondUrl";
 import { buildLeafletCommEmailHtml } from "@/lib/leaflets/comm/buildLeafletCommEmailHtml";
+import { isUnconfirmedOnlyStep } from "@/lib/leaflets/comm/commSchedule";
 
 type DeliveryRow = Deliveries & {
   routes?: Routes | null;
@@ -11,6 +12,7 @@ type DeliveryRow = Deliveries & {
 
 const LEAFLET_STAMP_COLUMNS: Record<string, keyof Leaflets> = {
   initial_confirmation: "comm_initial_confirmation_sent_at",
+  confirmation_followup: "comm_confirmation_followup_sent_at",
   distribution_day_pickup: "comm_distribution_day_pickup_sent_at",
   delivery_complete_prompt: "comm_delivery_complete_prompt_sent_at",
 };
@@ -174,7 +176,11 @@ export async function sendLeafletComm(params: {
   let sent = 0;
 
   const groups = groupByPerson(
-    deliveries.filter((d) => d.person_id && d.people?.email),
+    deliveries.filter((d) => {
+      if (!d.person_id || !d.people?.email) return false;
+      if (isUnconfirmedOnlyStep(params.stepKey) && d.response === "confirmed") return false;
+      return true;
+    }),
   );
 
   for (const { person, deliveries: personDeliveries } of groups.values()) {

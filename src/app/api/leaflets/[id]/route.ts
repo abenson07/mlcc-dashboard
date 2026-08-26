@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/require-session";
+import { isCommSchedulePatch } from "@/lib/leaflets/comm/commSchedule";
+import {
+  DuplicateLeafletTitleError,
+  isDuplicateLeafletTitle,
+  isPostgresUniqueViolation,
+} from "@/lib/leaflets/leafletTitle";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
 
 type Params = { params: Promise<{ id: string }> };
@@ -45,14 +51,45 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (typeof o.distribution_date === "string" && o.distribution_date.trim()) {
     patch.distribution_date = o.distribution_date.trim();
   }
+  if (o.distribution_date_2 === null || o.distribution_date_2 === "") {
+    patch.distribution_date_2 = null;
+  } else if (typeof o.distribution_date_2 === "string" && o.distribution_date_2.trim()) {
+    patch.distribution_date_2 = o.distribution_date_2.trim();
+  }
   if (typeof o.print_cost_cents === "number") {
     patch.print_cost_cents = o.print_cost_cents;
   }
   if (typeof o.sponsorship_goal_cents === "number") {
     patch.sponsorship_goal_cents = o.sponsorship_goal_cents;
   }
+  if (typeof o.sponsorship_due_date === "string" && o.sponsorship_due_date.trim()) {
+    patch.sponsorship_due_date = o.sponsorship_due_date.trim();
+  }
+  if (typeof o.delivery_date === "string" && o.delivery_date.trim()) {
+    patch.delivery_date = o.delivery_date.trim();
+  }
+  if (isCommSchedulePatch(o.comm_schedule)) {
+    patch.comm_schedule = o.comm_schedule;
+  }
 
   const supabase = await getSupabaseForLeafletRoutes();
+
+  if (typeof patch.title === "string") {
+    const { data: others, error: titlesError } = await supabase
+      .from("leaflets")
+      .select("id, title")
+      .neq("id", id);
+    if (titlesError) {
+      return NextResponse.json({ error: titlesError.message }, { status: 500 });
+    }
+    if (isDuplicateLeafletTitle(patch.title, (others ?? []).map((row) => row.title))) {
+      return NextResponse.json(
+        { error: new DuplicateLeafletTitleError(patch.title).message },
+        { status: 409 },
+      );
+    }
+  }
+
   const { data, error } = await supabase
     .from("leaflets")
     .update(patch)
@@ -61,6 +98,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     .single();
 
   if (error) {
+    if (isPostgresUniqueViolation(error)) {
+      const title = typeof patch.title === "string" ? patch.title : "this title";
+      return NextResponse.json(
+        { error: new DuplicateLeafletTitleError(title).message },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

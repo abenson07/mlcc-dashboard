@@ -29,6 +29,7 @@ export type {
   LeafletsInsert,
   LeafletsUpdate,
   LeafletStatus,
+  LeafletCommSchedule,
   EventTemplates,
   EventTemplatesInsert,
   EventTemplatesUpdate,
