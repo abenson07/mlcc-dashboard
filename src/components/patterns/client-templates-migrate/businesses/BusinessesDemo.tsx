@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useBusinesses, useDemoGuard, type BusinessWithDetails } from "hooks";
+import { useBusinesses, useBusinessMemberships, useDemoGuard, type BusinessWithDetails } from "hooks";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
@@ -28,13 +28,15 @@ import { AddBusinessModal } from "./AddBusinessModal";
 import { EditBusinessModal } from "./EditBusinessModal";
 import type { BusinessMemberRow, BusinessRow, SponsorRow } from "./types";
 import {
+  BUSINESS_MEMBERSHIP_ANNUAL_DUES,
+  BUSINESS_MEMBERSHIP_TIER,
   hookFiltersForView,
+  localIsoDate,
   toBusinessMemberRow,
   toBusinessRow,
-  toDbMembershipStatus,
   toSponsorRow,
 } from "./adapters";
-import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
+import type { BusinessesUpdate, BusinessMemberships, BusinessMembershipsUpdate } from "@/types/database";
 
 function matchesBusinessesView(business: BusinessWithDetails, view: BusinessesView): boolean {
   if (view === "members") return Boolean(business.is_member || business.membership);
@@ -48,6 +50,30 @@ type BusinessesView = "members" | "sponsors" | "all";
 
 function isBusinessesView(value: string | null): value is BusinessesView {
   return value === "members" || value === "sponsors" || value === "all";
+}
+
+function nestedMembershipPatch(
+  business: BusinessWithDetails,
+  data: BusinessMembershipsUpdate,
+): Record<string, unknown> {
+  const membershipId = business.membership?.id ?? newDemoId("biz-mem");
+  const membership: BusinessMemberships = {
+    status: "Active",
+    last_renewal: localIsoDate(),
+    payment_method: null,
+    is_subscription: false,
+    tier: BUSINESS_MEMBERSHIP_TIER,
+    annual_dues: BUSINESS_MEMBERSHIP_ANNUAL_DUES,
+    ...business.membership,
+    ...data,
+    id: membershipId,
+    tier: BUSINESS_MEMBERSHIP_TIER,
+  };
+  return {
+    is_member: true,
+    membership_id: membershipId,
+    membership,
+  };
 }
 
 type Selection =
@@ -77,6 +103,7 @@ function BusinessesDemoInner() {
     [view, search]
   );
   const { businesses: businessesRaw, loading, error, create, update, refetch } = useBusinesses({ filters });
+  const { create: createMembership, update: updateMembership } = useBusinessMemberships();
   const { enabled: demo, overlay, store } = useDemoGuard();
 
   const businesses = useMemo(() => {
@@ -111,16 +138,25 @@ function BusinessesDemoInner() {
     membershipId: string | null,
     membershipData: BusinessMembershipsUpdate
   ) {
+    const current = businesses.find((b) => b.id === businessId);
     if (demo) {
-      overlay.patch("businesses", businessId, { ...businessData, ...membershipData });
+      overlay.patch("businesses", businessId, {
+        ...businessData,
+        ...(current ? nestedMembershipPatch(current, membershipData) : membershipData),
+      });
       toast.success("Business updated — demo mode, saved locally only");
       return;
     }
-    await update(businessId, businessData);
-    if (membershipId && supabaseClient) {
-      await supabaseClient.from("business_memberships").update(membershipData).eq("id", membershipId);
+    try {
+      await update(businessId, businessData);
+      if (membershipId) {
+        await updateMembership(membershipId, membershipData);
+      }
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save changes");
+      throw e;
     }
-    await refetch();
   }
 
   /** Inline field commit from the Business detail panel — same demo-guard shape as `handleSaveEdit`. */
@@ -130,28 +166,41 @@ function BusinessesDemoInner() {
       toast.success("Business updated — demo mode, saved locally only");
       return;
     }
-    await update(businessId, data);
-    await refetch();
+    try {
+      await update(businessId, data);
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save changes");
+    }
   }
 
-  async function commitMembershipField(
-    membershipId: string,
-    businessId: string,
+  async function commitMembership(
+    business: BusinessWithDetails,
     data: BusinessMembershipsUpdate
   ) {
     if (demo) {
-      overlay.patch("businesses", businessId, data as Record<string, unknown>);
+      overlay.patch("businesses", business.id, nestedMembershipPatch(business, data));
       toast.success("Business updated — demo mode, saved locally only");
       return;
     }
-    if (supabaseClient) {
-      const { error } = await supabaseClient
-        .from("business_memberships")
-        .update(data)
-        .eq("id", membershipId);
-      if (error) throw error;
+    try {
+      if (business.membership) {
+        await updateMembership(business.membership.id, { ...data, tier: BUSINESS_MEMBERSHIP_TIER });
+      } else {
+        const created = await createMembership({
+          status: data.status ?? "Active",
+          last_renewal: data.last_renewal || localIsoDate(),
+          tier: BUSINESS_MEMBERSHIP_TIER,
+          annual_dues: data.annual_dues ?? BUSINESS_MEMBERSHIP_ANNUAL_DUES,
+        });
+        const linked = await update(business.id, { membership_id: created.id, is_member: true });
+        if (!linked) throw new Error("Membership was created but could not be linked to the business.");
+        toast.success("Membership started");
+      }
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save membership changes");
     }
-    await refetch();
   }
 
   function selectView(next: BusinessesView) {
@@ -168,6 +217,7 @@ function BusinessesDemoInner() {
         business_name: row.businessName,
         contact_name: row.contactName,
         phone: row.phone,
+        category: row.category || null,
         is_member: false,
         is_past_sponsor: false,
         sponsorships: [],
@@ -176,15 +226,22 @@ function BusinessesDemoInner() {
       toast.success("Business added — demo mode, saved locally only");
       return;
     }
-    await create({ business_name: row.businessName, contact_name: row.contactName, phone: row.phone });
+    await create({
+      business_name: row.businessName,
+      contact_name: row.contactName,
+      phone: row.phone,
+      category: row.category || null,
+    });
     await refetch();
   }
 
   async function handleAddMember(row: Omit<BusinessMemberRow, "id">) {
+    const renewal = /^\d{4}-\d{2}-\d{2}$/.test(row.renewalDate) ? row.renewalDate : localIsoDate();
+    const annualDues = row.annualDues || BUSINESS_MEMBERSHIP_ANNUAL_DUES;
+
     if (demo) {
       const id = newDemoId("biz");
       const membershipId = newDemoId("biz-mem");
-      const renewal = new Date().toISOString().slice(0, 10);
       overlay.upsert("businesses", {
         id,
         business_name: row.businessName,
@@ -194,29 +251,32 @@ function BusinessesDemoInner() {
         sponsorships: [],
         membership: {
           id: membershipId,
-          status: row.status,
+          status: "Active",
           last_renewal: renewal,
+          payment_method: null,
+          is_subscription: false,
+          tier: BUSINESS_MEMBERSHIP_TIER,
+          annual_dues: annualDues,
         },
       });
       toast.success("Member added — demo mode, saved locally only");
       return;
     }
-    const business = await create({ business_name: row.businessName });
-    if (business && supabaseClient) {
-      const { data: membership, error } = await supabaseClient
-        .from("business_memberships")
-        .insert({
-          status: toDbMembershipStatus(row.status) ?? "Active",
-          last_renewal: new Date().toISOString().slice(0, 10),
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      if (membership) {
-        await update(business.id, { membership_id: membership.id, is_member: true });
-      }
+    try {
+      const business = await create({ business_name: row.businessName });
+      if (!business) throw new Error("Could not create business.");
+      const membership = await createMembership({
+        status: "Active",
+        last_renewal: renewal,
+        tier: BUSINESS_MEMBERSHIP_TIER,
+        annual_dues: annualDues,
+      });
+      const linked = await update(business.id, { membership_id: membership.id, is_member: true });
+      if (!linked) throw new Error("Membership was created but could not be linked to the business.");
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to add member");
     }
-    await refetch();
   }
 
   async function handleAddSponsor(row: Omit<SponsorRow, "id">) {
@@ -328,6 +388,8 @@ function BusinessesDemoInner() {
                   businessMember={selection.row}
                   business={selectedBusiness}
                   onUpdateBusiness={(data) => commitBusinessField(selectedBusiness.id, data)}
+                  onUpdateMembership={(data) => commitMembership(selectedBusiness, data)}
+                  onStartMembership={() => commitMembership(selectedBusiness, { status: "Active" })}
                 />
               ) : null}
               {selection.kind === "sponsor" ? (
@@ -335,11 +397,8 @@ function BusinessesDemoInner() {
                   sponsor={selection.row}
                   business={selectedBusiness}
                   onUpdateBusiness={(data) => commitBusinessField(selectedBusiness.id, data)}
-                  onUpdateMembership={(data) =>
-                    selectedBusiness.membership
-                      ? commitMembershipField(selectedBusiness.membership.id, selectedBusiness.id, data)
-                      : undefined
-                  }
+                  onUpdateMembership={(data) => commitMembership(selectedBusiness, data)}
+                  onStartMembership={() => commitMembership(selectedBusiness, { status: "Active" })}
                 />
               ) : null}
               {selection.kind === "business" ? (
@@ -347,11 +406,8 @@ function BusinessesDemoInner() {
                   business={selection.row}
                   rawBusiness={selectedBusiness}
                   onUpdateBusiness={(data) => commitBusinessField(selectedBusiness.id, data)}
-                  onUpdateMembership={(data) =>
-                    selectedBusiness.membership
-                      ? commitMembershipField(selectedBusiness.membership.id, selectedBusiness.id, data)
-                      : undefined
-                  }
+                  onUpdateMembership={(data) => commitMembership(selectedBusiness, data)}
+                  onStartMembership={() => commitMembership(selectedBusiness, { status: "Active" })}
                 />
               ) : null}
             </OutlinedPanel>

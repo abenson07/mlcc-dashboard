@@ -65,7 +65,7 @@ export function MobileDatabasePage() {
     filters: peopleFilters,
   });
 
-  const { businesses, loading: bizLoading, error: bizError } = useBusinesses({
+  const { businesses, loading: bizLoading, error: bizError, refetch: refetchBusinesses } = useBusinesses({
     autoFetch: tab === "businesses",
     filters: {
       search: search.trim() || undefined,
@@ -89,6 +89,12 @@ export function MobileDatabasePage() {
     const fresh = people.find((p) => p.id === selectedPerson.id);
     if (fresh && fresh !== selectedPerson) setSelectedPerson(fresh);
   }, [people, selectedPerson]);
+
+  useEffect(() => {
+    if (!selectedBusiness) return;
+    const fresh = businesses.find((b) => b.id === selectedBusiness.id);
+    if (fresh && fresh !== selectedBusiness) setSelectedBusiness(fresh);
+  }, [businesses, selectedBusiness]);
 
   const listPeople =
     tab === "neighbors"
@@ -191,7 +197,11 @@ export function MobileDatabasePage() {
                   </div>
                   <div style={{ fontSize: 12, color: "var(--linear-color-ink-subtle)" }}>
                     {b.contact_name ?? b.email ?? "—"}
-                    {b.is_member ? " · Member" : ""}
+                    {b.membership?.status
+                      ? ` · ${b.membership.status}`
+                      : b.is_member
+                        ? " · Member"
+                        : ""}
                   </div>
                 </div>
               </button>
@@ -240,6 +250,9 @@ export function MobileDatabasePage() {
       <MobileBusinessSheet
         business={selectedBusiness}
         onClose={() => setSelectedBusiness(null)}
+        onRefetch={async () => {
+          await refetchBusinesses();
+        }}
       />
       <MobileQuickAddPerson
         open={addOpen}

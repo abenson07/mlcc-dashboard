@@ -1,6 +1,8 @@
 "use client";
 
 import { Avatar } from "@/components/patterns/primitives/Avatar";
+import { Button } from "@/components/patterns/primitives/Button";
+import { DetailActionBar } from "@/components/patterns/foundation/detail";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { Text } from "@/components/patterns/primitives/Text";
 import type { BusinessWithDetails } from "hooks";
@@ -13,6 +15,7 @@ export type BusinessDetailPanelProps = {
   rawBusiness: BusinessWithDetails;
   onUpdateBusiness: (data: BusinessesUpdate) => void | Promise<void>;
   onUpdateMembership: (data: BusinessMembershipsUpdate) => void | Promise<void>;
+  onStartMembership: () => void | Promise<void>;
 };
 
 /** Business detail — shown in the outlined side panel when a row is selected from All Businesses. */
@@ -21,7 +24,10 @@ export function BusinessDetailPanel({
   rawBusiness,
   onUpdateBusiness,
   onUpdateMembership,
+  onStartMembership,
 }: BusinessDetailPanelProps) {
+  const hasMembership = Boolean(rawBusiness.membership);
+
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -33,6 +39,12 @@ export function BusinessDetailPanel({
           </Text>
         </div>
       </div>
+
+      {hasMembership ? null : (
+        <DetailActionBar>
+          <Button label="Start membership" variant="secondary" onClick={() => void onStartMembership()} />
+        </DetailActionBar>
+      )}
 
       <DetailsSection business={rawBusiness} onCommit={onUpdateBusiness} />
       <MembershipSection business={rawBusiness} onCommit={onUpdateMembership} />

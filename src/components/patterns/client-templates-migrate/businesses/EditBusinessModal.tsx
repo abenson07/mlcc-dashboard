@@ -7,6 +7,7 @@ import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { MEMBERSHIP_STATUSES, toMembershipStatus } from "@/lib/memberships/status";
 import { Text } from "@/components/patterns/primitives/Text";
 import { validateEmail, validatePhone } from "@/lib/validation";
+import { parseAnnualDues, BUSINESS_MEMBERSHIP_TIER } from "./adapters";
 import type { BusinessWithDetails } from "hooks";
 import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
 
@@ -23,7 +24,6 @@ const selectStyle = {
   fontSize: 13,
   fontFamily: "inherit",
 };
-
 
 export type EditBusinessModalProps = {
   isOpen: boolean;
@@ -47,6 +47,7 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
   const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<string>(MEMBERSHIP_STATUSES[0]);
   const [renewalDate, setRenewalDate] = useState("");
+  const [annualDues, setAnnualDues] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -61,6 +62,7 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
     setWebsite(business.website ?? "");
     setStatus(business.membership?.status ?? MEMBERSHIP_STATUSES[0]);
     setRenewalDate(business.membership?.last_renewal ?? "");
+    setAnnualDues(business.membership?.annual_dues != null ? String(business.membership.annual_dues) : "");
     setEmailError(null);
     setPhoneError(null);
   }, [isOpen, business]);
@@ -78,6 +80,12 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
 
     setIsSaving(true);
     try {
+      const membershipData: BusinessMembershipsUpdate = {
+        status: toMembershipStatus(status) ?? undefined,
+        last_renewal: renewalDate || undefined,
+        tier: BUSINESS_MEMBERSHIP_TIER,
+        annual_dues: parseAnnualDues(annualDues),
+      };
       await onSave(
         business.id,
         {
@@ -89,7 +97,7 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
           website: website.trim() || null,
         },
         business.membership?.id ?? null,
-        { status: toMembershipStatus(status) ?? undefined, last_renewal: renewalDate }
+        membershipData
       );
       onClose();
     } finally {
@@ -133,6 +141,12 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
 
         {business.membership ? (
           <>
+            <div>
+              <span style={fieldLabelStyle}>Type</span>
+              <div style={{ marginTop: 6, fontSize: 13, color: "var(--linear-color-ink)" }}>
+                {BUSINESS_MEMBERSHIP_TIER}
+              </div>
+            </div>
             <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <span style={fieldLabelStyle}>Membership status</span>
               <select value={status} onChange={(event) => setStatus(event.target.value)} style={selectStyle}>
@@ -143,8 +157,9 @@ export function EditBusinessModal({ isOpen, business, onClose, onSave }: EditBus
                 ))}
               </select>
             </label>
+            <TextInput label="Annual dues" value={annualDues} onChange={setAnnualDues} />
             <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={fieldLabelStyle}>Renewal date</span>
+              <span style={fieldLabelStyle}>Last renewal</span>
               <input
                 type="date"
                 value={renewalDate}

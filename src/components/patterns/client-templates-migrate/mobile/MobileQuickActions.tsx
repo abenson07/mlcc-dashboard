@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { PersonWithMembership } from "hooks";
-import { useMemberships, usePeople } from "hooks";
+import type { PersonWithMembership, BusinessWithDetails } from "hooks";
+import { useBusinesses, useBusinessMemberships, useMemberships, usePeople } from "hooks";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { toMembershipTier } from "@/lib/memberships/status";
+import {
+  BUSINESS_MEMBERSHIP_ANNUAL_DUES,
+  BUSINESS_MEMBERSHIP_TIER,
+} from "@/components/patterns/client-templates-migrate/businesses/adapters";
 import { MobileBottomSheet } from "./MobileBottomSheet";
 import {
   mobileFieldLabelStyle,
@@ -244,6 +248,67 @@ export function MobileLogDonation({ open, personName, onClose }: MobileLogDonati
         ) : null}
         <button type="button" style={mobilePrimaryBtnStyle} onClick={submit}>
           Log donation
+        </button>
+      </div>
+    </MobileBottomSheet>
+  );
+}
+
+export type MobileStartBusinessMembershipProps = {
+  open: boolean;
+  business: BusinessWithDetails | null;
+  onClose: () => void;
+  onDone?: () => void;
+};
+
+export function MobileStartBusinessMembership({
+  open,
+  business,
+  onClose,
+  onDone,
+}: MobileStartBusinessMembershipProps) {
+  const { update } = useBusinesses({ autoFetch: false });
+  const { create: createMembership } = useBusinessMemberships();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit() {
+    if (!business) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const today = new Date();
+      const lastRenewal = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      const membership = await createMembership({
+        status: "Active",
+        last_renewal: lastRenewal,
+        tier: BUSINESS_MEMBERSHIP_TIER,
+        annual_dues: BUSINESS_MEMBERSHIP_ANNUAL_DUES,
+      });
+      const linked = await update(business.id, { membership_id: membership.id, is_member: true });
+      if (!linked) throw new Error("Membership was created but could not be linked to the business.");
+      onClose();
+      onDone?.();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not start membership.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <MobileBottomSheet open={open} onClose={onClose} title="Start membership">
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ margin: 0, fontSize: 14, color: "var(--linear-color-ink-subtle)" }}>
+          Logs a ${BUSINESS_MEMBERSHIP_ANNUAL_DUES}/year {BUSINESS_MEMBERSHIP_TIER} for{" "}
+          {business?.business_name ?? "this business"}.
+        </p>
+        {error ? <div style={{ fontSize: 13, color: "#eb5757" }}>{error}</div> : null}
+        <button type="button" style={mobilePrimaryBtnStyle} disabled={busy || !business} onClick={submit}>
+          {busy ? "Saving…" : "Start membership"}
+        </button>
+        <button type="button" style={mobileSecondaryBtnStyle} onClick={onClose}>
+          Cancel
         </button>
       </div>
     </MobileBottomSheet>

@@ -1,4 +1,6 @@
-export type BusinessMembershipStatus = "active" | "past_due" | "pending" | "lapsed";
+import type { MembershipStatusEnum } from "schemas/memberships";
+
+export type BusinessMembershipStatus = MembershipStatusEnum | "none";
 
 export type BusinessMemberRow = {
   id: string;

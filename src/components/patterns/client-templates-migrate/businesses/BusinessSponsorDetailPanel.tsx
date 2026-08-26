@@ -1,6 +1,8 @@
 "use client";
 
 import { Avatar } from "@/components/patterns/primitives/Avatar";
+import { Button } from "@/components/patterns/primitives/Button";
+import { DetailActionBar } from "@/components/patterns/foundation/detail";
 import { VStack } from "@/components/patterns/primitives/Stack";
 import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
@@ -23,6 +25,7 @@ export type BusinessSponsorDetailPanelProps = {
   business: BusinessWithDetails;
   onUpdateBusiness: (data: BusinessesUpdate) => void | Promise<void>;
   onUpdateMembership: (data: BusinessMembershipsUpdate) => void | Promise<void>;
+  onStartMembership: () => void | Promise<void>;
 };
 
 /** Sponsor detail — shown in the outlined side panel when a row is selected from Sponsors. */
@@ -31,7 +34,11 @@ export function BusinessSponsorDetailPanel({
   business,
   onUpdateBusiness,
   onUpdateMembership,
+  onStartMembership,
 }: BusinessSponsorDetailPanelProps) {
+  const hasMembership = Boolean(business.membership);
+  const levelLabel = sponsor.sponsorshipLevel[0].toUpperCase() + sponsor.sponsorshipLevel.slice(1);
+
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -39,7 +46,7 @@ export function BusinessSponsorDetailPanel({
         <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
           <Text weight="medium">{sponsor.businessName}</Text>
           <Text size="sm" color="secondary">
-            {sponsor.sponsorshipLevel[0].toUpperCase() + sponsor.sponsorshipLevel.slice(1)} sponsor
+            {levelLabel} sponsor
           </Text>
         </div>
       </div>
@@ -57,6 +64,12 @@ export function BusinessSponsorDetailPanel({
         <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Last sponsored in ${sponsor.lastSponsoredYear}`} />
         <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Sponsor since ${sponsor.sponsorSince}`} />
       </List>
+
+      {hasMembership ? null : (
+        <DetailActionBar>
+          <Button label="Start membership" variant="secondary" onClick={() => void onStartMembership()} />
+        </DetailActionBar>
+      )}
 
       <DetailsSection business={business} onCommit={onUpdateBusiness} />
       <MembershipSection business={business} onCommit={onUpdateMembership} />
