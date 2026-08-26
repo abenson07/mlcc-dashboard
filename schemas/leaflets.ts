@@ -11,6 +11,7 @@ export interface Leaflets {
   id: string;
   title: string;
   distribution_date: string;
+  distribution_date_2: string | null;
   sponsorship_due_date: string | null;
   delivery_date: string | null;
   status: LeafletStatus;
@@ -32,6 +33,7 @@ export interface Leaflets {
 export interface LeafletsInsert {
   title: string;
   distribution_date: string;
+  distribution_date_2?: string | null;
   sponsorship_due_date?: string | null;
   delivery_date?: string | null;
   status?: LeafletStatus;
@@ -47,6 +49,7 @@ export interface LeafletsInsert {
 export interface LeafletsUpdate {
   title?: string;
   distribution_date?: string;
+  distribution_date_2?: string | null;
   sponsorship_due_date?: string | null;
   delivery_date?: string | null;
   status?: LeafletStatus;

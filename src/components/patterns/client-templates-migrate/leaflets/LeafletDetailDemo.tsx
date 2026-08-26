@@ -191,7 +191,13 @@ function formatCountdownLabel(distributionDate: string, status: LeafletStatus): 
 
 function liveLeafletDetail(
   id: string,
-  leaflets: { id: string; title: string; distribution_date: string; status: string }[],
+  leaflets: {
+    id: string;
+    title: string;
+    distribution_date: string;
+    distribution_date_2?: string | null;
+    status: string;
+  }[],
 ): LeafletDetail {
   const row = leaflets.find((l) => l.id === id);
   if (!row) {
@@ -199,6 +205,7 @@ function liveLeafletDetail(
       id,
       title: "Leaflet",
       distributionDate: "",
+      distributionDate2: null,
       status: "planned",
       countdownLabel: "—",
     };
@@ -211,6 +218,7 @@ function liveLeafletDetail(
     id: row.id,
     title: row.title,
     distributionDate: row.distribution_date,
+    distributionDate2: row.distribution_date_2 ?? null,
     status,
     countdownLabel: formatCountdownLabel(row.distribution_date, status),
   };
@@ -265,6 +273,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
             id: leafletId,
             title: "Leaflet",
             distributionDate: "",
+            distributionDate2: null,
             status: "planned" as const,
             countdownLabel: "—",
           };
@@ -273,6 +282,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
       id: row.id,
       title: row.title,
       distributionDate: row.distributionDate,
+      distributionDate2: row.distributionDate2 ?? null,
       status: row.status,
       countdownLabel: formatCountdownLabel(row.distributionDate, row.status),
     };
@@ -363,6 +373,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         id: leaflet.id,
         title: leaflet.title,
         distributionDate: leaflet.distributionDate,
+        distributionDate2: leaflet.distributionDate2,
         status: leaflet.status,
         comm_schedule: schedule,
         commSent: demoLeafletRecord?.commSent,
@@ -521,6 +532,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
           leafletId={leafletId || leaflet.id}
           title={leaflet.title}
           distributionDate={leaflet.distributionDate}
+          distributionDate2={leaflet.distributionDate2 ?? null}
           commSchedule={commLeafletRow?.comm_schedule}
           commSettings={commSettings}
         />

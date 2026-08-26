@@ -10,6 +10,11 @@ import {
   isLeafletPipelineStep,
   snapshotCommSchedule,
 } from "@/lib/leaflets/comm/commSchedule";
+import {
+  DuplicateLeafletTitleError,
+  isDuplicateLeafletTitle,
+  isPostgresUniqueViolation,
+} from "@/lib/leaflets/leafletTitle";
 
 const MEMBERSHIP_QR_BASE = "https://mapleleafcommunity.org/membership";
 const OPEN_ROUTES_QR_URL = "https://mapleleafcommunity.org/leaflet/open-routes";
@@ -33,12 +38,23 @@ function membershipQrUrl(title: string): string {
 export async function createLeaflet(
   supabase: SupabaseClient,
   input: Pick<LeafletsInsert, "title" | "distribution_date"> & {
+    distribution_date_2?: string | null;
     sponsorship_due_date?: string | null;
     delivery_date?: string | null;
     sponsorship_goal_cents?: number | null;
     tierOverrides?: SponsorshipTierSeed[];
   },
 ): Promise<Leaflets> {
+  const { data: existingTitles, error: titlesError } = await supabase
+    .from("leaflets")
+    .select("title");
+  if (titlesError) {
+    throw new Error(titlesError.message);
+  }
+  if (isDuplicateLeafletTitle(input.title, (existingTitles ?? []).map((row) => row.title))) {
+    throw new DuplicateLeafletTitleError(input.title);
+  }
+
   const { data: membershipQr, error: membershipQrError } = await supabase
     .from("qr_codes")
     .insert({
@@ -83,6 +99,7 @@ export async function createLeaflet(
     .insert({
       title: input.title,
       distribution_date: input.distribution_date,
+      distribution_date_2: input.distribution_date_2?.trim() ? input.distribution_date_2.trim() : null,
       sponsorship_due_date: input.sponsorship_due_date ?? null,
       delivery_date: input.delivery_date ?? null,
       sponsorship_goal_cents: input.sponsorship_goal_cents ?? null,
@@ -95,6 +112,9 @@ export async function createLeaflet(
     .single();
 
   if (leafletError || !leaflet) {
+    if (isPostgresUniqueViolation(leafletError)) {
+      throw new DuplicateLeafletTitleError(input.title);
+    }
     throw new Error(leafletError?.message ?? "Failed to create leaflet");
   }
 

@@ -128,6 +128,17 @@ export function LeafletsListPage({ onCreateClick }: LeafletsListPageProps = {}) 
                         day: "numeric",
                         year: "numeric",
                       })}
+                      {leaflet.distributionDate2
+                        ? ` and ${new Date(`${leaflet.distributionDate2}T12:00:00`).toLocaleDateString(
+                            "en-US",
+                            {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )}`
+                        : ""}
                     </Text>
                   </div>
                 </button>

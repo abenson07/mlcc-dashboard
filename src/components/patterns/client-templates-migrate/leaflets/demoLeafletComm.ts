@@ -11,6 +11,7 @@ export function leafletRowForComm(input: {
   id: string;
   title: string;
   distributionDate: string;
+  distributionDate2?: string | null;
   status: LeafletStatus;
   comm_schedule?: LeafletCommSchedule;
   commSent?: Record<string, string>;
@@ -20,6 +21,7 @@ export function leafletRowForComm(input: {
     id: input.id,
     title: input.title,
     distribution_date: input.distributionDate,
+    distribution_date_2: input.distributionDate2 ?? null,
     sponsorship_due_date: null,
     delivery_date: null,
     status: input.status,

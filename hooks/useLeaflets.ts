@@ -33,6 +33,7 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
   const createMutation = useMutation({
     mutationFn: async (
       input: Pick<LeafletsInsert, "title" | "distribution_date"> & {
+        distribution_date_2?: string | null;
         sponsorship_due_date?: string | null;
         delivery_date?: string | null;
         sponsorship_goal_cents?: number | null;
@@ -107,6 +108,7 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
     },
     create: (
       input: Pick<LeafletsInsert, "title" | "distribution_date"> & {
+        distribution_date_2?: string | null;
         sponsorship_due_date?: string | null;
         delivery_date?: string | null;
         sponsorship_goal_cents?: number | null;

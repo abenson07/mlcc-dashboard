@@ -14,6 +14,8 @@ import {
   resolveCommSchedule,
   type LeafletCommSchedule,
 } from "@/lib/leaflets/comm/commSchedule";
+import { LinearDatePicker } from "@/components/patterns/primitives/LinearDatePicker";
+import { addDaysToIsoDate } from "@/components/leaflet/leafletData";
 import type { CommSettings } from "@/types/database";
 
 const rowInputStyle = {
@@ -30,6 +32,29 @@ const rowInputStyle = {
   textAlign: "right" as const,
 };
 
+const pickerWrap = { width: 260 } as const;
+
+function DateControl({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div style={pickerWrap}>
+      <LinearDatePicker
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        size="compact"
+      />
+    </div>
+  );
+}
+
 function Divider() {
   return (
     <div
@@ -42,6 +67,7 @@ export type LeafletDetailsPanelProps = {
   leafletId: string;
   title: string;
   distributionDate: string;
+  distributionDate2?: string | null;
   commSchedule: unknown;
   commSettings: CommSettings[];
 };
@@ -50,6 +76,7 @@ export function LeafletDetailsPanel({
   leafletId,
   title: initialTitle,
   distributionDate: initialDistributionDate,
+  distributionDate2: initialDistributionDate2 = null,
   commSchedule: storedSchedule,
   commSettings,
 }: LeafletDetailsPanelProps) {
@@ -57,6 +84,7 @@ export function LeafletDetailsPanel({
   const { update } = useLeaflets({ autoFetch: false });
   const [title, setTitle] = useState(initialTitle);
   const [distributionDate, setDistributionDate] = useState(initialDistributionDate);
+  const [distributionDate2, setDistributionDate2] = useState(initialDistributionDate2 ?? "");
   const [schedule, setSchedule] = useState<LeafletCommSchedule>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,18 +98,20 @@ export function LeafletDetailsPanel({
   useEffect(() => {
     setTitle(initialTitle);
     setDistributionDate(initialDistributionDate);
+    setDistributionDate2(initialDistributionDate2 ?? "");
     setSchedule(resolved);
     setBaseline(
       JSON.stringify({
         title: initialTitle,
         distributionDate: initialDistributionDate,
+        distributionDate2: initialDistributionDate2 ?? "",
         schedule: resolved,
       }),
     );
     setError(null);
-  }, [initialTitle, initialDistributionDate, resolved]);
+  }, [initialTitle, initialDistributionDate, initialDistributionDate2, resolved]);
 
-  const snapshot = JSON.stringify({ title, distributionDate, schedule });
+  const snapshot = JSON.stringify({ title, distributionDate, distributionDate2, schedule });
   const dirty = snapshot !== baseline;
 
   function setStepDate(stepKey: string, value: string) {
@@ -98,6 +128,7 @@ export function LeafletDetailsPanel({
           await update(leafletId, {
             title: title.trim() || initialTitle,
             distribution_date: distributionDate,
+            distribution_date_2: distributionDate2.trim() ? distributionDate2.trim() : null,
             comm_schedule: schedule,
           });
         },
@@ -107,6 +138,7 @@ export function LeafletDetailsPanel({
             patchDemoEntity("leaflets", leafletId, {
               title: title.trim() || initialTitle,
               distributionDate,
+              distributionDate2: distributionDate2.trim() ? distributionDate2 : null,
               comm_schedule: schedule,
             });
           },
@@ -153,14 +185,57 @@ export function LeafletDetailsPanel({
                 <Divider />
                 <SettingsRow
                   label="Distribution date"
-                  description="Anchor date for this leaflet"
+                  description="When leaflets hit doorsteps or are available for pickup"
                   control={
-                    <input
-                      type="date"
-                      style={rowInputStyle}
-                      value={distributionDate}
-                      onChange={(e) => setDistributionDate(e.target.value)}
-                    />
+                    <DateControl value={distributionDate} onChange={setDistributionDate} />
+                  }
+                />
+                <Divider />
+                <SettingsRow
+                  label="Second distribution date"
+                  description="Optional weekday or follow-up drop"
+                  control={
+                    distributionDate2 ? (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                        <DateControl value={distributionDate2} onChange={setDistributionDate2} />
+                        <button
+                          type="button"
+                          onClick={() => setDistributionDate2("")}
+                          style={{
+                            padding: 0,
+                            border: "none",
+                            background: "transparent",
+                            color: "var(--linear-color-ink-subtle)",
+                            fontSize: 12,
+                            cursor: "pointer",
+                            fontFamily: "inherit",
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDistributionDate2(
+                            distributionDate ? addDaysToIsoDate(distributionDate, 5) : "",
+                          )
+                        }
+                        style={{
+                          padding: 0,
+                          border: "none",
+                          background: "transparent",
+                          color: "var(--linear-color-ink)",
+                          fontSize: 13,
+                          cursor: "pointer",
+                          fontFamily: "inherit",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Add a second date
+                      </button>
+                    )
                   }
                 />
               </VStack>
@@ -184,11 +259,10 @@ export function LeafletDetailsPanel({
                       label={setting.name}
                       description={offsetDescription(setting.offset_days, setting.step_key)}
                       control={
-                        <input
-                          type="date"
-                          style={rowInputStyle}
+                        <DateControl
                           value={schedule[setting.step_key] ?? ""}
-                          onChange={(e) => setStepDate(setting.step_key, e.target.value)}
+                          onChange={(next) => setStepDate(setting.step_key, next)}
+                          placeholder="Send date"
                         />
                       }
                     />

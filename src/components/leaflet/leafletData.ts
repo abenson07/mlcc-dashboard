@@ -48,6 +48,42 @@ export function formatDistributionDate(iso: string) {
   });
 }
 
+/** Meteorological northern-hemisphere season from the first doorstep date. */
+export function suggestedLeafletTitle(isoDate: string): string {
+  const d = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "Leaflet";
+  const month = d.getMonth();
+  const year = d.getFullYear();
+  const season =
+    month >= 2 && month <= 4
+      ? "Spring"
+      : month >= 5 && month <= 7
+        ? "Summer"
+        : month >= 8 && month <= 10
+          ? "Fall"
+          : "Winter";
+  return `${season} ${year} Leaflet`;
+}
+
+export function addDaysToIsoDate(isoDate: string, days: number): string {
+  const d = new Date(`${isoDate}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+export function formatDistributionDates(primaryIso: string, secondIso?: string | null): string {
+  if (!primaryIso) return "";
+  const first = formatDistributionDate(primaryIso);
+  if (!secondIso) return first;
+  return `${first} and ${formatDistributionDate(secondIso)}`;
+}
+
+export function sponsorshipGoalDollarsFromTiers(
+  tiers: { amount: number; quantity: number }[],
+): number {
+  return tiers.reduce((sum, tier) => sum + tier.amount * tier.quantity, 0);
+}
+
 export function defaultSponsorshipDueDate(distributionDate: string): string {
   const d = new Date(`${distributionDate}T12:00:00`);
   d.setDate(d.getDate() - 30);

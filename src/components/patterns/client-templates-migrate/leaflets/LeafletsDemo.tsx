@@ -33,6 +33,7 @@ export function LeafletsDemo() {
         id,
         title: draft.title,
         distributionDate: draft.distribution_date,
+        distributionDate2: draft.distribution_date_2 ?? undefined,
         status: "planned",
         comm_schedule: snapshotCommSchedule(
           leafletCommSettingsFromDefs(),

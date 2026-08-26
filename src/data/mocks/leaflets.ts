@@ -4,6 +4,7 @@ export type LeafletSummary = {
   id: string;
   title: string;
   distributionDate: string;
+  distributionDate2?: string | null;
   status: LeafletStatus;
   comm_schedule?: Record<string, string>;
   commSent?: Record<string, string>;
@@ -23,6 +24,7 @@ export type LeafletDetail = {
   id: string;
   title: string;
   distributionDate: string;
+  distributionDate2?: string | null;
   status: LeafletStatus;
   countdownLabel: string;
 };

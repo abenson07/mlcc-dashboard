@@ -121,6 +121,7 @@ function asEdition(leaflet: Leaflets): LeafletEdition {
     id: leaflet.id,
     title: leaflet.title,
     distribution_date: leaflet.distribution_date,
+    distribution_date_2: leaflet.distribution_date_2,
     sponsorship_due_date: leaflet.sponsorship_due_date,
     delivery_date: leaflet.delivery_date,
     status: leaflet.status,

@@ -14,6 +14,7 @@ export function toLeafletSummary(row: Leaflets): LeafletSummary {
     id: row.id,
     title: row.title,
     distributionDate: row.distribution_date,
+    distributionDate2: row.distribution_date_2 ?? null,
     status: row.status,
   };
 }
