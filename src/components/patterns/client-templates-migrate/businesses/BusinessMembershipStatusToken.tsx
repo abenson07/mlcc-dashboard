@@ -1,28 +1,22 @@
 "use client";
 
+import { deriveMembershipStatus } from "@/lib/memberships/status";
 import type { BusinessMembershipStatus } from "./types";
-
-const LABEL: Record<BusinessMembershipStatus, string> = {
-  active: "Active",
-  past_due: "Past Due",
-  pending: "Pending",
-  lapsed: "Lapsed",
-};
-
-const COLOR: Record<BusinessMembershipStatus, string> = {
-  active: "#27a644",
-  past_due: "#eb5757",
-  pending: "#f2994a",
-  lapsed: "#8a8f98",
-};
 
 export type BusinessMembershipStatusTokenProps = {
   status: BusinessMembershipStatus;
 };
 
-/** Colored status pill for a business membership row. */
+/** Colored status pill for a business membership row — same vocabulary as person memberships. */
 export function BusinessMembershipStatusToken({ status }: BusinessMembershipStatusTokenProps) {
-  const color = COLOR[status];
+  const { label, color } =
+    status === "none"
+      ? { label: "No membership", color: "#8a8f98" }
+      : deriveMembershipStatus({
+          status,
+          cancel_at_period_end: false,
+          current_period_end: null,
+        });
 
   return (
     <span
@@ -40,7 +34,7 @@ export function BusinessMembershipStatusToken({ status }: BusinessMembershipStat
         whiteSpace: "nowrap",
       }}
     >
-      {LABEL[status]}
+      {label}
     </span>
   );
 }

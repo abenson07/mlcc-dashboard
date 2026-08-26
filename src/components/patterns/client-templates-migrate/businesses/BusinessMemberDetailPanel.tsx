@@ -1,27 +1,22 @@
 "use client";
 
 import { Avatar } from "@/components/patterns/primitives/Avatar";
+import { Button } from "@/components/patterns/primitives/Button";
+import { DetailActionBar } from "@/components/patterns/foundation/detail";
 import { VStack } from "@/components/patterns/primitives/Stack";
-import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
-import { Calendar, CircleDot, DollarSign, Tag } from "lucide-react";
-import { SideContentField } from "@/components/patterns/foundation/side-content";
 import type { BusinessWithDetails } from "hooks";
-import type { BusinessesUpdate } from "@/types/database";
+import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
 import type { BusinessMemberRow } from "./types";
-import { BusinessMembershipStatusToken } from "./BusinessMembershipStatusToken";
-import { DetailsSection, SponsorshipHistorySection } from "./BusinessSections";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+import { BUSINESS_MEMBERSHIP_TIER } from "./adapters";
+import { DetailsSection, MembershipSection, SponsorshipHistorySection } from "./BusinessSections";
 
 export type BusinessMemberDetailPanelProps = {
   businessMember: BusinessMemberRow;
   business: BusinessWithDetails;
   onUpdateBusiness: (data: BusinessesUpdate) => void | Promise<void>;
+  onUpdateMembership: (data: BusinessMembershipsUpdate) => void | Promise<void>;
+  onStartMembership: () => void | Promise<void>;
 };
 
 /** Business member detail — shown in the outlined side panel when a row is selected. */
@@ -29,7 +24,11 @@ export function BusinessMemberDetailPanel({
   businessMember,
   business,
   onUpdateBusiness,
+  onUpdateMembership,
+  onStartMembership,
 }: BusinessMemberDetailPanelProps) {
+  const hasMembership = Boolean(business.membership);
+
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -37,30 +36,19 @@ export function BusinessMemberDetailPanel({
         <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
           <Text weight="medium">{businessMember.businessName}</Text>
           <Text size="sm" color="secondary">
-            {businessMember.tier} tier
+            {hasMembership ? BUSINESS_MEMBERSHIP_TIER : "Flagged as member — no membership record"}
           </Text>
         </div>
       </div>
 
-      <List
-        density="compact"
-        header={
-          <Text type="label" color="secondary">
-            Membership
-          </Text>
-        }
-      >
-        <SideContentField icon={<CircleDot size={16} strokeWidth={1.75} />} endContent={<BusinessMembershipStatusToken status={businessMember.status} />} label="Status" />
-        <SideContentField icon={<Tag size={16} strokeWidth={1.75} />} label={`${businessMember.tier} tier`} />
-        <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Renews ${businessMember.renewalDate}`} />
-        <SideContentField icon={<Calendar size={16} strokeWidth={1.75} />} label={`Member since ${businessMember.memberSince}`} />
-        <SideContentField
-          icon={<DollarSign size={16} strokeWidth={1.75} />}
-          label={`${currencyFormatter.format(businessMember.annualDues)} annual dues`}
-        />
-      </List>
+      {hasMembership ? null : (
+        <DetailActionBar>
+          <Button label="Start membership" variant="primary" onClick={() => void onStartMembership()} />
+        </DetailActionBar>
+      )}
 
       <DetailsSection business={business} onCommit={onUpdateBusiness} />
+      <MembershipSection business={business} onCommit={onUpdateMembership} />
       <SponsorshipHistorySection business={business} />
     </VStack>
   );

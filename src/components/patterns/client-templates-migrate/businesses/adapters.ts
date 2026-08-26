@@ -1,6 +1,13 @@
 import type { BusinessWithDetails } from "hooks";
 import type { MembershipStatusEnum } from "schemas/memberships";
-import type { BusinessMemberRow, BusinessMembershipStatus, BusinessRow, SponsorRow, SponsorshipLevel } from "./types";
+import { formatMembershipDate, toMembershipStatus } from "@/lib/memberships/status";
+import {
+  BUSINESS_MEMBERSHIP_ANNUAL_DUES,
+  BUSINESS_MEMBERSHIP_TIER,
+} from "schemas/business_memberships";
+import type { BusinessMemberRow, BusinessRow, SponsorRow, SponsorshipLevel } from "./types";
+
+export { BUSINESS_MEMBERSHIP_ANNUAL_DUES, BUSINESS_MEMBERSHIP_TIER };
 
 export type BusinessesView = "members" | "sponsors" | "all";
 
@@ -10,37 +17,25 @@ export function hookFiltersForView(view: BusinessesView) {
   return {};
 }
 
-function formatDisplayDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch {
-    return "—";
-  }
+/** Local calendar date as YYYY-MM-DD — `toISOString()` is UTC and can land on yesterday. */
+export function localIsoDate(value: Date = new Date()): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-/** Real `business_memberships.status` is a free-form enum; normalize into the four statuses this screen renders. */
-export function normalizeMembershipStatus(status: string | null | undefined): BusinessMembershipStatus {
-  const normalized = (status ?? "").trim().toLowerCase();
-  if (normalized.includes("past") || normalized.includes("due")) return "past_due";
-  if (normalized.includes("pend")) return "pending";
-  if (normalized.includes("lapse") || normalized.includes("expire") || normalized.includes("cancel")) return "lapsed";
-  if (normalized.includes("active")) return "active";
-  return "pending";
+export function parseAnnualDues(raw: string): number | null {
+  const trimmed = raw.replace(/[$,]/g, "").trim();
+  if (!trimmed) return null;
+  const amount = Number(trimmed);
+  return Number.isFinite(amount) ? amount : null;
 }
 
-/**
- * Inverse of `normalizeMembershipStatus`, for writes. The display vocabulary is
- * wider than the database's: `membership_status_enum` has no "pending" or
- * "past due" label, so those cannot be persisted and callers must not offer
- * them. Returns null rather than guessing.
- */
-export function toDbMembershipStatus(
-  status: BusinessMembershipStatus,
-): MembershipStatusEnum | null {
-  if (status === "active") return "Active";
-  if (status === "lapsed") return "Expired";
-  return null;
+export function rowMembershipStatus(
+  status: string | null | undefined,
+): MembershipStatusEnum | "none" {
+  return toMembershipStatus(status) ?? "none";
 }
 
 /** Real `sponsorships` has no stored "level" — bucket by amount using the same thresholds the leaflet sponsorship-tier seeds use (`src/lib/sponsorship/tierPlaceholders.ts`). */
@@ -55,24 +50,22 @@ export function toBusinessRow(business: BusinessWithDetails): BusinessRow {
   return {
     id: business.id,
     businessName: business.business_name ?? "—",
-    // Real `businesses` has no category column — nothing to source this from yet.
-    category: "—",
+    category: business.category?.trim() || "—",
     contactName: business.contact_name ?? "—",
     phone: business.phone ?? "—",
   };
 }
 
 export function toBusinessMemberRow(business: BusinessWithDetails): BusinessMemberRow {
+  const membership = business.membership;
   return {
     id: business.id,
     businessName: business.business_name ?? "—",
-    // Real `business_memberships` has no tier column.
-    tier: "—",
-    renewalDate: formatDisplayDate(business.membership?.last_renewal),
-    status: normalizeMembershipStatus(business.membership?.status),
-    memberSince: formatDisplayDate(business.membership?.last_renewal),
-    // Real `business_memberships` has no dues-amount column.
-    annualDues: 0,
+    tier: membership ? BUSINESS_MEMBERSHIP_TIER : "—",
+    renewalDate: formatMembershipDate(membership?.last_renewal) ?? "—",
+    status: rowMembershipStatus(membership?.status),
+    memberSince: formatMembershipDate(membership?.last_renewal) ?? "—",
+    annualDues: membership?.annual_dues ?? 0,
   };
 }
 
@@ -80,7 +73,7 @@ export function toSponsorRow(business: BusinessWithDetails): SponsorRow {
   const sponsorships = business.sponsorships ?? [];
   const dated = sponsorships.filter((s) => s.paid_date);
   const mostRecent = [...dated].sort((a, b) => (b.paid_date! < a.paid_date! ? -1 : 1))[0] ?? sponsorships[0];
-  const earliest = [...dated].sort((a, b) => (a.paid_date! < b.paid_date! ? -1 : 1))[0] ?? sponsorships[0];
+  const earliest = [...dated].sort((a, b) => (a.paid_date! < a.paid_date! ? -1 : 1))[0] ?? sponsorships[0];
   const amount = mostRecent?.amount ?? 0;
 
   return {
@@ -89,6 +82,6 @@ export function toSponsorRow(business: BusinessWithDetails): SponsorRow {
     sponsorshipLevel: sponsorshipLevelFromAmount(amount),
     amount,
     lastSponsoredYear: mostRecent?.paid_date ? new Date(mostRecent.paid_date).getFullYear() : new Date().getFullYear(),
-    sponsorSince: formatDisplayDate(earliest?.paid_date),
+    sponsorSince: formatMembershipDate(earliest?.paid_date) ?? "—",
   };
 }

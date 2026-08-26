@@ -13,5 +13,6 @@ export {
   MobileQuickAddPerson,
   MobileLogCashMembership,
   MobileLogDonation,
+  MobileStartBusinessMembership,
 } from "./MobileQuickActions";
 export { MobilePersonSheet, MobileBusinessSheet } from "./MobileDetailSheets";

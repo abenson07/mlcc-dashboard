@@ -6,6 +6,7 @@ import { MobileBottomSheet } from "./MobileBottomSheet";
 import {
   MobileLogCashMembership,
   MobileLogDonation,
+  MobileStartBusinessMembership,
 } from "./MobileQuickActions";
 import { mobilePrimaryBtnStyle, mobileSecondaryBtnStyle } from "./mobileStyles";
 import { CancelMembershipModal } from "../people/CancelMembershipModal";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import { getApiBase } from "@/lib/apiBase";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { formatMembershipDate } from "@/lib/memberships/status";
+import { BUSINESS_MEMBERSHIP_TIER } from "@/components/patterns/client-templates-migrate/businesses/adapters";
 import type { CancelMode } from "@/lib/memberships/cancelMembership";
 
 function Field({ label, value }: { label: string; value: string }) {
@@ -180,25 +182,59 @@ export function MobilePersonSheet({ person, onClose, onRefetch }: MobilePersonSh
 export type MobileBusinessSheetProps = {
   business: BusinessWithDetails | null;
   onClose: () => void;
+  onRefetch?: () => void;
 };
 
-export function MobileBusinessSheet({ business, onClose }: MobileBusinessSheetProps) {
+export function MobileBusinessSheet({ business, onClose, onRefetch }: MobileBusinessSheetProps) {
+  const [startOpen, setStartOpen] = useState(false);
+  const membership = business?.membership;
+  const membershipLabel = membership
+    ? [BUSINESS_MEMBERSHIP_TIER, membership.status].filter(Boolean).join(" · ") || membership.status
+    : business?.is_member
+      ? "Flagged as member — no record"
+      : "Not a member";
+
   return (
-    <MobileBottomSheet
-      open={business != null}
-      onClose={onClose}
-      title={business?.business_name ?? "Business"}
-    >
-      {business ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <Field label="Contact" value={business.contact_name ?? "—"} />
-          <Field label="Email" value={business.email ?? "—"} />
-          <Field label="Phone" value={business.phone ?? "—"} />
-          <Field label="Website" value={business.website ?? "—"} />
-          <Field label="Member" value={business.is_member ? "Yes" : "No"} />
-          <Field label="Past sponsor" value={business.is_past_sponsor ? "Yes" : "No"} />
-        </div>
-      ) : null}
-    </MobileBottomSheet>
+    <>
+      <MobileBottomSheet
+        open={business != null}
+        onClose={onClose}
+        title={business?.business_name ?? "Business"}
+      >
+        {business ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <Field label="Contact" value={business.contact_name ?? "—"} />
+            <Field label="Email" value={business.email ?? "—"} />
+            <Field label="Phone" value={business.phone ?? "—"} />
+            <Field label="Website" value={business.website ?? "—"} />
+            <Field label="Membership" value={membershipLabel} />
+            {membership?.last_renewal ? (
+              <Field
+                label="Last renewal"
+                value={formatMembershipDate(membership.last_renewal) ?? membership.last_renewal}
+              />
+            ) : null}
+            <Field label="Past sponsor" value={business.is_past_sponsor ? "Yes" : "No"} />
+
+            {membership ? null : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                <button type="button" style={mobilePrimaryBtnStyle} onClick={() => setStartOpen(true)}>
+                  Start membership
+                </button>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </MobileBottomSheet>
+      <MobileStartBusinessMembership
+        open={startOpen}
+        business={business}
+        onClose={() => setStartOpen(false)}
+        onDone={() => {
+          setStartOpen(false);
+          onRefetch?.();
+        }}
+      />
+    </>
   );
 }

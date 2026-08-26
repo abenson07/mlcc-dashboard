@@ -3,29 +3,19 @@
 import { DetailField, DetailRow, DetailSection, DetailSelectField } from "@/components/patterns/foundation/detail";
 import type { BusinessWithDetails } from "hooks";
 import type { BusinessesUpdate, BusinessMembershipsUpdate } from "@/types/database";
-import { BusinessMembershipStatusToken } from "./BusinessMembershipStatusToken";
-import { normalizeMembershipStatus } from "./adapters";
-import { MEMBERSHIP_STATUSES, toMembershipStatus } from "@/lib/memberships/status";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+import { BUSINESS_MEMBERSHIP_TIER, parseAnnualDues } from "./adapters";
+import { MEMBERSHIP_STATUSES, formatMembershipDate, toMembershipStatus } from "@/lib/memberships/status";
 
 const MEMBERSHIP_STATUS_OPTIONS = MEMBERSHIP_STATUSES.map((status) => ({
   value: status,
   label: status,
 }));
 
-function formatDisplayDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch {
-    return "—";
-  }
-}
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
 
 /** Contact info — editable inline, each field committing on blur. */
 export function DetailsSection({
@@ -79,21 +69,30 @@ export function MembershipSection({
 
   return (
     <DetailSection title="Membership">
+      <DetailRow label="Type" value={BUSINESS_MEMBERSHIP_TIER} />
       <DetailSelectField
         label="Status"
         value={membership.status}
         options={MEMBERSHIP_STATUS_OPTIONS}
         onCommit={(next) => {
           const status = toMembershipStatus(next);
-          if (status) onCommit({ status });
+          if (status) void onCommit({ status });
         }}
       />
-      <DetailRow
-        label="Renews"
-        value={formatDisplayDate(membership.last_renewal)}
-        valueContent={
-          <BusinessMembershipStatusToken status={normalizeMembershipStatus(membership.status)} />
-        }
+      <DetailField
+        label="Annual dues"
+        type="number"
+        value={membership.annual_dues != null ? String(membership.annual_dues) : ""}
+        placeholder="200"
+        onCommit={(next) => onCommit({ annual_dues: parseAnnualDues(next) })}
+      />
+      <DetailField
+        label="Last renewal"
+        type="date"
+        value={membership.last_renewal ?? ""}
+        onCommit={(next) => {
+          if (next) void onCommit({ last_renewal: next });
+        }}
       />
     </DetailSection>
   );
@@ -117,7 +116,7 @@ export function SponsorshipHistorySection({ business }: { business: BusinessWith
               </span>
               {sponsorship.paid_date ? (
                 <span style={{ fontSize: 12, color: "var(--linear-color-ink-subtle)" }}>
-                  {formatDisplayDate(sponsorship.paid_date)}
+                  {formatMembershipDate(sponsorship.paid_date) ?? "—"}
                 </span>
               ) : null}
             </div>

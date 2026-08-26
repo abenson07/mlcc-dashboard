@@ -10,6 +10,7 @@ export type DetailFieldProps = {
   multiline?: boolean;
   rows?: number;
   placeholder?: string;
+  type?: "text" | "date" | "number";
 };
 
 const sharedInputStyle = {
@@ -36,6 +37,7 @@ export function DetailField({
   multiline = false,
   rows = 3,
   placeholder,
+  type = "text",
 }: DetailFieldProps) {
   const [draft, setDraft] = useState(value);
   const [syncedValue, setSyncedValue] = useState(value);
@@ -84,7 +86,7 @@ export function DetailField({
         />
       ) : (
         <input
-          type="text"
+          type={type}
           value={draft}
           placeholder={placeholder}
           onFocus={() => setIsEditing(true)}

@@ -4,13 +4,8 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
-import type {
-  BusinessMemberRow,
-  BusinessMembershipStatus,
-  BusinessRow,
-  SponsorRow,
-  SponsorshipLevel,
-} from "./types";
+import type { BusinessMemberRow, BusinessRow, SponsorRow, SponsorshipLevel } from "./types";
+import { localIsoDate, BUSINESS_MEMBERSHIP_ANNUAL_DUES, BUSINESS_MEMBERSHIP_TIER } from "./adapters";
 
 export type BusinessesView = "members" | "sponsors" | "all";
 
@@ -21,17 +16,6 @@ export type AddBusinessModalProps = {
   onAddMember: (row: Omit<BusinessMemberRow, "id">) => void;
   onAddSponsor: (row: Omit<SponsorRow, "id">) => void;
   onAddBusiness: (row: Omit<BusinessRow, "id">) => void;
-};
-
-// Only the statuses `membership_status_enum` can actually hold — "pending" and
-// "past due" exist in the display vocabulary but have no database label, so
-// offering them here would create a choice that silently fails to save.
-const STATUSES: BusinessMembershipStatus[] = ["active", "lapsed"];
-const STATUS_LABEL: Record<BusinessMembershipStatus, string> = {
-  active: "Active",
-  past_due: "Past Due",
-  pending: "Pending",
-  lapsed: "Lapsed",
 };
 
 const LEVELS: SponsorshipLevel[] = ["platinum", "gold", "silver", "bronze"];
@@ -64,12 +48,6 @@ const selectStyle = {
   fontFamily: "inherit",
 };
 
-function formatDate(value: string): string {
-  if (!value) return "";
-  const date = new Date(`${value}T00:00:00`);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
 /** Add-business form, split by the active Businesses view since each roster tracks different fields. */
 export function AddBusinessModal({
   isOpen,
@@ -80,11 +58,8 @@ export function AddBusinessModal({
   onAddBusiness,
 }: AddBusinessModalProps) {
   const [businessName, setBusinessName] = useState("");
-  const [tier, setTier] = useState("Gold");
   const [renewalDate, setRenewalDate] = useState("");
-  const [status, setStatus] = useState<BusinessMembershipStatus>(STATUSES[0]);
-  const [memberSince, setMemberSince] = useState("");
-  const [annualDues, setAnnualDues] = useState("");
+  const [annualDues, setAnnualDues] = useState(String(BUSINESS_MEMBERSHIP_ANNUAL_DUES));
   const [sponsorshipLevel, setSponsorshipLevel] = useState<SponsorshipLevel>(LEVELS[0]);
   const [amount, setAmount] = useState("");
   const [lastSponsoredYear, setLastSponsoredYear] = useState(String(CURRENT_YEAR));
@@ -96,11 +71,8 @@ export function AddBusinessModal({
   useEffect(() => {
     if (!isOpen) return;
     setBusinessName("");
-    setTier("Gold");
     setRenewalDate("");
-    setStatus(STATUSES[0]);
-    setMemberSince("");
-    setAnnualDues("");
+    setAnnualDues(String(BUSINESS_MEMBERSHIP_ANNUAL_DUES));
     setSponsorshipLevel(LEVELS[0]);
     setAmount("");
     setLastSponsoredYear(String(CURRENT_YEAR));
@@ -115,13 +87,14 @@ export function AddBusinessModal({
     const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
     if (view === "members") {
+      const renewal = renewalDate || localIsoDate();
       onAddMember({
         businessName: businessName.trim(),
-        tier: tier.trim(),
-        renewalDate: renewalDate ? formatDate(renewalDate) : today,
-        status,
-        memberSince: memberSince ? formatDate(memberSince) : today,
-        annualDues: Number(annualDues) || 0,
+        tier: BUSINESS_MEMBERSHIP_TIER,
+        renewalDate: renewal,
+        status: "Active",
+        memberSince: renewal,
+        annualDues: Number(annualDues) || BUSINESS_MEMBERSHIP_ANNUAL_DUES,
       });
     } else if (view === "sponsors") {
       onAddSponsor({
@@ -159,23 +132,15 @@ export function AddBusinessModal({
 
         {view === "members" ? (
           <>
-            <TextInput label="Tier" value={tier} onChange={setTier} />
+            <div>
+              <span style={fieldLabelStyle}>Type</span>
+              <div style={{ marginTop: 6, fontSize: 13, color: "var(--linear-color-ink)" }}>
+                {BUSINESS_MEMBERSHIP_TIER}
+              </div>
+            </div>
+            <TextInput label="Annual dues" value={annualDues} onChange={setAnnualDues} />
             <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={fieldLabelStyle}>Status</span>
-              <select
-                value={status}
-                onChange={(event) => setStatus(event.target.value as BusinessMembershipStatus)}
-                style={selectStyle}
-              >
-                {STATUSES.map((option) => (
-                  <option key={option} value={option}>
-                    {STATUS_LABEL[option]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={fieldLabelStyle}>Renewal date</span>
+              <span style={fieldLabelStyle}>Last renewal</span>
               <input
                 type="date"
                 value={renewalDate}
@@ -183,16 +148,6 @@ export function AddBusinessModal({
                 style={selectStyle}
               />
             </label>
-            <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={fieldLabelStyle}>Member since</span>
-              <input
-                type="date"
-                value={memberSince}
-                onChange={(event) => setMemberSince(event.target.value)}
-                style={selectStyle}
-              />
-            </label>
-            <TextInput label="Annual dues" value={annualDues} onChange={setAnnualDues} />
           </>
         ) : null}
 
@@ -236,4 +191,10 @@ export function AddBusinessModal({
       </div>
     </Modal>
   );
+}
+
+function formatDate(value: string): string {
+  if (!value) return "";
+  const date = new Date(`${value}T00:00:00`);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
