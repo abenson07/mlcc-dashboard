@@ -39,10 +39,9 @@ export type NewLeafletModalProps = {
 
 type Step = 1 | 2 | 3;
 
-// Budget + sponsorship tiers (and the confirm review of them) are skipped
-// for now. Create from the dates step using suggested title + seeded tiers.
-// Flip this to true to restore the old 3-step flow.
-const INCLUDE_BUDGET_AND_SPONSORSHIP_STEP = false;
+// Confirm review is skipped for now — create from the name step. Flip this
+// to true to restore dates → name → confirm.
+const INCLUDE_CONFIRM_STEP = false;
 
 type TierDraft = SponsorshipTierSeed & { key: string };
 
@@ -173,8 +172,8 @@ function TiersTable({
 }
 
 /**
- * Leaflet create flow. Dates → create when INCLUDE_BUDGET_AND_SPONSORSHIP_STEP is
- * false. Set that flag to true for dates → name/budget/tiers → confirm.
+ * Leaflet create flow: dates → name (sponsorships optional, behind a link).
+ * Confirm is skipped unless INCLUDE_CONFIRM_STEP is true.
  */
 export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalProps) {
   const { enabled: demo } = useDemoModeOptional();
@@ -190,6 +189,7 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
   const [budgetTouched, setBudgetTouched] = useState(false);
   const budgetTouchedRef = useRef(false);
   const [tiers, setTiers] = useState<TierDraft[]>(() => toTierDrafts(defaultSponsorshipTierSeeds()));
+  const [showSponsorships, setShowSponsorships] = useState(false);
   const [existingTitles, setExistingTitles] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -208,6 +208,7 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
     setBudgetDollars(String(sponsorshipGoalDollarsFromTiers(seedTiers)));
     budgetTouchedRef.current = false;
     setBudgetTouched(false);
+    setShowSponsorships(false);
     setExistingTitles(sampleLeaflets.map((row) => row.title));
     setSaving(false);
     setError(null);
@@ -301,7 +302,7 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
   }
 
   const modalTitle =
-    step === 1 ? "When is this leaflet being delivered?" : step === 2 ? "Name and sponsorships" : "Confirm leaflet";
+    step === 1 ? "When is this leaflet being delivered?" : step === 2 ? "Name this leaflet" : "Confirm leaflet";
 
   const createDisabled = saving || duplicate || !title.trim() || !distributionDate;
 
@@ -326,25 +327,16 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
             />
           )}
           {step === 1 ? (
-            INCLUDE_BUDGET_AND_SPONSORSHIP_STEP ? (
-              <Button
-                label="Continue"
-                variant="primary"
-                disabled={!distributionDate}
-                onClick={() => {
-                  setError(null);
-                  setStep(2);
-                }}
-              />
-            ) : (
-              <Button
-                label={saving ? "Creating…" : "Create leaflet"}
-                variant="primary"
-                disabled={createDisabled}
-                onClick={() => void handleCreate()}
-              />
-            )
-          ) : step === 2 ? (
+            <Button
+              label="Continue"
+              variant="primary"
+              disabled={!distributionDate}
+              onClick={() => {
+                setError(null);
+                setStep(2);
+              }}
+            />
+          ) : step === 2 && INCLUDE_CONFIRM_STEP ? (
             <Button
               label="Continue"
               variant="primary"
@@ -413,11 +405,6 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
                 Add a second distribution date
               </button>
             )}
-            {!INCLUDE_BUDGET_AND_SPONSORSHIP_STEP && duplicate ? (
-              <Text size="sm" display="block" style={errorTextStyle}>
-                A leaflet with this name already exists. Choose a different name to continue.
-              </Text>
-            ) : null}
           </>
         ) : null}
 
@@ -442,28 +429,41 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
                   {datesLabel}
                 </Text>
               ) : null}
+              {!showSponsorships ? (
+                <button
+                  type="button"
+                  onClick={() => setShowSponsorships(true)}
+                  style={{ ...linkButtonStyle, marginTop: 8 }}
+                >
+                  Define sponsorships
+                </button>
+              ) : null}
             </div>
-            <TextInput
-              label="Budget"
-              value={budgetDollars}
-              onChange={(next) => {
-                  setBudgetTouched(true);
-                  budgetTouchedRef.current = true;
-                  setBudgetDollars(next.replace(/[^\d.,]/g, ""));
-                }}
-            />
-            <div>
-              <Text size="sm" color="secondary" style={{ marginBottom: 8 }}>
-                Sponsorship tiers carried from the previous run
-              </Text>
-              <TiersTable
-                tiers={tiers}
-                editable
-                onChange={(key, patch) => {
-                  setTiers((prev) => prev.map((tier) => (tier.key === key ? { ...tier, ...patch } : tier)));
-                }}
-              />
-            </div>
+            {showSponsorships ? (
+              <>
+                <TextInput
+                  label="Budget"
+                  value={budgetDollars}
+                  onChange={(next) => {
+                    setBudgetTouched(true);
+                    budgetTouchedRef.current = true;
+                    setBudgetDollars(next.replace(/[^\d.,]/g, ""));
+                  }}
+                />
+                <div>
+                  <Text size="sm" color="secondary" style={{ marginBottom: 8 }}>
+                    Sponsorship tiers carried from the previous run
+                  </Text>
+                  <TiersTable
+                    tiers={tiers}
+                    editable
+                    onChange={(key, patch) => {
+                      setTiers((prev) => prev.map((tier) => (tier.key === key ? { ...tier, ...patch } : tier)));
+                    }}
+                  />
+                </div>
+              </>
+            ) : null}
           </>
         ) : null}
 
