@@ -115,6 +115,7 @@ export type CommStage = {
   name: string;
   state: "completed" | "active" | "upcoming";
   sentDate?: string;
+  scheduledOn?: string;
   timing?: string;
   description?: string;
   sentCount?: number;

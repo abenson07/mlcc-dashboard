@@ -37,6 +37,10 @@ import {
 import { useEvents, useLeaflets, useStories, useCurrentPerson, useFavorites } from "hooks";
 import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import { clearDemoStore, newDemoId, upsertDemoEntity } from "@/lib/demo/demoStore";
+import {
+  leafletCommSettingsFromDefs,
+  snapshotCommSchedule,
+} from "@/lib/leaflets/comm/commSchedule";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import { getBestMatchingHref } from "@/lib/nav/getBestMatchingHref";
 import { AddPromotionModal, NewEventModal } from "@/components/patterns/client-templates/events";
@@ -278,6 +282,11 @@ function MigrateCreateModals({
         title: draft.title,
         distributionDate: draft.distribution_date,
         status: "planned",
+        comm_schedule: snapshotCommSchedule(
+          leafletCommSettingsFromDefs(),
+          draft.distribution_date,
+        ),
+        commSent: {},
       });
       toast.success("Leaflet created — demo mode, saved locally only");
       router.push(hrefFor(`/leaflets/${id}`));

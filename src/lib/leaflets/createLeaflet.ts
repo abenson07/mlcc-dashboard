@@ -4,7 +4,12 @@ import {
   spawnLeafletSponsorshipTiers,
   tierPlaceholderRows,
 } from "@/lib/leaflets/spawnLeafletSponsorshipTiers";
-import type { Leaflets, LeafletsInsert } from "@/types/database";
+import type { CommSettings, Leaflets, LeafletsInsert } from "@/types/database";
+import {
+  LEAFLET_COMM_STEP_DEFS,
+  isLeafletPipelineStep,
+  snapshotCommSchedule,
+} from "@/lib/leaflets/comm/commSchedule";
 
 const MEMBERSHIP_QR_BASE = "https://mapleleafcommunity.org/membership";
 const OPEN_ROUTES_QR_URL = "https://mapleleafcommunity.org/leaflet/open-routes";
@@ -60,6 +65,19 @@ export async function createLeaflet(
     throw new Error(openRoutesQrError?.message ?? "Failed to create open routes QR code");
   }
 
+  const { data: commSettings } = await supabase
+    .from("comm_settings")
+    .select("step_key, offset_days, is_enabled")
+    .eq("context", "leaflet")
+    .is("event_template_id", null);
+
+  const scheduleSteps =
+    (commSettings as Pick<CommSettings, "step_key" | "offset_days" | "is_enabled">[] | null)
+      ?.filter((row) => row.is_enabled !== false && isLeafletPipelineStep(row.step_key)) ??
+    LEAFLET_COMM_STEP_DEFS;
+
+  const comm_schedule = snapshotCommSchedule(scheduleSteps, input.distribution_date);
+
   const { data: leaflet, error: leafletError } = await supabase
     .from("leaflets")
     .insert({
@@ -71,6 +89,7 @@ export async function createLeaflet(
       status: "planned",
       membership_qr_code_id: membershipQr.id,
       open_routes_qr_code_id: openRoutesQr.id,
+      comm_schedule,
     })
     .select()
     .single();

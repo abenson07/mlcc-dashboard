@@ -10,7 +10,7 @@ import { RowClickCell, ClassContentPage } from "@/components/patterns/client-tem
 import { Text } from "@/components/patterns/primitives/Text";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { IconButton } from "@/components/patterns/shared/IconButton";
-import type { LeafletRouteRow } from "@/data/mocks/leaflets";
+import type { LeafletRouteRow, LeafletRouteStatus } from "@/data/mocks/leaflets";
 import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
@@ -32,19 +32,40 @@ const groupColors: Record<string, string> = {
   skipped: "#8a8f98",
 };
 
-function SummaryCard({ title, value, hint }: { title: string; value: number; hint: string }) {
+function SummaryCard({
+  title,
+  value,
+  hint,
+  selected,
+  onClick,
+}: {
+  title: string;
+  value: number;
+  hint: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
   return (
-    <section
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
       style={{
+        all: "unset",
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
         gap: 12,
         padding: 20,
-        background: "var(--linear-color-panel)",
-        border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
+        background: selected
+          ? "var(--linear-color-sidebar-item-selected)"
+          : "var(--linear-color-panel)",
+        border: selected
+          ? "var(--linear-border-width) solid var(--linear-color-accent)"
+          : "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
         boxShadow: "var(--linear-shadow-panel)",
+        cursor: "pointer",
       }}
     >
       <Text weight="semibold">{title}</Text>
@@ -54,7 +75,7 @@ function SummaryCard({ title, value, hint }: { title: string; value: number; hin
       <Text size="sm" color="secondary">
         {hint}
       </Text>
-    </section>
+    </button>
   );
 }
 
@@ -124,6 +145,7 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
   const [skipRow, setSkipRow] = useState<LeafletRouteRow | null>(null);
   const [removeRow, setRemoveRow] = useState<LeafletRouteRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<LeafletRouteStatus | null>(null);
 
   useEffect(() => {
     if (!isDemo) return;
@@ -140,6 +162,11 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
   const assignedCount = routes.filter((r) => r.status === "in-progress").length;
   const openCount = routes.filter((r) => r.status === "unassigned").length;
   const skippedCount = routes.filter((r) => r.status === "skipped").length;
+  const visibleRoutes = statusFilter ? routes.filter((r) => r.status === statusFilter) : routes;
+
+  function toggleStatusFilter(status: LeafletRouteStatus) {
+    setStatusFilter((current) => (current === status ? null : status));
+  }
 
   const columns = useMemo((): TableColumn<LeafletRouteRow>[] => {
     return [
@@ -248,18 +275,36 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         .leaflet-route-row-actions:focus-within { opacity: 1; }
       `}</style>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-        <SummaryCard title="Assigned Routes" value={assignedCount} hint="Have a deliverer" />
-        <SummaryCard title="Open Routes" value={openCount} hint="Still need a deliverer" />
-        <SummaryCard title="Skipped Routes" value={skippedCount} hint="Need a substitute" />
+        <SummaryCard
+          title="Assigned Routes"
+          value={assignedCount}
+          hint="Have a deliverer"
+          selected={statusFilter === "in-progress"}
+          onClick={() => toggleStatusFilter("in-progress")}
+        />
+        <SummaryCard
+          title="Open Routes"
+          value={openCount}
+          hint="Still need a deliverer"
+          selected={statusFilter === "unassigned"}
+          onClick={() => toggleStatusFilter("unassigned")}
+        />
+        <SummaryCard
+          title="Skipped Routes"
+          value={skippedCount}
+          hint="Need a substitute"
+          selected={statusFilter === "skipped"}
+          onClick={() => toggleStatusFilter("skipped")}
+        />
       </div>
 
       <div style={{ marginInline: -8, minHeight: 0 }}>
         <GroupedTable
-          data={routes}
+          data={visibleRoutes}
           columns={columns}
           getRowKey={(row) => row.id}
           groupBy={(row) => row.status}
-          groupOrder={GROUP_ORDER}
+          groupOrder={statusFilter ? [statusFilter] : GROUP_ORDER}
           getGroupMeta={(key) => ({ color: groupColors[key], label: GROUP_LABEL[key] ?? key })}
           listChrome
         />

@@ -36,7 +36,10 @@ export type LeafletOverviewPageProps = {
   skippedRoutes?: LeafletRouteRow[];
   sponsors?: LeafletSponsorRow[];
   stories?: LeafletStoryRow[];
-  reminderDescription?: string;
+  nextStepTitle?: string;
+  nextStepDescription?: string;
+  nextStepSendLabel?: string;
+  showNextStepSend?: boolean;
 };
 
 /**
@@ -62,7 +65,10 @@ export function LeafletOverviewPage({
   skippedRoutes,
   sponsors,
   stories,
-  reminderDescription,
+  nextStepTitle,
+  nextStepDescription,
+  nextStepSendLabel,
+  showNextStepSend,
 }: LeafletOverviewPageProps) {
   return (
     <ClassContentPage>
@@ -80,7 +86,13 @@ export function LeafletOverviewPage({
           <BudgetChart summary={budgetSummary ?? sampleLeafletBudgetSummary} onViewBudget={onViewSponsorships} />
         </div>
         <div style={{ gridColumn: "span 1" }}>
-          <NextStepBox description={reminderDescription} onSend={onSendReminder} />
+          <NextStepBox
+            title={nextStepTitle}
+            description={nextStepDescription}
+            sendLabel={nextStepSendLabel}
+            onSend={onSendReminder}
+            showSend={showNextStepSend}
+          />
         </div>
       </div>
 

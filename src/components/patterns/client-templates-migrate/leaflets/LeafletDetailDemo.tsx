@@ -6,6 +6,7 @@ import { Download, Mail } from "lucide-react";
 import { toast } from "sonner";
 import {
   useAllSponsorships,
+  useCommSettings,
   useDeliveries,
   useDemoGuard,
   useFavorites,
@@ -29,7 +30,7 @@ import { Button } from "@/components/patterns/primitives/Button";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
 import { getApiBase } from "@/lib/apiBase";
 import { buildEventBudget } from "@/lib/events/eventData";
-import { mapTasksForUi } from "@/components/leaflet/leafletData";
+import { mapTasksForUi, buildCommStages, commRecipientCount } from "@/components/leaflet/leafletData";
 import type { Task } from "@/components/leaflet/types";
 import type { StripeInvoiceTableRow } from "@/components/billing/InvoicesListTable";
 import { LeafletOverviewPage } from "./LeafletOverviewPage";
@@ -41,8 +42,15 @@ import { RouteDetailPanel } from "./RouteDetailPanel";
 import { LeafletInvoiceDetailPanel } from "./LeafletInvoiceDetailPanel";
 import { StoryDetailPanel } from "./StoryDetailPanel";
 import { DelivererPersonPanel } from "./DelivererPersonPanel";
-import { EmailDeliverersModal } from "./EmailDeliverersModal";
-import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
+import { LeafletCommStepsModal } from "./LeafletCommStepsModal";
+import { LeafletDetailsPanel } from "./LeafletDetailsPanel";
+import { demoDeliveriesForComm, leafletRowForComm } from "./demoLeafletComm";
+import { listDemoScoped, patchDemoEntity, writeDemoScoped } from "@/lib/demo/demoStore";
+import {
+  isUnconfirmedOnlyStep,
+  leafletCommSettingsFromDefs,
+  snapshotCommSchedule,
+} from "@/lib/leaflets/comm/commSchedule";
 import { deliveriesToRouteRows } from "./adapters";
 import {
   leafletTaskGroupForDueDate,
@@ -149,7 +157,7 @@ function toLeafletStoryRow(row: {
   };
 }
 
-type LeafletDetailView = "overview" | "deliverers" | "routes" | "sponsorships" | "schedule";
+type LeafletDetailView = "overview" | "details" | "deliverers" | "routes" | "sponsorships" | "schedule";
 
 type Selection =
   | { kind: "route"; row: LeafletRouteRow }
@@ -220,12 +228,12 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const { enabled: demoMode } = useDemoModeOptional();
   const { enabled: demoGuard, guard, store } = useDemoGuard();
   const demo = demoMode || demoGuard;
-  const { leaflets } = useLeaflets();
+  const { leaflets, refetch: refetchLeaflets } = useLeaflets();
   const { isFavorite, toggleFavorite } = useFavorites();
   const currentRoute = normalizeRoute(
     searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname,
   );
-  const { deliveries } = useDeliveries(leafletId, { enabled: !demo && Boolean(leafletId) });
+  const { deliveries, refetch: refetchDeliveries } = useDeliveries(leafletId, { enabled: !demo && Boolean(leafletId) });
   const [view, setView] = useState<LeafletDetailView>("overview");
   const [selection, setSelection] = useState<Selection>(null);
   const [demoTasks, setDemoTasks] = useState<LeafletTaskRow[]>([]);
@@ -331,7 +339,52 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   };
 
   const sponsorRows = useMemo(() => leafletSponsorships.map(toLeafletSponsorRow), [leafletSponsorships]);
-  const pendingSponsorCount = sponsorRows.filter((s) => s.status !== "Confirmed").length;
+
+  const { settings: liveCommSettings } = useCommSettings("leaflet");
+  const fallbackCommSettings = useMemo(() => leafletCommSettingsFromDefs(), []);
+  const commSettings = demo
+    ? fallbackCommSettings
+    : liveCommSettings.length > 0
+      ? liveCommSettings
+      : fallbackCommSettings;
+
+  const demoLeafletRecord = useMemo(() => {
+    if (!demo) return null;
+    return store.merge<LeafletSummary>("leaflets", sampleLeaflets).find((item) => item.id === leafletId) ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, leafletId, store.version]);
+
+  const commLeafletRow = useMemo(() => {
+    if (demo) {
+      const schedule =
+        demoLeafletRecord?.comm_schedule ??
+        snapshotCommSchedule(commSettings, leaflet.distributionDate);
+      return leafletRowForComm({
+        id: leaflet.id,
+        title: leaflet.title,
+        distributionDate: leaflet.distributionDate,
+        status: leaflet.status,
+        comm_schedule: schedule,
+        commSent: demoLeafletRecord?.commSent,
+      });
+    }
+    return leafletRawRow ?? null;
+  }, [demo, demoLeafletRecord, commSettings, leaflet, leafletRawRow]);
+
+  const commDeliveries = useMemo(
+    () => (demo ? demoDeliveriesForComm(leaflet.id, demoLeafletRecord?.commSent) : deliveries),
+    [demo, leaflet.id, demoLeafletRecord?.commSent, deliveries],
+  );
+
+  const commStages = useMemo(
+    () => buildCommStages(commSettings, commLeafletRow, commDeliveries),
+    [commSettings, commLeafletRow, commDeliveries],
+  );
+
+  const activeCommStage = commStages.find((s) => s.state === "active");
+  const allCommSent = commStages.length > 0 && commStages.every((s) => s.state === "completed");
+
+  const recipientCount = commRecipientCount(activeCommStage?.stepKey, commDeliveries);
 
   const { stories: leafletStoryRows } = useStories({ filters: { leafletId: leafletId || null } });
   const { people } = usePeople({ autoFetch: !demo });
@@ -345,10 +398,18 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const openRouteRows = useMemo(() => routeRows.filter((r) => r.status === "unassigned"), [routeRows]);
   const skippedRouteRows = useMemo(() => routeRows.filter((r) => r.status === "skipped"), [routeRows]);
 
-  const unresolvedRecipientCount = useMemo(() => {
-    if (demo) return 8;
-    return deliveries.filter((d) => d.person_id && d.response !== "confirmed").length;
-  }, [demo, deliveries]);
+  async function handleCommSent(stepKey: string) {
+    if (demo) {
+      patchDemoEntity("leaflets", leafletId || leaflet.id, {
+        commSent: {
+          ...(demoLeafletRecord?.commSent ?? {}),
+          [stepKey]: new Date().toISOString(),
+        },
+      });
+      return;
+    }
+    await Promise.all([refetchLeaflets(), refetchDeliveries()]);
+  }
 
   function changeView(next: LeafletDetailView) {
     setView(next);
@@ -447,7 +508,24 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   }
 
   const body =
-    view === "deliverers" ? (
+    view === "details" ? (
+      <div
+        style={{
+          height: "100%",
+          minHeight: 0,
+          overflow: "auto",
+          boxSizing: "border-box",
+        }}
+      >
+        <LeafletDetailsPanel
+          leafletId={leafletId || leaflet.id}
+          title={leaflet.title}
+          distributionDate={leaflet.distributionDate}
+          commSchedule={commLeafletRow?.comm_schedule}
+          commSettings={commSettings}
+        />
+      </div>
+    ) : view === "deliverers" ? (
       <LeafletDeliverersPage
         leafletId={leafletId || leaflet.id}
         demo={demo}
@@ -490,13 +568,17 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         skippedRoutes={demo ? undefined : skippedRouteRows}
         sponsors={demo ? undefined : sponsorRows}
         stories={demo ? undefined : storyRows}
-        reminderDescription={
-          demo
-            ? undefined
-            : pendingSponsorCount === 0
-              ? "All sponsors are paid up."
-              : `${pendingSponsorCount} sponsor${pendingSponsorCount === 1 ? "" : "s"} still owe${pendingSponsorCount === 1 ? "s" : ""} payment before this issue goes to print.`
+        onSendReminder={() => setEmailOpen(true)}
+        nextStepTitle={allCommSent ? "Communications complete" : (activeCommStage?.name ?? "Deliverer emails")}
+        nextStepDescription={
+          allCommSent
+            ? "All deliverer emails have been sent."
+            : isUnconfirmedOnlyStep(activeCommStage?.stepKey ?? "")
+              ? `Ready to send to ${recipientCount} deliverer${recipientCount === 1 ? "" : "s"} who have not confirmed.`
+              : `Ready to send to ${recipientCount} deliverer${recipientCount === 1 ? "" : "s"}.`
         }
+        nextStepSendLabel="Send"
+        showNextStepSend={!allCommSent && Boolean(activeCommStage)}
       />
     );
 
@@ -506,7 +588,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     <div style={{ height: "100%" }}>
       <FoundationLayout
         navigation={navigation ?? <LinearSidebar />}
-        contentMaxWidth={1200}
+        contentMaxWidth={view === "details" ? undefined : 1200}
         isSideContentVisible={sideContentVisible}
         sideContent={
           selection ? (
@@ -558,6 +640,11 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
                   onClick={() => changeView("overview")}
                 />
                 <ViewTab
+                  label="Settings"
+                  selected={view === "details"}
+                  onClick={() => changeView("details")}
+                />
+                <ViewTab
                   label="Deliverers"
                   selected={view === "deliverers"}
                   onClick={() => changeView("deliverers")}
@@ -585,13 +672,14 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         {body}
       </FoundationLayout>
 
-      <EmailDeliverersModal
+      <LeafletCommStepsModal
         isOpen={emailOpen}
         onClose={() => setEmailOpen(false)}
         leafletId={leafletId || leaflet.id}
         leafletTitle={leaflet.title}
-        distributionDate={leaflet.distributionDate}
-        recipientCount={unresolvedRecipientCount}
+        stages={commStages}
+        recipientCount={recipientCount}
+        onSent={handleCommSent}
       />
     </div>
   );

@@ -4,6 +4,9 @@
 
 export type LeafletStatus = "planned" | "active" | "closed";
 
+/** Per-edition send dates keyed by comm step_key (YYYY-MM-DD). */
+export type LeafletCommSchedule = Partial<Record<string, string>>;
+
 export interface Leaflets {
   id: string;
   title: string;
@@ -17,7 +20,9 @@ export interface Leaflets {
   sponsorship_goal_cents: number | null;
   membership_qr_code_id: string | null;
   open_routes_qr_code_id: string | null;
+  comm_schedule?: LeafletCommSchedule;
   comm_initial_confirmation_sent_at: string | null;
+  comm_confirmation_followup_sent_at: string | null;
   comm_distribution_day_pickup_sent_at: string | null;
   comm_delivery_complete_prompt_sent_at: string | null;
   created_at: string;
@@ -36,6 +41,7 @@ export interface LeafletsInsert {
   sponsorship_goal_cents?: number | null;
   membership_qr_code_id?: string | null;
   open_routes_qr_code_id?: string | null;
+  comm_schedule?: LeafletCommSchedule;
 }
 
 export interface LeafletsUpdate {
@@ -50,7 +56,9 @@ export interface LeafletsUpdate {
   sponsorship_goal_cents?: number | null;
   membership_qr_code_id?: string | null;
   open_routes_qr_code_id?: string | null;
+  comm_schedule?: LeafletCommSchedule;
   comm_initial_confirmation_sent_at?: string | null;
+  comm_confirmation_followup_sent_at?: string | null;
   comm_distribution_day_pickup_sent_at?: string | null;
   comm_delivery_complete_prompt_sent_at?: string | null;
 }

@@ -12,6 +12,10 @@ import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeCo
 import { Button } from "@/components/patterns/primitives/Button";
 import { useAdminBasePath } from "@/components/patterns/client-templates/shared";
 import { newDemoId, upsertDemoEntity } from "@/lib/demo/demoStore";
+import {
+  leafletCommSettingsFromDefs,
+  snapshotCommSchedule,
+} from "@/lib/leaflets/comm/commSchedule";
 import { LeafletsListPage } from "./LeafletsListPage";
 import { NewLeafletModal, type NewLeafletDraft } from "./NewLeafletModal";
 
@@ -30,6 +34,11 @@ export function LeafletsDemo() {
         title: draft.title,
         distributionDate: draft.distribution_date,
         status: "planned",
+        comm_schedule: snapshotCommSchedule(
+          leafletCommSettingsFromDefs(),
+          draft.distribution_date,
+        ),
+        commSent: {},
       });
       toast.success("Leaflet created — demo mode, saved locally only");
       router.push(`${basePath}/leaflets/${id}`);

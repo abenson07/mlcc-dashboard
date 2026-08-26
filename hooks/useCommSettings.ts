@@ -3,15 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabaseClient";
 import type { CommSettings } from "@/types/database";
+import {
+  LEAFLET_COMM_STEP_ORDER,
+  pipelineLeafletCommSettings,
+} from "@/lib/leaflets/comm/commSchedule";
 
-/** Canonical pipeline order for leaflet comm steps (do not rely on created_at). */
-export const LEAFLET_COMM_STEP_ORDER = [
-  "initial_confirmation",
-  "pre_distribution_reminder",
-  "distribution_day_pickup",
-  "delivery_complete_prompt",
-  "completion_followup",
-] as const;
+export { LEAFLET_COMM_STEP_ORDER };
 
 export function sortLeafletCommSettings(settings: CommSettings[]): CommSettings[] {
   const order = new Map(LEAFLET_COMM_STEP_ORDER.map((key, index) => [key, index]));
@@ -35,7 +32,7 @@ export function useCommSettings(context: "leaflet" | "event" | "membership" = "l
         .order("created_at", { ascending: true });
       if (qError) throw qError;
       const rows = (data ?? []) as CommSettings[];
-      return context === "leaflet" ? sortLeafletCommSettings(rows) : rows;
+      return context === "leaflet" ? pipelineLeafletCommSettings(rows) : rows;
     },
   });
 

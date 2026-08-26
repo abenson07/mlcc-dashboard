@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/require-session";
+import { isCommSchedulePatch } from "@/lib/leaflets/comm/commSchedule";
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
 
 type Params = { params: Promise<{ id: string }> };
@@ -50,6 +51,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   if (typeof o.sponsorship_goal_cents === "number") {
     patch.sponsorship_goal_cents = o.sponsorship_goal_cents;
+  }
+  if (typeof o.sponsorship_due_date === "string" && o.sponsorship_due_date.trim()) {
+    patch.sponsorship_due_date = o.sponsorship_due_date.trim();
+  }
+  if (typeof o.delivery_date === "string" && o.delivery_date.trim()) {
+    patch.delivery_date = o.delivery_date.trim();
+  }
+  if (isCommSchedulePatch(o.comm_schedule)) {
+    patch.comm_schedule = o.comm_schedule;
   }
 
   const supabase = await getSupabaseForLeafletRoutes();

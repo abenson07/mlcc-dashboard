@@ -5,6 +5,8 @@ export type LeafletSummary = {
   title: string;
   distributionDate: string;
   status: LeafletStatus;
+  comm_schedule?: Record<string, string>;
+  commSent?: Record<string, string>;
 };
 
 /** Mirrors the shape of `sampleEvents` — pulled from the leaflet schedule. */
@@ -286,7 +288,7 @@ export const sampleDeliverers: LeafletDelivererRow[] = [
     name: "Rebecca Letwin",
     email: "rebecca.letwin@example.com",
     address: "8254 4th Ave NE",
-    status: "Confirmed",
+    status: "Invited",
     routes: [{ id: "ed1ef53d-5fca-46b7-aa96-a21f2a9df63c", name: "81st: 5th to Roosevelt", leafletCount: 50, routeType: "Street", deliveryId: "ed1ef53d-5fca-46b7-aa96-a21f2a9df63c", routeId: "ed1ef53d-5fca-46b7-aa96-a21f2a9df63c" }],
   },
   {
@@ -302,7 +304,7 @@ export const sampleDeliverers: LeafletDelivererRow[] = [
     name: "Diane Knutson",
     email: "diane.knutson@example.com",
     address: "Address not on file",
-    status: "Confirmed",
+    status: "Invited",
     routes: [{ id: "610a5b95-419e-45bb-96b7-2d97165731a0", name: "86th: 5th to Roosevelt", leafletCount: 50, routeType: "Street", deliveryId: "610a5b95-419e-45bb-96b7-2d97165731a0", routeId: "610a5b95-419e-45bb-96b7-2d97165731a0" }],
   },
 ];

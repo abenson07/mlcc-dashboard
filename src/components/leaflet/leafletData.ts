@@ -24,6 +24,11 @@ import type {
   Substitution,
   Task,
 } from "./types";
+import {
+  isUnconfirmedOnlyStep,
+  resolveCommSchedule,
+  upcomingTimingLabel,
+} from "@/lib/leaflets/comm/commSchedule";
 import { openRoutesTableStatusLabel } from "./deliveryUtils";
 
 export type RouteWithPrimaryDeliverer = Routes & {
@@ -265,8 +270,33 @@ export function responseCounts(deliveries: DeliveryWithRelations[]) {
   };
 }
 
+export function completionCounts(deliveries: DeliveryWithRelations[]) {
+  let yes = 0;
+  let unresponsive = 0;
+  for (const d of deliveries) {
+    if (!d.person_id) continue;
+    if (d.date_delivered) yes++;
+    else unresponsive++;
+  }
+  return { yes, unresponsive };
+}
+
+export function commRecipientCount(
+  stepKey: string | undefined,
+  deliveries: DeliveryWithRelations[],
+): number {
+  const people = new Set<string>();
+  for (const d of deliveries) {
+    if (!d.person_id || !d.people?.email) continue;
+    if (isUnconfirmedOnlyStep(stepKey ?? "") && d.response === "confirmed") continue;
+    people.add(d.person_id);
+  }
+  return people.size;
+}
+
 const LEAFLET_COMM_COLUMNS: Record<string, keyof Leaflets> = {
   initial_confirmation: "comm_initial_confirmation_sent_at",
+  confirmation_followup: "comm_confirmation_followup_sent_at",
   distribution_day_pickup: "comm_distribution_day_pickup_sent_at",
   delivery_complete_prompt: "comm_delivery_complete_prompt_sent_at",
 };
@@ -282,12 +312,14 @@ export function buildCommStages(
   deliveries: DeliveryWithRelations[],
 ): CommStage[] {
   const counts = responseCounts(deliveries);
-  const recipientCount = deliveries.filter(
-    (d) => d.person_id && d.people?.email,
-  ).length;
+  const schedule = resolveCommSchedule(
+    leaflet?.comm_schedule,
+    settings,
+    leaflet?.distribution_date ?? "",
+  );
   let foundActive = false;
 
-  return settings.map((s, index) => {
+  return settings.map((s) => {
     const leafletColumn = LEAFLET_COMM_COLUMNS[s.step_key];
     const deliveryColumn = DELIVERY_COMM_COLUMNS[s.step_key];
     const leafletSentAt =
@@ -310,14 +342,16 @@ export function buildCommStages(
         ? ((foundActive = true), "active")
         : "upcoming";
 
+    const scheduledOn = schedule[s.step_key];
     const stage: CommStage = {
       id: s.id,
       stepKey: s.step_key,
       name: s.name,
       state,
+      scheduledOn,
     };
 
-    if (state === "completed" && (leafletSentAt || deliveryColumn)) {
+    if (state === "completed") {
       const sentIso =
         leafletSentAt ??
         (deliverySentAt.find(Boolean) as string | undefined) ??
@@ -329,8 +363,8 @@ export function buildCommStages(
           year: "numeric",
         });
       }
-      stage.sentCount = recipientCount;
-      if (s.step_key === "initial_confirmation") {
+      stage.sentCount = commRecipientCount(s.step_key, deliveries);
+      if (s.requires_response) {
         stage.yes = counts.yes;
         stage.unresponsive = counts.unresponsive;
         stage.no = counts.no;
@@ -339,29 +373,19 @@ export function buildCommStages(
       }
     }
 
-    if (state === "active" && s.requires_response) {
+    if (state === "active") {
+      stage.timing = "Ready to send";
       stage.description =
-        s.step_key === "initial_confirmation"
-          ? "Ask deliverers to confirm their routes before distribution day."
-          : s.name;
+        s.step_key === "confirmation_followup"
+          ? "Remind deliverers who have not confirmed their routes."
+          : s.step_key === "initial_confirmation"
+            ? "Ask deliverers to confirm their routes before distribution day."
+            : s.name;
     }
 
-    if (state === "active" || state === "upcoming") {
-      if (s.offset_days != null) {
-        stage.timing =
-          s.offset_days < 0
-            ? `Send in ${Math.abs(s.offset_days)} days`
-            : s.offset_days > 0
-              ? `Send in ${s.offset_days} days`
-              : "Send on distribution day";
-      } else if (state === "active") {
-        stage.timing = "Send in today";
-      }
-      stage.description ??= s.name;
-    }
-
-    if (index === settings.length - 1 && state === "upcoming") {
-      stage.description = "Last chance before routes are reassigned.";
+    if (state === "upcoming") {
+      stage.timing = upcomingTimingLabel(scheduledOn);
+      stage.description = s.name;
     }
 
     return stage;
