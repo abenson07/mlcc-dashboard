@@ -62,7 +62,6 @@ function nestedMembershipPatch(
     last_renewal: localIsoDate(),
     payment_method: null,
     is_subscription: false,
-    tier: BUSINESS_MEMBERSHIP_TIER,
     annual_dues: BUSINESS_MEMBERSHIP_ANNUAL_DUES,
     ...business.membership,
     ...data,
