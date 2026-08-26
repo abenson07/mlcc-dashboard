@@ -49,6 +49,7 @@ import {
   formatLeafletTaskDueLabel,
   sampleLeafletDetail,
   sampleLeafletTasks,
+  sampleLeaflets,
   type LeafletBudgetSummary,
   type LeafletDelivererRow,
   type LeafletDetail,
@@ -57,6 +58,7 @@ import {
   type LeafletSponsorshipInvoiceRow,
   type LeafletStatus,
   type LeafletStoryRow,
+  type LeafletSummary,
   type LeafletTaskGroupLabel,
   type LeafletTaskRow,
 } from "@/data/mocks/leaflets";
@@ -216,7 +218,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { enabled: demoMode } = useDemoModeOptional();
-  const { enabled: demoGuard, guard } = useDemoGuard();
+  const { enabled: demoGuard, guard, store } = useDemoGuard();
   const demo = demoMode || demoGuard;
   const { leaflets } = useLeaflets();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -244,10 +246,30 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     writeDemoScoped("leafletTasks", leafletId || "default", next);
   }
 
-  const leaflet = useMemo(
-    () => (demo ? sampleLeafletDetail : liveLeafletDetail(leafletId, leaflets)),
-    [demo, leafletId, leaflets],
-  );
+  const leaflet = useMemo(() => {
+    if (!demo) return liveLeafletDetail(leafletId, leaflets);
+    const merged = store.merge<LeafletSummary>("leaflets", sampleLeaflets);
+    const row = merged.find((item) => item.id === leafletId);
+    if (!row) {
+      return leafletId === sampleLeafletDetail.id
+        ? sampleLeafletDetail
+        : {
+            id: leafletId,
+            title: "Leaflet",
+            distributionDate: "",
+            status: "planned" as const,
+            countdownLabel: "—",
+          };
+    }
+    return {
+      id: row.id,
+      title: row.title,
+      distributionDate: row.distributionDate,
+      status: row.status,
+      countdownLabel: formatCountdownLabel(row.distributionDate, row.status),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, leafletId, leaflets, store.version]);
 
   const {
     tasks: leafletTaskRows,

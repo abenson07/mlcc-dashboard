@@ -1,5 +1,8 @@
 export { LeafletsDemo } from "./LeafletsDemo";
 export { LeafletsListPage } from "./LeafletsListPage";
+export type { LeafletsListPageProps } from "./LeafletsListPage";
+export { NewLeafletModal } from "./NewLeafletModal";
+export type { NewLeafletModalProps, NewLeafletDraft } from "./NewLeafletModal";
 export { LeafletDetailDemo } from "./LeafletDetailDemo";
 export type { LeafletDetailDemoProps } from "./LeafletDetailDemo";
 export { LeafletOverviewPage } from "./LeafletOverviewPage";
