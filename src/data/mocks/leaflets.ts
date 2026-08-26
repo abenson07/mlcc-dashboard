@@ -163,6 +163,10 @@ export type LeafletRouteRow = {
   initials: string;
   detail: string;
   status: LeafletRouteStatus;
+  routeId?: string;
+  personId?: string | null;
+  personName?: string | null;
+  response?: "pending" | "confirmed" | "needs_cover" | "rejected";
 };
 
 /** Routes with no primary deliverer assigned — pulled from `routes` where `primary_deliverer_id is null`. */
@@ -186,6 +190,7 @@ export type LeafletDelivererRouteRow = {
   deliveryId?: string;
   routeId?: string;
   isSkipped?: boolean;
+  response?: "pending" | "confirmed" | "needs_cover" | "rejected";
 };
 
 export type LeafletDelivererRow = {

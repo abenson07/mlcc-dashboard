@@ -11,12 +11,13 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { IconButton } from "@/components/patterns/shared/IconButton";
 import type { LeafletRouteRow, LeafletRouteStatus } from "@/data/mocks/leaflets";
-import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
+import { DEMO_STORE_EVENT, listDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
   RemoveRoutesConfirmModal,
   SkipRouteConfirmModal,
 } from "./LeafletRouteActionModals";
+import { applyLeafletDeliveryStatus, routeHasDeliverer } from "./leafletDeliveryStatus";
 
 const GROUP_ORDER = ["unassigned", "in-progress", "skipped"];
 
@@ -87,14 +88,19 @@ export type LeafletRoutesPageProps = {
 
 function RouteActionsCell({
   row,
+  onConfirm,
   onSkip,
   onRemove,
 }: {
   row: LeafletRouteRow;
+  onConfirm: (row: LeafletRouteRow) => void;
   onSkip: (row: LeafletRouteRow) => void;
   onRemove: (row: LeafletRouteRow) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const hasDeliverer = routeHasDeliverer(row);
+  const alreadyConfirmed = row.response === "confirmed" && row.status !== "skipped";
+  if (!hasDeliverer) return null;
   return (
     <div className="leaflet-route-row-actions" style={{ display: "flex", justifyContent: "flex-end" }}>
       <Dropdown
@@ -112,6 +118,15 @@ function RouteActionsCell({
           />
         }
       >
+        {!alreadyConfirmed ? (
+          <DropdownItem
+            label="Confirm route"
+            onSelect={() => {
+              setOpen(false);
+              onConfirm(row);
+            }}
+          />
+        ) : null}
         <DropdownItem
           label="Skip route"
           onSelect={() => {
@@ -149,13 +164,13 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
 
   useEffect(() => {
     if (!isDemo) return;
-    setLocalRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
+    const load = () => {
+      setLocalRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
+    };
+    load();
+    window.addEventListener(DEMO_STORE_EVENT, load);
+    return () => window.removeEventListener(DEMO_STORE_EVENT, load);
   }, [isDemo, scopeKey]);
-
-  function persistRoutes(next: LeafletRouteRow[]) {
-    setLocalRoutes(next);
-    writeDemoScoped("leafletRoutes", scopeKey, next);
-  }
 
   const routes = isDemo ? localRoutes : deliveriesToRouteRows(deliveries);
 
@@ -166,6 +181,72 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
 
   function toggleStatusFilter(status: LeafletRouteStatus) {
     setStatusFilter((current) => (current === status ? null : status));
+  }
+
+  async function applyStatus(
+    row: LeafletRouteRow,
+    action: "confirm" | "skip" | "remove",
+    liveMessage: string,
+    demoMessage: string,
+  ) {
+    await applyLeafletDeliveryStatus({
+      isDemo,
+      scopeKey,
+      deliveryIds: [row.id],
+      action,
+      update,
+      refetch,
+    });
+    toast.success(isDemo ? demoMessage : liveMessage);
+  }
+
+  async function handleConfirm(row: LeafletRouteRow) {
+    try {
+      await applyStatus(
+        row,
+        "confirm",
+        "Route confirmed",
+        "Route confirmed — demo mode, saved locally only",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to confirm");
+    }
+  }
+
+  async function handleSkip() {
+    if (!skipRow) return;
+    setSubmitting(true);
+    try {
+      await applyStatus(
+        skipRow,
+        "skip",
+        "Route skipped",
+        "Route skipped — demo mode, saved locally only",
+      );
+      setSkipRow(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to skip");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleRemove() {
+    if (!removeRow) return;
+    setSubmitting(true);
+    try {
+      await applyStatus(
+        removeRow,
+        "remove",
+        "Deliverer removed",
+        "Route removed — demo mode, saved locally only",
+      );
+      setRemoveRow(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to remove");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const columns = useMemo((): TableColumn<LeafletRouteRow>[] => {
@@ -197,9 +278,10 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         renderCell: (row) => (
           <RouteActionsCell
             row={row}
+            onConfirm={(r) => void handleConfirm(r)}
             onSkip={setSkipRow}
             onRemove={(r) => {
-              if (r.status === "unassigned") {
+              if (!routeHasDeliverer(r)) {
                 toast.message("Route has no deliverer to remove");
                 return;
               }
@@ -209,63 +291,7 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         ),
       },
     ];
-  }, [onSelectRoute]);
-
-  async function handleSkip() {
-    if (!skipRow) return;
-    setSubmitting(true);
-    try {
-      if (isDemo) {
-        persistRoutes(
-          localRoutes.map((r) =>
-            r.id === skipRow.id
-              ? { ...r, status: "skipped", detail: "Needs a substitute" }
-              : r,
-          ),
-        );
-        toast.success("Route skipped — demo mode, saved locally only");
-      } else {
-        await update(skipRow.id, { is_skipped: true, response: "needs_cover" });
-        await refetch();
-        toast.success("Route skipped");
-      }
-      setSkipRow(null);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to skip");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleRemove() {
-    if (!removeRow) return;
-    setSubmitting(true);
-    try {
-      if (isDemo) {
-        persistRoutes(
-          localRoutes.map((r) =>
-            r.id === removeRow.id
-              ? { ...r, status: "unassigned", detail: "Unassigned", initials: "—" }
-              : r,
-          ),
-        );
-        toast.success("Route removed — demo mode, saved locally only");
-      } else {
-        await update(removeRow.id, {
-          person_id: null,
-          is_skipped: false,
-          response: "pending",
-        });
-        await refetch();
-        toast.success("Deliverer removed");
-      }
-      setRemoveRow(null);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to remove");
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  }, [onSelectRoute, handleConfirm]);
 
   return (
     <ClassContentPage>

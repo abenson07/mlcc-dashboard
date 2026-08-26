@@ -48,4 +48,5 @@ export { LeafletDetailsPanel } from "./LeafletDetailsPanel";
 export type { LeafletDetailsPanelProps } from "./LeafletDetailsPanel";
 export { EmailDeliverersModal } from "./EmailDeliverersModal";
 export { DelivererPersonPanel } from "./DelivererPersonPanel";
+export type { DelivererPersonPanelProps } from "./DelivererPersonPanel";
 export { toLeafletSummary, deliveriesToDelivererRows, deliveriesToRouteRows } from "./adapters";

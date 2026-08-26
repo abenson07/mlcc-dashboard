@@ -8,7 +8,6 @@ import {
   useDemoGuard,
   type DeliveryWithRelations,
 } from "hooks";
-import type { DeliveriesUpdate } from "@/types/database";
 import { pixel, proportional, type TableColumn } from "@/components/patterns/primitives/table";
 import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
@@ -18,13 +17,18 @@ import {
   type LeafletDelivererRouteRow,
   type LeafletDelivererRow,
 } from "@/data/mocks/leaflets";
-import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
+import { DEMO_STORE_EVENT, listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToDelivererRows, sampleOpenDeliveriesForPicker } from "./adapters";
 import { AddRouteModal } from "./AddRouteModal";
 import {
   RemoveRoutesConfirmModal,
   SkipRouteConfirmModal,
 } from "./LeafletRouteActionModals";
+import {
+  applyLeafletDeliveryStatus,
+  deliveryIdsForDeliverer,
+  type LeafletDeliveryStatusAction,
+} from "./leafletDeliveryStatus";
 
 type StatusFilter = "all" | LeafletDelivererRow["status"];
 
@@ -72,15 +76,18 @@ function StatusBadge({ status }: { status: LeafletDelivererRow["status"] }) {
 function RouteRowActions({
   route,
   delivererName,
+  onConfirm,
   onSkip,
   onRemove,
 }: {
   route: LeafletDelivererRouteRow;
   delivererName: string;
+  onConfirm: (route: LeafletDelivererRouteRow) => void;
   onSkip: (route: LeafletDelivererRouteRow) => void;
   onRemove: (route: LeafletDelivererRouteRow, delivererName: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const alreadyConfirmed = route.response === "confirmed" && !route.isSkipped;
   return (
     <div className="leaflet-card-route-actions" style={{ display: "flex", justifyContent: "flex-end" }}>
       <Dropdown
@@ -98,6 +105,15 @@ function RouteRowActions({
           />
         }
       >
+        {!alreadyConfirmed ? (
+          <DropdownItem
+            label="Confirm route"
+            onSelect={() => {
+              setOpen(false);
+              onConfirm(route);
+            }}
+          />
+        ) : null}
         <DropdownItem
           label="Skip route"
           onSelect={() => {
@@ -120,6 +136,7 @@ function RouteRowActions({
 function routeColumns(
   totalLeaflets: number,
   delivererName: string,
+  onConfirm: (route: LeafletDelivererRouteRow) => void,
   onSkip: (route: LeafletDelivererRouteRow) => void,
   onRemove: (route: LeafletDelivererRouteRow, delivererName: string) => void,
 ): TableColumn<LeafletDelivererRouteRow>[] {
@@ -162,6 +179,7 @@ function routeColumns(
         <RouteRowActions
           route={row}
           delivererName={delivererName}
+          onConfirm={onConfirm}
           onSkip={onSkip}
           onRemove={onRemove}
         />
@@ -173,8 +191,10 @@ function routeColumns(
 type CardActions = {
   onSelectPerson: (deliverer: LeafletDelivererRow) => void;
   onAddRoute: (deliverer: LeafletDelivererRow) => void;
+  onConfirmAll: (deliverer: LeafletDelivererRow) => void;
   onSkipAll: (deliverer: LeafletDelivererRow) => void;
   onRemoveAll: (deliverer: LeafletDelivererRow) => void;
+  onConfirmRoute: (route: LeafletDelivererRouteRow) => void;
   onSkipRoute: (route: LeafletDelivererRouteRow) => void;
   onRemoveRoute: (route: LeafletDelivererRouteRow, delivererName: string) => void;
 };
@@ -189,8 +209,14 @@ function DelivererCard({
   const totalLeaflets = deliverer.routes.reduce((sum, route) => sum + route.leafletCount, 0);
   const columns = useMemo(
     () =>
-      routeColumns(totalLeaflets, deliverer.name, actions.onSkipRoute, actions.onRemoveRoute),
-    [totalLeaflets, deliverer.name, actions.onSkipRoute, actions.onRemoveRoute],
+      routeColumns(
+        totalLeaflets,
+        deliverer.name,
+        actions.onConfirmRoute,
+        actions.onSkipRoute,
+        actions.onRemoveRoute,
+      ),
+    [totalLeaflets, deliverer.name, actions.onConfirmRoute, actions.onSkipRoute, actions.onRemoveRoute],
   );
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -261,6 +287,13 @@ function DelivererCard({
               }}
             />
             <DropdownItem
+              label="Confirm all routes"
+              onSelect={() => {
+                setMenuOpen(false);
+                actions.onConfirmAll(deliverer);
+              }}
+            />
+            <DropdownItem
               label="Skip all routes"
               onSelect={() => {
                 setMenuOpen(false);
@@ -325,9 +358,14 @@ export function LeafletDeliverersPage({
 
   useEffect(() => {
     if (!isDemo) return;
-    setLocalDeliverers(
-      listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
-    );
+    const load = () => {
+      setLocalDeliverers(
+        listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
+      );
+    };
+    load();
+    window.addEventListener(DEMO_STORE_EVENT, load);
+    return () => window.removeEventListener(DEMO_STORE_EVENT, load);
   }, [isDemo, scopeKey]);
 
   function persistDeliverers(next: LeafletDelivererRow[]) {
@@ -362,13 +400,21 @@ export function LeafletDeliverersPage({
   const activeFilterLabel =
     STATUS_FILTER_OPTIONS.find((option) => option.value === statusFilter)?.label ?? "All statuses";
 
-  async function applyUpdates(ids: string[], patch: DeliveriesUpdate, demoMessage: string) {
-    if (isDemo) {
-      toast.success(demoMessage);
-      return;
-    }
-    await Promise.all(ids.map((id) => update(id, patch)));
-    await refetch();
+  async function applyStatus(
+    ids: string[],
+    action: LeafletDeliveryStatusAction,
+    liveMessage: string,
+    demoMessage: string,
+  ) {
+    await applyLeafletDeliveryStatus({
+      isDemo,
+      scopeKey,
+      deliveryIds: ids,
+      action,
+      update,
+      refetch,
+    });
+    toast.success(isDemo ? demoMessage : liveMessage);
   }
 
   async function handleAssign(deliverer: LeafletDelivererRow, delivery: DeliveryWithRelations) {
@@ -409,23 +455,12 @@ export function LeafletDeliverersPage({
     if (!skipTarget) return;
     setSubmitting(true);
     try {
-      await applyUpdates(
+      await applyStatus(
         skipTarget.deliveryIds,
-        { is_skipped: true, response: "needs_cover" },
+        "skip",
+        "Route skipped",
         "Routes skipped — demo mode, saved locally only",
       );
-      if (isDemo) {
-        persistDeliverers(
-          localDeliverers.map((d) => ({
-            ...d,
-            routes: d.routes.map((r) =>
-              skipTarget.deliveryIds.includes(r.deliveryId ?? r.id)
-                ? { ...r, isSkipped: true }
-                : r,
-            ),
-          })),
-        );
-      }
       setSkipTarget(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to skip");
@@ -438,23 +473,12 @@ export function LeafletDeliverersPage({
     if (!removeTarget) return;
     setSubmitting(true);
     try {
-      await applyUpdates(
+      await applyStatus(
         removeTarget.deliveryIds,
-        { person_id: null, is_skipped: false, response: "pending" },
+        "remove",
+        "Deliverer removed",
         "Routes removed — demo mode, saved locally only",
       );
-      if (isDemo) {
-        persistDeliverers(
-          localDeliverers
-            .map((d) => ({
-              ...d,
-              routes: d.routes.filter(
-                (r) => !removeTarget.deliveryIds.includes(r.deliveryId ?? r.id),
-              ),
-            }))
-            .filter((d) => d.routes.length > 0),
-        );
-      }
       setRemoveTarget(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to remove");
@@ -463,22 +487,42 @@ export function LeafletDeliverersPage({
     }
   }
 
+  async function handleConfirm(ids: string[], allRoutes: boolean) {
+    try {
+      await applyStatus(
+        ids,
+        "confirm",
+        allRoutes ? "Deliverer confirmed" : "Route confirmed",
+        allRoutes
+          ? "Deliverer confirmed — demo mode, saved locally only"
+          : "Route confirmed — demo mode, saved locally only",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to confirm");
+    }
+  }
+
   const cardActions: CardActions = {
     onSelectPerson: onSelectDeliverer,
     onAddRoute: setAddFor,
+    onConfirmAll: (deliverer) => {
+      const ids = deliveryIdsForDeliverer(deliverer);
+      if (ids.length === 0) return;
+      void handleConfirm(ids, true);
+    },
     onSkipAll: (deliverer) => {
-      const ids = deliverer.routes
-        .map((r) => r.deliveryId)
-        .filter((id): id is string => Boolean(id));
+      const ids = deliveryIdsForDeliverer(deliverer);
       if (ids.length === 0) return;
       setSkipTarget({ label: `all routes for ${deliverer.name}`, deliveryIds: ids });
     },
     onRemoveAll: (deliverer) => {
-      const ids = deliverer.routes
-        .map((r) => r.deliveryId)
-        .filter((id): id is string => Boolean(id));
+      const ids = deliveryIdsForDeliverer(deliverer);
       if (ids.length === 0) return;
       setRemoveTarget({ personName: deliverer.name, deliveryIds: ids, allRoutes: true });
+    },
+    onConfirmRoute: (route) => {
+      const id = route.deliveryId ?? route.id;
+      void handleConfirm([id], false);
     },
     onSkipRoute: (route) => {
       const id = route.deliveryId ?? route.id;

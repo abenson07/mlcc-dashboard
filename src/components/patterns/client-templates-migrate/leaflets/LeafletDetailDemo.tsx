@@ -45,16 +45,17 @@ import { DelivererPersonPanel } from "./DelivererPersonPanel";
 import { LeafletCommStepsModal } from "./LeafletCommStepsModal";
 import { LeafletDetailsPanel } from "./LeafletDetailsPanel";
 import { demoDeliveriesForComm, leafletRowForComm } from "./demoLeafletComm";
-import { listDemoScoped, patchDemoEntity, writeDemoScoped } from "@/lib/demo/demoStore";
+import { DEMO_STORE_EVENT, listDemoScoped, patchDemoEntity, writeDemoScoped } from "@/lib/demo/demoStore";
 import {
   isUnconfirmedOnlyStep,
   leafletCommSettingsFromDefs,
   snapshotCommSchedule,
 } from "@/lib/leaflets/comm/commSchedule";
-import { deliveriesToRouteRows } from "./adapters";
+import { deliveriesToDelivererRows, deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
   leafletTaskGroupForDueDate,
   formatLeafletTaskDueLabel,
+  sampleDeliverers,
   sampleLeafletDetail,
   sampleLeafletTasks,
   sampleLeaflets,
@@ -245,16 +246,28 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const [view, setView] = useState<LeafletDetailView>("overview");
   const [selection, setSelection] = useState<Selection>(null);
   const [demoTasks, setDemoTasks] = useState<LeafletTaskRow[]>([]);
+  const [demoRoutes, setDemoRoutes] = useState<LeafletRouteRow[]>([]);
+  const [demoDeliverers, setDemoDeliverers] = useState<LeafletDelivererRow[]>([]);
   const [emailOpen, setEmailOpen] = useState(false);
 
   useEffect(() => {
     if (!demo) {
       setDemoTasks([]);
+      setDemoRoutes([]);
+      setDemoDeliverers([]);
       return;
     }
-    setDemoTasks(
-      listDemoScoped<LeafletTaskRow>("leafletTasks", leafletId || "default") ?? sampleLeafletTasks,
-    );
+    const scopeKey = leafletId || "default";
+    const load = () => {
+      setDemoTasks(listDemoScoped<LeafletTaskRow>("leafletTasks", scopeKey) ?? sampleLeafletTasks);
+      setDemoRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
+      setDemoDeliverers(
+        listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
+      );
+    };
+    load();
+    window.addEventListener(DEMO_STORE_EVENT, load);
+    return () => window.removeEventListener(DEMO_STORE_EVENT, load);
   }, [demo, leafletId]);
 
   function persistDemoTasks(next: LeafletTaskRow[]) {
@@ -406,8 +419,22 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   );
 
   const routeRows = useMemo(() => deliveriesToRouteRows(deliveries), [deliveries]);
+  const liveDeliverers = useMemo(() => deliveriesToDelivererRows(deliveries), [deliveries]);
   const openRouteRows = useMemo(() => routeRows.filter((r) => r.status === "unassigned"), [routeRows]);
   const skippedRouteRows = useMemo(() => routeRows.filter((r) => r.status === "skipped"), [routeRows]);
+
+  const resolvedRoute =
+    selection?.kind === "route"
+      ? (demo
+          ? demoRoutes.find((row) => row.id === selection.row.id)
+          : routeRows.find((row) => row.id === selection.row.id)) ?? selection.row
+      : null;
+  const resolvedDeliverer =
+    selection?.kind === "person"
+      ? (demo
+          ? demoDeliverers.find((row) => row.id === selection.row.id)
+          : liveDeliverers.find((row) => row.id === selection.row.id)) ?? null
+      : null;
 
   async function handleCommSent(stepKey: string) {
     if (demo) {
@@ -518,6 +545,15 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     );
   }
 
+  useEffect(() => {
+    if (selection?.kind !== "person") return;
+    if (demo && demoDeliverers.length === 0) return;
+    if (!resolvedDeliverer) setSelection(null);
+  }, [demo, demoDeliverers.length, resolvedDeliverer, selection?.kind]);
+
+  const sideContentVisible =
+    selection != null && (selection.kind !== "person" || resolvedDeliverer != null);
+
   const body =
     view === "details" ? (
       <div
@@ -594,8 +630,6 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
       />
     );
 
-  const sideContentVisible = selection != null;
-
   return (
     <div style={{ height: "100%" }}>
       <FoundationLayout
@@ -605,15 +639,23 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         sideContent={
           selection ? (
             <OutlinedPanel onClose={() => setSelection(null)}>
-              {selection.kind === "route" ? (
-                <RouteDetailPanel route={selection.row} />
+              {selection.kind === "route" && resolvedRoute ? (
+                <RouteDetailPanel
+                  route={resolvedRoute}
+                  leafletId={leafletId || leaflet.id}
+                  demo={demo}
+                />
               ) : selection.kind === "invoice" ? (
                 <LeafletInvoiceDetailPanel invoice={selection.row} onPaid={refetchStripeInvoices} />
-              ) : selection.kind === "person" ? (
-                <DelivererPersonPanel deliverer={selection.row} />
-              ) : (
+              ) : selection.kind === "person" && resolvedDeliverer ? (
+                <DelivererPersonPanel
+                  deliverer={resolvedDeliverer}
+                  leafletId={leafletId || leaflet.id}
+                  demo={demo}
+                />
+              ) : selection.kind === "story" ? (
                 <StoryDetailPanel story={selection.row} />
-              )}
+              ) : null}
             </OutlinedPanel>
           ) : null
         }
