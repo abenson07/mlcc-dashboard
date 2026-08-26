@@ -39,6 +39,11 @@ export type NewLeafletModalProps = {
 
 type Step = 1 | 2 | 3;
 
+// Budget + sponsorship tiers (and the confirm review of them) are skipped
+// for now. Create from the dates step using suggested title + seeded tiers.
+// Flip this to true to restore the old 3-step flow.
+const INCLUDE_BUDGET_AND_SPONSORSHIP_STEP = false;
+
 type TierDraft = SponsorshipTierSeed & { key: string };
 
 function newTierKey() {
@@ -167,7 +172,10 @@ function TiersTable({
   );
 }
 
-/** Multi-step create flow: delivery dates → name/budget/tiers → confirm. */
+/**
+ * Leaflet create flow. Dates → create when INCLUDE_BUDGET_AND_SPONSORSHIP_STEP is
+ * false. Set that flag to true for dates → name/budget/tiers → confirm.
+ */
 export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalProps) {
   const { enabled: demo } = useDemoModeOptional();
   const { store } = useDemoGuard();
@@ -295,6 +303,8 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
   const modalTitle =
     step === 1 ? "When is this leaflet being delivered?" : step === 2 ? "Name and sponsorships" : "Confirm leaflet";
 
+  const createDisabled = saving || duplicate || !title.trim() || !distributionDate;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -316,15 +326,24 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
             />
           )}
           {step === 1 ? (
-            <Button
-              label="Continue"
-              variant="primary"
-              disabled={!distributionDate}
-              onClick={() => {
-                setError(null);
-                setStep(2);
-              }}
-            />
+            INCLUDE_BUDGET_AND_SPONSORSHIP_STEP ? (
+              <Button
+                label="Continue"
+                variant="primary"
+                disabled={!distributionDate}
+                onClick={() => {
+                  setError(null);
+                  setStep(2);
+                }}
+              />
+            ) : (
+              <Button
+                label={saving ? "Creating…" : "Create leaflet"}
+                variant="primary"
+                disabled={createDisabled}
+                onClick={() => void handleCreate()}
+              />
+            )
           ) : step === 2 ? (
             <Button
               label="Continue"
@@ -339,7 +358,7 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
             <Button
               label={saving ? "Creating…" : "Create leaflet"}
               variant="primary"
-              disabled={saving || duplicate || !title.trim()}
+              disabled={createDisabled}
               onClick={() => void handleCreate()}
             />
           )}
@@ -394,6 +413,11 @@ export function NewLeafletModal({ isOpen, onClose, onCreate }: NewLeafletModalPr
                 Add a second distribution date
               </button>
             )}
+            {!INCLUDE_BUDGET_AND_SPONSORSHIP_STEP && duplicate ? (
+              <Text size="sm" display="block" style={errorTextStyle}>
+                A leaflet with this name already exists. Choose a different name to continue.
+              </Text>
+            ) : null}
           </>
         ) : null}
 
