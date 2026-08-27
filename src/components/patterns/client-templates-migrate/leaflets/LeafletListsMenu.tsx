@@ -1,54 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { List as ListIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Building2 } from "lucide-react";
+import { useBusinesses } from "hooks";
 import { IconButton } from "@/components/patterns/primitives/IconButton";
 import { Icon } from "@/components/patterns/primitives/Icon";
-import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { LeafletListModal } from "./LeafletListModal";
-import type { LeafletListView } from "@/data/mocks/leaflets";
+import { sampleLeafletBusinessList } from "@/data/mocks/leaflets";
 
-const OPTIONS: { view: LeafletListView; label: string }[] = [
-  { view: "members", label: "Business List" },
-  { view: "events", label: "Upcoming Events" },
-];
+export type LeafletListsMenuProps = {
+  demo?: boolean;
+};
 
 /**
- * Topbar "Lists for leaflet" control — a dropdown of the available text
- * lists; picking one opens `LeafletListModal` for it.
+ * Topbar business-members control — opens a modal of current member
+ * businesses with copy-to-clipboard.
  */
-export function LeafletListsMenu() {
-  const [isMenuOpen, setMenuOpen] = useState(false);
-  const [selectedView, setSelectedView] = useState<LeafletListView | null>(null);
+export function LeafletListsMenu({ demo = false }: LeafletListsMenuProps) {
+  const [isOpen, setOpen] = useState(false);
+  const { businesses } = useBusinesses({
+    autoFetch: !demo,
+    filters: { isMember: true },
+  });
 
-  function handleSelect(view: LeafletListView) {
-    setMenuOpen(false);
-    setSelectedView(view);
-  }
+  const names = useMemo(
+    () =>
+      demo
+        ? sampleLeafletBusinessList
+        : businesses.map((business) => business.business_name).filter((name): name is string => Boolean(name)),
+    [demo, businesses],
+  );
 
   return (
     <>
-      <Dropdown
-        label="Lists for leaflet"
-        open={isMenuOpen}
-        onOpenChange={setMenuOpen}
-        placement="below"
-        alignment="end"
-        trigger={
-          <IconButton
-            label="Lists for leaflet"
-            variant="ghost"
-            size="sm"
-            icon={<Icon icon={ListIcon} size="sm" color="secondary" />}
-          />
-        }
-      >
-        {OPTIONS.map((option) => (
-          <DropdownItem key={option.view} label={option.label} onSelect={() => handleSelect(option.view)} />
-        ))}
-      </Dropdown>
+      <IconButton
+        label="Business list"
+        variant="ghost"
+        size="sm"
+        icon={<Icon icon={Building2} size="sm" color="secondary" />}
+        onClick={() => setOpen(true)}
+      />
 
-      <LeafletListModal view={selectedView} onClose={() => setSelectedView(null)} />
+      <LeafletListModal isOpen={isOpen} names={names} onClose={() => setOpen(false)} />
     </>
   );
 }
