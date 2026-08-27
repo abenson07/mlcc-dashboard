@@ -1,37 +1,80 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, QrCode as QrCodeIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { QrCode as QrCodeIcon } from "lucide-react";
+import { useLeafletQr } from "hooks";
 import { IconButton } from "@/components/patterns/primitives/IconButton";
 import { Icon } from "@/components/patterns/primitives/Icon";
-import { Dropdown, DropdownItem, DropdownSeparator } from "@/components/patterns/shared/dropdown";
-import { LeafletQrCodeModal } from "./LeafletQrCodeModal";
-import { sampleLeafletQrCodes, type LeafletQrCode } from "@/data/mocks/leaflets";
+import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
+import { QrCodePreviewModal } from "@/components/patterns/client-templates-migrate/qr-codes/QrCodePreviewModal";
+import { sampleLeafletQrCodes } from "@/data/mocks/leaflets";
+import type { QrCodes } from "@/types/database";
+
+export type LeafletQrMenuProps = {
+  demo?: boolean;
+  membershipQrCodeId?: string | null;
+  openRoutesQrCodeId?: string | null;
+};
+
+type LeafletQrMenuItem = {
+  id: string;
+  label: string;
+  code: QrCodes;
+};
+
+function sampleToQrCodes(): LeafletQrMenuItem[] {
+  const now = new Date().toISOString();
+  return sampleLeafletQrCodes.map((sample) => ({
+    id: sample.id,
+    label: sample.label,
+    code: {
+      id: sample.id,
+      name: sample.label,
+      url: sample.url,
+      created_at: now,
+      updated_at: now,
+    },
+  }));
+}
 
 /**
- * Topbar QR-codes control — a dropdown listing this leaflet's QR codes plus
- * a "Generate new" action; picking one opens `LeafletQrCodeModal` for it.
+ * Topbar QR-codes control — a dropdown of this leaflet's membership and
+ * open-routes QR codes; picking one opens `QrCodePreviewModal`.
  */
-export function LeafletQrMenu() {
-  const [codes, setCodes] = useState<LeafletQrCode[]>(sampleLeafletQrCodes);
+export function LeafletQrMenu({
+  demo = false,
+  membershipQrCodeId = null,
+  openRoutesQrCodeId = null,
+}: LeafletQrMenuProps) {
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [selectedCode, setSelectedCode] = useState<LeafletQrCode | null>(null);
+  const [selectedCode, setSelectedCode] = useState<QrCodes | null>(null);
 
-  function handleSelect(code: LeafletQrCode) {
-    setMenuOpen(false);
-    setSelectedCode(code);
-  }
+  const { data: membershipQr } = useLeafletQr(demo ? null : membershipQrCodeId);
+  const { data: openRoutesQr } = useLeafletQr(demo ? null : openRoutesQrCodeId);
 
-  function handleGenerate() {
-    const id = `qr-generated-${Date.now()}`;
-    const generated: LeafletQrCode = {
-      id,
-      label: `New QR Code ${codes.length + 1}`,
-      url: `https://mapleleafcommunity.org/qr/${id}`,
-    };
-    setCodes((prev) => [...prev, generated]);
+  const items = useMemo((): LeafletQrMenuItem[] => {
+    if (demo) return sampleToQrCodes();
+    const next: LeafletQrMenuItem[] = [];
+    if (membershipQr) {
+      next.push({
+        id: membershipQr.id,
+        label: "Membership QR Code",
+        code: { ...membershipQr, name: "Membership QR Code" },
+      });
+    }
+    if (openRoutesQr) {
+      next.push({
+        id: openRoutesQr.id,
+        label: "Leaflet Routes QR Code",
+        code: { ...openRoutesQr, name: "Leaflet Routes QR Code" },
+      });
+    }
+    return next;
+  }, [demo, membershipQr, openRoutesQr]);
+
+  function handleSelect(item: LeafletQrMenuItem) {
     setMenuOpen(false);
-    setSelectedCode(generated);
+    setSelectedCode(item.code);
   }
 
   return (
@@ -51,18 +94,16 @@ export function LeafletQrMenu() {
           />
         }
       >
-        {codes.map((code) => (
-          <DropdownItem key={code.id} label={code.label} onSelect={() => handleSelect(code)} />
-        ))}
-        <DropdownSeparator />
-        <DropdownItem
-          label="Generate new QR code"
-          icon={<Plus size={16} strokeWidth={1.75} />}
-          onSelect={handleGenerate}
-        />
+        {items.length === 0 ? (
+          <DropdownItem label="No QR codes for this leaflet" disabled />
+        ) : (
+          items.map((item) => (
+            <DropdownItem key={item.id} label={item.label} onSelect={() => handleSelect(item)} />
+          ))
+        )}
       </Dropdown>
 
-      <LeafletQrCodeModal code={selectedCode} onClose={() => setSelectedCode(null)} />
+      <QrCodePreviewModal code={selectedCode} onClose={() => setSelectedCode(null)} />
     </>
   );
 }

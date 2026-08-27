@@ -44,6 +44,8 @@ import { StoryDetailPanel } from "./StoryDetailPanel";
 import { DelivererPersonPanel } from "./DelivererPersonPanel";
 import { LeafletCommStepsModal } from "./LeafletCommStepsModal";
 import { LeafletDetailsPanel } from "./LeafletDetailsPanel";
+import { LeafletQrMenu } from "./LeafletQrMenu";
+import { LeafletListsMenu } from "./LeafletListsMenu";
 import { demoDeliveriesForComm, leafletRowForComm } from "./demoLeafletComm";
 import { DEMO_STORE_EVENT, listDemoScoped, patchDemoEntity, writeDemoScoped } from "@/lib/demo/demoStore";
 import {
@@ -274,6 +276,11 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     setDemoTasks(next);
     writeDemoScoped("leafletTasks", leafletId || "default", next);
   }
+
+  const liveLeafletRow = useMemo(
+    () => leaflets.find((row) => row.id === leafletId),
+    [leaflets, leafletId],
+  );
 
   const leaflet = useMemo(() => {
     if (!demo) return liveLeafletDetail(leafletId, leaflets);
@@ -668,23 +675,32 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
               isFavorite: isFavorite(currentRoute),
               onFavoriteClick: () =>
                 void toggleFavorite({ name: leaflet.title, route: currentRoute }),
-              endContent:
-                view === "deliverers" ? (
-                  <>
-                    <Button
-                      label="Download Top Sheets"
-                      variant="secondary"
-                      icon={<Download size={14} strokeWidth={1.75} />}
-                      onClick={downloadTopSheets}
-                    />
-                    <Button
-                      label="Email deliverers"
-                      variant="secondary"
-                      icon={<Mail size={14} strokeWidth={1.75} />}
-                      onClick={() => setEmailOpen(true)}
-                    />
-                  </>
-                ) : undefined,
+              endContent: (
+                <>
+                  <LeafletListsMenu demo={demo} />
+                  <LeafletQrMenu
+                    demo={demo}
+                    membershipQrCodeId={liveLeafletRow?.membership_qr_code_id ?? null}
+                    openRoutesQrCodeId={liveLeafletRow?.open_routes_qr_code_id ?? null}
+                  />
+                  {view === "deliverers" ? (
+                    <>
+                      <Button
+                        label="Download Top Sheets"
+                        variant="secondary"
+                        icon={<Download size={14} strokeWidth={1.75} />}
+                        onClick={downloadTopSheets}
+                      />
+                      <Button
+                        label="Email deliverers"
+                        variant="secondary"
+                        icon={<Mail size={14} strokeWidth={1.75} />}
+                        onClick={() => setEmailOpen(true)}
+                      />
+                    </>
+                  ) : null}
+                </>
+              ),
             }}
             controls={
               <ViewTabs aria-label="Leaflet views">
