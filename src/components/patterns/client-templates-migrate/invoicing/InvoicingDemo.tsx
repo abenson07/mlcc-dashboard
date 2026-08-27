@@ -104,22 +104,24 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
     return createSponsorship(...args);
   }
 
-  const topbarAction =
-    view === "invoices" ? (
+  const topbarAction = (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <Button
-        label="New Invoice"
+        label="New invoice"
         variant="secondary"
         icon={<Plus size={14} strokeWidth={1.75} />}
         onClick={() => setIsCreateInvoiceOpen(true)}
       />
-    ) : view === "sponsorships" ? (
-      <Button
-        label="New Sponsorship"
-        variant="secondary"
-        icon={<Plus size={14} strokeWidth={1.75} />}
-        onClick={() => setIsCreateSponsorshipOpen(true)}
-      />
-    ) : null;
+      {view === "sponsorships" ? (
+        <Button
+          label="New sponsorship"
+          variant="secondary"
+          icon={<Plus size={14} strokeWidth={1.75} />}
+          onClick={() => setIsCreateSponsorshipOpen(true)}
+        />
+      ) : null}
+    </div>
+  );
 
   const toolbar =
     view === "invoices" ? (
