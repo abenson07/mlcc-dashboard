@@ -48,11 +48,7 @@ import { LeafletQrMenu } from "./LeafletQrMenu";
 import { LeafletListsMenu } from "./LeafletListsMenu";
 import { demoDeliveriesForComm, leafletRowForComm } from "./demoLeafletComm";
 import { DEMO_STORE_EVENT, listDemoScoped, patchDemoEntity, writeDemoScoped } from "@/lib/demo/demoStore";
-import {
-  isUnconfirmedOnlyStep,
-  leafletCommSettingsFromDefs,
-  snapshotCommSchedule,
-} from "@/lib/leaflets/comm/commSchedule";
+import { leafletCommSettingsFromDefs, snapshotCommSchedule } from "@/lib/leaflets/comm/commSchedule";
 import { deliveriesToDelivererRows, deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
   leafletTaskGroupForDueDate,
@@ -253,6 +249,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const [demoRoutes, setDemoRoutes] = useState<LeafletRouteRow[]>([]);
   const [demoDeliverers, setDemoDeliverers] = useState<LeafletDelivererRow[]>([]);
   const [emailOpen, setEmailOpen] = useState(false);
+  const [emailPersonId, setEmailPersonId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!demo) {
@@ -414,10 +411,19 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     [commSettings, commLeafletRow, commDeliveries],
   );
 
-  const activeCommStage = commStages.find((s) => s.state === "active");
-  const allCommSent = commStages.length > 0 && commStages.every((s) => s.state === "completed");
+  const recipientCountByStep = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const stage of commStages) {
+      if (!stage.stepKey) continue;
+      out[stage.stepKey] = commRecipientCount(stage.stepKey, commDeliveries);
+    }
+    return out;
+  }, [commStages, commDeliveries]);
 
-  const recipientCount = commRecipientCount(activeCommStage?.stepKey, commDeliveries);
+  function openEmailModal(personId?: string) {
+    setEmailPersonId(personId ?? null);
+    setEmailOpen(true);
+  }
 
   const { stories: leafletStoryRows } = useStories({ filters: { leafletId: leafletId || null } });
   const { people } = usePeople({ autoFetch: !demo });
@@ -587,6 +593,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         leafletId={leafletId || leaflet.id}
         demo={demo}
         onSelectDeliverer={selectDeliverer}
+        onEmailDeliverer={(row) => openEmailModal(row.id)}
       />
     ) : view === "routes" ? (
       <LeafletRoutesPage
@@ -625,17 +632,11 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         skippedRoutes={demo ? undefined : skippedRouteRows}
         sponsors={demo ? undefined : sponsorRows}
         stories={demo ? undefined : storyRows}
-        onSendReminder={() => setEmailOpen(true)}
-        nextStepTitle={allCommSent ? "Communications complete" : (activeCommStage?.name ?? "Deliverer emails")}
-        nextStepDescription={
-          allCommSent
-            ? "All deliverer emails have been sent."
-            : isUnconfirmedOnlyStep(activeCommStage?.stepKey ?? "")
-              ? `Ready to send to ${recipientCount} deliverer${recipientCount === 1 ? "" : "s"} who have not confirmed.`
-              : `Ready to send to ${recipientCount} deliverer${recipientCount === 1 ? "" : "s"}.`
-        }
+        onSendReminder={() => openEmailModal()}
+        nextStepTitle="Deliverer emails"
+        nextStepDescription="Choose a template to send. Hover a chip to see a sample deliverer’s value."
         nextStepSendLabel="Send"
-        showNextStepSend={!allCommSent && Boolean(activeCommStage)}
+        showNextStepSend
       />
     );
 
@@ -661,6 +662,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
                   deliverer={resolvedDeliverer}
                   leafletId={leafletId || leaflet.id}
                   demo={demo}
+                  onEmail={() => openEmailModal(resolvedDeliverer.id)}
                 />
               ) : selection.kind === "story" ? (
                 <StoryDetailPanel story={selection.row} />
@@ -697,7 +699,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
                         label="Email deliverers"
                         variant="secondary"
                         icon={<Mail size={14} strokeWidth={1.75} />}
-                        onClick={() => setEmailOpen(true)}
+                        onClick={() => openEmailModal()}
                       />
                     </>
                   ) : null}
@@ -746,11 +748,17 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
 
       <LeafletCommStepsModal
         isOpen={emailOpen}
-        onClose={() => setEmailOpen(false)}
+        onClose={() => {
+          setEmailOpen(false);
+          setEmailPersonId(null);
+        }}
         leafletId={leafletId || leaflet.id}
         leafletTitle={leaflet.title}
+        distributionDate={leaflet.distributionDate}
         stages={commStages}
-        recipientCount={recipientCount}
+        deliverers={demo ? demoDeliverers : liveDeliverers}
+        recipientCountByStep={recipientCountByStep}
+        personId={emailPersonId}
         onSent={handleCommSent}
       />
     </div>

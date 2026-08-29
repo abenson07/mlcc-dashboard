@@ -23,12 +23,14 @@ export type DelivererPersonPanelProps = {
   deliverer: LeafletDelivererRow;
   leafletId: string;
   demo?: boolean;
+  onEmail?: () => void;
 };
 
 export function DelivererPersonPanel({
   deliverer,
   leafletId,
   demo = false,
+  onEmail,
 }: DelivererPersonPanelProps) {
   const { enabled: demoGuard } = useDemoGuard();
   const isDemo = demo || demoGuard;
@@ -143,6 +145,15 @@ export function DelivererPersonPanel({
             />
           }
         >
+          {onEmail ? (
+            <DropdownItem
+              label="Email this deliverer"
+              onSelect={() => {
+                setMenuOpen(false);
+                onEmail();
+              }}
+            />
+          ) : null}
           <DropdownItem
             label="Confirm all routes"
             onSelect={() => {
@@ -203,6 +214,16 @@ export function DelivererPersonPanel({
         ))}
       </SideContentSection>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {onEmail ? (
+          <Button
+            label="Email this deliverer"
+            variant="secondary"
+            size="sm"
+            width="100%"
+            icon={<Mail size={14} strokeWidth={1.75} />}
+            onClick={onEmail}
+          />
+        ) : null}
         <Button
           label="Confirm all routes"
           variant="primary"

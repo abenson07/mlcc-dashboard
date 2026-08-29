@@ -10,7 +10,7 @@ import { sampleDeliverers, type LeafletRouteRow } from "@/data/mocks/leaflets";
 import type { AssignDelivererPerson, AssignDelivererScope } from "./leafletDeliveryStatus";
 import { AssignScopeConfirmModal } from "./LeafletRouteActionModals";
 
-const MAX_RESULTS = 8;
+const MAX_RESULTS = 24;
 
 export type AssignDelivererModalProps = {
   isOpen: boolean;
@@ -21,6 +21,77 @@ export type AssignDelivererModalProps = {
   onClose: () => void;
   onSelect: (person: AssignDelivererPerson) => void;
 };
+
+function PersonPickRow({
+  person,
+  onSelect,
+}: {
+  person: AssignDelivererPerson;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      style={{
+        boxSizing: "border-box",
+        appearance: "none",
+        background: "transparent",
+        border: "none",
+        margin: 0,
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 2,
+        width: "100%",
+        padding: "10px 12px",
+        borderRadius: 6,
+        color: "var(--linear-color-ink)",
+        fontFamily: "inherit",
+        textAlign: "left",
+        lineHeight: 1.4,
+      }}
+      onMouseEnter={(event) => {
+        event.currentTarget.style.background = "var(--linear-color-sidebar-item-selected)";
+      }}
+      onMouseLeave={(event) => {
+        event.currentTarget.style.background = "transparent";
+      }}
+    >
+      <span
+        style={{
+          display: "block",
+          width: "100%",
+          fontSize: 13,
+          fontWeight: 510,
+          lineHeight: "20px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {person.name}
+      </span>
+      {person.email ? (
+        <span
+          style={{
+            display: "block",
+            width: "100%",
+            fontSize: 12,
+            lineHeight: "16px",
+            color: "var(--linear-color-ink-subtle)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {person.email}
+        </span>
+      ) : null}
+    </button>
+  );
+}
 
 export function AssignDelivererModal({
   isOpen,
@@ -35,8 +106,7 @@ export function AssignDelivererModal({
   const trimmed = search.trim();
 
   const { people, loading } = usePeople({
-    autoFetch: isOpen && !demo && trimmed.length > 0,
-    filters: { search: trimmed || undefined },
+    autoFetch: !demo,
   });
 
   useEffect(() => {
@@ -51,7 +121,7 @@ export function AssignDelivererModal({
     return source
       .filter((p) => p.id !== excludePersonId)
       .filter((p) => {
-        if (!q) return false;
+        if (!q) return true;
         return (
           p.name.toLowerCase().includes(q) || (p.email ?? "").toLowerCase().includes(q)
         );
@@ -76,43 +146,42 @@ export function AssignDelivererModal({
           Choose a deliverer for{" "}
           <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{routeLabel}</span>.
         </Text>
-        <TextInput label="Search people" value={search} onChange={setSearch} />
-        {loading && !demo ? (
+        <TextInput
+          label="Search people"
+          value={search}
+          onChange={setSearch}
+          autoFocus
+          placeholder="Name or email"
+        />
+        {loading && !demo && people.length === 0 ? (
           <Text size="sm" color="secondary">
-            Searching…
-          </Text>
-        ) : null}
-        {trimmed.length === 0 ? (
-          <Text size="sm" color="secondary">
-            Type a name or email to search.
+            Loading people…
           </Text>
         ) : candidates.length === 0 && !loading ? (
           <Text size="sm" color="secondary">
             No matching people.
           </Text>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div
+            role="listbox"
+            aria-label="People"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxHeight: 280,
+              overflow: "auto",
+              padding: 4,
+              borderRadius: 8,
+              border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+              background: "var(--linear-color-canvas)",
+            }}
+          >
             {candidates.map((person) => (
-              <button
+              <PersonPickRow
                 key={person.id}
-                type="button"
-                onClick={() => onSelect(person)}
-                style={{
-                  all: "unset",
-                  boxSizing: "border-box",
-                  cursor: "pointer",
-                  padding: "10px 12px",
-                  borderRadius: 6,
-                  border: "var(--linear-border-width) solid var(--linear-color-hairline)",
-                  color: "var(--linear-color-ink)",
-                  fontSize: 13,
-                }}
-              >
-                {person.name}
-                {person.email ? (
-                  <span style={{ color: "var(--linear-color-ink-subtle)" }}> · {person.email}</span>
-                ) : null}
-              </button>
+                person={person}
+                onSelect={() => onSelect(person)}
+              />
             ))}
           </div>
         )}
