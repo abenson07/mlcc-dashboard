@@ -13,16 +13,33 @@ export function buildLeafletCommEmailHtml(params: {
   routeLines: string[];
   actionUrl: string;
   variant?: "confirm" | "complete";
+  stepKey?: string;
 }) {
   const firstName = escapeHtml(params.delivererName.split(" ")[0] ?? params.delivererName);
   const title = escapeHtml(params.leafletTitle);
   const date = escapeHtml(params.distributionDate);
   const isComplete = params.variant === "complete";
-  const heading = isComplete ? "Report delivery complete" : "Confirm your delivery routes";
-  const actionLabel = isComplete ? "Mark delivered" : "Confirm or respond";
+  const isReminder = params.stepKey === "pre_distribution_reminder";
+  const isFollowup = params.stepKey === "confirmation_followup";
+  const heading = isComplete
+    ? "Report delivery complete"
+    : isReminder
+      ? "Distribution is coming up"
+      : isFollowup
+        ? "We still need you to confirm"
+        : "Confirm your delivery routes";
+  const actionLabel = isComplete
+    ? "Mark delivered"
+    : isReminder
+      ? "View your routes"
+      : "Confirm or respond";
   const intro = isComplete
     ? `Thanks for helping deliver the <strong>${title}</strong> leaflet on <strong>${date}</strong>. When you&rsquo;re finished, let us know using the link below.`
-    : `You&rsquo;re scheduled to help deliver the <strong>${title}</strong> leaflet on <strong>${date}</strong>.`;
+    : isReminder
+      ? `The <strong>${title}</strong> leaflet goes out on <strong>${date}</strong>. You can pick up your packets at Project9 Brewing. Here are the routes you&rsquo;re covering.`
+      : isFollowup
+        ? `We haven&rsquo;t heard back yet. Please confirm your routes for the <strong>${title}</strong> leaflet on <strong>${date}</strong>.`
+        : `You&rsquo;re scheduled to help deliver the <strong>${title}</strong> leaflet on <strong>${date}</strong>.`;
   const routesHtml = params.routeLines
     .map((line) => `<li style="margin:0 0 8px">${escapeHtml(line)}</li>`)
     .join("");

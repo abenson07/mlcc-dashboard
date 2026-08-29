@@ -43,6 +43,7 @@ export function ThemeProvider({ children, defaultMode = "dark" }: ThemeProviderP
   return (
     <ThemeContext.Provider value={{ mode, toggle }}>
       <div
+        data-linear-theme=""
         style={
           {
             ...linearTokenVars,
