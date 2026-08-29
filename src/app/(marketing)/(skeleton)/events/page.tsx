@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CmsGrid12Section } from "@marketing/components/byq/CmsGrid12Section";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
+import { getMergedUpcomingEvents } from "@marketing/data/events";
 
 export const metadata: Metadata = {
   title: "Events | Maple Leaf Community Council",
@@ -8,10 +9,12 @@ export const metadata: Metadata = {
     "Upcoming Maple Leaf Community Council events: Silent Book Club, Summer Social, neighborhood gatherings, and more.",
 };
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  const events = await getMergedUpcomingEvents();
+
   return (
     <main>
-      <CmsGrid12Section title="Events" />
+      <CmsGrid12Section title="Events" events={events} />
       <CtaSection />
     </main>
   );

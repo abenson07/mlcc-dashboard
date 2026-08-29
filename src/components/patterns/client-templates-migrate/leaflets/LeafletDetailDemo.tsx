@@ -142,17 +142,19 @@ function toLeafletSponsorRow(s: SponsorshipWithParent): LeafletSponsorRow {
 function toLeafletStoryRow(row: {
   id: string;
   title: string;
-  author_id: string | null;
+  author?: string | null;
+  author_id?: string | null;
   status: string;
   publish_date: string | null;
 }, authorNameById: Map<string, string>): LeafletStoryRow {
   const date = row.publish_date
     ? new Date(`${row.publish_date}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "—";
+  const authorFromPerson = row.author_id ? authorNameById.get(row.author_id) : undefined;
   return {
     id: row.id,
     title: row.title,
-    author: (row.author_id && authorNameById.get(row.author_id)) || "—",
+    author: authorFromPerson || row.author || "—",
     type: "—",
     date,
     time: "—",

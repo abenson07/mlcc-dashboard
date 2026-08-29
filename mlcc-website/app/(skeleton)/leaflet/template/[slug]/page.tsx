@@ -3,22 +3,23 @@ import { notFound } from "next/navigation";
 import { CmsPageSection } from "@marketing/components/byq/CmsPageSection";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
 import {
-  getLeafletStory,
-  getPublishedLeafletStories,
-  getRelatedLeafletStories,
+  loadLeafletStory,
+  loadPublishedLeafletStories,
+  loadRelatedLeafletStories,
 } from "@marketing/data/leaflet-stories";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getPublishedLeafletStories().map((story) => ({ slug: story.slug }));
+export async function generateStaticParams() {
+  const stories = await loadPublishedLeafletStories();
+  return stories.map((story) => ({ slug: story.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const story = getLeafletStory(slug);
+  const story = await loadLeafletStory(slug);
 
   if (!story) {
     return {};
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function LeafletStoryTemplatePage({ params }: PageProps) {
   const { slug } = await params;
-  const story = getLeafletStory(slug);
+  const story = await loadLeafletStory(slug);
 
   if (!story || story.draft) {
     notFound();
@@ -43,7 +44,7 @@ export default async function LeafletStoryTemplatePage({ params }: PageProps) {
       <CmsPageSection
         title={story.title}
         story={story}
-        relatedStories={getRelatedLeafletStories(slug)}
+        relatedStories={await loadRelatedLeafletStories(slug)}
       />
       <CtaSection />
     </main>

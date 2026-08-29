@@ -114,8 +114,11 @@ export default function StoryDetailPanel({ story, onClose, onDeleted }: StoryDet
           id="story-author"
           className="lf-select"
           style={{ width: "100%" }}
-          value={story.author_id ?? ""}
-          onChange={(e) => void update(story.id, { author_id: e.target.value || null })}
+          value={people.find((p) => p.full_name === story.author)?.id ?? ""}
+          onChange={(e) => {
+            const person = people.find((p) => p.id === e.target.value);
+            void update(story.id, { author: person?.full_name ?? "" });
+          }}
         >
           <option value="">Unassigned</option>
           {people.map((person) => (

@@ -569,20 +569,21 @@ export default function EventDetailsPanel({
     try {
       const nextStarts = combineDateTime(eventDate, startTime);
       const nextEnds = showEndTime && endTime ? combineDateTime(eventDate, endTime) : null;
+      const fieldPayload = {
+        ...fd,
+        location: location.trim(),
+        address: address.trim() || undefined,
+        location_is_generic: locationIsGeneric,
+        description: description.trim(),
+        documents,
+        capacity: undefined,
+      };
       await updateEvent({
         name: name.trim(),
         starts_at: nextStarts,
         ends_at: nextEnds,
         date: eventDate || null,
-        field_data: {
-          ...fd,
-          location: location.trim(),
-          address: address.trim() || undefined,
-          location_is_generic: locationIsGeneric,
-          description: description.trim(),
-          documents,
-          capacity: undefined,
-        },
+        field_data: fieldPayload,
       });
       setBaseline(snapshot);
     } catch (err) {

@@ -1,3 +1,8 @@
+import {
+  mergeStaticWithPublished,
+  type PublishedEventRow,
+} from "./mergePublishedEvents";
+
 export type EventDetailBlock =
   | { kind: "heading"; text: string; size?: "h5" | "h6" }
   | { kind: "paragraph"; text: string; linkText?: string; href?: string }
@@ -396,6 +401,66 @@ export function getUpcomingEvents(eventList: Event[] = events): Event[] {
   return eventList.filter((event) => new Date(event.dateIso).getTime() >= now);
 }
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+async function fetchJson<T>(pathAndQuery: string, method: "GET" | "POST" = "GET"): Promise<T | null> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  try {
+    const response = await fetch(`${SUPABASE_URL}${pathAndQuery}`, {
+      method,
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        ...(method === "POST" ? { "Content-Type": "application/json" } : {}),
+      },
+      body: method === "POST" ? "{}" : undefined,
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchPublishedEventRows(): Promise<PublishedEventRow[]> {
+  const params = new URLSearchParams({
+    select: "name,starts_at,slug,committee,field_data",
+    publish_status: "eq.published",
+    slug: "not.is.null",
+  });
+  const rows = await fetchJson<PublishedEventRow[]>(`/rest/v1/events?${params.toString()}`);
+  return rows ?? [];
+}
+
+export async function fetchUnpublishedEventSlugs(): Promise<string[]> {
+  const rows = await fetchJson<{ slug: string | null }[]>(
+    `/rest/v1/rpc/unpublished_event_slugs`,
+    "POST",
+  );
+  if (!rows) return [];
+  return rows.map((row) => row.slug).filter((slug): slug is string => Boolean(slug));
+}
+
+export async function getMergedEvents(): Promise<Event[]> {
+  const [published, unpublishedSlugs] = await Promise.all([
+    fetchPublishedEventRows(),
+    fetchUnpublishedEventSlugs(),
+  ]);
+  return mergeStaticWithPublished(events, published, unpublishedSlugs);
+}
+
+export async function getMergedUpcomingEvents(): Promise<Event[]> {
+  return getUpcomingEvents(await getMergedEvents());
+}
+
+export async function getMergedEvent(slug: string): Promise<Event | undefined> {
+  const merged = await getMergedEvents();
+  return merged.find((item) => item.slug === slug);
+}
+
 export const events: Event[] = [
   event({
     slug: "silent-book-club-at-watershed-pub",
@@ -598,8 +663,12 @@ export function getEventPageHref(event: Event): string {
   return `/events/${event.slug}`;
 }
 
-export function getRelatedEvents(currentSlug?: string, limit = 2): Event[] {
-  return getUpcomingEvents(events)
+export function getRelatedEvents(
+  currentSlug?: string,
+  limit = 2,
+  eventList: Event[] = events,
+): Event[] {
+  return getUpcomingEvents(eventList)
     .filter((item) => item.slug !== currentSlug)
     .slice(0, limit);
 }

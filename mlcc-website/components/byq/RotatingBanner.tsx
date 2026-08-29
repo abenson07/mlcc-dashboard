@@ -2,33 +2,31 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { getBannerItems } from "@marketing/data/banner";
+import type { BannerItem } from "@marketing/data/banner";
 
 const FADE_MS = 1000;
 const CYCLE_MS = 30000;
 
-const banners = getBannerItems();
-
-export function RotatingBanner() {
+export function RotatingBanner({ items }: { items: BannerItem[] }) {
   const [index, setIndex] = React.useState(0);
   const [visible, setVisible] = React.useState(true);
 
   React.useEffect(() => {
-    if (banners.length <= 1) return;
+    if (items.length <= 1) return;
 
     const intervalId = window.setInterval(() => {
       setVisible(false);
 
       window.setTimeout(() => {
-        setIndex((current) => (current + 1) % banners.length);
+        setIndex((current) => (current + 1) % items.length);
         setVisible(true);
       }, FADE_MS);
     }, CYCLE_MS);
 
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [items.length]);
 
-  const banner = banners[index] ?? banners[0];
+  const banner = items[index] ?? items[0];
   if (!banner) return null;
 
   const bannerContent = (

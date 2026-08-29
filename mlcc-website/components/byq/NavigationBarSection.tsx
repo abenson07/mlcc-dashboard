@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { RotatingBanner } from "@marketing/components/byq/RotatingBanner";
 import { SectionLabel } from "@marketing/components/SectionLabel";
+import type { BannerItem } from "@marketing/data/banner";
 
 const primaryLinks: {
   label: string;
@@ -20,7 +21,7 @@ const primaryLinks: {
   },
 ];
 
-export function NavigationBarSection() {
+export function NavigationBarSection({ bannerItems }: { bannerItems: BannerItem[] }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   return (
@@ -32,7 +33,7 @@ export function NavigationBarSection() {
         data-editable-id="global.nav"
         data-editable-label="Navigation Bar"
       >
-        <RotatingBanner />
+        <RotatingBanner items={bannerItems} />
 
         <div className="px-8 max-[767px]:px-4">
           <div className="w-full max-w-[1800px] mx-auto">

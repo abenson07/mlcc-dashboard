@@ -7,14 +7,21 @@ import { List } from "@/components/patterns/primitives/List";
 import { Text } from "@/components/patterns/primitives/Text";
 import { MapPin, User } from "lucide-react";
 import { toast } from "sonner";
-import { useDeliveries, useDemoGuard } from "hooks";
+import { useDeliveries, useDemoGuard, useRoutes } from "hooks";
 import { SideContentField } from "@/components/patterns/foundation/side-content";
 import type { LeafletRouteRow } from "@/data/mocks/leaflets";
+import { AssignDelivererFlow, type AssignDelivererTarget } from "./AssignDelivererModal";
 import {
   RemoveRoutesConfirmModal,
   SkipRouteConfirmModal,
 } from "./LeafletRouteActionModals";
-import { applyLeafletDeliveryStatus, routeHasDeliverer } from "./leafletDeliveryStatus";
+import {
+  applyLeafletDelivererAssign,
+  applyLeafletDeliveryStatus,
+  routeHasDeliverer,
+  type AssignDelivererPerson,
+  type AssignDelivererScope,
+} from "./leafletDeliveryStatus";
 
 export type RouteDetailPanelProps = {
   route: LeafletRouteRow;
@@ -29,8 +36,10 @@ export function RouteDetailPanel({ route, leafletId, demo = false }: RouteDetail
   const { update, refetch } = useDeliveries(leafletId, {
     enabled: !isDemo && Boolean(leafletId),
   });
+  const { update: updateRoute } = useRoutes({ autoFetch: false });
   const [skipOpen, setSkipOpen] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
+  const [assignTarget, setAssignTarget] = useState<AssignDelivererTarget | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const isSkipped = route.status === "skipped";
@@ -103,6 +112,34 @@ export function RouteDetailPanel({ route, leafletId, demo = false }: RouteDetail
     }
   }
 
+  async function handleAssign(person: AssignDelivererPerson, scope: AssignDelivererScope) {
+    setSubmitting(true);
+    try {
+      await applyLeafletDelivererAssign({
+        isDemo,
+        scopeKey,
+        row: route,
+        person,
+        scope,
+        updateDelivery: update,
+        updateRoute,
+        refetch,
+      });
+      toast.success(
+        isDemo
+          ? `${person.name} assigned — demo mode, saved locally only`
+          : scope === "permanent"
+            ? `${person.name} assigned as the default deliverer`
+            : `${person.name} assigned for this leaflet`,
+      );
+      setAssignTarget(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to assign");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <VStack gap={5}>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -121,8 +158,26 @@ export function RouteDetailPanel({ route, leafletId, demo = false }: RouteDetail
         }
       >
         <SideContentField icon={<MapPin size={16} strokeWidth={1.75} />} label={route.detail} />
-        <SideContentField icon={<User size={16} strokeWidth={1.75} />} label={personLabel} />
+        <SideContentField
+          icon={<User size={16} strokeWidth={1.75} />}
+          label={personLabel}
+          onClick={
+            isAssigned
+              ? () => setAssignTarget({ row: route, mode: "change" })
+              : undefined
+          }
+        />
       </List>
+
+      {!isAssigned ? (
+        <Button
+          label={isSkipped ? "Assign substitute" : "Assign deliverer"}
+          variant="primary"
+          size="sm"
+          width="100%"
+          onClick={() => setAssignTarget({ row: route, mode: "assign" })}
+        />
+      ) : null}
 
       {hasDeliverer ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -165,6 +220,13 @@ export function RouteDetailPanel({ route, leafletId, demo = false }: RouteDetail
         submitting={submitting}
         onCancel={() => setRemoveOpen(false)}
         onConfirm={handleRemove}
+      />
+      <AssignDelivererFlow
+        target={assignTarget}
+        demo={isDemo}
+        submitting={submitting}
+        onClose={() => setAssignTarget(null)}
+        onConfirm={handleAssign}
       />
     </VStack>
   );

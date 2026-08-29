@@ -4,8 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useFaqs, usePeople, useStories, useBanners, useDemoGuard, useCurrentPerson } from "hooks";
-import type { BannerWriteInput } from "@/lib/webflow/banners";
+import { useFaqs, usePeople, useStories, useDemoGuard, useCurrentPerson } from "hooks";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
@@ -20,7 +19,7 @@ import { StoryFormPanel } from "./StoryFormPanel";
 import { FaqFormPanel } from "./FaqFormPanel";
 import { BannerFormPanel } from "./BannerFormPanel";
 import type { Banner, Faq, Story } from "./types";
-import { bannerIsCurrentlyActive, contentStatusToStoryStatus, toBanner, toFaq, toStory } from "./adapters";
+import { bannerIsCurrentlyActive, contentStatusToStoryStatus, getSiteBanners, toFaq, toStory, todayISODate } from "./adapters";
 import { sampleStories } from "@/data/mocks/content";
 
 type ContentView = "stories" | "faqs" | "banners";
@@ -69,13 +68,6 @@ function ContentDemoInner() {
     update: updateFaq,
     togglePage,
   } = useFaqs();
-  const {
-    banners: bannerRows,
-    loading: bannersLoading,
-    error: bannersError,
-    create: createBanner,
-    update: updateBanner,
-  } = useBanners();
   const { people } = usePeople();
   const { enabled: demo, store } = useDemoGuard();
   const { person: currentPerson, authDisplayName } = useCurrentPerson();
@@ -112,10 +104,10 @@ function ContentDemoInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demo, faqRows, store.version]);
   const banners: Banner[] = useMemo(() => {
-    const base = bannerRows.map(toBanner);
+    const base = getSiteBanners();
     return demo ? store.merge<Banner>("banners", base) : base;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [demo, bannerRows, store.version]);
+  }, [demo, store.version]);
   const activeBanners = useMemo(() => banners.filter((b) => bannerIsCurrentlyActive(b)), [banners]);
   const inactiveBanners = useMemo(() => banners.filter((b) => !bannerIsCurrentlyActive(b)), [banners]);
 
@@ -156,19 +148,19 @@ function ContentDemoInner() {
       closeDetail();
       return;
     }
+    const status = contentStatusToStoryStatus(updated.status);
+    const payload = {
+      title: updated.title,
+      author: updated.author,
+      status,
+      body: updated.body,
+      cover_image_url: updated.imageUrl ?? null,
+      publish_date: status === "published" ? updated.publishDate || todayISODate() : updated.publishDate ?? null,
+    };
     if (!updated.id) {
-      await createStory({
-        title: updated.title,
-        author_id: updated.authorId,
-        status: contentStatusToStoryStatus(updated.status),
-        body: updated.body,
-      });
+      await createStory(payload);
     } else {
-      await updateStory(updated.id, {
-        title: updated.title,
-        body: updated.body,
-        status: contentStatusToStoryStatus(updated.status),
-      });
+      await updateStory(updated.id, payload);
     }
     closeDetail();
   }
@@ -209,29 +201,16 @@ function ContentDemoInner() {
       closeDetail();
       return;
     }
-    const input: BannerWriteInput = {
-      name: updated.title,
-      message: updated.ctaText,
-      linkUrl: updated.link,
-      active: updated.active,
-      expiresAt: updated.expiresAt,
-      urgent: false,
-      editorNotes: "",
-    };
-    if (!updated.id) {
-      await createBanner(input);
-    } else {
-      await updateBanner(updated.id, input);
-    }
+    toast.message(
+      "Site banners are generated from upcoming events, Leaflet stories, and volunteer opportunities.",
+    );
     closeDetail();
   }
 
   const viewLabel = view === "stories" ? "story" : view === "faqs" ? "FAQ" : "banner";
   const isDetailView = editingStory != null || editingFaq != null || editingBanner != null;
-  const loading =
-    demo ? false : view === "stories" ? storiesLoading : view === "faqs" ? faqsLoading : bannersLoading;
-  const error =
-    demo ? null : view === "stories" ? storiesError : view === "faqs" ? faqsError : bannersError;
+  const loading = demo ? false : view === "stories" ? storiesLoading : view === "faqs" ? faqsLoading : false;
+  const error = demo ? null : view === "stories" ? storiesError : view === "faqs" ? faqsError : null;
 
   return (
     <div style={{ height: "100%" }}>
@@ -328,6 +307,10 @@ function ContentDemoInner() {
             <Text color="secondary">Loading…</Text>
           ) : view === "banners" ? (
             <VStack gap={4}>
+              <Text color="secondary" size="sm">
+                Same ticker as the public site — generated from upcoming events, Leaflet stories, and volunteer
+                opportunities.
+              </Text>
               <VStack gap={2}>
                 <Text weight="semibold" size="sm" color="secondary">
                   Active

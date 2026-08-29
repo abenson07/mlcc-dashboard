@@ -1,4 +1,4 @@
-import type { DeliveriesUpdate } from "@/types/database";
+import type { DeliveriesUpdate, RoutesUpdate } from "@/types/database";
 import { listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
 import type {
   LeafletDelivererRouteRow,
@@ -145,5 +145,129 @@ export async function applyLeafletDeliveryStatus(params: {
   }
   const patch = leafletDeliveryStatusPatch(params.action);
   await Promise.all(params.deliveryIds.map((id) => params.update(id, patch)));
+  await params.refetch?.();
+}
+
+export type AssignDelivererPerson = {
+  id: string;
+  name: string;
+  email: string | null;
+};
+
+export type AssignDelivererScope = "this-route" | "permanent";
+
+function applyAssignToRouteRow(
+  row: LeafletRouteRow,
+  person: AssignDelivererPerson,
+): LeafletRouteRow {
+  return {
+    ...row,
+    status: "in-progress",
+    personId: person.id,
+    personName: person.name,
+    response: "pending",
+    initials: initialsFromName(person.name),
+    detail: `Assigned to ${person.name}`,
+  };
+}
+
+function applyAssignToDelivererRows(
+  deliverers: LeafletDelivererRow[],
+  row: LeafletRouteRow,
+  person: AssignDelivererPerson,
+): LeafletDelivererRow[] {
+  const deliveryId = row.id;
+  const routeEntry: LeafletDelivererRouteRow = {
+    id: row.routeId ?? row.id,
+    name: row.name,
+    leafletCount: 0,
+    deliveryId: row.id,
+    routeId: row.routeId ?? row.id,
+    isSkipped: false,
+    response: "pending",
+  };
+
+  const withoutRoute = deliverers
+    .map((deliverer) => ({
+      ...deliverer,
+      routes: deliverer.routes.filter((r) => (r.deliveryId ?? r.id) !== deliveryId),
+    }))
+    .filter((d) => d.routes.length > 0)
+    .map((d) => ({ ...d, status: delivererStatus(d.routes) }));
+
+  const existing = withoutRoute.find((d) => d.id === person.id);
+  if (existing) {
+    return withoutRoute
+      .map((d) => {
+        if (d.id !== person.id) return d;
+        const routes = [...d.routes, routeEntry];
+        return { ...d, routes, status: delivererStatus(routes) };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  return [
+    ...withoutRoute,
+    {
+      id: person.id,
+      name: person.name,
+      email: person.email ?? "",
+      address: "Address not on file",
+      status: "Invited" as const,
+      routes: [routeEntry],
+    },
+  ].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function applyDemoLeafletDelivererAssign(
+  scopeKey: string,
+  row: LeafletRouteRow,
+  person: AssignDelivererPerson,
+): { routes: LeafletRouteRow[]; deliverers: LeafletDelivererRow[] } {
+  const currentRoutes =
+    listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows();
+  const currentDeliverers =
+    listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers;
+
+  const routes = currentRoutes.map((r) => (r.id === row.id ? applyAssignToRouteRow(r, person) : r));
+  const deliverers = applyAssignToDelivererRows(currentDeliverers, row, person);
+
+  writeDemoScoped("leafletRoutes", scopeKey, routes);
+  writeDemoScoped("leafletDeliverers", scopeKey, deliverers);
+  return { routes, deliverers };
+}
+
+export async function applyLeafletDelivererAssign(params: {
+  isDemo: boolean;
+  scopeKey: string;
+  row: LeafletRouteRow;
+  person: AssignDelivererPerson;
+  scope: AssignDelivererScope;
+  updateDelivery: (id: string, patch: DeliveriesUpdate) => Promise<unknown>;
+  updateRoute: (id: string, patch: RoutesUpdate) => Promise<unknown>;
+  refetch?: () => Promise<void>;
+}): Promise<void> {
+  const { row, person, scope } = params;
+  if (params.isDemo) {
+    applyDemoLeafletDelivererAssign(params.scopeKey, row, person);
+    return;
+  }
+
+  await params.updateDelivery(row.id, {
+    person_id: person.id,
+    is_skipped: false,
+    response: "pending",
+  });
+
+  if (scope === "permanent") {
+    const routeId = row.routeId;
+    if (!routeId) throw new Error("Route id is required for a permanent assignment");
+    const updated = await params.updateRoute(routeId, {
+      primary_deliverer_id: person.id,
+      primary_deliverer_email: person.email,
+    });
+    if (updated == null) throw new Error("Failed to update the route default deliverer");
+  }
+
   await params.refetch?.();
 }

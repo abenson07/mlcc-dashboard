@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { getUpcomingEvents } from "@marketing/data/events";
+import type { Event } from "@marketing/data/events";
 import { EventCard } from "@marketing/components/byq/EventCard";
 
 function ArrowLeftIcon() {
@@ -57,8 +57,7 @@ function NavButton({
   );
 }
 
-export function CmsGrid13Section() {
-  const events = React.useMemo(() => getUpcomingEvents(), []);
+export function CmsGrid13Section({ events }: { events: Event[] }) {
   const [slide, setSlide] = React.useState(0);
   const trackRef = React.useRef<HTMLDivElement>(null);
   const [stepPx, setStepPx] = React.useState(0);

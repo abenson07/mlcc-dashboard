@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import { useDeliveries, useDemoGuard } from "hooks";
+import { useDeliveries, useDemoGuard, useRoutes } from "hooks";
 import { pixel, proportional, type TableColumn } from "@/components/patterns/primitives/table";
 import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
 import { RowClickCell, ClassContentPage } from "@/components/patterns/client-templates/shared";
@@ -13,11 +13,18 @@ import { IconButton } from "@/components/patterns/shared/IconButton";
 import type { LeafletRouteRow, LeafletRouteStatus } from "@/data/mocks/leaflets";
 import { DEMO_STORE_EVENT, listDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
+import { AssignDelivererFlow, type AssignDelivererTarget } from "./AssignDelivererModal";
 import {
   RemoveRoutesConfirmModal,
   SkipRouteConfirmModal,
 } from "./LeafletRouteActionModals";
-import { applyLeafletDeliveryStatus, routeHasDeliverer } from "./leafletDeliveryStatus";
+import {
+  applyLeafletDelivererAssign,
+  applyLeafletDeliveryStatus,
+  routeHasDeliverer,
+  type AssignDelivererPerson,
+  type AssignDelivererScope,
+} from "./leafletDeliveryStatus";
 
 const GROUP_ORDER = ["unassigned", "in-progress", "skipped"];
 
@@ -76,6 +83,36 @@ function SummaryCard({
       <Text size="sm" color="secondary">
         {hint}
       </Text>
+    </button>
+  );
+}
+
+function DelivererCell({
+  row,
+  onAssign,
+  onChange,
+}: {
+  row: LeafletRouteRow;
+  onAssign: (row: LeafletRouteRow) => void;
+  onChange: (row: LeafletRouteRow) => void;
+}) {
+  const assigned = row.status === "in-progress" && Boolean(row.personName);
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        if (assigned) onChange(row);
+        else onAssign(row);
+      }}
+      style={{
+        all: "unset",
+        cursor: "pointer",
+        color: "var(--linear-color-accent)",
+        fontSize: 13,
+      }}
+    >
+      {assigned ? row.personName : "Add deliverer"}
     </button>
   );
 }
@@ -155,10 +192,12 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
   const { deliveries, update, refetch } = useDeliveries(leafletId, {
     enabled: !isDemo && Boolean(leafletId),
   });
+  const { update: updateRoute } = useRoutes({ autoFetch: false });
   const scopeKey = leafletId || "default";
   const [localRoutes, setLocalRoutes] = useState<LeafletRouteRow[]>(() => sampleAllRouteRows());
   const [skipRow, setSkipRow] = useState<LeafletRouteRow | null>(null);
   const [removeRow, setRemoveRow] = useState<LeafletRouteRow | null>(null);
+  const [assignTarget, setAssignTarget] = useState<AssignDelivererTarget | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<LeafletRouteStatus | null>(null);
 
@@ -249,6 +288,35 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
     }
   }
 
+  async function handleAssign(person: AssignDelivererPerson, scope: AssignDelivererScope) {
+    if (!assignTarget) return;
+    setSubmitting(true);
+    try {
+      await applyLeafletDelivererAssign({
+        isDemo,
+        scopeKey,
+        row: assignTarget.row,
+        person,
+        scope,
+        updateDelivery: update,
+        updateRoute,
+        refetch,
+      });
+      toast.success(
+        isDemo
+          ? `${person.name} assigned — demo mode, saved locally only`
+          : scope === "permanent"
+            ? `${person.name} assigned as the default deliverer`
+            : `${person.name} assigned for this leaflet`,
+      );
+      setAssignTarget(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to assign");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   const columns = useMemo((): TableColumn<LeafletRouteRow>[] => {
     return [
       {
@@ -262,13 +330,15 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         ),
       },
       {
-        key: "detail",
-        header: "Detail",
+        key: "deliverer",
+        header: "Deliverer",
         width: proportional(1, { minWidth: 160 }),
         renderCell: (row) => (
-          <RowClickCell onClick={() => onSelectRoute?.(row)}>
-            <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.detail}</span>
-          </RowClickCell>
+          <DelivererCell
+            row={row}
+            onAssign={(r) => setAssignTarget({ row: r, mode: "assign" })}
+            onChange={(r) => setAssignTarget({ row: r, mode: "change" })}
+          />
         ),
       },
       {
@@ -291,7 +361,7 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         ),
       },
     ];
-  }, [onSelectRoute, handleConfirm]);
+  }, [onSelectRoute]);
 
   return (
     <ClassContentPage>
@@ -349,6 +419,13 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         submitting={submitting}
         onCancel={() => setRemoveRow(null)}
         onConfirm={handleRemove}
+      />
+      <AssignDelivererFlow
+        target={assignTarget}
+        demo={isDemo}
+        submitting={submitting}
+        onClose={() => setAssignTarget(null)}
+        onConfirm={handleAssign}
       />
     </ClassContentPage>
   );

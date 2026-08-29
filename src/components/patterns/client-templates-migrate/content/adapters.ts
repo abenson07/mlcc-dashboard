@@ -1,6 +1,8 @@
 import type { FaqWithPages } from "hooks";
 import type { Stories, StoryStatus } from "@/types/database";
 import type { BannerView } from "@/lib/webflow/banners";
+import { getBannerItems, type BannerItem } from "@marketing/data/banner";
+import { formatLeafletAuthor } from "@marketing/data/leaflet-stories";
 import type { Banner, ContentStatus, Faq, Story } from "./types";
 
 function formatDate(isoDate: string | null): string | null {
@@ -13,14 +15,24 @@ function formatDate(isoDate: string | null): string | null {
 }
 
 export function toStory(row: Stories, authorNameById: Map<string, string>): Story {
+  const authorFromPerson = row.author_id ? authorNameById.get(row.author_id) : undefined;
+  const authorFromSlug = row.author_slug ? formatLeafletAuthor(row.author_slug) : undefined;
+  const authorFromText = row.author
+    ? row.author.includes("-") && !row.author.includes(" ")
+      ? formatLeafletAuthor(row.author)
+      : row.author
+    : undefined;
   return {
     id: row.id,
     title: row.title,
-    author: (row.author_id && authorNameById.get(row.author_id)) || "—",
-    authorId: row.author_id,
+    author: authorFromPerson || authorFromText || authorFromSlug || "—",
+    authorId: row.author_id ?? null,
     status: row.status === "published" ? "Published" : "Draft",
     publishedAt: formatDate(row.publish_date),
+    publishDate: row.publish_date,
     body: row.body,
+    slug: row.slug ?? undefined,
+    imageUrl: row.cover_image_url ?? undefined,
   };
 }
 
@@ -51,6 +63,26 @@ export function toBanner(row: BannerView): Banner {
     active: row.active,
     expiresAt: row.expiresAt,
   };
+}
+
+export function siteBannerId(item: BannerItem): string {
+  return `site:${item.linkPath}`;
+}
+
+export function toBannerFromSiteItem(item: BannerItem): Banner {
+  return {
+    id: siteBannerId(item),
+    title: item.headline,
+    ctaText: item.linkText,
+    link: item.linkPath,
+    active: true,
+    expiresAt: null,
+  };
+}
+
+/** Same rotating ticker the public site renders in `RotatingBanner`. */
+export function getSiteBanners(): Banner[] {
+  return getBannerItems().map(toBannerFromSiteItem);
 }
 
 /** Active list = `active` flag on AND not yet past `expiresAt`; everything else is Inactive. */

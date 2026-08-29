@@ -191,6 +191,131 @@ export function getPublishedLeafletStories(): LeafletStory[] {
   return leafletStories.filter((story) => !story.draft);
 }
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+const DEFAULT_STORY_TYPE: LeafletStoryType = "From the Council";
+
+type StoryRow = {
+  slug?: string | null;
+  title: string;
+  author?: string | null;
+  author_slug?: string | null;
+  publish_date: string | null;
+  story_type?: string | null;
+  featured?: boolean | null;
+  status: string | null;
+  cover_image_url: string | null;
+  body: string | null;
+};
+
+function slugifyStoryTitle(title: string): string {
+  const s = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 96);
+  return s || "story";
+}
+
+function isLeafletStoryType(value: string | null | undefined): value is LeafletStoryType {
+  return value === "From the Council" || value === "Neighborhood Update";
+}
+
+function storyFromRow(row: StoryRow): LeafletStory | null {
+  const catalog =
+    leafletStories.find((story) => story.title === row.title) ??
+    (row.slug ? leafletStories.find((story) => story.slug === row.slug) : undefined);
+  const slug = row.slug || catalog?.slug || slugifyStoryTitle(row.title);
+  if (!slug) return null;
+  return {
+    slug,
+    webflowSlug: catalog?.webflowSlug ?? slug,
+    title: row.title,
+    author: row.author_slug || row.author || catalog?.author || "maple-leaf-community-council",
+    publishDate: row.publish_date || catalog?.publishDate || "1970-01-01",
+    type: isLeafletStoryType(row.story_type)
+      ? row.story_type
+      : (catalog?.type ?? DEFAULT_STORY_TYPE),
+    featured: row.featured ?? catalog?.featured ?? false,
+    draft: row.status !== "published",
+    image: row.cover_image_url ?? catalog?.image,
+    body: row.body || catalog?.body || "",
+  };
+}
+
+async function fetchStoryRows(select: string): Promise<StoryRow[] | null> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  const params = new URLSearchParams({
+    select,
+    order: "publish_date.desc.nullslast",
+  });
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/stories?${params.toString()}`, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    next: { revalidate: 60 },
+  });
+  if (!response.ok) return null;
+  return (await response.json()) as StoryRow[];
+}
+
+async function fetchStoriesFromSupabase(): Promise<LeafletStory[] | null> {
+  try {
+    const rows =
+      (await fetchStoryRows(
+        "slug,title,author,author_slug,publish_date,story_type,featured,status,cover_image_url,body",
+      )) ??
+      (await fetchStoryRows("title,author,publish_date,status,cover_image_url,body"));
+    if (!rows) return null;
+    return rows.map(storyFromRow).filter((story): story is LeafletStory => story != null);
+  } catch {
+    return null;
+  }
+}
+
+/** Catalog plus live dashboard rows (DB wins on matching slug). */
+export async function loadLeafletStories(): Promise<LeafletStory[]> {
+  const fromDb = await fetchStoriesFromSupabase();
+  if (!fromDb) return leafletStories;
+
+  const bySlug = new Map(leafletStories.map((story) => [story.slug, story]));
+  for (const story of fromDb) {
+    bySlug.set(story.slug, story);
+  }
+  return [...bySlug.values()];
+}
+
+export async function loadLeafletStory(slug: string): Promise<LeafletStory | undefined> {
+  const stories = await loadLeafletStories();
+  return stories.find((story) => story.slug === slug);
+}
+
+export async function loadPublishedLeafletStories(): Promise<LeafletStory[]> {
+  const stories = await loadLeafletStories();
+  return stories.filter((story) => !story.draft);
+}
+
+export async function loadRelatedLeafletStories(
+  currentSlug: string,
+  limit = 2,
+): Promise<LeafletStory[]> {
+  const stories = await loadLeafletStories();
+  const current = stories.find((story) => story.slug === currentSlug);
+  if (!current) return [];
+
+  return stories
+    .filter((story) => !story.draft && story.slug !== currentSlug)
+    .sort((a, b) => {
+      if (a.type === current.type && b.type !== current.type) return -1;
+      if (b.type === current.type && a.type !== current.type) return 1;
+      return b.publishDate.localeCompare(a.publishDate);
+    })
+    .slice(0, limit);
+}
+
 export function formatLeafletDate(isoDate: string): string {
   const date = new Date(`${isoDate}T12:00:00`);
   return date.toLocaleDateString("en-US", {

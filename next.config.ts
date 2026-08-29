@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/leaflet/open-routes",
+        destination: "/open-routes",
+        permanent: false,
+      },
+      {
         source: "/advocacy/zoning-workshop",
         destination: "/one-seattle-plan",
         permanent: true,
