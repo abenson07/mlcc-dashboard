@@ -1,4 +1,0 @@
-id,title,description,commitment_type,commitment_unit,commitment_quantity,quantity,event_id,created_at,updated_at
-5bc1c589-aa11-408d-8e56-63f6e8ade5ba,Test,Test,one_off,hours,1.00,1,,2026-05-17 23:03:19.728122+00,2026-05-17 23:03:19.728122+00
-c4c30263-1e65-4b69-8814-07467dd22c72,test,test,one_off,hours,1.00,1,4112bd34-09fc-4452-92b2-06e33fcd05bf,2026-05-17 23:15:34.732337+00,2026-05-17 23:15:34.732337+00
-cb4f140d-5bcf-4fe0-8363-187bbe585341,Test,Test,ongoing,hours,12.00,1,,2026-05-17 23:01:12.786907+00,2026-05-17 23:01:12.786907+00

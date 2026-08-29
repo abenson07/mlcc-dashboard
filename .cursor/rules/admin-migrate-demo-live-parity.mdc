@@ -1,12 +1,12 @@
 ---
-description: Keep admin-migrate demo and live layouts in sync; data may differ, UI/layout must not.
-globs: src/app/admin-migrate/**/*,src/components/patterns/client-templates-migrate/**/*,src/components/patterns/foundation/**/*
+description: Keep /admin demo and live layouts in sync; data may differ, UI/layout must not.
+globs: src/app/admin/**/*,src/components/patterns/client-templates-migrate/**/*,src/components/patterns/foundation/**/*
 alwaysApply: false
 ---
 
-# Admin-migrate demo / live layout parity
+# Admin demo / live layout parity
 
-Demo mode and live mode in `/admin-migrate` may use different data (mocks vs real APIs), but **layouts, structure, and UI must stay aligned**.
+Demo mode and live mode in `/admin` may use different data (mocks vs real APIs), but **layouts, structure, and UI must stay aligned**.
 
 When changing layout, spacing, composition, chrome, navigation, or interaction patterns:
 

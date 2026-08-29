@@ -1,6 +1,5 @@
 import type { FaqWithPages } from "hooks";
 import type { Stories, StoryStatus } from "@/types/database";
-import type { BannerView } from "@/lib/webflow/banners";
 import { getBannerItems, type BannerItem } from "@marketing/data/banner";
 import { formatLeafletAuthor } from "@marketing/data/leaflet-stories";
 import type { Banner, ContentStatus, Faq, Story } from "./types";
@@ -54,16 +53,6 @@ export function toFaq(row: FaqWithPages): Faq {
   };
 }
 
-export function toBanner(row: BannerView): Banner {
-  return {
-    id: row.id,
-    title: row.name,
-    ctaText: row.message,
-    link: row.linkUrl,
-    active: row.active,
-    expiresAt: row.expiresAt,
-  };
-}
 
 export function siteBannerId(item: BannerItem): string {
   return `site:${item.linkPath}`;

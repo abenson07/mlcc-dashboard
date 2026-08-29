@@ -1,17 +1,17 @@
 ---
-description: Confirm before live Webflow/Stripe/DB/email writes; always flag data deletion; assume user wants work done when they ask.
+description: Confirm before live Stripe/DB/email writes; always flag data deletion; assume user wants work done when they ask.
 alwaysApply: true
 ---
 
 # External APIs and side effects
 
-The user expects agents to **run real integration commands** (Webflow, Stripe, MCP, scripts that use `.env`, etc.) so they don’t have to micromanage. **Do not** refuse or hand-wave with “you run it” when they’ve asked you to do the task.
+The user expects agents to **run real integration commands** (Stripe, MCP, scripts that use `.env`, etc.) so they don’t have to micromanage. **Do not** refuse or hand-wave with “you run it” when they’ve asked you to do the task.
 
 ## Before mutating live data
 
-When the user’s request clearly means hitting a **real** API or running a **write** (create / update / publish / migrate / setup scripts), **assume they want it**, but **confirm once** in plain language before you run—for example: *“This will create CMS fields on your Webflow collection — OK to run?”* If they already said “run it” / “do it” / “execute”, that counts as confirmation; a one-line recap of impact is still required.
+When the user’s request clearly means hitting a **real** API or running a **write** (create / update / publish / migrate / setup scripts), **assume they want it**, but **confirm once** in plain language before you run—for example: *“This will create Stripe products — OK to run?”* If they already said “run it” / “do it” / “execute”, that counts as confirmation; a one-line recap of impact is still required.
 
-**Deletion / destructive operations:** If anything you’re about to do could **delete or irreversibly remove data** (drop migrations, delete CMS items/collections, wipe tables, destructive Stripe ops, etc.), **say so explicitly** before running (`This will delete …` / `This is destructive because …`). Never bury that in jargon.
+**Deletion / destructive operations:** If anything you’re about to do could **delete or irreversibly remove data** (drop migrations, wipe tables, destructive Stripe ops, etc.), **say so explicitly** before running (`This will delete …` / `This is destructive because …`). Never bury that in jargon.
 
 ## During / after
 
@@ -20,5 +20,5 @@ When the user’s request clearly means hitting a **real** API or running a **wr
 
 ## Examples (this repo)
 
-- **Mutating:** `webflow:create-events-collection`, `webflow:setup-events-fields` (default), seeds, DB migrations that apply changes, publish flows.
-- **Usually read-only:** `webflow:verify-events`, `webflow:verify-banners` (still uses live API; mention if hitting production).
+- **Mutating:** seeds, DB migrations that apply changes, publish flows, Stripe setup scripts.
+- **Usually read-only:** verify flags on scripts when they exist (still mention if hitting production).

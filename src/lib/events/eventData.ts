@@ -286,14 +286,10 @@ export function eventIdsForInvoiceFilter(eventId: string, fieldData: EventFieldD
   return ids;
 }
 
-export function eventsListBasePath(pathname: string | null): string {
-  if (pathname?.startsWith("/admin/events")) return "/admin/events";
-  if (pathname?.startsWith("/admin/events")) return "/admin/events";
-  return "/old-admin/events";
+export function eventsListBasePath(_pathname: string | null): string {
+  return "/admin/events";
 }
 
-export function eventsHubBasePath(pathname: string | null): string {
-  if (pathname?.startsWith("/admin/events")) return "/admin/events";
-  if (pathname?.startsWith("/admin/events")) return "/admin/events";
-  return "/old-admin/events-hub";
+export function eventsHubBasePath(_pathname: string | null): string {
+  return "/admin/events";
 }
