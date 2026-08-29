@@ -14,15 +14,14 @@ This README is written for **board members, volunteers, and contractors** who ne
 
 1. [What this product does](#what-this-product-does)
 2. [What’s in this repo](#whats-in-this-repo)
-3. [Current vs leftover admin UIs](#current-vs-leftover-admin-uis)
-4. [Run it locally](#run-it-locally)
-5. [Sign in](#sign-in)
-6. [Environment variables (by capability)](#environment-variables-by-capability)
-7. [If you are an agent](#if-you-are-an-agent)
-8. [Integrations](#integrations)
-9. [Useful npm scripts](#useful-npm-scripts)
-10. [Deploy notes](#deploy-notes)
-11. [Further reading](#further-reading)
+3. [Run it locally](#run-it-locally)
+4. [Sign in](#sign-in)
+5. [Environment variables (by capability)](#environment-variables-by-capability)
+6. [If you are an agent](#if-you-are-an-agent)
+7. [Integrations](#integrations)
+8. [Useful npm scripts](#useful-npm-scripts)
+9. [Deploy notes](#deploy-notes)
+10. [Further reading](#further-reading)
 
 A longer, non-engineer walkthrough of the product and rollout is in [docs/architecture-and-tech-stack.md](docs/architecture-and-tech-stack.md).
 
@@ -74,10 +73,10 @@ board    -->  /login  -->  /admin
                 +--> Supabase Auth (magic link / OTP)
                                |
                +---------------+----------------+
-               v               v                v
-          Supabase DB      Stripe          Webflow CMS
-          (people,         (payments,      (some public
-           leaflets,        memberships)    listings)
+               v               v
+          Supabase DB      Stripe
+          (people,         (payments,
+           leaflets,        memberships)
            events, …)
 ```
 
@@ -88,31 +87,10 @@ board    -->  /login  -->  /admin
 | `src/components/patterns/` | Admin UI (migrate templates, foundation chrome, shared pieces). |
 | `hooks/`, `schemas/` | Data hooks and TypeScript table types. |
 | `supabase/migrations/` | Database migrations. |
-| `src/app/api/` | Server routes (Stripe, Webflow, Resend, webhooks, …). |
+| `src/app/api/` | Server routes (Stripe, Resend, webhooks, …). |
 | `docs/` | Architecture, design tokens, page wiring notes. |
 | [`mlcc-website/`](mlcc-website/) | Earlier standalone marketing site / content source. **Not** the app you run with root `npm run dev`. |
 | [`maple-leaf-landings/`](maple-leaf-landings/) | Separate static landings for give/shop subdomains. |
-
----
-
-## Current vs leftover admin UIs
-
-Agents and new contributors: **edit `/admin` unless someone asked for a legacy shell.**
-
-| URL | Role |
-|-----|------|
-| `/` and other marketing paths | Live public site. |
-| `/admin` | Current admin. Some files still say “admin-migrate”; that means this shell. |
-| `/admin-preview` | Design/preview sandbox. Includes non-MLCC sample screens. Do not treat as production. Avoid wiring real Supabase writes here. |
-| `/admin-retire`, `/old-admin` | Older admin shells. Not the product default. |
-
-WIP routes (gated until Settings → preview features is on):
-
-- `/admin/committees`
-- `/admin/inbox`
-- `/admin/action-items`
-
-See `src/middleware.ts`.
 
 ---
 
@@ -176,7 +154,6 @@ The full list and comments live in [`.env.example`](.env.example). Grouped by wh
 | Capability | Typical variables |
 |------------|-------------------|
 | Auth and database | `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` / `SUPABASE_DB_PASSWORD` |
-| Webflow CMS (banners, events, volunteer asks) | `WEBFLOW_SITE_API_TOKEN`, `WEBFLOW_SITE_ID`, collection IDs |
 | Stripe (memberships, donations, merch, invoices) | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, product/price IDs |
 | Email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, segment/audience IDs |
 | Leaflet respond links | `LEAFLET_RESPONSE_SIGNING_SECRET` |
@@ -202,11 +179,10 @@ Read this section before changing code.
 - **Demo / live layout parity:** Demo and live may use different data. Layout, spacing, chrome, and interaction patterns must stay aligned. See [AGENTS.md](AGENTS.md) and `.cursor/rules/admin-migrate-demo-live-parity.mdc`.
 - **Public site:** `src/app/(marketing)/**`. Use Sparkles / marketing section conventions — not the admin Mercury/Wise tokens ([docs/DESIGN.md](docs/DESIGN.md) is for the **dashboard**).
 - **Data:** `schemas/`, `hooks/`, `supabase/migrations/`, `src/app/api/`.
-- **Admin-preview:** preview only; do not “fix production” there.
 
 ### External APIs and writes
 
-Scripts and commands that **create, update, publish, or migrate live data** (Webflow, Stripe, production Supabase, etc.) need an explicit human OK. Say what will change before running. If something is **destructive** (delete CMS items, drop tables, wipe data), say that plainly first. See `.cursor/rules/external-side-effects.mdc`.
+Scripts and commands that **create, update, publish, or migrate live data** (Stripe, production Supabase, etc.) need an explicit human OK. Say what will change before running. If something is **destructive** (drop tables, wipe data), say that plainly first. See `.cursor/rules/external-side-effects.mdc`.
 
 Do not treat “smoke test” as permission to mutate production.
 
@@ -217,7 +193,7 @@ Do not treat “smoke test” as permission to mutate production.
 
 ### Secrets
 
-Never commit `.env.local`, service-role keys, Stripe secrets, or Webflow tokens.
+Never commit `.env.local`, service-role keys, or Stripe secrets.
 
 ### Nested apps
 
@@ -231,7 +207,6 @@ Root `package.json` is this dashboard + marketing Next app. Do not assume `mlcc-
 |--------|------|
 | **Supabase** | Postgres, Auth (OTP), RLS-backed app data. |
 | **Stripe** | Memberships, donations, merch, invoices. Card data stays at Stripe. |
-| **Webflow CMS** | Some public listings (banners, events collection, volunteer asks) still sync here. |
 | **Resend** | Transactional and marketing email. |
 | **Linear** | Issue tracking / in-app feedback. |
 | **Slack** | Committee signup and form notifications. |
@@ -254,15 +229,11 @@ From the **repo root**:
 | `npm run build` / `npm start` | Production build and serve. |
 | `npm run lint` | ESLint. |
 | `npm test` | Vitest. |
-| `npm run webflow:setup-banners` / `webflow:verify-banners` | Banners CMS collection. |
-| `npm run webflow:setup-volunteer-asks` / `webflow:verify-volunteer-asks` | Volunteer asks CMS. |
-| `npm run webflow:create-events-collection` / `webflow:verify-events` | Events CMS. |
 | `npm run seed:businesses` | Seed businesses from Places data. |
 | `npm run migrate:businesses` / `migrate:qr-codes` / `migrate:stories-marketing` | Targeted DB migrations via scripts. |
 | `npm run import:marketing-stories` | Import stories from the marketing site. |
 | `npm run stripe:setup-commerce` | Create commerce products in Stripe. |
 | `npm run db:export:list` / `db:export:dump` | Database export helpers. |
-| `npm run deploy` | Webflow Cloud deploy (`webflow cloud deploy`). |
 
 Script headers and `.env.example` comments are the detailed manuals. Prefer `--dry-run` / `--verify` when those flags exist.
 
@@ -273,8 +244,7 @@ Give/shop landings: [maple-leaf-landings/README.md](maple-leaf-landings/README.m
 ## Deploy notes
 
 - **Stack:** Next.js 16, React 19, TypeScript, Tailwind CSS 4.
-- **Typical production:** marketing at `/`, admin at `/admin`. Leave `BASE_PATH` / `NEXT_PUBLIC_BASE_PATH` **unset** unless you are on a legacy Webflow Cloud mount (then see [docs/API-ROUTES-PRODUCTION.md](docs/API-ROUTES-PRODUCTION.md)).
-- **Also present:** OpenNext/Cloudflare (`wrangler.json`, `npm run preview`) and `npm run deploy` for Webflow Cloud.
+- **Typical production:** marketing at `/`, admin at `/admin`. Leave `BASE_PATH` / `NEXT_PUBLIC_BASE_PATH` **unset** unless you sit behind a reverse-proxy mount (then see [docs/API-ROUTES-PRODUCTION.md](docs/API-ROUTES-PRODUCTION.md)).
 - **Cron (Vercel):** daily `GET /api/cron/action-item-reminders` — see `vercel.json`.
 - Legacy mapleleafcommunity.org URL aliases are 301s in `next.config.ts`; inventory in [docs/legacy-site-redirects.md](docs/legacy-site-redirects.md).
 

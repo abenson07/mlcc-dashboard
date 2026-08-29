@@ -75,7 +75,7 @@ function buildColumns(
 export function ProgramClassesTable() {
   const router = useRouter();
   const columns = useMemo(
-    () => buildColumns(() => router.push("/admin-preview/class-detail")),
+    () => buildColumns(() => router.push("/admin")),
     [router],
   );
 
@@ -98,7 +98,7 @@ export function ProgramClassesTable() {
 export function ActiveClassesFullTable() {
   const router = useRouter();
   const columns = useMemo(
-    () => buildColumns(() => router.push("/admin-preview/class-detail")),
+    () => buildColumns(() => router.push("/admin")),
     [router],
   );
 

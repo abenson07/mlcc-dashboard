@@ -7,7 +7,7 @@ describe("global search helpers", () => {
   it("filters integrated pages by label", () => {
     const results = searchPages("finance", 5);
     expect(results.length).toBeGreaterThan(0);
-    expect(results.some((page) => page.label.toLowerCase().includes("finance"))).toBe(true);
+    expect(results.some((page) => page.id === "finance-invoices")).toBe(true);
   });
 
   it("filters mock stories by title", () => {
@@ -17,8 +17,8 @@ describe("global search helpers", () => {
   });
 
   it("detects integrated shell paths", () => {
-    expect(isIntegratedShellPath("/old-admin/people")).toBe(true);
-    expect(isIntegratedShellPath("/old-admin/neighbors")).toBe(false);
-    expect(isIntegratedShellPath("/old-admin/events-hub/abc/overview")).toBe(true);
+    expect(isIntegratedShellPath("/admin/people")).toBe(true);
+    expect(isIntegratedShellPath("/login")).toBe(false);
+    expect(isIntegratedShellPath("/admin/events/abc")).toBe(true);
   });
 });

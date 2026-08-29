@@ -1,4 +1,0 @@
-id,context,context_id,template_id,title,description,offset_days,is_complete,completed_at,created_at
-01fff89a-aae9-4b1f-9ced-3a3913f94133,leaflet,c291cb16-72e4-44a7-a5f7-830d575b39c3,6196c619-fc32-4605-9801-8bd9e563403d,Example task three,Placeholder — replace with real checklist item.,-7,false,,2026-06-22 17:24:17.119377+00
-6ad394e9-cfb4-493f-8310-b01d62338397,leaflet,c291cb16-72e4-44a7-a5f7-830d575b39c3,d84ce7e4-a0a3-4eb7-828c-126e0c2a2e6f,Example task one,Placeholder — replace with real checklist item.,-42,false,,2026-06-22 17:24:17.119377+00
-a88fa9ef-b423-40e5-8b49-942ee8202ff9,leaflet,c291cb16-72e4-44a7-a5f7-830d575b39c3,e28300ce-ce4a-4fd9-8d1e-df86399eee78,Example task two,Placeholder — replace with real checklist item.,-14,false,,2026-06-22 17:24:17.119377+00

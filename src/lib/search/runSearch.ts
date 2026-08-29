@@ -50,7 +50,7 @@ async function searchEvents(
           year: "numeric",
         })
       : undefined,
-    href: `/old-admin/events-hub/${row.id}/overview`,
+    href: `/admin/events/${row.id}`,
   }));
 }
 
@@ -76,7 +76,7 @@ async function searchPeople(
     section: "people" as const,
     title: row.full_name ?? "Unknown",
     subtitle: row.email ?? row.address ?? undefined,
-    href: `/old-admin/people?selected=${encodeURIComponent(row.id)}`,
+    href: `/admin/people`,
   }));
 }
 
@@ -103,7 +103,7 @@ async function searchBusinesses(
     section: "businesses" as const,
     title: row.business_name ?? row.contact_name ?? "Unknown business",
     subtitle: row.email ?? row.address ?? undefined,
-    href: `/old-admin/people?filter=businesses&selected=${encodeURIComponent(row.id)}`,
+    href: `/admin/businesses`,
   }));
 }
 
@@ -133,7 +133,7 @@ async function searchLeaflets(
           year: "numeric",
         })
       : (row.status ?? undefined),
-    href: `/old-admin/leaflet?leaflet=${encodeURIComponent(row.id)}`,
+    href: `/admin/leaflets/${row.id}`,
   }));
 }
 
@@ -213,17 +213,13 @@ async function searchRoutes(
     const deliverer = Array.isArray(route.people) ? route.people[0] : route.people;
     const delivery = latestDeliveryByRoute.get(route.id);
     const leafletId = delivery?.leaflet_id;
-    const params = new URLSearchParams();
-    if (leafletId) params.set("leaflet", leafletId);
-    if (delivery?.id) params.set("delivery", delivery.id);
-    const qs = params.toString();
 
     return {
       id: route.id,
       section: "routes" as const,
       title: route.route_name,
       subtitle: deliverer?.full_name ?? route.primary_deliverer_email ?? undefined,
-      href: qs ? `/old-admin/leaflet/routes?${qs}` : "/old-admin/leaflet/routes",
+      href: leafletId ? `/admin/leaflets/${leafletId}` : "/admin/leaflets",
     };
   });
 }
@@ -248,7 +244,7 @@ async function searchActionItems(
     section: "action_items" as const,
     title: row.title ?? "Untitled action item",
     subtitle: row.status ?? undefined,
-    href: `/old-admin/action-items?item=${encodeURIComponent(row.id)}`,
+    href: `/admin/action-items`,
   }));
 }
 
@@ -279,7 +275,7 @@ async function searchInvoices(term: string, limit: number): Promise<SearchResult
       section: "invoices" as const,
       title: inv.number ? `Invoice ${inv.number}` : `Invoice ${inv.id.slice(-8)}`,
       subtitle: inv.customer_email ?? inv.event_name ?? inv.status ?? undefined,
-      href: `/old-admin/sponsorship/invoices/${encodeURIComponent(inv.id)}`,
+      href: `/admin/invoices`,
     }));
 }
 
@@ -317,7 +313,7 @@ export async function runSearch(q: string, limit = DEFAULT_LIMIT): Promise<Searc
         id: story.id,
         section: "stories" as const,
         title: story.title,
-        href: `/old-admin/stories?selected=${encodeURIComponent(story.id)}`,
+        href: `/admin/content`,
       })),
     ),
     searchRoutes(supabase, term, limit),

@@ -1,5 +1,5 @@
 /**
- * LocalStorage-backed demo-mode persistence for /admin-migrate.
+ * LocalStorage-backed demo-mode persistence for `/admin`.
  * Never touches Supabase or Stripe — walkthrough mutations live here until exit.
  */
 
