@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/require-session";
-import { ensureSupabaseEventFromWebflow } from "@/lib/volunteers/ensureSupabaseEventFromWebflow";
 import { fetchVolunteerAskById } from "@/lib/volunteers/fetchVolunteerAsk";
 import { parseVolunteerAskBody } from "@/lib/volunteers/parseVolunteerAskBody";
 import { getSupabaseForVolunteerRoutes } from "@/lib/volunteers/supabaseForVolunteerRoutes";
-import {
-  archiveVolunteerAskOnWebflow,
-  getVolunteerAskWebflowConfigIssues,
-  isVolunteerAsksWebflowConfigured,
-  syncVolunteerAskToWebflow,
-} from "@/lib/webflow/volunteerAsks";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-/** Update a volunteer ask in Supabase and sync to Webflow CMS. */
+/** Update a volunteer ask in Supabase. */
 export async function PATCH(request: NextRequest, ctx: RouteContext) {
   const session = await requireSession();
   if (!session.ok) return session.response;
@@ -52,13 +45,6 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       );
     }
 
-    let event_id: string | null = null;
-    if (parsed.event_id) {
-      event_id = parsed.event_id;
-    } else if (parsed.webflowEventItemId) {
-      event_id = await ensureSupabaseEventFromWebflow(supabase, parsed.webflowEventItemId);
-    }
-
     const updatePayload: Record<string, unknown> = {
       title: parsed.title,
       description: parsed.description,
@@ -66,7 +52,7 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       commitment_unit: parsed.commitment_unit,
       commitment_quantity: parsed.commitment_quantity,
       quantity: parsed.quantity,
-      event_id,
+      event_id: parsed.event_id,
     };
     if (parsed.committee) updatePayload.committee = parsed.committee;
     if (parsed.auto_accept_provided) {
@@ -88,27 +74,9 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
       );
     }
 
-    let webflow: Awaited<ReturnType<typeof syncVolunteerAskToWebflow>> | null = null;
-    let webflowError: string | null = null;
-
-    if (isVolunteerAsksWebflowConfigured()) {
-      const full = await fetchVolunteerAskById(supabase, id);
-      if (full) {
-        try {
-          webflow = await syncVolunteerAskToWebflow(full);
-        } catch (err) {
-          webflowError = err instanceof Error ? err.message : "Webflow sync failed";
-        }
-      }
-    } else {
-      webflowError = `Webflow not configured. Set: ${getVolunteerAskWebflowConfigIssues().join(", ")}`;
-    }
-
     return NextResponse.json({
       ok: true,
       ask: updated,
-      webflow,
-      webflowError,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update volunteer ask";
@@ -116,7 +84,7 @@ export async function PATCH(request: NextRequest, ctx: RouteContext) {
   }
 }
 
-/** Delete a volunteer ask from Supabase and archive its Webflow CMS item. */
+/** Delete a volunteer ask from Supabase. */
 export async function DELETE(_request: NextRequest, ctx: RouteContext) {
   const session = await requireSession();
   if (!session.ok) return session.response;
@@ -134,17 +102,6 @@ export async function DELETE(_request: NextRequest, ctx: RouteContext) {
       return NextResponse.json({ error: "Volunteer ask not found" }, { status: 404 });
     }
 
-    let webflow: Awaited<ReturnType<typeof archiveVolunteerAskOnWebflow>> | null = null;
-    let webflowError: string | null = null;
-
-    if (isVolunteerAsksWebflowConfigured()) {
-      try {
-        webflow = await archiveVolunteerAskOnWebflow(id);
-      } catch (err) {
-        webflowError = err instanceof Error ? err.message : "Webflow archive failed";
-      }
-    }
-
     const { error: deleteError } = await supabase.from("volunteer_asks").delete().eq("id", id);
 
     if (deleteError) {
@@ -156,8 +113,6 @@ export async function DELETE(_request: NextRequest, ctx: RouteContext) {
 
     return NextResponse.json({
       ok: true,
-      webflow,
-      webflowError,
       signupCount: existing.signup_count,
     });
   } catch (err) {
