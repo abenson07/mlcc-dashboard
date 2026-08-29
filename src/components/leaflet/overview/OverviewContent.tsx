@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useStories } from "hooks";
-import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import { IconArrowRight, IconCalendar, IconPlus } from "../icons";
 import { daysUntilDistribution, formatDistributionDate } from "../leafletData";
 import { leafletHref, useLeafletContext } from "../LeafletContext";
@@ -30,10 +29,9 @@ export default function OverviewContent() {
   async function handleAddStory() {
     setAddingStory(true);
     try {
-      const authorId = await getCurrentPersonId();
       const story = await createStory({
         title: "",
-        author_id: authorId,
+        author: "",
         leaflet_id: leafletId,
         publish_date: new Date().toISOString().slice(0, 10),
       });

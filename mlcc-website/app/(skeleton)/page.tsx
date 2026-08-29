@@ -4,13 +4,16 @@ import { HeroSection } from "@marketing/components/byq/HeroSection";
 import { HomeFaqSection } from "@marketing/components/sections/HomeFaqSection";
 import { MembershipPricingSection } from "@marketing/components/sections/MembershipPricingSection";
 import { ServicesMarqueeSection } from "@marketing/components/sections/ServicesMarqueeSection";
+import { getMergedUpcomingEvents } from "@marketing/data/events";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const events = await getMergedUpcomingEvents();
+
   return (
     <main>
       <HeroSection />
       <ServicesMarqueeSection />
-      <CmsGrid13Section />
+      <CmsGrid13Section events={events} />
       <MembershipPricingSection />
       <HomeFaqSection />
       <CtaSection />

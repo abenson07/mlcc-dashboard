@@ -1,14 +1,27 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getApiBase } from "@/lib/apiBase";
+import { getBannerItems, type BannerItem } from "@marketing/data/banner";
 import type { BannerView, BannerWriteInput } from "@/lib/webflow/banners";
 
 export const BANNERS_QUERY_KEY = ["banners"] as const;
 
-async function readJsonError(res: Response): Promise<Error> {
-  const json = (await res.json().catch(() => null)) as { error?: string } | null;
-  return new Error(json?.error || "Request failed");
+function siteBannerToView(item: BannerItem): BannerView {
+  return {
+    id: `site:${item.linkPath}`,
+    name: item.headline,
+    slug: item.linkPath.replace(/^\//, ""),
+    message: item.linkText,
+    linkUrl: item.linkPath,
+    active: true,
+    expiresAt: null,
+    urgent: false,
+    urgentUntil: null,
+    editorNotes: "",
+    isArchived: false,
+    isDraft: false,
+    derived: { isExpired: false, inUrgentWindow: false, hiddenByRetention: false },
+  };
 }
 
 export function useBanners() {
@@ -16,46 +29,28 @@ export function useBanners() {
 
   const query = useQuery({
     queryKey: BANNERS_QUERY_KEY,
-    queryFn: async (): Promise<BannerView[]> => {
-      const res = await fetch(`${getApiBase()}/api/banners`);
-      if (!res.ok) throw await readJsonError(res);
-      const json = (await res.json()) as { banners: BannerView[] };
-      return json.banners;
-    },
+    queryFn: async (): Promise<BannerView[]> => getBannerItems().map(siteBannerToView),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: BANNERS_QUERY_KEY });
 
   const createMutation = useMutation({
-    mutationFn: async (input: BannerWriteInput): Promise<BannerView> => {
-      const res = await fetch(`${getApiBase()}/api/banners`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) throw await readJsonError(res);
-      const json = (await res.json()) as { banner: BannerView };
-      return json.banner;
+    mutationFn: async (_input: BannerWriteInput): Promise<BannerView> => {
+      throw new Error(
+        "Site banners are generated from events, Leaflet stories, and volunteer asks — not stored separately.",
+      );
     },
     onSuccess: invalidate,
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      input,
-    }: {
+    mutationFn: async (_args: {
       id: string;
       input: BannerWriteInput;
     }): Promise<BannerView> => {
-      const res = await fetch(`${getApiBase()}/api/banners/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) throw await readJsonError(res);
-      const json = (await res.json()) as { banner: BannerView };
-      return json.banner;
+      throw new Error(
+        "Site banners are generated from events, Leaflet stories, and volunteer asks — not stored separately.",
+      );
     },
     onSuccess: invalidate,
   });

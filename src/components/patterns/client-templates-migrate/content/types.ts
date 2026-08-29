@@ -8,8 +8,10 @@ export type Story = {
   status: ContentStatus;
   /** Formatted for display (e.g. "Aug 8, 2026"); null when unset. */
   publishedAt: string | null;
+  /** ISO date (`YYYY-MM-DD`) for writes; null when unset. */
+  publishDate?: string | null;
   body: string;
-  /** Demo-only fields — real `Stories` rows have no image/description column yet. */
+  slug?: string;
   imageUrl?: string;
   description?: string;
 };

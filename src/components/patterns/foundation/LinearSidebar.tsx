@@ -35,7 +35,6 @@ import {
   DropdownItem,
 } from "@/components/patterns/shared/dropdown";
 import { useEvents, useLeaflets, useStories, useCurrentPerson, useFavorites } from "hooks";
-import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import { clearDemoStore, newDemoId, upsertDemoEntity } from "@/lib/demo/demoStore";
 import {
   leafletCommSettingsFromDefs,
@@ -234,10 +233,9 @@ function MigrateCreateModals({
       router.push(hrefFor(`/content?view=stories&selected=${id}`));
       return;
     }
-    const authorId = await getCurrentPersonId();
     const created = await createStory({
       title: story.title,
-      author_id: authorId,
+      author: story.author || "",
       status: story.status === "Published" ? "published" : "draft",
       body: story.body || "",
     });

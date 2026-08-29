@@ -7,7 +7,6 @@ import {
   getEventDetailBlocks,
   getEventMapEmbedUrl,
   getEventPageHref,
-  getRelatedEvents,
   type Event,
   type EventDetailBlock,
 } from "@marketing/data/events";
@@ -212,13 +211,12 @@ function EventDetailsCard({ event }: { event: Event }) {
 export function CmsPage12Section({
   title,
   event,
-  currentSlug,
+  relatedEvents = [],
 }: {
   title: string;
   event?: Event;
-  currentSlug?: string;
+  relatedEvents?: Event[];
 }) {
-  const relatedEvents = getRelatedEvents(currentSlug);
   const heroImage = event?.image;
 
   return (

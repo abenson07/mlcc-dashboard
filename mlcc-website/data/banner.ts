@@ -1,4 +1,4 @@
-import { events, getEventPageHref, getUpcomingEvents } from "./events";
+import { events, getEventPageHref, getUpcomingEvents, type Event } from "./events";
 import { getPublishedLeafletStories } from "./leaflet-stories";
 import { volunteerOpportunities } from "./volunteers";
 
@@ -8,8 +8,9 @@ export type BannerItem = {
   linkPath: string;
 };
 
-export function getBannerItems(): BannerItem[] {
-  const upcomingEvents = getUpcomingEvents(events)
+function eventBannerItems(upcomingEvents: Event[]): BannerItem[] {
+  return upcomingEvents
+    .slice()
     .sort((a, b) => new Date(a.dateIso).getTime() - new Date(b.dateIso).getTime())
     .slice(0, 4)
     .map((event) => ({
@@ -17,7 +18,9 @@ export function getBannerItems(): BannerItem[] {
       linkText: "See event details",
       linkPath: getEventPageHref(event),
     }));
+}
 
+function storyAndVolunteerBannerItems(): BannerItem[] {
   const recentStories = getPublishedLeafletStories()
     .sort((a, b) => b.publishDate.localeCompare(a.publishDate))
     .slice(0, 2)
@@ -33,5 +36,13 @@ export function getBannerItems(): BannerItem[] {
     linkPath: `/volunteer/${opportunity.slug}`,
   }));
 
-  return [...upcomingEvents, ...recentStories, ...volunteerAsks];
+  return [...recentStories, ...volunteerAsks];
+}
+
+export function getBannerItemsFromEvents(upcomingEvents: Event[]): BannerItem[] {
+  return [...eventBannerItems(upcomingEvents), ...storyAndVolunteerBannerItems()];
+}
+
+export function getBannerItems(): BannerItem[] {
+  return getBannerItemsFromEvents(getUpcomingEvents(events));
 }

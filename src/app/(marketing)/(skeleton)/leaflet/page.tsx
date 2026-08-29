@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CmsGridSection } from "@marketing/components/byq/CmsGridSection";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
-import { getPublishedLeafletStories } from "@marketing/data/leaflet-stories";
+import { loadPublishedLeafletStories } from "@marketing/data/leaflet-stories";
 
 export const metadata: Metadata = {
   title: "The Leaflet | Maple Leaf Community Council",
@@ -9,10 +9,11 @@ export const metadata: Metadata = {
     "Read stories from the Leaflet, Maple Leaf's printed neighborhood newsletter delivered door to door by neighborhood volunteers.",
 };
 
-export default function LeafletPage() {
+export default async function LeafletPage() {
+  const stories = await loadPublishedLeafletStories();
   return (
     <main>
-      <CmsGridSection title="The Leaflet" stories={getPublishedLeafletStories()} />
+      <CmsGridSection title="The Leaflet" stories={stories} />
       <CtaSection
         title="Join the Leaflet team"
         subhead="Help write, design, photograph, and deliver the neighborhood newsletter that reaches Maple Leaf door to door."

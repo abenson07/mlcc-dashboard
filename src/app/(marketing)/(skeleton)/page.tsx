@@ -5,6 +5,7 @@ import { HeroSection } from "@marketing/components/byq/HeroSection";
 import { HomeFaqSection } from "@marketing/components/sections/HomeFaqSection";
 import { MembershipPricingSection } from "@marketing/components/sections/MembershipPricingSection";
 import { ServicesMarqueeSection } from "@marketing/components/sections/ServicesMarqueeSection";
+import { getMergedUpcomingEvents } from "@marketing/data/events";
 
 export const metadata: Metadata = {
   title: "Maple Leaf Community Council",
@@ -12,12 +13,14 @@ export const metadata: Metadata = {
     "Connecting neighbors to the people and things that matter most. A volunteer-run community council keeping Maple Leaf, Seattle informed, connected, and involved.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const events = await getMergedUpcomingEvents();
+
   return (
     <main>
       <HeroSection />
       <ServicesMarqueeSection />
-      <CmsGrid13Section />
+      <CmsGrid13Section events={events} />
       <MembershipPricingSection />
       <HomeFaqSection />
       <CtaSection />

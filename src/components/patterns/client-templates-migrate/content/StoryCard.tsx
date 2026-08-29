@@ -21,7 +21,7 @@ export function StoryCard({ story, onClick }: StoryCardProps) {
     <ContentListRow
       icon={
         story.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- demo-only external asset from the live marketing site
+          // eslint-disable-next-line @next/next/no-img-element -- Leaflet cover from stories.cover_image_url
           <img
             src={story.imageUrl}
             alt=""

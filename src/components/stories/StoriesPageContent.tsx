@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { IconPlus, IconSearch } from "@/components/leaflet/icons";
 import { useLeaflets, useStories } from "hooks";
-import { getCurrentPersonId } from "@/lib/people/currentPerson";
 import StoryDetailPanel from "./StoryDetailPanel";
 
 export default function StoriesPageContent() {
@@ -70,10 +69,9 @@ export default function StoriesPageContent() {
   async function handleNewStory() {
     setCreating(true);
     try {
-      const authorId = await getCurrentPersonId();
       const newStory = await create({
         title: "",
-        author_id: authorId,
+        author: "",
         publish_date: new Date().toISOString().slice(0, 10),
       });
       if (newStory) selectStory(newStory.id);

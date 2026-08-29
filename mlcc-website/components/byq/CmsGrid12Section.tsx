@@ -1,9 +1,8 @@
-import { getUpcomingEvents } from "@marketing/data/events";
+import type { Event } from "@marketing/data/events";
 import { EventCard } from "@marketing/components/byq/EventCard";
 import { SectionLabel } from "@marketing/components/SectionLabel";
 
-export function CmsGrid12Section({ title }: { title: string }) {
-  const events = getUpcomingEvents();
+export function CmsGrid12Section({ title, events }: { title: string; events: Event[] }) {
   return (
     <div
       className="bg-sparkles-cream text-sparkles-navy"
