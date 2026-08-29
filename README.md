@@ -1,6 +1,6 @@
-# Maple Leaf Community Club
+# Maple Leaf Community Council
 
-This repository is the **Maple Leaf Community Club (MLCC)** platform: a public neighborhood website and a private admin dashboard used by the board and approved volunteers.
+This repository is the **Maple Leaf Community Council (MLCC)** platform: a public neighborhood website and a private admin dashboard used by the board and approved volunteers.
 
 The live public site is [mapleleafcommunity.org](https://www.mapleleafcommunity.org). The admin lives at `/admin` on the same app after you sign in with an emailed one-time code — there are **no passwords**.
 
