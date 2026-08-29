@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-// Optional BASE_PATH for legacy Webflow Cloud mounts; leave unset on Vercel (marketing at /, admin at /admin).
+// Optional BASE_PATH for a reverse-proxy mount; leave unset on Vercel (marketing at /, admin at /admin).
 const basePath = process.env.BASE_PATH || undefined;
 
 const nextConfig: NextConfig = {
@@ -264,10 +263,8 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: false,
       },
-      // Legacy /admin deep links from the old shell-preview admin — that content
-      // moved to /admin-retire and /admin now serves the admin-migrate build,
-      // which reshapes several of these routes. Map old shapes to their closest
-      // new equivalent.
+      // Legacy /admin deep links from the previous admin shell. /admin now
+      // uses a different route shape; map old URLs to the closest equivalent.
       {
         source: "/admin/events/:id/overview",
         destination: "/admin/events/:id",
@@ -380,7 +377,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-// Only run OpenNext Cloudflare dev init when in dev (avoid breaking Webflow Cloud / plain next build)
-if (process.env.NODE_ENV === "development") {
-  initOpenNextCloudflareForDev();
-}
