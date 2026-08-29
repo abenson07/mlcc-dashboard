@@ -16,8 +16,7 @@ import * as React from "react";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-const ACCOUNT_PANEL_IMAGE =
-  "https://cdn.prod.website-files.com/6a2fa8175a11738252f297aa/images/image-account_1image-account.avif";
+const ACCOUNT_PANEL_IMAGE = "/images/account-panel.jpg";
 
 function SendCodeButton() {
   const { pending } = useFormStatus();
