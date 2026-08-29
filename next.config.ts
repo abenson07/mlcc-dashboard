@@ -348,16 +348,12 @@ const nextConfig: NextConfig = {
   experimental: {
     viewTransition: true,
     serverActions: {
-      // Allow public domains and Webflow/Cosmic internal host so origin vs x-forwarded-host check passes when behind their proxy.
+      // Allow the public domains so the origin vs x-forwarded-host check passes behind a proxy.
       allowedOrigins: [
         "https://www.mapleleafcommunity.org",
         "www.mapleleafcommunity.org",
         "https://mapleleafcommunity.org",
         "mapleleafcommunity.org",
-        "https://mapleleafcommunity.webflow.io",
-        "mapleleafcommunity.webflow.io",
-        "https://*.wf-app-prod.cosmic.webflow.services",
-        "*.wf-app-prod.cosmic.webflow.services",
         ...(process.env.SERVER_ACTIONS_ALLOWED_ORIGIN
           ? [process.env.SERVER_ACTIONS_ALLOWED_ORIGIN]
           : []),

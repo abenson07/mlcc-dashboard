@@ -1,6 +1,6 @@
 /**
  * LocalStorage-backed demo-mode persistence for /admin-migrate.
- * Never touches Supabase/Stripe/Webflow — walkthrough mutations live here until exit.
+ * Never touches Supabase or Stripe — walkthrough mutations live here until exit.
  */
 
 export const DEMO_STORE_EVENT = "admin-migrate-demo-store";

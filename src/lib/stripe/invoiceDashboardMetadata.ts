@@ -17,7 +17,7 @@ export const METADATA_KEYS = {
   category: "category",
   created: "created",
   createdBy: "created_by",
-  /** Supabase events.id when category is event sponsorship. Legacy invoices may still hold a Webflow CMS item id. */
+  /** Supabase events.id when category is event sponsorship. Legacy invoices may still hold an imported CMS item id. */
   eventId: "event_id",
   /** Display name at issue time (from the events table). */
   eventName: "event_name",
