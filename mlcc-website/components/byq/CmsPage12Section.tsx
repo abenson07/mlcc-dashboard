@@ -218,6 +218,12 @@ export function CmsPage12Section({
   relatedEvents?: Event[];
 }) {
   const heroImage = event?.image;
+  const isPortrait = event?.imageAspect === "portrait";
+  const imageOrderClass = event?.imagePosition === "right" ? "order-2" : "order-1";
+  const bodyOrderClass = event?.imagePosition === "right" ? "order-1" : "order-2";
+  // Image on the left pushes the text column to the right-hand grid cell — align it to
+  // the outer (right) edge there instead of leaving it hugging the middle gap.
+  const bodyAlignClass = event?.imagePosition === "right" ? "justify-self-start" : "justify-self-end";
 
   return (
     <div
@@ -267,7 +273,7 @@ export function CmsPage12Section({
                 </div>
               </div>
 
-              {heroImage ? (
+              {heroImage && !isPortrait ? (
                 <div className="h-[30rem] w-full overflow-hidden rounded-2xl max-[991px]:h-[22.5rem] max-[767px]:h-[18.75rem] max-[479px]:h-[15.6rem]">
                   <img
                     loading="lazy"
@@ -282,11 +288,20 @@ export function CmsPage12Section({
 
           <div className="mx-auto w-full max-w-[1800px] pb-20 max-[767px]:pb-16">
             <div className="grid grid-cols-2 items-start justify-items-end gap-4 max-[991px]:grid-cols-1 max-[991px]:gap-16">
-              <div className="flex w-full max-w-[42.5rem] flex-col justify-self-start max-[991px]:max-w-none max-[767px]:max-w-none">
+              {heroImage && isPortrait ? (
+                <div className={`w-full aspect-[3/4] overflow-hidden rounded-2xl ${imageOrderClass}`}>
+                  <img loading="lazy" src={heroImage} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : null}
+
+              <div
+                className={`flex w-full max-w-[42.5rem] flex-col gap-16 max-[991px]:max-w-none max-[767px]:max-w-none ${isPortrait ? `${bodyOrderClass} ${bodyAlignClass}` : "justify-self-start"}`}
+              >
                 {event ? renderEventBody(getEventDetailBlocks(event)) : renderSkeletonBody()}
+                {isPortrait && event ? <EventDetailsCard event={event} /> : null}
               </div>
 
-              {event ? <EventDetailsCard event={event} /> : null}
+              {event && !isPortrait ? <EventDetailsCard event={event} /> : null}
             </div>
           </div>
         </div>

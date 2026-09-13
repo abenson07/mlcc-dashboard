@@ -95,6 +95,30 @@ describe("mergeStaticWithPublished", () => {
     expect(merged[1].shortDescription).toBe("Bring a blanket");
   });
 
+  it("maps image_aspect and image_position from field_data onto the mapped event", () => {
+    const merged = mergeStaticWithPublished(
+      [staticEvent()],
+      [
+        publishedRow({
+          field_data: {
+            location: "Reservoir Park",
+            description: "Admin blurb",
+            image_url: "/images/admin.jpg",
+            image_aspect: "portrait",
+            image_position: "right",
+          },
+        }),
+      ],
+    );
+    expect(merged[0]).toMatchObject({ imageAspect: "portrait", imagePosition: "right" });
+  });
+
+  it("defaults imageAspect/imagePosition to undefined (landscape/left) when field_data omits them", () => {
+    const mapped = mapRowToMarketingEvent(publishedRow());
+    expect(mapped?.imageAspect).toBeUndefined();
+    expect(mapped?.imagePosition).toBeUndefined();
+  });
+
   it("omits committee meetings from public output", () => {
     const merged = mergeStaticWithPublished(
       [staticEvent()],
