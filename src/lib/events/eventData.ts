@@ -12,12 +12,20 @@ export type EventDocumentAsset = {
   url?: string | null;
 };
 
+export const EVENT_COVER_ASPECT_RATIOS = { landscape: 16 / 9, portrait: 3 / 4 } as const;
+export type EventCoverAspect = keyof typeof EVENT_COVER_ASPECT_RATIOS;
+export type EventCoverPosition = "left" | "right";
+
 /** Conventional keys stored in `events.field_data` jsonb. */
 export type EventFieldData = {
   location?: string;
   status?: string;
   capacity?: number;
   image_url?: string;
+  /** Cover image framing — defaults to "landscape" when absent (pre-dates this field). */
+  image_aspect?: EventCoverAspect;
+  /** Which side the cover image renders on in the public detail-page hero. Only meaningful for portrait. */
+  image_position?: EventCoverPosition;
   description?: string;
   kind?: EventKind;
   committee?: string;
@@ -95,6 +103,8 @@ export function parseEventFieldData(raw: Record<string, unknown> | null | undefi
     status: typeof fd.status === "string" ? fd.status : undefined,
     capacity: typeof fd.capacity === "number" ? fd.capacity : undefined,
     image_url: typeof fd.image_url === "string" ? fd.image_url : undefined,
+    image_aspect: fd.image_aspect === "portrait" ? "portrait" : fd.image_aspect === "landscape" ? "landscape" : undefined,
+    image_position: fd.image_position === "right" ? "right" : fd.image_position === "left" ? "left" : undefined,
     description: typeof fd.description === "string" ? fd.description : undefined,
     kind:
       fd.kind === "external"
