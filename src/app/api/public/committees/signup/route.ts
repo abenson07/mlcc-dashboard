@@ -7,7 +7,10 @@ import {
   findOrCreatePersonFromContact,
   looksLikeEmail,
 } from "@/lib/committees/findOrCreatePersonFromContact";
-import { sendVolunteerAutoAcceptEmail } from "@/lib/committees/sendCommitteeEmail";
+import {
+  sendVolunteerAutoAcceptEmail,
+  sendVolunteerInterestAcknowledgementEmail,
+} from "@/lib/committees/sendCommitteeEmail";
 import type { CommitteeInterestSource, CommitteeSlug } from "@/types/database";
 
 type SignupSource = "join-card" | "meeting-signup" | "zoning-workshop" | "volunteer-opportunity";
@@ -174,6 +177,16 @@ export async function POST(request: NextRequest) {
           );
         }
       }
+    }
+  }
+
+  if (!autoAccepted && looksLikeEmail(trimmedContact)) {
+    const ackResult = await sendVolunteerInterestAcknowledgementEmail({
+      to: trimmedContact,
+      name: trimmedName,
+    });
+    if (!ackResult.sent) {
+      console.error("[committees/signup] failed to send acknowledgement email", ackResult.error);
     }
   }
 

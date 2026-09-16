@@ -155,7 +155,7 @@ The full list and comments live in [`.env.example`](.env.example). Grouped by wh
 |------------|-------------------|
 | Auth and database | `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` / `SUPABASE_DB_PASSWORD` |
 | Stripe (memberships, donations, merch, invoices) | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, product/price IDs |
-| Email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, segment/audience IDs |
+| Email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, segment/audience IDs, `COMMITTEE_INTEREST_CC_EMAILS` |
 | Leaflet respond links | `LEAFLET_RESPONSE_SIGNING_SECRET` |
 | Feedback / issues | `LINEAR_API_KEY` |
 | Social scheduling | `BUFFER_API_TOKEN` |

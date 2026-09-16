@@ -12,11 +12,25 @@ export function getCommitteeEmailReplyTo(): string {
   return HELLO_REPLY_TO;
 }
 
+/**
+ * Committee-chair CC list from `COMMITTEE_INTEREST_CC_EMAILS` (comma-separated).
+ * Unset until chairs are wired up — returns an empty list.
+ */
+export function getCommitteeInterestCcEmails(): string[] {
+  const raw = process.env.COMMITTEE_INTEREST_CC_EMAILS?.trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
+}
+
 export async function sendCommitteeInterestEmail(params: {
   to: string;
   subject: string;
   text: string;
   html?: string;
+  cc?: string[];
 }): Promise<{ sent: boolean; id?: string; error?: string }> {
   const resend = getResend();
   const from = getCommitteeEmailFrom();
@@ -32,6 +46,7 @@ export async function sendCommitteeInterestEmail(params: {
       subject: params.subject,
       text: params.text,
       ...(params.html ? { html: params.html } : {}),
+      ...(params.cc && params.cc.length ? { cc: params.cc } : {}),
     });
     if (error) return { sent: false, error: error.message };
     return { sent: true, id: data?.id };
@@ -41,6 +56,34 @@ export async function sendCommitteeInterestEmail(params: {
       error: e instanceof Error ? e.message : "Failed to send email",
     };
   }
+}
+
+/**
+ * Auto-reply for any general committee/volunteer interest submission (join a
+ * committee, RSVP, workshop interest, volunteer opportunity) that isn't
+ * already covered by `sendVolunteerAutoAcceptEmail`. CC's committee chairs
+ * once `COMMITTEE_INTEREST_CC_EMAILS` is configured — empty until then.
+ */
+export async function sendVolunteerInterestAcknowledgementEmail(params: {
+  to: string;
+  name: string;
+}): Promise<{ sent: boolean; id?: string; error?: string }> {
+  const text = [
+    `Hi ${params.name},`,
+    "",
+    "Thanks for reaching out — we've received your message about volunteering with Maple Leaf Community Council.",
+    "",
+    "Someone will be in touch with you shortly. We're an all-volunteer organization, so we'll get back to you as quickly as we possibly can.",
+    "",
+    "— Maple Leaf Community Council",
+  ].join("\n");
+
+  return sendCommitteeInterestEmail({
+    to: params.to,
+    subject: "Thanks for reaching out to Maple Leaf Community Council",
+    text,
+    cc: getCommitteeInterestCcEmails(),
+  });
 }
 
 export async function sendVolunteerAutoAcceptEmail(params: {

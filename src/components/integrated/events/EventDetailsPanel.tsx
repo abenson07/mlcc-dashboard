@@ -13,6 +13,9 @@ import { Modal } from "@/components/patterns/shared/Modal";
 import { SettingsRow } from "@/components/patterns/client-templates-migrate/settings/SettingsRow";
 import {
   eventsListBasePath,
+  isoToLaDateInput,
+  isoToLaTimeInput,
+  laDateTimeToIso,
   EVENT_COVER_ASPECT_RATIOS,
   type EventDocumentAsset,
   type EventCoverAspect,
@@ -69,30 +72,6 @@ const docThumbStyle = {
   flexShrink: 0,
   overflow: "hidden" as const,
 };
-
-function toDatePart(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-function toTimePart(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function combineDateTime(date: string, time: string): string | null {
-  if (!date.trim()) return null;
-  const t = time.trim() || "00:00";
-  const d = new Date(`${date}T${t}`);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
-}
 
 type PlaceSuggest = { placeId: string; mainText: string; secondaryText: string };
 
@@ -506,9 +485,9 @@ export default function EventDetailsPanel({
 
   function hydrateFromEvent() {
     if (!event) return;
-    const date = toDatePart(event.starts_at);
-    const start = toTimePart(event.starts_at);
-    const end = toTimePart(event.ends_at);
+    const date = isoToLaDateInput(event.starts_at);
+    const start = isoToLaTimeInput(event.starts_at);
+    const end = isoToLaTimeInput(event.ends_at);
     const nextName = event.title;
     const nextShowEnd = Boolean(end && end !== start);
     const nextLocation = event.fieldData.location ?? "";
@@ -578,8 +557,8 @@ export default function EventDetailsPanel({
     setSaving(true);
     setError(null);
     try {
-      const nextStarts = combineDateTime(eventDate, startTime);
-      const nextEnds = showEndTime && endTime ? combineDateTime(eventDate, endTime) : null;
+      const nextStarts = laDateTimeToIso(eventDate, startTime);
+      const nextEnds = showEndTime && endTime ? laDateTimeToIso(eventDate, endTime) : null;
       const fieldPayload = {
         ...fd,
         location: location.trim(),
@@ -611,10 +590,10 @@ export default function EventDetailsPanel({
     setBaseline(
       JSON.stringify({
         name: event.title,
-        eventDate: toDatePart(event.starts_at),
-        startTime: toTimePart(event.starts_at),
-        endTime: toTimePart(event.ends_at),
-        showEndTime: Boolean(toTimePart(event.ends_at)),
+        eventDate: isoToLaDateInput(event.starts_at),
+        startTime: isoToLaTimeInput(event.starts_at),
+        endTime: isoToLaTimeInput(event.ends_at),
+        showEndTime: Boolean(isoToLaTimeInput(event.ends_at)),
         location: event.fieldData.location ?? "",
         address: event.fieldData.address ?? "",
         locationIsGeneric: Boolean(event.fieldData.location_is_generic),
@@ -1149,14 +1128,22 @@ export default function EventDetailsPanel({
 
       <Modal
         isOpen={confirmSave}
-        onClose={() => setConfirmSave(false)}
+        onClose={() => {
+          if (!saving) setConfirmSave(false);
+        }}
         title="Save changes?"
         footer={
           <>
-            <Button label="Keep editing" variant="secondary" onClick={() => setConfirmSave(false)} />
             <Button
-              label="Save"
+              label="Keep editing"
+              variant="secondary"
+              disabled={saving}
+              onClick={() => setConfirmSave(false)}
+            />
+            <Button
+              label={saving ? "Saving…" : "Save"}
               variant="primary"
+              disabled={saving}
               onClick={() => void persistChanges()}
             />
           </>
