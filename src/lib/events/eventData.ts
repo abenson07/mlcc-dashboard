@@ -148,6 +148,84 @@ export function deriveEventStatus(row: Events, fieldData: EventFieldData): strin
   return "Planning";
 }
 
+/** MLCC operates in Seattle; render event dates/times in this zone regardless of viewer or server locale. */
+export const EVENT_TIME_ZONE = "America/Los_Angeles";
+
+function laDateStr(d: Date, opts: Intl.DateTimeFormatOptions): string {
+  return d.toLocaleDateString("en-US", { timeZone: EVENT_TIME_ZONE, ...opts });
+}
+
+function laTimeStr(d: Date, opts: Intl.DateTimeFormatOptions): string {
+  return d.toLocaleTimeString("en-US", { timeZone: EVENT_TIME_ZONE, ...opts });
+}
+
+/** `YYYY-MM-DD` calendar day in `EVENT_TIME_ZONE`, for same-day comparisons independent of viewer timezone. */
+function laDateKey(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: EVENT_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+/** `YYYY-MM-DD` for `iso` as a wall-clock date in `EVENT_TIME_ZONE` — for hydrating a `<input type="date">`. */
+export function isoToLaDateInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : laDateKey(d);
+}
+
+/** `HH:MM` (24h) for `iso` as a wall-clock time in `EVENT_TIME_ZONE` — for hydrating a `<input type="time">`. */
+export function isoToLaTimeInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: EVENT_TIME_ZONE,
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(d);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "00";
+  const hour = get("hour");
+  return `${hour === "24" ? "00" : hour}:${get("minute")}`;
+}
+
+/** UTC-instant offset (in minutes) between `EVENT_TIME_ZONE` and UTC at `utcGuess`, accounting for DST. */
+function laOffsetMinutesAt(utcGuess: Date): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: EVENT_TIME_ZONE,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(utcGuess);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? "0");
+  const wallAsUtc = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    get("hour") === 24 ? 0 : get("hour"),
+    get("minute"),
+    get("second"),
+  );
+  return (wallAsUtc - utcGuess.getTime()) / 60000;
+}
+
+/** Combines a `YYYY-MM-DD` date and `HH:MM` time — read as wall-clock in `EVENT_TIME_ZONE` — into a UTC ISO string. */
+export function laDateTimeToIso(date: string, time: string): string | null {
+  if (!date.trim()) return null;
+  const t = time.trim() || "00:00";
+  const naiveUtc = new Date(`${date}T${t}:00Z`);
+  if (Number.isNaN(naiveUtc.getTime())) return null;
+  const offsetMin = laOffsetMinutesAt(naiveUtc);
+  return new Date(naiveUtc.getTime() - offsetMin * 60000).toISOString();
+}
+
 export function daysUntilEvent(iso: string | null): number {
   if (!iso) return 0;
   const today = new Date();
@@ -167,7 +245,7 @@ export function formatEventDateRange(row: Events): string {
   const start = row.starts_at ?? (row.date ? `${row.date}T12:00:00` : null);
   if (!start) return "Date TBD";
   const startDate = new Date(start);
-  const startStr = startDate.toLocaleDateString("en-US", {
+  const startStr = laDateStr(startDate, {
     weekday: "long",
     month: "short",
     day: "numeric",
@@ -175,22 +253,22 @@ export function formatEventDateRange(row: Events): string {
   });
   if (!row.ends_at) return startStr;
   const endDate = new Date(row.ends_at);
-  const sameDay = startDate.toDateString() === endDate.toDateString();
+  const sameDay = laDateKey(startDate) === laDateKey(endDate);
   if (sameDay) {
-    const timeStr = `${startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – ${endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+    const timeStr = `${laTimeStr(startDate, { hour: "numeric", minute: "2-digit" })} – ${laTimeStr(endDate, { hour: "numeric", minute: "2-digit" })}`;
     return `${startStr} · ${timeStr}`;
   }
-  return `${startStr} – ${endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+  return `${startStr} – ${laDateStr(endDate, { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
 export function formatEventTimeRange(row: Events): string {
   if (!row.starts_at) return "—";
   const start = new Date(row.starts_at);
   if (!row.ends_at) {
-    return start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    return laTimeStr(start, { hour: "numeric", minute: "2-digit" });
   }
   const end = new Date(row.ends_at);
-  return `${start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} – ${end.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+  return `${laTimeStr(start, { hour: "numeric", minute: "2-digit" })} – ${laTimeStr(end, { hour: "numeric", minute: "2-digit" })}`;
 }
 
 export function mapEventListItem(row: Events): EventListItem {
@@ -203,11 +281,9 @@ export function mapEventListItem(row: Events): EventListItem {
     id: row.id,
     title: row.name ?? "Untitled event",
     date: iso?.slice(0, 10) ?? "",
-    day: d ? d.getDate() : 0,
-    month: d ? d.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : "",
-    monthLabel: d
-      ? d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
-      : "No date",
+    day: d ? Number(laDateStr(d, { day: "numeric" })) : 0,
+    month: d ? laDateStr(d, { month: "short" }).toUpperCase() : "",
+    monthLabel: d ? laDateStr(d, { month: "long", year: "numeric" }) : "No date",
     status,
     location: fieldData.location ?? "—",
     daysUntil: daysUntilEvent(iso),
