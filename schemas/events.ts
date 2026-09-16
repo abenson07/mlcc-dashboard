@@ -1,6 +1,6 @@
 /**
  * Events Schema
- * Dashboard-native events (parallel track to Webflow calendar).
+ * Dashboard-native events.
  *
  * `field_data` jsonb conventions (see `src/lib/events/eventData.ts`):
  * - location, status, capacity, image_url, description, address

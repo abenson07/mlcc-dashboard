@@ -2,7 +2,6 @@ export type LeafletStoryType = "From the Council" | "Neighborhood Update";
 
 export type LeafletStory = {
   slug: string;
-  webflowSlug: string;
   title: string;
   author: string;
   publishDate: string;
@@ -16,7 +15,6 @@ export type LeafletStory = {
 export const leafletStories: LeafletStory[] = [
   {
     slug: "2026-volunteer-open-house",
-    webflowSlug: "a-fresh-start-for-maple-leaf-join-our-2026-volunteer-committee-open-house",
     title: "A fresh start for Maple Leaf: join our 2026 volunteer & committee open house",
     author: "alex-benson",
     publishDate: "2025-12-30",
@@ -28,7 +26,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "advocacy-and-zoning-workshops",
-    webflowSlug: "a-place-to-work-through-hard-questions-together",
     title: "A place to work through hard questions together",
     author: "alex-benson",
     publishDate: "2026-01-09",
@@ -40,7 +37,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "silent-book-club",
-    webflowSlug: "a-quiet-way-to-belong",
     title: "A quiet way to belong",
     author: "alex-benson",
     publishDate: "2026-01-08",
@@ -52,7 +48,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "community-meetings",
-    webflowSlug: "bringing-neighbors-together-to-learn-ask-questions-and-be-heard",
     title: "Bringing neighbors together to learn, ask questions, and be heard",
     author: "rebecca-letwin",
     publishDate: "2025-12-31",
@@ -64,7 +59,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "movies-by-the-tower",
-    webflowSlug: "building-connections-under-the-stars",
     title: "Building Connections Under the Stars",
     author: "alex-benson",
     publishDate: "2026-01-05",
@@ -76,7 +70,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "built-by-neighbors",
-    webflowSlug: "built-by-neighbors-sustained-by-neighbors",
     title: "Built by neighbors, sustained by neighbors",
     author: "alex-benson",
     publishDate: "2026-01-04",
@@ -88,7 +81,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "halloween-parade",
-    webflowSlug: "carrying-the-halloween-parade-forward",
     title: "Carrying the Halloween Parade forward",
     author: "alex-benson",
     publishDate: "2026-01-05",
@@ -100,7 +92,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "the-leaflet",
-    webflowSlug: "connecting-maple-leaf-through-the-decades",
     title: "Connecting Maple Leaf through the decades",
     author: "alex-benson",
     publishDate: "2025-12-30",
@@ -112,7 +103,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "love-your-neighbor",
-    webflowSlug: "conversations-close-to-home",
     title: "Conversations close to home",
     author: "alex-benson",
     publishDate: "2026-01-07",
@@ -124,7 +114,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "housing-types",
-    webflowSlug: "housing-types",
     title: "Housing Types",
     author: "ethan-delavan",
     publishDate: "2026-01-31",
@@ -136,7 +125,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "one-seattle-plan",
-    webflowSlug: "one-seattle-plan-speak-up-for-maple-leafs-future",
     title: "One Seattle Plan: Speak Up for Maple Leaf’s Future",
     author: "laurie-vette",
     publishDate: "2025-11-12",
@@ -148,7 +136,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "summer-social",
-    webflowSlug: "summer-social-tradition-what-it-takes",
     title: "What it takes to keep a neighborhood tradition alive",
     author: "stefan-hoerschelmann",
     publishDate: "2025-12-29",
@@ -160,7 +147,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "visioning-survey",
-    webflowSlug: "survey",
     title: "Your Maple Leaf Visioning Survey",
     author: "ethan-delavan",
     publishDate: "2026-02-22",
@@ -172,7 +158,6 @@ export const leafletStories: LeafletStory[] = [
   },
   {
     slug: "cybersecurity-incident",
-    webflowSlug: "cybersecurity-incident",
     title: "Cybersecurity Incident",
     author: "ethan-delavan",
     publishDate: "2026-05-26",
@@ -231,7 +216,6 @@ function storyFromRow(row: StoryRow): LeafletStory | null {
   if (!slug) return null;
   return {
     slug,
-    webflowSlug: catalog?.webflowSlug ?? slug,
     title: row.title,
     author: row.author_slug || row.author || catalog?.author || "maple-leaf-community-council",
     publishDate: row.publish_date || catalog?.publishDate || "1970-01-01",

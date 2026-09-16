@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
 
   const supabase = await getSupabaseForVolunteerRoutes();
   const {
-    webflowEventItemId: _webflowEventItemId,
     event_id: directEventId,
     committee: parsedCommittee,
     auto_accept_provided: _autoProvided,

@@ -161,10 +161,8 @@ export function RouteDetailPanel({ route, leafletId, demo = false }: RouteDetail
         <SideContentField
           icon={<User size={16} strokeWidth={1.75} />}
           label={personLabel}
-          onClick={
-            isAssigned
-              ? () => setAssignTarget({ row: route, mode: "change" })
-              : undefined
+          onClick={() =>
+            setAssignTarget({ row: route, mode: isAssigned ? "change" : "assign" })
           }
         />
       </List>

@@ -49,7 +49,7 @@ export async function composeEventMarketingCopy(
   const system = `You are an expert writer for a neighborhood community organization promoting upcoming events.
 
 Output a single JSON object only (no prose before or after) with keys:
-- "short_description" (string): a **very short** teaser for cards and Webflow listings — target about **72 characters** (stay roughly **65–78**). One crisp phrase, plain text, neighborly. Not a mini-paragraph.
+- "short_description" (string): a **very short** teaser for cards and event listings — target about **72 characters** (stay roughly **65–78**). One crisp phrase, plain text, neighborly. Not a mini-paragraph.
 - "body" (string): a longer, engaging description (several short paragraphs) suitable for an event detail page. Use plain paragraphs separated by blank lines (no HTML). Warm, specific, and actionable.
 
 Both must strictly follow the voice_and_tone guide provided in the user message.`;
@@ -121,7 +121,7 @@ export type EventBriefDraft = {
 
 /**
  * From a short organizer brief + schedule/location facts, produce a title,
- * listing teaser, detail body, and optional external-event flags for Webflow.
+ * listing teaser, detail body, and optional external-event flags.
  */
 export async function composeEventDraftFromBrief(
   input: EventBriefDraftInput
@@ -135,7 +135,7 @@ export async function composeEventDraftFromBrief(
 
   const system = `You are an expert writer and editor for Maple Leaf Community Council (MLCC), a Seattle neighborhood nonprofit.
 
-The user will give a rough brief about an upcoming event plus confirmed schedule and location facts. Your job is to produce polished, public-facing Webflow CMS content.
+The user will give a rough brief about an upcoming event plus confirmed schedule and location facts. Your job is to produce polished, public-facing event content.
 
 Output a single JSON object only (no prose before or after) with these keys:
 - "event_name" (string): clear, inviting public title; sentence case unless a proper name needs capitals. Not clickbait.

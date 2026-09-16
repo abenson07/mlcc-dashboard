@@ -6,9 +6,19 @@ export type TextInputProps = {
   onChange: (next: string) => void;
   multiline?: boolean;
   rows?: number;
+  autoFocus?: boolean;
+  placeholder?: string;
 };
 
-export function TextInput({ label, value, onChange, multiline = false, rows = 4 }: TextInputProps) {
+export function TextInput({
+  label,
+  value,
+  onChange,
+  multiline = false,
+  rows = 4,
+  autoFocus = false,
+  placeholder,
+}: TextInputProps) {
   const sharedStyle = {
     boxSizing: "border-box" as const,
     width: "100%",
@@ -29,6 +39,8 @@ export function TextInput({ label, value, onChange, multiline = false, rows = 4 
           value={value}
           onChange={(event) => onChange(event.target.value)}
           rows={rows}
+          autoFocus={autoFocus}
+          placeholder={placeholder}
           style={{ ...sharedStyle, paddingBlock: 8, resize: "vertical" }}
         />
       ) : (
@@ -36,6 +48,8 @@ export function TextInput({ label, value, onChange, multiline = false, rows = 4 
           type="text"
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          autoFocus={autoFocus}
+          placeholder={placeholder}
           style={{ ...sharedStyle, height: 32 }}
         />
       )}

@@ -60,10 +60,6 @@ export const config = {
   matcher: [
     "/admin",
     "/admin/:path*",
-    "/admin-retire",
-    "/admin-retire/:path*",
-    "/old-admin",
-    "/old-admin/:path*",
     "/login",
     "/signup",
   ],

@@ -16,12 +16,18 @@ import {
   isoToLaDateInput,
   isoToLaTimeInput,
   laDateTimeToIso,
+  EVENT_COVER_ASPECT_RATIOS,
   type EventDocumentAsset,
+  type EventCoverAspect,
+  type EventCoverPosition,
 } from "@/lib/events/eventData";
 import { eventPageUrl } from "@/lib/events/eventQr";
 import { getApiBase } from "@/lib/apiBase";
 import { useEventContext } from "./EventContext";
 import { EventQrCodesSection } from "./EventQrCodesSection";
+import { CoverImageCropModal } from "./CoverImageCropModal";
+
+const MAX_COVER_UPLOAD_BYTES = 20 * 1024 * 1024;
 
 function Divider() {
   return (
@@ -438,6 +444,8 @@ export default function EventDetailsPanel({
   const [publishing, setPublishing] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [coverHover, setCoverHover] = useState(false);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmSave, setConfirmSave] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
@@ -599,19 +607,37 @@ export default function EventDetailsPanel({
     setConfirmDiscard(false);
   }
 
-  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    if (fileInputRef.current) fileInputRef.current.value = "";
     if (!file || readOnly) return;
-    setUploadingImage(true);
+    if (file.size > MAX_COVER_UPLOAD_BYTES) {
+      setError("That image is too large (max 20MB) — try a smaller file.");
+      return;
+    }
     setError(null);
+    setCropImageSrc(URL.createObjectURL(file));
+    setCropModalOpen(true);
+  }
+
+  function closeCropModal() {
+    setCropModalOpen(false);
+    if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
+    setCropImageSrc(null);
+  }
+
+  async function handleCropSave(file: File, aspect: EventCoverAspect) {
+    const url = await uploadCoverImage(file);
+    await updateEvent({ field_data: { ...fd, image_url: url, image_aspect: aspect } });
+    closeCropModal();
+  }
+
+  async function handleImagePositionChange(position: EventCoverPosition) {
+    if (readOnly) return;
     try {
-      const url = await uploadCoverImage(file);
-      await updateEvent({ field_data: { ...fd, image_url: url } });
+      await updateEvent({ field_data: { ...fd, image_position: position } });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to upload image");
-    } finally {
-      setUploadingImage(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setError(err instanceof Error ? err.message : "Failed to update image position");
     }
   }
 
@@ -854,7 +880,7 @@ export default function EventDetailsPanel({
                     style={{
                       position: "relative",
                       width: "100%",
-                      aspectRatio: "16 / 9",
+                      aspectRatio: `${EVENT_COVER_ASPECT_RATIOS[fd.image_aspect ?? "landscape"]} / 1`,
                       borderRadius: "var(--linear-radius-md)",
                       overflow: "hidden",
                       background: "var(--linear-color-icon-button-secondary)",
@@ -899,6 +925,33 @@ export default function EventDetailsPanel({
                     ) : null}
                   </div>
                 </VStack>
+                {fd.image_aspect === "portrait" ? (
+                  <>
+                    <Divider />
+                    <SettingsRow
+                      label="Image position"
+                      description="Which side the image sits on for the event page"
+                      control={
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <Button
+                            label="Left"
+                            size="sm"
+                            variant={(fd.image_position ?? "left") === "left" ? "primary" : "secondary"}
+                            disabled={readOnly}
+                            onClick={() => void handleImagePositionChange("left")}
+                          />
+                          <Button
+                            label="Right"
+                            size="sm"
+                            variant={fd.image_position === "right" ? "primary" : "secondary"}
+                            disabled={readOnly}
+                            onClick={() => void handleImagePositionChange("right")}
+                          />
+                        </div>
+                      }
+                    />
+                  </>
+                ) : null}
                 <Divider />
                 <VStack gap={1.5}>
                   <VStack gap={0.5}>
@@ -1064,6 +1117,14 @@ export default function EventDetailsPanel({
           ) : null}
         </VStack>
       </div>
+
+      <CoverImageCropModal
+        isOpen={cropModalOpen}
+        onClose={closeCropModal}
+        imageSrc={cropImageSrc}
+        initialAspect={fd.image_aspect ?? "landscape"}
+        onSave={handleCropSave}
+      />
 
       <Modal
         isOpen={confirmSave}

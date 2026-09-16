@@ -147,6 +147,7 @@ async function sendToDeliverer(params: {
       routeLines,
       actionUrl,
       variant: mode === "complete" ? "complete" : "confirm",
+      stepKey: params.stepKey,
     }),
   });
   return true;

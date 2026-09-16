@@ -190,6 +190,7 @@ function routeColumns(
 
 type CardActions = {
   onSelectPerson: (deliverer: LeafletDelivererRow) => void;
+  onEmail: (deliverer: LeafletDelivererRow) => void;
   onAddRoute: (deliverer: LeafletDelivererRow) => void;
   onConfirmAll: (deliverer: LeafletDelivererRow) => void;
   onSkipAll: (deliverer: LeafletDelivererRow) => void;
@@ -280,6 +281,13 @@ function DelivererCard({
             }
           >
             <DropdownItem
+              label="Email this deliverer"
+              onSelect={() => {
+                setMenuOpen(false);
+                actions.onEmail(deliverer);
+              }}
+            />
+            <DropdownItem
               label="Add route"
               onSelect={() => {
                 setMenuOpen(false);
@@ -326,6 +334,7 @@ export type LeafletDeliverersPageProps = {
   leafletId: string;
   demo: boolean;
   onSelectDeliverer: (deliverer: LeafletDelivererRow) => void;
+  onEmailDeliverer?: (deliverer: LeafletDelivererRow) => void;
 };
 
 /**
@@ -335,6 +344,7 @@ export function LeafletDeliverersPage({
   leafletId,
   demo,
   onSelectDeliverer,
+  onEmailDeliverer,
 }: LeafletDeliverersPageProps) {
   const { enabled: demoGuard } = useDemoGuard();
   const isDemo = demo || demoGuard;
@@ -504,6 +514,7 @@ export function LeafletDeliverersPage({
 
   const cardActions: CardActions = {
     onSelectPerson: onSelectDeliverer,
+    onEmail: (deliverer) => onEmailDeliverer?.(deliverer),
     onAddRoute: setAddFor,
     onConfirmAll: (deliverer) => {
       const ids = deliveryIdsForDeliverer(deliverer);

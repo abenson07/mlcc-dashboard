@@ -1,6 +1,0 @@
--- Load task_templates (3 rows)
--- Run on NEW database after 01_setup_schema.sql
-
-INSERT INTO public.task_templates (id, context, event_template_id, title, description, offset_days, is_active, created_at) VALUES ('6196c619-fc32-4605-9801-8bd9e563403d'::uuid, 'leaflet', NULL, 'Example task three', 'Placeholder — replace with real checklist item.', '-7', 'true', '2026-06-22 16:39:56.437504+00'::timestamptz);
-INSERT INTO public.task_templates (id, context, event_template_id, title, description, offset_days, is_active, created_at) VALUES ('d84ce7e4-a0a3-4eb7-828c-126e0c2a2e6f'::uuid, 'leaflet', NULL, 'Example task one', 'Placeholder — replace with real checklist item.', '-42', 'true', '2026-06-22 16:39:56.437504+00'::timestamptz);
-INSERT INTO public.task_templates (id, context, event_template_id, title, description, offset_days, is_active, created_at) VALUES ('e28300ce-ce4a-4fd9-8d1e-df86399eee78'::uuid, 'leaflet', NULL, 'Example task two', 'Placeholder — replace with real checklist item.', '-14', 'true', '2026-06-22 16:39:56.437504+00'::timestamptz);

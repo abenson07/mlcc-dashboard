@@ -15,7 +15,6 @@ export type ParsedVolunteerAskBody = {
   commitment_unit: VolunteerCommitmentUnit;
   commitment_quantity: number;
   quantity: number;
-  webflowEventItemId: string | null;
   event_id: string | null;
   committee: CommitteeSlug | null;
   auto_accept: boolean;
@@ -40,8 +39,6 @@ export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | nu
   if (!Number.isFinite(commitment_quantity) || commitment_quantity <= 0) return null;
   if (!Number.isFinite(quantity) || quantity < 1) return null;
 
-  const webflowEventItemId =
-    typeof b.webflowEventItemId === "string" ? b.webflowEventItemId.trim() : "";
 
   const eventIdRaw = typeof b.event_id === "string" ? b.event_id.trim() : "";
   const event_id = eventIdRaw && UUID_RE.test(eventIdRaw) ? eventIdRaw : null;
@@ -67,7 +64,6 @@ export function parseVolunteerAskBody(raw: unknown): ParsedVolunteerAskBody | nu
     commitment_unit,
     commitment_quantity,
     quantity,
-    webflowEventItemId: webflowEventItemId || null,
     event_id,
     committee,
     auto_accept: hasAutoAccept ? auto_accept : false,

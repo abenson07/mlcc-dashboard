@@ -1,5 +1,5 @@
 /**
- * Base path for API when deployed behind a mount path (Webflow Cloud).
+ * Base path for API when deployed behind a mount path.
  * On Vercel / local, leave NEXT_PUBLIC_BASE_PATH unset — APIs live at `/api/*`.
  *
  * If the env var is missing at runtime, infer `/dashboard` from the page URL so

@@ -42,8 +42,6 @@ export {
 export { useQrCodes, QR_CODES_QUERY_KEY } from "./useQrCodes";
 export { useEventQrCodes, type EventQrCodeRow } from "./useEventQrCodes";
 export { useDashboard } from "./useDashboard";
-export { useWebflowEvents, WEBFLOW_EVENTS_QUERY_KEY } from "./useWebflowEvents";
-export { useBanners, BANNERS_QUERY_KEY } from "./useBanners";
 export { useLeaflets, LEAFLETS_QUERY_KEY } from "./useLeaflets";
 export { useDeliveries, type DeliveryWithRelations } from "./useDeliveries";
 export { useTasks, taskDueDate } from "./useTasks";
@@ -93,12 +91,6 @@ export {
   useFundraiserStripeTotals,
   FUNDRAISER_STRIPE_TOTALS_QUERY_KEY,
 } from "./useFundraiserStripeTotals";
-export type {
-  WebflowEventsPayload,
-  WebflowCollectionFieldDTO,
-  WebflowEventItemDTO,
-  WebflowOptionChoice,
-} from "./useWebflowEvents";
 export { useDemoGuard } from "./useDemoGuard";
 export {
   useCommitteeInitiatives,

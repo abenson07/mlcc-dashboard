@@ -1,5 +1,0 @@
--- Load events (2 rows)
--- Run on NEW database after 01_setup_schema.sql
-
-INSERT INTO public.events (id, name, date, event_template_id, starts_at, ends_at, slug, field_data, created_at, updated_at) VALUES ('4112bd34-09fc-4452-92b2-06e33fcd05bf'::uuid, '2026 Summer Social', '2026-07-16'::date, NULL, NULL, NULL, NULL, '{}'::jsonb, '2026-06-22 16:40:07.215701+00'::timestamptz, '2026-06-22 16:40:07.215701+00'::timestamptz);
-INSERT INTO public.events (id, name, date, event_template_id, starts_at, ends_at, slug, field_data, created_at, updated_at) VALUES ('f124dc61-d470-4c23-a708-94038dac38ad'::uuid, 'Steering — Jun 22, 2026', '2026-06-23'::date, NULL, '2026-06-23 04:27:00+00'::timestamptz, '2026-06-23 06:26:00+00'::timestamptz, 'steering-jun-22-2026-mqpyornp', '{"kind":"committee_meeting","status":"planning","location":"Nearby!","committee":"steering","qr_code_id":"599b7fd1-0ce7-40af-931f-8dcb0772f641"}'::jsonb, '2026-06-23 01:24:28.047966+00'::timestamptz, '2026-06-23 01:24:28.047966+00'::timestamptz);

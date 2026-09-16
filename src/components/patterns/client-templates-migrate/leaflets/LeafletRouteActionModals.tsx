@@ -128,7 +128,7 @@ export function AssignScopeConfirmModal({
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap" }}>
           <Button label="Cancel" variant="ghost" onClick={onCancel} disabled={submitting} />
           <Button
-            label="This route only"
+            label="This issue only"
             variant="secondary"
             disabled={submitting}
             onClick={() => {
@@ -136,7 +136,7 @@ export function AssignScopeConfirmModal({
             }}
           />
           <Button
-            label={submitting ? "Saving…" : "Permanent"}
+            label={submitting ? "Saving…" : "Update permanently"}
             variant="primary"
             disabled={submitting}
             onClick={() => {
@@ -150,7 +150,7 @@ export function AssignScopeConfirmModal({
         Assign{" "}
         <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{personName}</span> to{" "}
         <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{routeLabel}</span>.
-        Permanent also updates the route&apos;s default deliverer for future leaflets.
+        Update permanently also updates the route&apos;s default deliverer for future leaflets.
       </Text>
     </Modal>
   );

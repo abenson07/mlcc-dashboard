@@ -22,6 +22,10 @@ export type Event = {
   locationName: string;
   category: string;
   image: string;
+  /** Cover image framing — "landscape" (default) or "portrait". */
+  imageAspect?: "landscape" | "portrait";
+  /** Which side the image sits on for the portrait detail-page hero. Defaults to "left". */
+  imagePosition?: "left" | "right";
   href: string;
   external?: boolean;
   detail?: EventDetailContent;

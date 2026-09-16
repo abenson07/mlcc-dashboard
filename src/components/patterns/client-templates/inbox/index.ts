@@ -1,1 +1,0 @@
-export { InboxDemo } from "./InboxDemo";
