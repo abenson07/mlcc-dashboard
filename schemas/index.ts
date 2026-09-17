@@ -33,3 +33,4 @@ export * from "./committee_default_attendees";
 export * from "./user_favorites";
 export * from "./faqs";
 export * from "./stories";
+export * from "./surplus_vote_ballots";

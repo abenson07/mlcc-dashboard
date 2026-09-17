@@ -115,4 +115,7 @@ export type {
   StoriesInsert,
   StoriesUpdate,
   StoryStatus,
+  SurplusVoteBallots,
+  SurplusVoteBallotsInsert,
+  SurplusVoteBallotsUpdate,
 } from "../../schemas";

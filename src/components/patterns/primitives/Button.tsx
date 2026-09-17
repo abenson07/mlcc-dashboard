@@ -50,6 +50,8 @@ export function Button({
         lineHeight: "20px",
         fontWeight: 500,
         textAlign: "center",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
         background: isPrimary
           ? "var(--linear-color-accent)"
           : isGhost
