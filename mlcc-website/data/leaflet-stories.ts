@@ -250,7 +250,7 @@ async function fetchStoriesFromSupabase(): Promise<LeafletStory[] | null> {
   try {
     const rows =
       (await fetchStoryRows(
-        "slug,title,author,author_slug,publish_date,story_type,featured,status,cover_image_url,body",
+        "slug,title,author_slug,publish_date,story_type,featured,status,cover_image_url,body",
       )) ??
       (await fetchStoryRows("title,author,publish_date,status,cover_image_url,body"));
     if (!rows) return null;
