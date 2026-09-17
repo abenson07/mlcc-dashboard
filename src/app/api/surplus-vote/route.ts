@@ -92,3 +92,25 @@ export async function PUT(request: NextRequest) {
   const response: SurplusVotePutResponse = { ...loaded.payload, saved: true };
   return NextResponse.json(response);
 }
+
+export async function DELETE() {
+  const auth = await requireSession();
+  if (!auth.ok) return auth.response;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("surplus_vote_ballots")
+    .delete()
+    .eq("user_id", auth.user.id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const loaded = await loadVoteState(auth.user.id);
+  if ("error" in loaded) {
+    return NextResponse.json({ error: loaded.error }, { status: 500 });
+  }
+
+  return NextResponse.json(loaded.payload);
+}

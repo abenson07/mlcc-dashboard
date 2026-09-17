@@ -9,12 +9,15 @@ import type { SurplusVoteGetResponse } from "@/lib/surplus-vote/types";
 export function useSurplusVote() {
   // Randomized once per mount so an unsaved ballot doesn't default to the
   // catalog order (which would bias voting toward whatever's listed first).
-  const [defaultOrder] = useState(() => shuffleSurplusVoteItems(SURPLUS_VOTE_ITEMS));
+  const [defaultOrder, setDefaultOrder] = useState(() =>
+    shuffleSurplusVoteItems(SURPLUS_VOTE_ITEMS),
+  );
   const [myRanking, setMyRanking] = useState<string[] | null>(null);
   const [ballotCount, setBallotCount] = useState(0);
   const [results, setResults] = useState<SurplusVoteResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -69,6 +72,21 @@ export function useSurplusVote() {
     [applyPayload],
   );
 
+  const resetRanking = useCallback(async () => {
+    setResetting(true);
+    try {
+      const res = await fetch(`${getApiBase()}/api/surplus-vote`, { method: "DELETE" });
+      const json = (await res.json()) as SurplusVoteGetResponse & { error?: string };
+      if (!res.ok) throw new Error(json.error ?? "Failed to reset");
+      applyPayload(json);
+      setDefaultOrder(shuffleSurplusVoteItems(SURPLUS_VOTE_ITEMS));
+    } catch (e) {
+      throw e instanceof Error ? e : new Error("Failed to reset");
+    } finally {
+      setResetting(false);
+    }
+  }, [applyPayload]);
+
   const orderedItems = useMemo(
     () => (myRanking != null ? orderItemsByRanking(myRanking, SURPLUS_VOTE_ITEMS) : defaultOrder),
     [myRanking, defaultOrder],
@@ -81,9 +99,11 @@ export function useSurplusVote() {
     results,
     loading,
     saving,
+    resetting,
     error,
     loaded,
     saveRanking,
+    resetRanking,
     hasSaved: myRanking != null,
   };
 }

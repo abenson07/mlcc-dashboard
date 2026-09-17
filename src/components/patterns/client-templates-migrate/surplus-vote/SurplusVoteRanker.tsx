@@ -28,7 +28,9 @@ type SurplusVoteRankerProps = {
   items: SurplusVoteItem[];
   onReorder: (next: SurplusVoteItem[]) => void;
   onSave: () => void;
+  onReset: () => void;
   saving: boolean;
+  resetting: boolean;
   dirty: boolean;
   hasSaved: boolean;
 };
@@ -124,7 +126,9 @@ export function SurplusVoteRanker({
   items,
   onReorder,
   onSave,
+  onReset,
   saving,
+  resetting,
   dirty,
   hasSaved,
 }: SurplusVoteRankerProps) {
@@ -168,12 +172,22 @@ export function SurplusVoteRanker({
             gets {SURPLUS_VOTE_ITEM_COUNT} points; last gets 1. You can change this later.
           </Text>
         </div>
-        <Button
-          label={saving ? "Saving…" : hasSaved && !dirty ? "Saved" : "Save ranking"}
-          variant="primary"
-          disabled={saving || (!dirty && hasSaved)}
-          onClick={onSave}
-        />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          {hasSaved ? (
+            <Button
+              label={resetting ? "Resetting…" : "Reset my vote"}
+              variant="secondary"
+              disabled={resetting || saving}
+              onClick={onReset}
+            />
+          ) : null}
+          <Button
+            label={saving ? "Saving…" : hasSaved && !dirty ? "Saved" : "Save ranking"}
+            variant="primary"
+            disabled={saving || resetting || (!dirty && hasSaved)}
+            onClick={onSave}
+          />
+        </div>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

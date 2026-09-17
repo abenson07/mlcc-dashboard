@@ -33,9 +33,11 @@ function SurplusVoteDemoInner() {
     results,
     loading,
     saving,
+    resetting,
     error,
     loaded,
     saveRanking,
+    resetRanking,
     hasSaved,
   } = useSurplusVote();
   const [draft, setDraft] = useState<SurplusVoteItem[]>(orderedItems);
@@ -57,6 +59,18 @@ function SurplusVoteDemoInner() {
       toast.success("Ranking saved");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn’t save ranking");
+    }
+  }
+
+  async function handleReset() {
+    if (!window.confirm("Reset your vote? This removes your saved ranking so you can start over.")) {
+      return;
+    }
+    try {
+      await resetRanking();
+      toast.success("Vote reset — rank the cards again and save when ready");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn’t reset vote");
     }
   }
 
@@ -96,7 +110,9 @@ function SurplusVoteDemoInner() {
                 items={draft}
                 onReorder={setDraft}
                 onSave={() => void handleSave()}
+                onReset={() => void handleReset()}
                 saving={saving}
+                resetting={resetting}
                 dirty={dirty}
                 hasSaved={hasSaved}
               />
