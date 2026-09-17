@@ -14,6 +14,7 @@
     "import:marketing-stories": "tsx scripts/import-marketing-site-stories.ts",
     "migrate:businesses": "tsx scripts/apply-businesses-migration.ts",
     "migrate:qr-codes": "tsx scripts/apply-qr-codes-migration.ts",
+    "migrate:surplus-vote": "tsx scripts/apply-surplus-vote-ballots-migration.ts",
     "db:export:list": "tsx scripts/db-export/01-list-tables.ts",
     "db:export:dump": "tsx scripts/db-export/02-export-schema-and-data.ts",
     "stripe:setup-commerce": "node scripts/stripe-setup-commerce-products.mjs",
@@ -21,6 +22,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@internationalized/date": "^3.12.2",
     "@react-stately/utils": "^3.12.1",
     "@supabase/ssr": "^0.8.0",
