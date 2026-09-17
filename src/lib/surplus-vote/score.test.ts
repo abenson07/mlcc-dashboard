@@ -31,6 +31,19 @@ describe("surplus vote scoring", () => {
     const n = SURPLUS_VOTE_ITEM_COUNT;
     expect(results).toHaveLength(n);
     expect(results.every((row) => row.points === n + 1)).toBe(true);
+    // Every item was 1st on one ballot and last on the other, so the
+    // average rank across both should land in the middle for everyone.
+    expect(results.every((row) => row.averageRank === (n + 1) / 2)).toBe(true);
+  });
+
+  it("reports null average rank with no ballots and a low average rank for a consistent top pick", () => {
+    expect(scoreBallots([]).every((row) => row.averageRank === null)).toBe(true);
+
+    const topId = SURPLUS_VOTE_ITEM_IDS[0];
+    const ballot = [topId, ...SURPLUS_VOTE_ITEM_IDS.slice(1)];
+    const results = scoreBallots([ballot]);
+    const top = results.find((row) => row.id === topId);
+    expect(top?.averageRank).toBe(1);
   });
 
   it("restores item order from a saved ranking", () => {

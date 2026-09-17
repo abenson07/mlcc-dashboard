@@ -1,13 +1,17 @@
 "use client";
 
 import { Text } from "@/components/patterns/primitives/Text";
-import { formatSurplusPrice, SURPLUS_VOTE_ITEM_COUNT } from "@/lib/surplus-vote/items";
+import { formatSurplusPrice } from "@/lib/surplus-vote/items";
 import type { SurplusVoteResult } from "@/lib/surplus-vote/score";
 
 export type SurplusVoteResultsProps = {
   results: SurplusVoteResult[];
   ballotCount: number;
 };
+
+function formatAverageRank(averageRank: number | null): string {
+  return averageRank != null ? `Avg. rank ${averageRank.toFixed(1)}` : "—";
+}
 
 export function SurplusVoteResults({ results, ballotCount }: SurplusVoteResultsProps) {
   const maxPoints = Math.max(1, ...results.map((row) => row.points));
@@ -33,8 +37,8 @@ export function SurplusVoteResults({ results, ballotCount }: SurplusVoteResultsP
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Text weight="semibold">Results</Text>
         <Text size="sm" color="secondary">
-          {peopleLabel}. Higher rank earns more points (1st of {SURPLUS_VOTE_ITEM_COUNT} ={" "}
-          {SURPLUS_VOTE_ITEM_COUNT} points).
+          {peopleLabel}. Sorted by what people voted for, with each idea's average rank across
+          all ballots (1 = everyone's top priority).
         </Text>
       </div>
 
@@ -82,12 +86,12 @@ export function SurplusVoteResults({ results, ballotCount }: SurplusVoteResultsP
                     </Text>
                   </div>
                   <Text size="sm" weight="medium" style={{ flexShrink: 0 }}>
-                    {row.points}
+                    {formatAverageRank(row.averageRank)}
                   </Text>
                 </div>
                 <div
                   role="img"
-                  aria-label={`${row.points} points for ${row.title}`}
+                  aria-label={`${formatAverageRank(row.averageRank)} for ${row.title}`}
                   style={{
                     height: 10,
                     borderRadius: 999,

@@ -6,6 +6,8 @@ import {
 
 export type SurplusVoteResult = SurplusVoteItem & {
   points: number;
+  /** 1-based average rank across ballots (1 = everyone's top pick). Null with no ballots. */
+  averageRank: number | null;
 };
 
 export function isCompleteRanking(
@@ -32,11 +34,15 @@ export function scoreBallots(
 ): SurplusVoteResult[] {
   const itemCount = items.length;
   const points = new Map(items.map((item) => [item.id, 0]));
+  const rankSum = new Map(items.map((item) => [item.id, 0]));
+  let validBallotCount = 0;
 
   for (const ranking of ballots) {
     if (!isCompleteRanking(ranking, items.map((item) => item.id))) continue;
+    validBallotCount += 1;
     ranking.forEach((id, index) => {
       points.set(id, (points.get(id) ?? 0) + pointsForRank(index, itemCount));
+      rankSum.set(id, (rankSum.get(id) ?? 0) + (index + 1));
     });
   }
 
@@ -44,6 +50,7 @@ export function scoreBallots(
     .map((item) => ({
       ...item,
       points: points.get(item.id) ?? 0,
+      averageRank: validBallotCount > 0 ? (rankSum.get(item.id) ?? 0) / validBallotCount : null,
     }))
     .sort((a, b) => b.points - a.points || a.title.localeCompare(b.title));
 }
