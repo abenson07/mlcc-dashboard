@@ -150,6 +150,7 @@ export function SurplusVoteRanker({
         flexDirection: "column",
         gap: 16,
         maxWidth: 680,
+        marginInline: "auto",
       }}
     >
       <div
@@ -160,7 +161,7 @@ export function SurplusVoteRanker({
           gap: 16,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
           <Text weight="semibold">Rank surplus spending</Text>
           <Text size="sm" color="secondary">
             Drag the cards so your top priority is first. First of {SURPLUS_VOTE_ITEM_COUNT}{" "}
