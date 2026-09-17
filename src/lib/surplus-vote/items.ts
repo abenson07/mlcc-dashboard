@@ -94,3 +94,15 @@ export const SURPLUS_VOTE_ITEMS: SurplusVoteItem[] = [
 export const SURPLUS_VOTE_ITEM_IDS = SURPLUS_VOTE_ITEMS.map((item) => item.id);
 
 export const SURPLUS_VOTE_ITEM_COUNT = SURPLUS_VOTE_ITEMS.length;
+
+/** Fisher-Yates shuffle. Returns a new array; doesn't mutate `items`. */
+export function shuffleSurplusVoteItems(
+  items: readonly SurplusVoteItem[] = SURPLUS_VOTE_ITEMS,
+): SurplusVoteItem[] {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}

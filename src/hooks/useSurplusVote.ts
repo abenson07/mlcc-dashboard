@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getApiBase } from "@/lib/apiBase";
-import { SURPLUS_VOTE_ITEMS } from "@/lib/surplus-vote/items";
+import { SURPLUS_VOTE_ITEMS, shuffleSurplusVoteItems } from "@/lib/surplus-vote/items";
 import { orderItemsByRanking, type SurplusVoteResult } from "@/lib/surplus-vote/score";
 import type { SurplusVoteGetResponse } from "@/lib/surplus-vote/types";
 
 export function useSurplusVote() {
+  // Randomized once per mount so an unsaved ballot doesn't default to the
+  // catalog order (which would bias voting toward whatever's listed first).
+  const [defaultOrder] = useState(() => shuffleSurplusVoteItems(SURPLUS_VOTE_ITEMS));
   const [myRanking, setMyRanking] = useState<string[] | null>(null);
   const [ballotCount, setBallotCount] = useState(0);
   const [results, setResults] = useState<SurplusVoteResult[]>([]);
@@ -67,8 +70,8 @@ export function useSurplusVote() {
   );
 
   const orderedItems = useMemo(
-    () => orderItemsByRanking(myRanking, SURPLUS_VOTE_ITEMS),
-    [myRanking],
+    () => (myRanking != null ? orderItemsByRanking(myRanking, SURPLUS_VOTE_ITEMS) : defaultOrder),
+    [myRanking, defaultOrder],
   );
 
   return {
