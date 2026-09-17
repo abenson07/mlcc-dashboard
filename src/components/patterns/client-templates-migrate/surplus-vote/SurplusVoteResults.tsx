@@ -23,6 +23,7 @@ export function SurplusVoteResults({ results, ballotCount }: SurplusVoteResultsP
         gap: 16,
         padding: 20,
         maxWidth: 720,
+        marginInline: "auto",
         background: "var(--linear-color-panel)",
         border: "var(--linear-border-width) solid var(--linear-color-panel-border)",
         borderRadius: "var(--linear-radius-md)",
