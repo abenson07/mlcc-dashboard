@@ -124,6 +124,12 @@ const group2Items: DemoItem[] = [
     icon: <CreditCard size={16} strokeWidth={1.75} />,
     path: "/invoices",
   },
+  {
+    id: "surplus-vote",
+    label: "Surplus Vote",
+    icon: <ListOrdered size={16} strokeWidth={1.75} />,
+    path: "/surplus-vote",
+  },
 ];
 
 const moreItems: DemoItem[] = [
@@ -132,12 +138,6 @@ const moreItems: DemoItem[] = [
     label: "Shirt Preorders",
     icon: <Shirt size={16} strokeWidth={1.75} />,
     path: "/shirt-preorders",
-  },
-  {
-    id: "surplus-vote",
-    label: "Surplus Vote",
-    icon: <ListOrdered size={16} strokeWidth={1.75} />,
-    path: "/surplus-vote",
   },
   {
     id: "qr-codes",
