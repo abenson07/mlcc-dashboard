@@ -7,7 +7,8 @@ export type EventDetailBlock =
   | { kind: "heading"; text: string; size?: "h5" | "h6" }
   | { kind: "paragraph"; text: string; linkText?: string; href?: string }
   | { kind: "list"; items: string[] }
-  | { kind: "video"; youtubeId: string; title: string };
+  | { kind: "video"; youtubeId: string; title: string }
+  | { kind: "image"; src: string; alt: string; caption?: string };
 
 export type EventDetailContent = {
   blocks: EventDetailBlock[];
@@ -110,6 +111,56 @@ const SILENT_BOOK_CLUB_DETAIL: EventDetailContent = {
     {
       kind: "paragraph",
       text: "The Maple Leaf group meets at Watershed Pub & Kitchen through much of the year. It’s part of a broader network of Silent Book Clubs across Seattle, now firmly rooted here in the neighborhood.",
+    },
+  ],
+};
+
+const HALLOWEEN_PARADE_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "Grab your costume and come stroll through Maple Leaf with us! The Halloween Parade is one of our favorite neighborhood traditions, and this year we’re making it easier for everyone to join in. Kids, grown-ups, grandparents, and neighbors who just want to see the fun are all welcome. This isn’t only a kids’ event. 🎃",
+    },
+    {
+      kind: "paragraph",
+      text: "Your furry kids are invited too. Dress up your dog, bring your favorite pup in a bandana, and expect plenty of tail wags along the way. We’ll gather at the park and head out together, with local shops cheering us on as we pass by.",
+    },
+    {
+      kind: "image",
+      src: "/images/events/halloween-26-route.png",
+      alt: "Map of the Halloween Parade route through Maple Leaf, starting and ending at the park",
+      caption: "This year’s parade route. Both routes start and end at the park.",
+    },
+    {
+      kind: "heading",
+      text: "Pick your route",
+      size: "h5",
+    },
+    {
+      kind: "paragraph",
+      text: "The short route is a gentle loop that heads back to the park after we stop at Macrina Bakery. It’s perfect for little legs, strollers, and anyone who wants a cozy, easy walk. If you have extra energy (or just a lot of candy to earn), the longer route keeps going up 5th Ave to visit Chevron, Javasti, and a few more neighborhood spots before we all head back to the park together.",
+    },
+    {
+      kind: "heading",
+      text: "Businesses along the route",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "The Perkins School",
+        "Ace Hardware",
+        "Math ’n’ Stuff",
+        "Cloud City Coffee",
+        "Macrina Bakery",
+        "Javasti",
+        "Chevron",
+        "And a few more friendly businesses along the way",
+      ],
+    },
+    {
+      kind: "paragraph",
+      text: "Take a moment to say thanks to the folks who open their doors for us. Supporting the shops on the route is one of the best ways to keep Maple Leaf feeling like home.",
     },
   ],
 };
@@ -634,6 +685,7 @@ export const events: Event[] = [
     category: "Community",
     image: EVENT_IMAGES.halloweenParade,
     href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Seattle",
+    detail: HALLOWEEN_PARADE_DETAIL,
   }),
   event({
     slug: "november-silent-book-club",

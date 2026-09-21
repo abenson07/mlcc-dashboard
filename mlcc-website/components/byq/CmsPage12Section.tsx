@@ -79,6 +79,22 @@ function renderEventBody(blocks: EventDetailBlock[]) {
           );
         }
 
+        if (block.kind === "image") {
+          return (
+            <figure key={index} className="mb-4 w-full">
+              <img
+                loading="lazy"
+                src={block.src}
+                alt={block.alt}
+                className="w-full rounded-xl object-cover"
+              />
+              {block.caption ? (
+                <figcaption className="mt-2 text-sm opacity-70">{block.caption}</figcaption>
+              ) : null}
+            </figure>
+          );
+        }
+
         if (block.kind === "video") {
           return (
             <div key={index} className="mb-4 aspect-[16/9] w-full overflow-hidden rounded-xl">
