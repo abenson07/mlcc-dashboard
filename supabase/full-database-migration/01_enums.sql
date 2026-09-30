@@ -26,7 +26,8 @@ create type public.membership_status_enum as enum (
   'Active',
   'Expired',
   'Donation',
-  'Cancelled'
+  'Cancelled',
+  'Review'
 );
 
 create type public.payment_type_enum as enum (

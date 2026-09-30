@@ -6,7 +6,7 @@ import type { MembershipStatusEnum, MembershipTierEnum, Memberships } from "sche
  * casing included — Postgres enum casts are case-sensitive, so writing "active"
  * instead of "Active" fails the same way writing a label that doesn't exist does.
  */
-export const MEMBERSHIP_STATUSES = ["Active", "Expired", "Donation", "Cancelled"] as const;
+export const MEMBERSHIP_STATUSES = ["Active", "Expired", "Donation", "Cancelled", "Review"] as const;
 export const MEMBERSHIP_TIERS = ["Household", "Individual", "Senior", "Student"] as const;
 
 export const MEMBERSHIP_TIER_OPTIONS = MEMBERSHIP_TIERS.map((tier) => ({
@@ -37,6 +37,7 @@ export type MembershipDisplayKey =
   | "cancelled"
   | "expired"
   | "donation"
+  | "review"
   | "none";
 
 export type MembershipDisplayState = {
@@ -51,6 +52,7 @@ const DISPLAY_COLOR: Record<MembershipDisplayKey, string> = {
   cancelled: "#8a8f98",
   expired: "#eb5757",
   donation: "#2f80ed",
+  review: "#d9a400",
   none: "#8a8f98",
 };
 
@@ -95,6 +97,10 @@ export function deriveMembershipStatus(
   }
   if (status === "Expired") {
     return { key: "expired", label: "Expired", color: DISPLAY_COLOR.expired };
+  }
+  if (status === "Review") {
+    // A manual flag: we couldn't verify this member (e.g. no Stripe subscription).
+    return { key: "review", label: "Needs review", color: DISPLAY_COLOR.review };
   }
   if (status === "Donation") {
     return { key: "donation", label: "Donation", color: DISPLAY_COLOR.donation };

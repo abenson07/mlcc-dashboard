@@ -94,3 +94,12 @@ describe("deriveMembershipStatus", () => {
     expect(deriveMembershipStatus(null)).toMatchObject({ key: "none", label: "No membership" });
   });
 });
+
+describe("Review status", () => {
+  it("is a real status label and renders as a distinct flag", () => {
+    expect(toMembershipStatus("review")).toBe("Review");
+    expect(
+      deriveMembershipStatus({ status: "Review", cancel_at_period_end: false, current_period_end: null }),
+    ).toMatchObject({ key: "review", label: "Needs review" });
+  });
+});
