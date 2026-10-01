@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, type ReactNode } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import {
   useAllSponsorships,
@@ -30,6 +30,7 @@ import { InvoiceDetailPanel } from "./InvoiceDetailPanel";
 import { SponsorshipDetailPanel } from "./SponsorshipDetailPanel";
 import { CreateInvoiceModal } from "./CreateInvoiceModal";
 import { CreateSponsorshipModal } from "./CreateSponsorshipModal";
+import { CheckEntryModal } from "@/components/patterns/client-templates-migrate/payments";
 
 type InvoicingView = "overview" | "invoices" | "sponsorships";
 
@@ -48,6 +49,8 @@ const CATEGORY_OPTIONS = [
   { value: "event", label: "Event" },
   { value: "leaflet", label: "Leaflet" },
 ];
+
+const INVOICE_CATEGORY_OPTIONS = [...CATEGORY_OPTIONS, { value: "membership", label: "Membership" }];
 
 const SPONSORSHIP_STATUS_OPTIONS = [
   { value: "pledged", label: "Pledged" },
@@ -74,6 +77,7 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
   const [sponsorshipParentFilter, setSponsorshipParentFilter] = useState<string[]>([]);
   const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
   const [isCreateSponsorshipOpen, setIsCreateSponsorshipOpen] = useState(false);
+  const [isCheckEntryOpen, setIsCheckEntryOpen] = useState(false);
 
   if (isMobile) {
     return (
@@ -107,6 +111,12 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
   const topbarAction = (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <Button
+        label="Log checks"
+        variant="secondary"
+        icon={<Receipt size={14} strokeWidth={1.75} />}
+        onClick={() => setIsCheckEntryOpen(true)}
+      />
+      <Button
         label="New invoice"
         variant="secondary"
         icon={<Plus size={14} strokeWidth={1.75} />}
@@ -138,7 +148,7 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
           },
           {
             label: "Category",
-            options: CATEGORY_OPTIONS,
+            options: INVOICE_CATEGORY_OPTIONS,
             selected: invoiceCategoryFilter,
             onChange: setInvoiceCategoryFilter,
           },
@@ -241,6 +251,7 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
           await refetchInvoices();
         }}
       />
+      <CheckEntryModal isOpen={isCheckEntryOpen} onClose={() => setIsCheckEntryOpen(false)} />
       <CreateSponsorshipModal
         isOpen={isCreateSponsorshipOpen}
         onClose={() => setIsCreateSponsorshipOpen(false)}
