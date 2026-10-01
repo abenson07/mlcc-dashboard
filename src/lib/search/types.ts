@@ -1,4 +1,5 @@
 export type SearchSection =
+  | "actions"
   | "pages"
   | "events"
   | "people"
@@ -23,6 +24,7 @@ export type SearchResponse = {
 };
 
 export const SEARCH_SECTION_LABELS: Record<SearchSection, string> = {
+  actions: "Actions",
   pages: "Pages",
   events: "Events",
   people: "People",
@@ -35,6 +37,7 @@ export const SEARCH_SECTION_LABELS: Record<SearchSection, string> = {
 };
 
 export const SEARCH_SECTION_ORDER: SearchSection[] = [
+  "actions",
   "pages",
   "events",
   "people",

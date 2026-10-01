@@ -64,6 +64,7 @@ import {
   TryButton,
   WorkspaceMenu,
 } from "./sidebar";
+import { useGlobalSearchOptional } from "@/components/search/GlobalSearchProvider";
 import { useThemeMode } from "./ThemeContext";
 import { useDemoModeOptional } from "./DemoModeContext";
 import { useWipFeaturesOptional } from "./WipFeaturesContext";
@@ -380,6 +381,7 @@ function LinearSidebarBase({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const globalSearch = useGlobalSearchOptional();
   const basePath = useAdminBasePath();
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isNewStoryOpen, setIsNewStoryOpen] = useState(false);
@@ -506,6 +508,7 @@ function LinearSidebarBase({
           <SidebarIconButton
             label="Search"
             variant="ghost"
+            onClick={globalSearch?.open}
             icon={<Search size={16} strokeWidth={1.75} />}
           />
           <Dropdown

@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Plus, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -78,6 +79,19 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
   const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
   const [isCreateSponsorshipOpen, setIsCreateSponsorshipOpen] = useState(false);
   const [isCheckEntryOpen, setIsCheckEntryOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Deep link from global search: /admin/invoices?action=log-checks
+  useEffect(() => {
+    if (searchParams.get("action") !== "log-checks") return;
+    setIsCheckEntryOpen(true);
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("action");
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [searchParams, pathname, router]);
 
   if (isMobile) {
     return (
