@@ -24,6 +24,18 @@ function stripeErrorResponse(e: unknown): NextResponse {
   );
 }
 
+function parseDate(body: unknown): string | null {
+  if (typeof body !== "object" || body === null) return null;
+  const date = (body as Record<string, unknown>).date;
+  return typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
+}
+
+function parseAmountCents(body: unknown): number | null {
+  if (typeof body !== "object" || body === null) return null;
+  const v = (body as Record<string, unknown>).amountCents;
+  return typeof v === "number" && Number.isInteger(v) && v > 0 ? v : null;
+}
+
 function parseMethod(body: unknown): ManualPaymentMethod | null {
   if (typeof body !== "object" || body === null) return null;
   const method = (body as Record<string, unknown>).method;
@@ -60,6 +72,8 @@ export async function POST(
     );
   }
 
+  const paymentDate = parseDate(body);
+  const amountCents = parseAmountCents(body);
   const { invoiceId } = await ctx.params;
 
   try {
@@ -74,10 +88,38 @@ export async function POST(
       );
     }
 
+    // A check for less than the balance can't be applied partially out of band, so leave the
+    // invoice open and record the money received; staff finish it when the rest arrives.
+    if (amountCents != null && amountCents < current.amount_due) {
+      const received =
+        Number(current.metadata?.[METADATA_KEYS.checkReceivedCents] ?? 0) + amountCents;
+      const partial = await stripe.invoices.update(invoiceId, {
+        metadata: {
+          ...current.metadata,
+          manual_payment_method: method,
+          [METADATA_KEYS.checkReceivedCents]: String(received),
+          ...(paymentDate ? { [METADATA_KEYS.manualPaymentDate]: paymentDate } : {}),
+        },
+      });
+      return NextResponse.json({
+        id: partial.id,
+        status: partial.status,
+        hosted_invoice_url: partial.hosted_invoice_url,
+        partial: true,
+      });
+    }
+
     await stripe.invoices.pay(invoiceId, { paid_out_of_band: true });
 
     const invoice = await stripe.invoices.update(invoiceId, {
-      metadata: { ...current.metadata, manual_payment_method: method },
+      metadata: {
+        ...current.metadata,
+        manual_payment_method: method,
+        ...(amountCents != null
+          ? { [METADATA_KEYS.checkReceivedCents]: String(amountCents) }
+          : {}),
+        ...(paymentDate ? { [METADATA_KEYS.manualPaymentDate]: paymentDate } : {}),
+      },
     });
 
     const sponsorshipId = invoice.metadata?.[METADATA_KEYS.sponsorshipId];
@@ -87,7 +129,7 @@ export async function POST(
         .from("sponsorships")
         .update({
           status: "paid",
-          paid_date: new Date().toISOString().slice(0, 10),
+          paid_date: paymentDate ?? new Date().toISOString().slice(0, 10),
         })
         .eq("id", sponsorshipId);
     }
