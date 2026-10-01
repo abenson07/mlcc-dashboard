@@ -172,6 +172,49 @@ export async function createScheduledSocialPost(
   return bufferCreatePost(channel, input);
 }
 
+export type CreateSocialPostEachResult =
+  | { ok: true; post: BufferSocialPostRow }
+  | { ok: false; message: string };
+
+/**
+ * Schedules each item independently (own text/time), tracking per-channel queue usage
+ * so a long plan stops cleanly at Buffer's limit instead of failing mid-request.
+ * Always returns one result per input item, in order.
+ */
+export async function createScheduledSocialPostsEach(
+  items: CreateSocialPostInput[],
+  snapshot?: BufferPostsListResponse,
+): Promise<CreateSocialPostEachResult[]> {
+  const state = snapshot ?? (await listSocialPosts());
+  const channelById = new Map(state.channels.map((c) => [c.id, c]));
+  const used = scheduledCountByChannel(state);
+
+  const results: CreateSocialPostEachResult[] = [];
+  for (const item of items) {
+    const channel = channelById.get(item.channelId);
+    if (!channel) {
+      results.push({ ok: false, message: "Channel not found or not supported (Instagram/Facebook only)." });
+      continue;
+    }
+    const count = used.get(item.channelId) ?? 0;
+    if (count >= state.queueMax) {
+      results.push({
+        ok: false,
+        message: `${channel.name} already has ${count} scheduled posts (limit ${state.queueMax}).`,
+      });
+      continue;
+    }
+    try {
+      const post = await bufferCreatePost(channel, item);
+      used.set(item.channelId, count + 1);
+      results.push({ ok: true, post });
+    } catch (e) {
+      results.push({ ok: false, message: e instanceof Error ? e.message : "Failed to schedule post." });
+    }
+  }
+  return results;
+}
+
 export type CreateSocialPostBatchInput = {
   text: string;
   dueAt: string;
