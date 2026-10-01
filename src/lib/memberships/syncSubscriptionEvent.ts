@@ -4,6 +4,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/server";
 import { syncSingleSubscription } from "@/lib/stripe/subscriptionSync";
 import type { MembershipsUpdate } from "@/types/database";
+import { sendMembershipRenewalEmail } from "@/lib/commerce/membershipEmail";
 
 /**
  * Events that change what a membership actually is, as opposed to creating one.
@@ -189,6 +190,35 @@ export async function syncSubscriptionEvent(event: Stripe.Event): Promise<SyncRe
         stripe_transaction_id: invoice.id,
       });
       if (paymentError) return { ok: false, error: paymentError.message };
+
+      // Thank real renewals only. The first invoice of a new subscription is
+      // covered by the welcome email sent at checkout. Reaching this point means
+      // the payment row was just inserted, so webhook retries never re-send.
+      if (invoice.billing_reason === "subscription_cycle") {
+        const { data: details } = await supabase
+          .from("memberships")
+          .select("tier, customer_email")
+          .eq("id", membership.id)
+          .maybeSingle();
+        const to = (details?.customer_email as string | null) ?? invoice.customer_email ?? null;
+        if (to) {
+          const { data: owner } = await supabase
+            .from("people")
+            .select("full_name")
+            .eq("membership_id", membership.id)
+            .maybeSingle();
+          const sent = await sendMembershipRenewalEmail({
+            to,
+            customerName: (owner?.full_name as string | undefined) ?? invoice.customer_name ?? "neighbor",
+            tierName: (details?.tier as string | null) ?? "MLCC",
+            amountCents: invoice.amount_paid ?? 0,
+            paidOn: paidOn ?? new Date().toISOString().slice(0, 10),
+            receiptId: invoice.number ?? invoice.id ?? null,
+            receiptUrl: invoice.hosted_invoice_url,
+          });
+          if (!sent.sent) console.error("Renewal email failed:", sent.error);
+        }
+      }
       return { ok: true, handled: true };
     }
 
