@@ -33,3 +33,26 @@ export function searchPages(q: string, limit: number) {
     return haystack.includes(term);
   }).slice(0, limit);
 }
+
+/** Opens the Log checks dialog on the invoices page. */
+export const LOG_CHECKS_HREF = "/admin/invoices?action=log-checks";
+
+/** Quick actions: jump straight to a task rather than a page. */
+export const ACTION_INDEX: PageIndexEntry[] = [
+  {
+    id: "log-checks",
+    label: "Log checks",
+    href: LOG_CHECKS_HREF,
+    keywords: ["write check", "upload checks", "bulk checks", "record payment", "membership payment"],
+  },
+];
+
+export function searchActions(q: string, limit: number) {
+  const term = q.trim().toLowerCase();
+  if (!term) return ACTION_INDEX.slice(0, limit);
+
+  return ACTION_INDEX.filter((action) => {
+    const haystack = [action.label, ...(action.keywords ?? [])].join(" ").toLowerCase();
+    return haystack.includes(term);
+  }).slice(0, limit);
+}

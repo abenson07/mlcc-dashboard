@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ThemeProvider } from "@/components/patterns/foundation/ThemeContext";
 import { DemoModeProvider } from "@/components/patterns/foundation/DemoModeContext";
 import { WipFeaturesProvider } from "@/components/patterns/foundation/WipFeaturesContext";
+import { GlobalSearchProvider } from "@/components/search/GlobalSearchProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import "./isolation.css";
 
@@ -34,7 +35,9 @@ export default async function AdminMigrateLayout({ children }: { children: React
       <QueryProvider>
         <ThemeProvider>
           <WipFeaturesProvider>
-            <DemoModeProvider>{children}</DemoModeProvider>
+            <DemoModeProvider>
+              <GlobalSearchProvider>{children}</GlobalSearchProvider>
+            </DemoModeProvider>
           </WipFeaturesProvider>
         </ThemeProvider>
         <Toaster richColors position="bottom-right" />

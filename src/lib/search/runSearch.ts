@@ -1,5 +1,5 @@
 import { getSupabaseForLeafletRoutes } from "@/lib/leaflets/supabaseForLeafletRoutes";
-import { searchPages } from "@/lib/search/pageIndex";
+import { searchActions, searchPages } from "@/lib/search/pageIndex";
 import { searchStories } from "@/lib/search/storyIndex";
 import type { SearchResponse, SearchResult, SearchSection } from "@/lib/search/types";
 import { listDashboardInvoices } from "@/lib/stripe/listDashboardInvoices";
@@ -281,6 +281,12 @@ async function searchInvoices(term: string, limit: number): Promise<SearchResult
 
 export async function runSearch(q: string, limit = DEFAULT_LIMIT): Promise<SearchResponse> {
   const term = q.trim();
+  const actionResults: SearchResult[] = searchActions(term, limit).map((action) => ({
+    id: action.id,
+    section: "actions",
+    title: action.label,
+    href: action.href,
+  }));
   const pageResults: SearchResult[] = searchPages(term, limit).map((page) => ({
     id: page.id,
     section: "pages",
@@ -289,7 +295,7 @@ export async function runSearch(q: string, limit = DEFAULT_LIMIT): Promise<Searc
   }));
 
   if (!term) {
-    return { q: term, sections: { pages: pageResults } };
+    return { q: term, sections: { actions: actionResults, pages: pageResults } };
   }
 
   const supabase = await getSupabaseForLeafletRoutes();
@@ -322,6 +328,7 @@ export async function runSearch(q: string, limit = DEFAULT_LIMIT): Promise<Searc
   ]);
 
   const allResults = [
+    ...actionResults,
     ...pageResults,
     ...events,
     ...people,
