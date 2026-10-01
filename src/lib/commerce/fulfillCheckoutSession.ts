@@ -15,10 +15,10 @@ import type {
 } from "@/types/database";
 import {
   sendFundraiserThankYouEmail,
-  sendMembershipConfirmationEmail,
   sendShopOrderConfirmationEmail,
   sendTshirtConfirmationEmail,
 } from "@/lib/commerce/commerceEmail";
+import { sendMembershipWelcomeEmail } from "@/lib/commerce/membershipEmail";
 import {
   explodeShirtPreorderRows,
   upsertPersonForShopOrder,
@@ -517,11 +517,13 @@ export async function fulfillCheckoutSession(
     if (newsletterOptIn) await upsertNewsletterContact(customerEmail, firstName);
     if (digestOptIn) await upsertWeeklyDigestContact(customerEmail, firstName);
 
-    await sendMembershipConfirmationEmail({
+    await sendMembershipWelcomeEmail({
       to: customerEmail,
       customerName,
       tierName: tierDef.name,
       amountCents,
+      paidOn: paymentRow.date,
+      receiptId: transactionId ?? session.id,
       isSubscription,
     });
 
