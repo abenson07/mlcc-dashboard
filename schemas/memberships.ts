@@ -11,7 +11,7 @@
  * "Lapsed" label. Keep these in step with `01_enums.sql`.
  */
 export type MembershipTierEnum = "Household" | "Individual" | "Senior" | "Student";
-export type MembershipStatusEnum = "Active" | "Expired" | "Donation" | "Cancelled";
+export type MembershipStatusEnum = "Active" | "Expired" | "Donation" | "Cancelled" | "Review";
 
 export interface Memberships {
   id: string; // uuid

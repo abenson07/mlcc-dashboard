@@ -1,6 +1,8 @@
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { getStripe } from "@/lib/stripe/server";
+import { syncSingleSubscription } from "@/lib/stripe/subscriptionSync";
 import type { MembershipsUpdate } from "@/types/database";
 
 /**
@@ -10,6 +12,7 @@ import type { MembershipsUpdate } from "@/types/database";
  * pass silently, which is why every membership row read "Active" indefinitely.
  */
 export const SUBSCRIPTION_EVENT_TYPES = [
+  "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "invoice.paid",
@@ -33,6 +36,28 @@ function unixToDate(seconds: number | null | undefined): string | null {
 function idOf(value: string | { id: string } | null | undefined): string | null {
   if (!value) return null;
   return typeof value === "string" ? value : value.id;
+}
+
+/**
+ * Which subscription an invoice belongs to. Newer Stripe API versions moved this
+ * from `invoice.subscription` to `invoice.parent.subscription_details`; the
+ * endpoint's pinned version decides which one we get, so read both. Reading only
+ * the old field made every renewal look like it had no subscription.
+ */
+function invoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const legacy = (invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription | null }).subscription;
+  const current = invoice.parent?.subscription_details?.subscription;
+  return idOf(current ?? legacy ?? null);
+}
+
+function eventSubscriptionId(event: Stripe.Event): string | null {
+  if (event.type.startsWith("customer.subscription.")) {
+    return (event.data.object as Stripe.Subscription).id;
+  }
+  if (event.type === "invoice.paid" || event.type === "invoice.payment_failed") {
+    return invoiceSubscriptionId(event.data.object as Stripe.Invoice);
+  }
+  return null;
 }
 
 async function findMembershipBySubscription(supabase: SupabaseClient, subscriptionId: string) {
@@ -63,7 +88,27 @@ export async function syncSubscriptionEvent(event: Stripe.Event): Promise<SyncRe
   const supabase = createAdminSupabaseClient();
   if (!supabase) return { ok: false, error: "Supabase service role is not configured." };
 
+  // Make sure the subscription is recorded and current before the event-specific
+  // handling below. This is what creates a member/business the first time we see
+  // their subscription (e.g. a payment link with no checkout metadata), and it
+  // handles business memberships end to end.
+  const subscriptionId = eventSubscriptionId(event);
+  const stripe = getStripe();
+  if (subscriptionId && stripe) {
+    try {
+      const { info } = await syncSingleSubscription(stripe, supabase, subscriptionId);
+      if (info.kind.kind === "business") {
+        return { ok: true, handled: true, note: "business membership synced" };
+      }
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : "subscription sync failed" };
+    }
+  }
+
   switch (event.type) {
+    case "customer.subscription.created":
+      return { ok: true, handled: true };
+
     case "customer.subscription.updated": {
       const subscription = event.data.object as Stripe.Subscription;
       const membership = await findMembershipBySubscription(supabase, subscription.id);
@@ -103,9 +148,7 @@ export async function syncSubscriptionEvent(event: Stripe.Event): Promise<SyncRe
 
     case "invoice.paid": {
       const invoice = event.data.object as Stripe.Invoice;
-      const subscriptionId = idOf(
-        (invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription }).subscription,
-      );
+      const subscriptionId = invoiceSubscriptionId(invoice);
       if (!subscriptionId) return { ok: true, handled: false, note: "invoice has no subscription" };
 
       const membership = await findMembershipBySubscription(supabase, subscriptionId);
@@ -151,9 +194,7 @@ export async function syncSubscriptionEvent(event: Stripe.Event): Promise<SyncRe
 
     case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice;
-      const subscriptionId = idOf(
-        (invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription }).subscription,
-      );
+      const subscriptionId = invoiceSubscriptionId(invoice);
       if (!subscriptionId) return { ok: true, handled: false, note: "invoice has no subscription" };
 
       const membership = await findMembershipBySubscription(supabase, subscriptionId);

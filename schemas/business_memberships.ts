@@ -19,6 +19,13 @@ export interface BusinessMemberships {
   tier: string | null;
   /** Annual dues in dollars. */
   annual_dues: number | null;
+  /** Stripe sync columns — null for manually-managed members. */
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  customer_email?: string | null;
+  cancel_at_period_end?: boolean; // default false
+  current_period_end?: string | null; // date
+  canceled_at?: string | null; // timestamp with time zone
 }
 
 export interface BusinessMembershipsInsert {
@@ -28,6 +35,12 @@ export interface BusinessMembershipsInsert {
   is_subscription?: boolean | null;
   tier?: string | null;
   annual_dues?: number | null;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  customer_email?: string | null;
+  cancel_at_period_end?: boolean;
+  current_period_end?: string | null;
+  canceled_at?: string | null;
 }
 
 export interface BusinessMembershipsUpdate {
@@ -37,4 +50,10 @@ export interface BusinessMembershipsUpdate {
   is_subscription?: boolean | null;
   tier?: string | null;
   annual_dues?: number | null;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  customer_email?: string | null;
+  cancel_at_period_end?: boolean;
+  current_period_end?: string | null;
+  canceled_at?: string | null;
 }

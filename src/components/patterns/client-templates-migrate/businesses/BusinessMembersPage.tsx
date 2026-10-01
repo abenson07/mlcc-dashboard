@@ -9,10 +9,11 @@ import { RowClickCell } from "@/components/patterns/client-templates/shared";
 import type { BusinessMemberRow, BusinessMembershipStatus } from "./types";
 import { BusinessMembershipStatusToken } from "./BusinessMembershipStatusToken";
 
-const GROUP_ORDER: BusinessMembershipStatus[] = ["none", "Active", "Donation", "Expired", "Cancelled"];
+const GROUP_ORDER: BusinessMembershipStatus[] = ["none", "Review", "Active", "Donation", "Expired", "Cancelled"];
 
 const GROUP_LABEL: Record<BusinessMembershipStatus, string> = {
   none: "No membership record",
+  Review: "Needs review",
   Active: "Active",
   Donation: "Donation",
   Expired: "Expired",

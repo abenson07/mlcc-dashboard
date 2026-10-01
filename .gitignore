@@ -42,3 +42,8 @@ next-env.d.ts
 .wrangler
 .dev.vars*
 .tmp/
+docs/subscriptions.csv
+docs/unified_customers.csv
+docs/unified_payments.csv
+docs/duplicate-subscriptions.csv
+docs/duplicate-subscriptions-report.md
