@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { SectionLabel } from "@marketing/components/SectionLabel";
 import {
@@ -32,6 +31,12 @@ export function MembershipJoinSection() {
   const [digestOptIn, setDigestOptIn] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Arriving with a tier preselected (Support / Join buttons) — jump straight to the name field.
+  React.useEffect(() => {
+    if (findMembershipTier(requestedTier)) nameInputRef.current?.focus();
+  }, [requestedTier]);
 
   const selectedTier = findMembershipTier(tier) ?? membershipTiers[0]!;
 
@@ -183,29 +188,15 @@ export function MembershipJoinSection() {
                   </span>
                 </label>
 
-                <div className="flex flex-col gap-2">
-                  <label className="flex items-start gap-3 font-body text-sm leading-5 text-puget-night">
-                    <input
-                      type="checkbox"
-                      checked={volunteerOptIn}
-                      onChange={(e) => setVolunteerOptIn(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-sparkles-navy"
-                    />
-                    <span>Contact me about volunteering.</span>
-                  </label>
-                  <div className="ml-7 flex items-start gap-3 rounded-xl border border-sparkles-navy/20 bg-sparkles-warm px-4 py-3">
-                    <span className="rounded-full bg-sparkles-navy px-2 py-0.5 font-display text-[0.625rem] font-bold uppercase tracking-wide text-sparkles-cream">
-                      New
-                    </span>
-                    <p className="m-0 font-body text-xs leading-4 text-sparkles-navy">
-                      Volunteer Days are back — a few hours a month goes a long way.{" "}
-                      <Link href="/volunteer" className="font-bold underline underline-offset-2">
-                        See what's open
-                      </Link>
-                      .
-                    </p>
-                  </div>
-                </div>
+                <label className="flex items-start gap-3 font-body text-sm leading-5 text-puget-night">
+                  <input
+                    type="checkbox"
+                    checked={volunteerOptIn}
+                    onChange={(e) => setVolunteerOptIn(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-sparkles-navy"
+                  />
+                  <span>Contact me about volunteering.</span>
+                </label>
 
                 <label className="flex items-start gap-3 font-body text-sm leading-5 text-puget-night">
                   <input
@@ -229,6 +220,7 @@ export function MembershipJoinSection() {
               </div>
 
               <input
+                ref={nameInputRef}
                 required
                 placeholder="Full name"
                 value={name}
