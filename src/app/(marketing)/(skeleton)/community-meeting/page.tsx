@@ -25,6 +25,14 @@ function renderBody(blocks: LivestreamBodyBlock[]) {
       );
     }
 
+    if (block.kind === "subheading") {
+      return (
+        <h3 key={index} className="mb-2 mt-6 font-display text-xl leading-6 font-bold text-puget-night">
+          {block.text}
+        </h3>
+      );
+    }
+
     if (block.kind === "list") {
       return (
         <ul key={index} className="mb-4 list-disc pl-6" role="list">

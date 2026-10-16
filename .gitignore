@@ -48,3 +48,6 @@ docs/unified_payments.csv
 docs/duplicate-subscriptions.csv
 docs/duplicate-subscriptions-report.md
 docs/duplicate-subscriptions-cancel-plan.csv
+
+# Local meeting media (large; not for the repo)
+docs/*.mp4
