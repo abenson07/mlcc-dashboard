@@ -1,5 +1,6 @@
 import { events, getEventPageHref, getUpcomingEvents, type Event } from "./events";
 import { getPublishedLeafletStories } from "./leaflet-stories";
+import { livestreamBannerItem } from "./livestream";
 import { volunteerOpportunities } from "./volunteers";
 
 export type BannerItem = {
@@ -40,7 +41,7 @@ function storyAndVolunteerBannerItems(): BannerItem[] {
 }
 
 export function getBannerItemsFromEvents(upcomingEvents: Event[]): BannerItem[] {
-  return [...eventBannerItems(upcomingEvents), ...storyAndVolunteerBannerItems()];
+  return [livestreamBannerItem, ...eventBannerItems(upcomingEvents), ...storyAndVolunteerBannerItems()];
 }
 
 export function getBannerItems(): BannerItem[] {

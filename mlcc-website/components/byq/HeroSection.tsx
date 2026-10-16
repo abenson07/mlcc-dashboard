@@ -2,6 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { communityMeetingLivestream, getLivestreamThumbnailUrl } from "@marketing/data/livestream";
+
+// Temporary: feature the community meeting live stream instead of the slide rotation.
+// Set to false to bring the slides back.
+const FEATURE_LIVESTREAM = true;
 
 function ArrowIcon() {
   return (
@@ -175,17 +180,23 @@ export function HeroSection() {
                   ${rightCardVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[50px]"}
                 `}
               >
-                {slides.map((slide, i) => (
-                  <div key={i} className={`absolute inset-0 hero-slide hero-slide-${i + 1}`}>
-                    <img src={slide.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                {FEATURE_LIVESTREAM ? (
+                  <div className="absolute inset-0">
+                    <img
+                      src={getLivestreamThumbnailUrl(communityMeetingLivestream.youtubeId)}
+                      alt={`${communityMeetingLivestream.title} live stream`}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
                     <div className="relative z-[2] flex h-full w-full items-end justify-end p-4 max-[767px]:p-3">
                       <div className="flex max-w-[20.75rem] flex-col items-start justify-between gap-8 rounded-[1.25rem] bg-sparkles-cream p-8 text-sparkles-navy max-[767px]:rounded-2xl max-[767px]:p-6">
-                        <p className="m-0 font-body text-base leading-6 font-normal">{slide.body}</p>
+                        <p className="m-0 font-body text-base leading-6 font-normal">
+                          {communityMeetingLivestream.heroBlurb}
+                        </p>
                         <Link
-                          href={slide.href}
+                          href={communityMeetingLivestream.href}
                           className="inline-flex items-center gap-1 font-display text-base font-bold text-sparkles-navy no-underline"
                         >
-                          <span>{slide.linkText}</span>
+                          <span>Watch the live stream now</span>
                           <span className="flex h-4 w-4 items-center justify-center overflow-hidden">
                             <ArrowIcon />
                           </span>
@@ -193,7 +204,27 @@ export function HeroSection() {
                       </div>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  slides.map((slide, i) => (
+                    <div key={i} className={`absolute inset-0 hero-slide hero-slide-${i + 1}`}>
+                      <img src={slide.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <div className="relative z-[2] flex h-full w-full items-end justify-end p-4 max-[767px]:p-3">
+                        <div className="flex max-w-[20.75rem] flex-col items-start justify-between gap-8 rounded-[1.25rem] bg-sparkles-cream p-8 text-sparkles-navy max-[767px]:rounded-2xl max-[767px]:p-6">
+                          <p className="m-0 font-body text-base leading-6 font-normal">{slide.body}</p>
+                          <Link
+                            href={slide.href}
+                            className="inline-flex items-center gap-1 font-display text-base font-bold text-sparkles-navy no-underline"
+                          >
+                            <span>{slide.linkText}</span>
+                            <span className="flex h-4 w-4 items-center justify-center overflow-hidden">
+                              <ArrowIcon />
+                            </span>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
