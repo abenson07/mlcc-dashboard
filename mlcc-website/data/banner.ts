@@ -7,6 +7,8 @@ export type BannerItem = {
   headline: string;
   linkText: string;
   linkPath: string;
+  /** ISO time after which the banner drops this item. Checked in the browser, since pages are statically rendered. */
+  expiresAt?: string;
 };
 
 function eventBannerItems(upcomingEvents: Event[]): BannerItem[] {
