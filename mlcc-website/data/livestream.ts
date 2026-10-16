@@ -14,6 +14,8 @@ export const communityMeetingLivestream = {
   href: "/community-meeting",
   youtubeId: "NB1U8akiWXg",
   youtubeUrl: "https://youtube.com/live/NB1U8akiWXg",
+  heroImage: "/images/events/fall-community-meeting-2026.webp",
+  heroImageAlt: "Neighbors gathered in the Olympic View Elementary cafeteria for the Fall Community Meeting",
   heroBlurb:
     "Hear District 5 City Council candidates Nilu Jenks and Julie Kang answer Maple Leaf's top questions at our Fall Community Meeting.",
   body: [
@@ -166,6 +168,13 @@ export const communityMeetingLivestream = {
     },
   ] satisfies LivestreamBodyBlock[],
 };
+
+/** The hero features the live stream until midnight, Seattle time, on Oct 20, 2026. Then it returns to the normal slide rotation. */
+export const LIVESTREAM_HERO_ENDS_AT = "2026-10-20T07:00:00.000Z";
+
+export function isLivestreamHeroActive(now: Date = new Date()) {
+  return now.getTime() < Date.parse(LIVESTREAM_HERO_ENDS_AT);
+}
 
 export function getLivestreamEmbedUrl(youtubeId: string) {
   return `https://www.youtube-nocookie.com/embed/${youtubeId}`;
