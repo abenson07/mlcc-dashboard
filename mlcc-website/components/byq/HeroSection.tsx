@@ -2,11 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { communityMeetingLivestream, getLivestreamThumbnailUrl } from "@marketing/data/livestream";
-
-// Temporary: feature the community meeting live stream instead of the slide rotation.
-// Set to false to bring the slides back.
-const FEATURE_LIVESTREAM = true;
+import { communityMeetingLivestream, isLivestreamHeroActive } from "@marketing/data/livestream";
 
 function ArrowIcon() {
   return (
@@ -44,6 +40,14 @@ const slides = [
 ];
 
 export function HeroSection() {
+  // Temporary hold: feature the community meeting live stream in place of the slide rotation
+  // until LIVESTREAM_HERO_ENDS_AT. Starts true so server and client markup match, then the
+  // date is checked on mount (the marketing pages are statically rendered).
+  const [featureLivestream, setFeatureLivestream] = React.useState(true);
+  React.useEffect(() => {
+    setFeatureLivestream(isLivestreamHeroActive());
+  }, []);
+
   const leftCardRef = React.useRef<HTMLDivElement>(null);
   const [leftCardVisible, setLeftCardVisible] = React.useState(false);
 
@@ -180,11 +184,11 @@ export function HeroSection() {
                   ${rightCardVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[50px]"}
                 `}
               >
-                {FEATURE_LIVESTREAM ? (
+                {featureLivestream ? (
                   <div className="absolute inset-0">
                     <img
-                      src={getLivestreamThumbnailUrl(communityMeetingLivestream.youtubeId)}
-                      alt={`${communityMeetingLivestream.title} live stream`}
+                      src={communityMeetingLivestream.heroImage}
+                      alt={communityMeetingLivestream.heroImageAlt}
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                     <div className="relative z-[2] flex h-full w-full items-end justify-end p-4 max-[767px]:p-3">
