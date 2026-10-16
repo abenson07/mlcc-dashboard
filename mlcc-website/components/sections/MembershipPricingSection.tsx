@@ -10,10 +10,10 @@ interface MembershipCardProps {
   description: string;
   price: string;
   href: string;
-  stripeHref: string;
+  joinHref: string;
 }
 
-function MembershipCard({ title, description, price, href, stripeHref }: MembershipCardProps) {
+function MembershipCard({ title, description, price, href, joinHref }: MembershipCardProps) {
   return (
     <div className="relative flex h-full flex-col rounded-[1.75rem] border-[3px] border-sparkles-navy bg-sparkles-cream p-7">
       <div className="flex items-start justify-between gap-4">
@@ -27,32 +27,23 @@ function MembershipCard({ title, description, price, href, stripeHref }: Members
         <Link href={href} className="font-body text-sm font-bold text-sparkles-navy underline underline-offset-2">
           Learn more
         </Link>
-        <a
-          href={stripeHref}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href={joinHref}
           className="rounded-xl bg-sparkles-navy py-2.5 px-5 text-center font-display text-sm font-bold leading-5 text-sparkles-cream no-underline transition-all duration-300 hover:bg-sparkles-navy/90"
         >
           Support
-        </a>
+        </Link>
       </div>
     </div>
   );
 }
-
-const STRIPE_PAYMENT_LINKS: Record<string, string> = {
-  household: "https://buy.stripe.com/cNidRa2aHesdfIWdNw3sI0E",
-  individual: "https://buy.stripe.com/00gdT37PPae95DGdQS",
-  senior: "https://buy.stripe.com/aEUeX7fihfyt5DGdQT",
-  student: "https://buy.stripe.com/aEUeX7fihfyt5DGdQT",
-};
 
 const membershipCards: MembershipCardProps[] = membershipTiers.map((tier) => ({
   title: tier.name,
   description: tier.description,
   price: formatMembershipPrice(tier.priceCents),
   href: `/membership/${tier.slug}`,
-  stripeHref: STRIPE_PAYMENT_LINKS[tier.slug] ?? "/membership",
+  joinHref: `/membership/join?tier=${tier.slug}`,
 }));
 
 interface MembershipPricingSectionProps {
