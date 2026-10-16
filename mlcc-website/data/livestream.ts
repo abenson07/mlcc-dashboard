@@ -189,4 +189,5 @@ export const livestreamBannerItem: BannerItem = {
   headline: `${communityMeetingLivestream.title} live stream`,
   linkText: "Watch now",
   linkPath: communityMeetingLivestream.href,
+  expiresAt: LIVESTREAM_HERO_ENDS_AT,
 };

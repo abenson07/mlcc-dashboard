@@ -7,9 +7,20 @@ import type { BannerItem } from "@marketing/data/banner";
 const FADE_MS = 1000;
 const CYCLE_MS = 30000;
 
-export function RotatingBanner({ items }: { items: BannerItem[] }) {
+export function RotatingBanner({ items: allItems }: { items: BannerItem[] }) {
   const [index, setIndex] = React.useState(0);
   const [visible, setVisible] = React.useState(true);
+  // Null until mounted so server and client markup match; then expired items are dropped.
+  const [now, setNow] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    setNow(Date.now());
+  }, []);
+
+  const items = React.useMemo(
+    () => allItems.filter((item) => !item.expiresAt || now === null || Date.parse(item.expiresAt) > now),
+    [allItems, now],
+  );
 
   React.useEffect(() => {
     if (items.length <= 1) return;
