@@ -1,0 +1,141 @@
+---
+import SectionLabel from "./SectionLabel.astro";
+import type { BannerItem } from "../lib/banner";
+
+const { bannerItems = [] } = Astro.props as { bannerItems?: BannerItem[] };
+
+const primaryLinks = [
+  { label: "Events", href: "/events" },
+  { label: "Leaflet", href: "/leaflet" },
+  { label: "Committees", href: "/committees" },
+  { label: "Summer Social T-Shirt", href: "/shop/2026-summer-social-shirt", tag: "New" },
+];
+const bannerLabel = "font-body text-[0.625rem] leading-3 font-bold uppercase tracking-[0.0625rem] whitespace-nowrap";
+---
+
+<div class="fixed left-0 right-0 top-0 z-[999] bg-sparkles-cream">
+  {bannerItems.length > 0 && (
+    <div class="w-full relative p-1" id="site-banner" data-items={JSON.stringify(bannerItems)}>
+      <div class="rounded-2xl bg-sparkles-navy text-sparkles-cream text-center backdrop-blur-xl min-[768px]:flex min-[768px]:items-center min-[768px]:justify-center min-[768px]:gap-2 min-[768px]:px-2 min-[768px]:py-2 max-[767px]:overflow-hidden max-[767px]:py-2">
+        <div id="banner-desktop" class="min-[768px]:flex min-[768px]:items-center min-[768px]:justify-center min-[768px]:gap-2 transition-opacity duration-1000 ease-in-out max-[767px]:hidden">
+          <div class={bannerLabel} data-banner-headline></div>
+          <a class={`${bannerLabel} no-underline text-sparkles-cream/90 hover:text-sparkles-cream transition-colors duration-200`} data-banner-link></a>
+        </div>
+        <div class="hidden max-[767px]:flex max-[767px]:w-max max-[767px]:items-center max-[767px]:gap-2 animate-marquee-banner">
+          {[0, 1].map(() => (
+            <div class="flex shrink-0 items-center gap-2 pl-2">
+              <div class={bannerLabel} data-banner-headline></div>
+              <a class={`${bannerLabel} no-underline text-sparkles-cream/90 hover:text-sparkles-cream transition-colors duration-200`} data-banner-link></a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div class="px-8 max-[767px]:px-4">
+    <div class="w-full max-w-[1800px] mx-auto">
+      <div class="grid grid-cols-[1fr_auto_1fr] gap-8 items-center w-full py-4 border-b border-sparkles-navy/30 max-[991px]:grid-cols-[1fr_1fr] max-[479px]:flex max-[479px]:justify-between max-[479px]:items-center">
+        <a href="/" class="z-[2] flex justify-start items-center w-[6.25rem] max-[479px]:w-[5.625rem]">
+          <img src="/logo_black.svg" alt="Maple Leaf Community Council" class="w-full" />
+        </a>
+
+        <nav class="max-[991px]:hidden" aria-label="Primary">
+          <div class="flex items-center gap-6">
+            {primaryLinks.map((item) => (
+              <a href={item.href} class="relative z-[2] inline-flex items-center gap-2 p-0 font-display text-[0.875rem] leading-4 font-bold uppercase no-underline text-sparkles-navy transition-colors duration-200 hover:text-sparkles-navy/90">
+                <span>{item.label}</span>
+                {item.tag && <SectionLabel>{item.tag}</SectionLabel>}
+              </a>
+            ))}
+          </div>
+        </nav>
+
+        <div class="z-[2] flex flex-wrap justify-end items-center gap-6 relative max-[479px]:gap-4">
+          <div class="max-[767px]:hidden flex items-center gap-2">
+            <a href="/volunteer" class="inline-flex items-center justify-center px-3 py-2 border border-sparkles-navy rounded-[2rem] bg-sparkles-cream font-display text-xs font-bold leading-4 text-sparkles-navy no-underline transition-all duration-300 hover:bg-sparkles-warm">Volunteer</a>
+            <a href="/membership" class="inline-flex items-center justify-center px-3 py-2 border border-sparkles-navy rounded-[2rem] bg-sparkles-navy font-display text-xs font-bold leading-4 text-sparkles-cream no-underline transition-all duration-300 hover:bg-sparkles-navy/90 hover:border-sparkles-navy/90">Support</a>
+          </div>
+          <button type="button" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" class="p-0 bg-transparent border-none cursor-pointer flex items-center justify-center text-sparkles-navy min-[992px]:hidden">
+            <span id="icon-open" class="flex items-center justify-center w-5">
+              <svg width="100%" height="100%" viewBox="0 0 157 100" fill="currentColor"><rect x="0" y="0" width="157" height="14" rx="7" /><rect x="0" y="43" width="157" height="14" rx="7" /><rect x="0" y="86" width="157" height="14" rx="7" /></svg>
+            </span>
+            <span id="icon-close" class="hidden items-center justify-center w-5 p-[2px]">
+              <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none"><path d="M10 10 L90 90 M90 10 L10 90" stroke="currentColor" stroke-width="10" stroke-linecap="round" /></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mobile-menu" class="fixed inset-x-0 top-0 z-[998] hidden max-h-[87vh] overflow-y-auto min-[992px]:!hidden">
+  <div class="flex flex-col gap-2 items-stretch relative bg-sparkles-warm px-8 pt-[7.5rem] pb-6 max-h-[87vh] overflow-y-auto max-[767px]:px-4">
+    {primaryLinks.map((item) => (
+      <a href={item.href} class="inline-flex items-center gap-2 py-3 font-display text-lg font-bold uppercase text-sparkles-navy no-underline hover:opacity-80 transition-opacity duration-200">
+        <span>{item.label}</span>
+        {item.tag && <SectionLabel>{item.tag}</SectionLabel>}
+      </a>
+    ))}
+    <div class="w-full h-px bg-sparkles-navy/30 my-3"></div>
+    <div class="flex flex-col gap-3 pb-3">
+      <a href="/volunteer" class="inline-flex items-center justify-center px-3 py-2 border border-sparkles-navy rounded-[2rem] bg-sparkles-cream font-display text-xs font-bold leading-4 text-sparkles-navy no-underline">Volunteer</a>
+      <a href="/membership" class="inline-flex items-center justify-center px-3 py-2 border border-sparkles-navy rounded-[2rem] bg-sparkles-navy font-display text-xs font-bold leading-4 text-sparkles-cream no-underline">Support</a>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  @keyframes marquee-banner {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee-banner { animation: marquee-banner 12s linear infinite; }
+</style>
+
+<script>
+  // Mobile menu
+  const toggle = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  toggle?.addEventListener("click", () => {
+    const open = menu?.classList.toggle("hidden") === false;
+    toggle.setAttribute("aria-expanded", String(open));
+    document.getElementById("icon-open")?.classList.toggle("hidden", open);
+    const close = document.getElementById("icon-close");
+    close?.classList.toggle("hidden", !open);
+    close?.classList.toggle("flex", open);
+  });
+
+  // Rotating banner: drop expired items in the browser (pages are static), then cycle.
+  const root = document.getElementById("site-banner");
+  if (root) {
+    const all: { headline: string; linkText: string; linkPath: string; expiresAt?: string }[] = JSON.parse(root.dataset.items ?? "[]");
+    const now = Date.now();
+    const items = all.filter((i) => !i.expiresAt || Date.parse(i.expiresAt) > now);
+    const desktop = document.getElementById("banner-desktop");
+    const paint = (i: number) => {
+      const item = items[i];
+      root.querySelectorAll<HTMLElement>("[data-banner-headline]").forEach((el) => (el.textContent = item.headline));
+      root.querySelectorAll<HTMLAnchorElement>("[data-banner-link]").forEach((el) => {
+        el.textContent = item.linkText;
+        el.href = item.linkPath;
+      });
+    };
+    if (items.length === 0) root.remove();
+    else {
+      let index = 0;
+      paint(0);
+      if (items.length > 1) {
+        setInterval(() => {
+          if (desktop) desktop.style.opacity = "0";
+          setTimeout(() => {
+            index = (index + 1) % items.length;
+            paint(index);
+            if (desktop) desktop.style.opacity = "1";
+          }, 1000);
+        }, 30000);
+      }
+    }
+  }
+</script>

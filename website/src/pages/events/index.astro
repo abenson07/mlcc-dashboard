@@ -1,0 +1,33 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SectionLabel from "../../components/SectionLabel.astro";
+import EventCard from "../../components/EventCard.astro";
+import CtaSection from "../../components/CtaSection.astro";
+import { getAllEvents, isUpcoming } from "../../lib/events";
+
+const events = (await getAllEvents()).filter((e) => isUpcoming(e));
+---
+
+<BaseLayout
+  title="Events | Maple Leaf Community Council"
+  description="Upcoming Maple Leaf Community Council events: Silent Book Club, Summer Social, neighborhood gatherings, and more."
+>
+  <main>
+    <div class="bg-sparkles-cream text-sparkles-navy">
+      <section class="bg-sparkles-cream pb-[10rem] pt-[10rem] max-[767px]:pb-20 max-[767px]:pt-20">
+        <div class="px-8 max-[767px]:px-4">
+          <div class="mx-auto w-full max-w-[1800px]">
+            <div class="mb-16 flex flex-col items-start gap-6">
+              <SectionLabel>Community</SectionLabel>
+              <h1 class="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">Events</h1>
+            </div>
+            <div class="grid grid-cols-3 gap-8 max-[991px]:grid-cols-2 max-[767px]:grid-cols-1">
+              {events.map((event) => <EventCard event={event} />)}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <CtaSection />
+  </main>
+</BaseLayout>

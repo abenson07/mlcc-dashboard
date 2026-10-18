@@ -1,0 +1,32 @@
+---
+const {
+  title = "A better neighborhood starts with you",
+  subhead = "Join us in making a better Maple Leaf for all",
+  primary = { label: "Become a supporting member", href: "/membership" },
+  secondary = { label: "Volunteer to help", href: "/volunteer" },
+} = Astro.props;
+---
+
+<div class="p-2 bg-sparkles-cream">
+  <div class="relative z-[1] rounded-2xl flex justify-center items-center w-full overflow-hidden bg-sparkles-accent h-[34.25rem] max-[991px]:h-auto max-[991px]:py-40 max-[767px]:py-24">
+    <div class="relative z-[3] px-8 w-full max-[767px]:px-4">
+      <div class="w-full max-w-[1800px] mx-auto">
+        <div class="relative z-[3] flex flex-col justify-center items-center text-center mx-auto gap-6 max-w-[42.5rem] max-[767px]:gap-5">
+          <div class="flex flex-col items-center gap-4">
+            <h2 class="m-0 font-display text-[3rem] leading-[3.25rem] font-bold tracking-[-0.125rem] text-sparkles-cream max-[767px]:text-[2rem] max-[767px]:leading-7 max-[767px]:tracking-[-0.031rem]">{title}</h2>
+            <p class="m-0 font-body text-xl leading-7 font-normal text-sparkles-cream/90 max-[767px]:text-base max-[767px]:leading-6">{subhead}</p>
+          </div>
+          <div class="flex flex-row justify-center items-center gap-2 flex-wrap">
+            <a href={primary.href} class="relative inline-flex justify-center items-center gap-2 overflow-hidden no-underline shrink-0 cursor-pointer rounded-[2rem] font-display text-sm leading-5 font-bold uppercase transition-all duration-300 border border-sparkles-navy bg-sparkles-navy text-sparkles-cream hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90 px-4 py-3">
+              <span>{primary.label}</span>
+              <span class="w-4 h-4 flex items-center justify-center">
+                <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span>
+            </a>
+            <a href={secondary.href} class="inline-flex justify-center items-center no-underline shrink-0 cursor-pointer rounded-[2rem] px-4 py-3 font-display text-sm leading-5 font-bold uppercase transition-all duration-300 border border-sparkles-navy/30 bg-white/50 text-sparkles-navy hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90 hover:text-sparkles-cream">{secondary.label}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

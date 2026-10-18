@@ -1,0 +1,23 @@
+---
+import { imageSrc } from "../lib/sanity";
+import { formatEventDate, type SanityEvent } from "../lib/events";
+
+const { event } = Astro.props as { event: SanityEvent };
+const src = imageSrc(event.image, 900, 720);
+---
+
+<a href={`/events/${event.slug}`} class="flex w-full flex-col gap-4 text-sparkles-navy no-underline">
+  <div class="relative h-[22.5rem] overflow-hidden rounded-2xl max-[479px]:h-[17rem]">
+    <div class="absolute inset-0 h-full w-full bg-transparent">
+      {src && <img loading="lazy" src={src} alt="" class="h-full w-full object-cover" />}
+    </div>
+  </div>
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
+      <div class="font-display text-2xl font-bold leading-7 tracking-[-0.031rem] text-puget-night max-[767px]:text-xl max-[767px]:leading-6">{event.title}</div>
+      <div class="font-body text-base leading-6 text-sparkles-navy">
+        <span>{event.locationName}</span><span class="px-2">·</span><span>{formatEventDate(event.startsAt)}</span>
+      </div>
+    </div>
+  </div>
+</a>

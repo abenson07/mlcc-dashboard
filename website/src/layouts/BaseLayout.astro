@@ -1,11 +1,15 @@
 ---
 import "../styles/global.css";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { getBannerItems } from "../lib/banner";
 
 interface Props {
   title: string;
   description?: string;
 }
-const { title, description = "Maple Leaf Community Council" } = Astro.props;
+const { title, description = "A volunteer-run community council connecting neighbors in Maple Leaf, Seattle, through events, advocacy, The Leaflet newsletter, and more." } = Astro.props;
+const bannerItems = await getBannerItems();
 ---
 
 <!doctype html>
@@ -15,9 +19,18 @@ const { title, description = "Maple Leaf Community Council" } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta property="og:site_name" content="Maple Leaf Community Council" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body class="marketing-root">
-    <slot />
+  <body class="marketing-root min-h-full flex flex-col bg-sparkles-cream text-sparkles-navy font-body antialiased">
+    <SiteNav bannerItems={bannerItems} />
+    <div class="flex-1 bg-sparkles-cream pt-[6.75rem] max-[991px]:pt-[6.25rem]">
+      <slot />
+    </div>
+    <SiteFooter />
   </body>
 </html>
