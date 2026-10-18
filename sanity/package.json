@@ -1,0 +1,8 @@
+{
+  "name": "mlcc-sanity-schemas",
+  "private": true,
+  "type": "module",
+  "description": "Shared Sanity schemas. Imported by the dashboard's embedded Studio (/admin/website) and referenced by the Astro site. `sanity` is here only so schemas typecheck on their own.",
+  "scripts": { "typecheck": "tsc --noEmit -p ." },
+  "devDependencies": { "sanity": "^6.19.0", "typescript": "^5.6.0" }
+}
