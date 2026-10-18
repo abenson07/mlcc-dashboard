@@ -5,11 +5,11 @@ import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { schemaTypes } from "@sanity-schemas/index";
 
-/** Studio mounted inside the admin at /admin/website. Schemas are shared with the Astro site via /sanity/schemas. */
+/** Studio mounted inside the admin at /admin/website/studio (backup editor; day-to-day editing is /admin/website). Schemas are shared with the Astro site via /sanity/schemas. */
 export default defineConfig({
   name: "mlcc",
   title: "MLCC Website",
-  basePath: "/admin/website",
+  basePath: "/admin/website/studio",
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production",
   plugins: [structureTool(), visionTool({ defaultApiVersion: "2025-02-19" })],

@@ -23,6 +23,7 @@ import {
   Plus,
   QrCode,
   Search,
+  Globe,
   Settings,
   Shirt,
   Star,
@@ -124,6 +125,12 @@ const group2Items: DemoItem[] = [
     label: "Invoicing",
     icon: <CreditCard size={16} strokeWidth={1.75} />,
     path: "/invoices",
+  },
+  {
+    id: "website",
+    label: "Edit website",
+    icon: <Globe size={16} strokeWidth={1.75} />,
+    path: "/website",
   },
   {
     id: "surplus-vote",

@@ -20,8 +20,8 @@ export default function WebsiteStudioPage() {
           borderBottom: "1px solid rgba(128,128,128,0.3)",
         }}
       >
-        <Link href="/admin" style={{ textDecoration: "none", color: "inherit" }}>
-          ← Back to admin
+        <Link href="/admin/website" style={{ textDecoration: "none", color: "inherit" }}>
+          ← Back to Edit website
         </Link>
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>

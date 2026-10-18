@@ -23,7 +23,7 @@ export function sanityWrite(): SanityClient {
 }
 
 const draftId = (id: string) => `drafts.${id}`;
-const stripSystem = ({ _rev, _updatedAt, _createdAt, ...rest }: WebsiteDoc) => rest as WebsiteDoc; // eslint-disable-line @typescript-eslint/no-unused-vars
+const stripSystem = ({ _rev, _updatedAt, _createdAt, ...rest }: WebsiteDoc) => rest as WebsiteDoc;
 
 /** The document as editors should see it: the draft if there is one, otherwise the published version. */
 export async function loadDoc(id: string): Promise<LoadedDoc | null> {
