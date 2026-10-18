@@ -5,6 +5,7 @@ import nextConfig from 'eslint-config-next/core-web-vitals'
 export default defineConfig([
   ...nextConfig,
   globalIgnores([
+    'website/**',
     '.next/**',
     '**/.next/**',
     'out/**',
