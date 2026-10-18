@@ -29,6 +29,9 @@
       "@marketing/*": [
         "./mlcc-website/*"
       ],
+      "@sanity-schemas/*": [
+        "./sanity/schemas/*"
+      ],
       "hooks": [
         "./hooks"
       ],
@@ -50,6 +53,7 @@
   "exclude": [
     "node_modules",
     "scripts",
-    "website"
+    "website",
+    "sanity/node_modules"
   ]
 }
