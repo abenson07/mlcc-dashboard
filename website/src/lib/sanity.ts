@@ -2,7 +2,7 @@ import { sanityClient } from "sanity:client";
 import imageUrlBuilder from "@sanity/image-url";
 import { toHTML, type PortableTextComponents } from "@portabletext/to-html";
 
-const readToken = import.meta.env.SANITY_API_READ_TOKEN;
+const readToken = process.env.SANITY_API_READ_TOKEN ?? import.meta.env.SANITY_API_READ_TOKEN;
 
 /** Published content only. Used at build time and for static pages. */
 export function fetchPublished<T>(query: string, params: Record<string, unknown> = {}) {
@@ -12,6 +12,11 @@ export function fetchPublished<T>(query: string, params: Record<string, unknown>
 /** Drafts included. Needs the Viewer token; only call from routes with `prerender = false`. */
 export function fetchDrafts<T>(query: string, params: Record<string, unknown> = {}) {
   return sanityClient.withConfig({ token: readToken }).fetch<T>(query, params, { perspective: "drafts" });
+}
+
+/** Draft-aware fetch: edit mode sees unpublished changes, the public site only published content. */
+export function fetchContent<T>(query: string, params: Record<string, unknown> = {}, edit = false) {
+  return edit ? fetchDrafts<T>(query, params) : fetchPublished<T>(query, params);
 }
 
 const builder = imageUrlBuilder(sanityClient);
@@ -29,7 +34,7 @@ export function imageSrc(source: unknown, width: number, height?: number) {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const bodyComponents: PortableTextComponents = {
+const eventBody: PortableTextComponents = {
   block: {
     normal: ({ children }) => `<p class="mb-4 text-base leading-6">${children}</p>`,
     h3: ({ children }) =>
@@ -60,7 +65,18 @@ const bodyComponents: PortableTextComponents = {
   },
 };
 
-export function renderBody(blocks: unknown): string {
+/** Live stream / meeting pages use a smaller heading scale than event pages. */
+const meetingBody: PortableTextComponents = {
+  ...eventBody,
+  block: {
+    ...eventBody.block,
+    h3: ({ children }) =>
+      `<h2 class="mb-3 mt-8 font-display text-2xl leading-7 font-bold tracking-[-0.03125rem] text-puget-night">${children}</h2>`,
+    h4: ({ children }) => `<h3 class="mb-2 mt-6 font-display text-xl leading-6 font-bold text-puget-night">${children}</h3>`,
+  },
+};
+
+export function renderBody(blocks: unknown, variant: "event" | "meeting" = "event"): string {
   if (!Array.isArray(blocks) || blocks.length === 0) return "";
-  return toHTML(blocks as never, { components: bodyComponents });
+  return toHTML(blocks as never, { components: variant === "meeting" ? meetingBody : eventBody });
 }

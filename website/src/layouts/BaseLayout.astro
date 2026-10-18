@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import SiteNav from "../components/SiteNav.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import EditBridge from "../components/EditBridge.astro";
 import { getBannerItems } from "../lib/banner";
 
 interface Props {
@@ -9,7 +10,8 @@ interface Props {
   description?: string;
 }
 const { title, description = "A volunteer-run community council connecting neighbors in Maple Leaf, Seattle, through events, advocacy, The Leaflet newsletter, and more." } = Astro.props;
-const bannerItems = await getBannerItems();
+const edit = Astro.locals.edit;
+const bannerItems = await getBannerItems(Boolean(edit));
 ---
 
 <!doctype html>
@@ -26,11 +28,12 @@ const bannerItems = await getBannerItems();
     <meta property="og:image" content="/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body class="marketing-root min-h-full flex flex-col bg-sparkles-cream text-sparkles-navy font-body antialiased">
+  <body data-edit-mode={edit ? "" : undefined} class="marketing-root min-h-full flex flex-col bg-sparkles-cream text-sparkles-navy font-body antialiased">
     <SiteNav bannerItems={bannerItems} />
     <div class="flex-1 bg-sparkles-cream pt-[6.75rem] max-[991px]:pt-[6.25rem]">
       <slot />
     </div>
     <SiteFooter />
+    {edit && <EditBridge parentOrigin={edit.parent} token={edit.token} />}
   </body>
 </html>

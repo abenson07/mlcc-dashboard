@@ -110,16 +110,34 @@ const bannerLabel = "font-body text-[0.625rem] leading-3 font-bold uppercase tra
   // Rotating banner: drop expired items in the browser (pages are static), then cycle.
   const root = document.getElementById("site-banner");
   if (root) {
-    const all: { headline: string; linkText: string; linkPath: string; expiresAt?: string }[] = JSON.parse(root.dataset.items ?? "[]");
+    const all: { _id?: string; headline: string; linkText: string; linkPath: string; expiresAt?: string }[] = JSON.parse(root.dataset.items ?? "[]");
     const now = Date.now();
     const items = all.filter((i) => !i.expiresAt || Date.parse(i.expiresAt) > now);
     const desktop = document.getElementById("banner-desktop");
     const paint = (i: number) => {
       const item = items[i];
-      root.querySelectorAll<HTMLElement>("[data-banner-headline]").forEach((el) => (el.textContent = item.headline));
+      const editing = document.body.hasAttribute("data-edit-mode") && item._id;
+      root.querySelectorAll<HTMLElement>("[data-banner-headline]").forEach((el) => {
+        el.textContent = item.headline;
+        // Edit mode: pinned banner items can be typed over in place.
+        if (editing) {
+          el.dataset.editId = item._id;
+          el.dataset.editField = "headline";
+          el.dataset.editKind = "text";
+        } else {
+          delete el.dataset.editKind;
+        }
+      });
       root.querySelectorAll<HTMLAnchorElement>("[data-banner-link]").forEach((el) => {
         el.textContent = item.linkText;
         el.href = item.linkPath;
+        if (editing) {
+          el.dataset.editId = item._id;
+          el.dataset.editField = "linkPath";
+          el.dataset.editKind = "open";
+        } else {
+          delete el.dataset.editKind;
+        }
       });
     };
     if (items.length === 0) root.remove();
@@ -128,13 +146,15 @@ const bannerLabel = "font-body text-[0.625rem] leading-3 font-bold uppercase tra
       paint(0);
       if (items.length > 1) {
         setInterval(() => {
+          // In edit mode, hold still while the banner is hovered or being typed in.
+          if (document.body.hasAttribute("data-edit-mode") && (root.matches(":hover") || root.contains(document.activeElement))) return;
           if (desktop) desktop.style.opacity = "0";
           setTimeout(() => {
             index = (index + 1) % items.length;
             paint(index);
             if (desktop) desktop.style.opacity = "1";
           }, 1000);
-        }, 30000);
+        }, document.body.hasAttribute("data-edit-mode") ? 5000 : 30000);
       }
     }
   }

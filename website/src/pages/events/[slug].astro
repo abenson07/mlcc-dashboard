@@ -4,14 +4,13 @@ import SectionLabel from "../../components/SectionLabel.astro";
 import EventDetailsCard from "../../components/EventDetailsCard.astro";
 import CtaSection from "../../components/CtaSection.astro";
 import { imageSrc, renderBody } from "../../lib/sanity";
+import { ed } from "../../lib/edit";
 import { formatEventDate, getAllEvents, getRelatedEvents, type SanityEvent } from "../../lib/events";
 
-export async function getStaticPaths() {
-  const events = await getAllEvents();
-  return events.map((event) => ({ params: { slug: event.slug }, props: { event, all: events } }));
-}
-
-const { event, all } = Astro.props as { event: SanityEvent; all: SanityEvent[] };
+const edit = Boolean(Astro.locals.edit);
+const all: SanityEvent[] = await getAllEvents(edit);
+const event = all.find((e) => e.slug === Astro.params.slug);
+if (!event) return new Response("Event not found", { status: 404 });
 const related = getRelatedEvents(all, event.slug, 2);
 
 const isPortrait = event.imageAspect === "portrait";
@@ -41,15 +40,15 @@ const bodyHtml = renderBody(event.body) || `<p class="mb-4 text-base leading-6">
 
                 <div class="mx-auto flex max-w-[42.5rem] flex-col items-center justify-start gap-6 text-center max-[479px]:gap-4">
                   <div class="flex flex-wrap items-center justify-center gap-2">
-                    <SectionLabel>{formatEventDate(event.startsAt)}</SectionLabel>
-                    {event.category && <SectionLabel>{event.category}</SectionLabel>}
+                    <span {...ed(edit, event._id, "startsAt")}><SectionLabel>{formatEventDate(event.startsAt)}</SectionLabel></span>
+                    {(event.category || edit) && <span {...ed(edit, event._id, "category", "text")}><SectionLabel>{event.category}</SectionLabel></span>}
                   </div>
-                  <h1 class="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">{event.title}</h1>
+                  <h1 {...ed(edit, event._id, "title", "text")} class="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">{event.title}</h1>
                 </div>
               </div>
 
               {hero && !isPortrait && (
-                <div class="h-[30rem] w-full overflow-hidden rounded-2xl max-[991px]:h-[22.5rem] max-[767px]:h-[18.75rem] max-[479px]:h-[15.6rem]">
+                <div {...ed(edit, event._id, "image")} class="h-[30rem] w-full overflow-hidden rounded-2xl max-[991px]:h-[22.5rem] max-[767px]:h-[18.75rem] max-[479px]:h-[15.6rem]">
                   <img src={hero} alt="" class="h-full w-full object-cover" />
                 </div>
               )}
@@ -59,17 +58,17 @@ const bodyHtml = renderBody(event.body) || `<p class="mb-4 text-base leading-6">
           <div class="mx-auto w-full max-w-[1800px] pb-20 max-[767px]:pb-16">
             <div class="grid grid-cols-2 items-start justify-items-end gap-4 max-[991px]:grid-cols-1 max-[991px]:gap-16">
               {hero && isPortrait && (
-                <div class={`w-full aspect-[3/4] overflow-hidden rounded-2xl ${imageOrder}`}>
+                <div {...ed(edit, event._id, "image")} class={`w-full aspect-[3/4] overflow-hidden rounded-2xl ${imageOrder}`}>
                   <img src={hero} alt="" class="h-full w-full object-cover" />
                 </div>
               )}
 
               <div class={`flex w-full max-w-[42.5rem] flex-col gap-16 max-[991px]:max-w-none ${isPortrait ? `${bodyOrder} ${bodyAlign}` : "justify-self-start"}`}>
-                <div class="font-body text-sparkles-navy" set:html={bodyHtml} />
-                {isPortrait && <EventDetailsCard event={event} />}
+                <div class="font-body text-sparkles-navy" {...ed(edit, event._id, "body")} set:html={bodyHtml} />
+                {isPortrait && <EventDetailsCard event={event} edit={edit} />}
               </div>
 
-              {!isPortrait && <EventDetailsCard event={event} />}
+              {!isPortrait && <EventDetailsCard event={event} edit={edit} />}
             </div>
           </div>
         </div>

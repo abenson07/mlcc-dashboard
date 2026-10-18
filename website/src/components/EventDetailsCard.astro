@@ -1,13 +1,14 @@
 ---
+import { ed } from "../lib/edit";
 import { eventActionHref, eventMapEmbedUrl, formatEventDate, formatEventTime, type SanityEvent } from "../lib/events";
 
-const { event } = Astro.props as { event: SanityEvent };
+const { event, edit = false } = Astro.props as { event: SanityEvent; edit?: boolean };
 const label = "mb-2 font-body text-xs leading-4 font-bold uppercase tracking-[0.0625rem] text-sparkles-navy";
 const external = Boolean(event.externalUrl);
 ---
 
 <div class="sticky top-[7.5rem] flex w-full max-w-[28rem] flex-col gap-6 rounded-2xl bg-sparkles-warm p-8 max-[991px]:max-w-none max-[991px]:justify-self-start max-[767px]:w-full">
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid grid-cols-2 gap-4" {...ed(edit, event._id, "startsAt")}>
     <div>
       <div class={label}>Date</div>
       <div class="font-body text-base leading-6 text-sparkles-navy">{formatEventDate(event.startsAt)}</div>
@@ -24,11 +25,11 @@ const external = Boolean(event.externalUrl);
       <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-sparkles-navy">
         <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
       </span>
-      <span class="font-body text-base leading-6 text-sparkles-navy">{event.locationName}</span>
+      <span class="font-body text-base leading-6 text-sparkles-navy" {...ed(edit, event._id, "locationName", "text")}>{event.locationName}</span>
     </div>
   </div>
 
-  <div class="h-48 w-full overflow-hidden rounded-xl">
+  <div class="h-48 w-full overflow-hidden rounded-xl" {...ed(edit, event._id, "mapQuery")}>
     <iframe title={`Map for ${event.locationName}`} src={eventMapEmbedUrl(event)} class="h-full w-full border-0" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
   </div>
 
@@ -36,6 +37,7 @@ const external = Boolean(event.externalUrl);
     href={eventActionHref(event)}
     class="inline-flex w-full items-center justify-center rounded-[2rem] border border-sparkles-navy bg-sparkles-navy px-4 py-3 font-display text-sm font-bold leading-5 text-sparkles-cream no-underline transition-all duration-300 hover:border-sparkles-navy/90 hover:bg-sparkles-navy/90"
     {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    {...ed(edit, event._id, "externalUrl")}
   >
     {external ? "View event" : "Get directions"}
   </a>

@@ -5,7 +5,8 @@ import EventCard from "../../components/EventCard.astro";
 import CtaSection from "../../components/CtaSection.astro";
 import { getAllEvents, isUpcoming } from "../../lib/events";
 
-const events = (await getAllEvents()).filter((e) => isUpcoming(e));
+const edit = Boolean(Astro.locals.edit);
+const events = (await getAllEvents(edit)).filter((e) => isUpcoming(e));
 ---
 
 <BaseLayout
@@ -22,7 +23,7 @@ const events = (await getAllEvents()).filter((e) => isUpcoming(e));
               <h1 class="m-0 font-display text-[3.75rem] leading-16 font-bold tracking-[-0.15625rem] text-puget-night max-[767px]:text-[2.5rem] max-[767px]:leading-10 max-[767px]:tracking-[-0.0625rem]">Events</h1>
             </div>
             <div class="grid grid-cols-3 gap-8 max-[991px]:grid-cols-2 max-[767px]:grid-cols-1">
-              {events.map((event) => <EventCard event={event} />)}
+              {events.map((event) => <EventCard event={event} edit={edit} />)}
             </div>
           </div>
         </div>

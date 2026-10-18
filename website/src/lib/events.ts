@@ -1,4 +1,4 @@
-import { fetchPublished } from "./sanity";
+import { fetchContent } from "./sanity";
 
 const TZ = "America/Los_Angeles";
 
@@ -25,8 +25,12 @@ const EVENT_FIELDS = /* groq */ `
   shortDescription, image, imageAspect, imagePosition, externalUrl, body
 `;
 
-export async function getAllEvents(): Promise<SanityEvent[]> {
-  return fetchPublished<SanityEvent[]>(`*[_type == "event" && defined(slug.current)] | order(startsAt asc){${EVENT_FIELDS}}`);
+export async function getAllEvents(edit = false): Promise<SanityEvent[]> {
+  return fetchContent<SanityEvent[]>(
+    `*[_type == "event" && defined(slug.current)] | order(startsAt asc){${EVENT_FIELDS}}`,
+    {},
+    edit,
+  );
 }
 
 export const isUpcoming = (e: SanityEvent, now = Date.now()) => new Date(e.startsAt).getTime() >= now;

@@ -1,0 +1,112 @@
+---
+/**
+ * Edit mode only (rendered by BaseLayout when the request has a valid edit token).
+ * Talks to the dashboard's Edit website screen that frames this page:
+ *   - text / textarea fields turn typeable on click and send a `patch` on blur
+ *   - everything else sends `open` so the side form focuses that field
+ */
+const { parentOrigin, token } = Astro.props as { parentOrigin: string; token: string };
+---
+
+<script is:inline define:vars={{ parentOrigin, editToken: token }}>
+  (function () {
+    var send = function (msg) {
+      msg.source = "mlcc-edit";
+      window.parent.postMessage(msg, parentOrigin);
+    };
+
+    var style = document.createElement("style");
+    style.textContent =
+      "[data-edit-kind]{cursor:pointer;outline:2px solid transparent;outline-offset:3px;border-radius:4px;transition:outline-color .12s,background-color .12s}" +
+      "[data-edit-kind]:hover{outline-color:#2e7b34;background-color:rgba(46,123,52,.07)}" +
+      "[data-edit-kind][contenteditable]{outline-color:#2e7b34;background-color:rgba(46,123,52,.12);cursor:text}" +
+      "[data-edit-active]{outline-color:#2e7b34!important}" +
+      "[data-edit-kind] iframe{pointer-events:none}";
+    document.head.appendChild(style);
+
+    function mark(el) {
+      document.querySelectorAll("[data-edit-active]").forEach(function (n) { n.removeAttribute("data-edit-active"); });
+      if (el) el.setAttribute("data-edit-active", "");
+    }
+
+    function clean(el) {
+      return el.dataset.editKind === "textarea" ? el.innerText.trim() : el.textContent.replace(/\s+/g, " ").trim();
+    }
+
+    function onKey(e) {
+      var el = e.currentTarget;
+      if (e.key === "Escape") { el.textContent = el.__orig; el.blur(); }
+      else if (e.key === "Enter" && el.dataset.editKind === "text") { e.preventDefault(); el.blur(); }
+    }
+
+    function onBlur(e) {
+      var el = e.currentTarget;
+      el.removeEventListener("keydown", onKey);
+      el.removeAttribute("contenteditable");
+      var value = clean(el);
+      var before = (el.__orig || "").replace(el.dataset.editKind === "textarea" ? /$^/ : /\s+/g, " ").trim();
+      if (value !== before) send({ type: "patch", id: el.dataset.editId, field: el.dataset.editField, value: value });
+    }
+
+    function startText(el) {
+      el.__orig = el.dataset.editKind === "textarea" ? el.innerText : el.textContent;
+      try { el.contentEditable = "plaintext-only"; } catch (err) {}
+      if (!el.isContentEditable) el.contentEditable = "true";
+      el.focus();
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.addEventListener("keydown", onKey);
+      el.addEventListener("blur", onBlur, { once: true });
+    }
+
+    document.addEventListener("click", function (e) {
+      var t = e.target instanceof Element ? e.target : null;
+      if (!t) return;
+      var el = t.closest("[data-edit-kind]");
+      if (el) {
+        if (el.isContentEditable) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var kind = el.dataset.editKind;
+        mark(el);
+        if (kind === "text" || kind === "textarea") startText(el);
+        else send({ type: "open", id: el.dataset.editId, field: el.dataset.editField });
+        return;
+      }
+      var a = t.closest("a[href]");
+      if (!a) return;
+      var url;
+      try { url = new URL(a.getAttribute("href"), location.href); } catch (err) { return; }
+      if (url.origin !== location.origin) { a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener"); return; }
+      // Keep navigation inside edit mode.
+      if (!url.searchParams.has("edit")) {
+        url.searchParams.set("edit", editToken);
+        a.setAttribute("href", url.pathname + url.search + url.hash);
+      }
+    }, true);
+
+    window.addEventListener("message", function (e) {
+      if (e.origin !== parentOrigin) return;
+      var m = e.data;
+      if (!m || m.source !== "mlcc-edit-parent") return;
+      if (m.type === "reload") {
+        sessionStorage.setItem("mlcc-edit-scroll", String(window.scrollY));
+        location.reload();
+      } else if (m.type === "focus") {
+        var el = document.querySelector('[data-edit-id="' + CSS.escape(m.id) + '"][data-edit-field="' + CSS.escape(m.field) + '"]');
+        if (el) { mark(el); el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+      }
+    });
+
+    var saved = sessionStorage.getItem("mlcc-edit-scroll");
+    if (saved) { sessionStorage.removeItem("mlcc-edit-scroll"); window.scrollTo(0, Number(saved)); }
+
+    var seen = {};
+    document.querySelectorAll("[data-edit-id]").forEach(function (n) { seen[n.dataset.editId] = true; });
+    send({ type: "ready", path: location.pathname, docs: Object.keys(seen) });
+  })();
+</script>

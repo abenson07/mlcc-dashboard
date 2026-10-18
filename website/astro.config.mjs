@@ -7,11 +7,12 @@ import tailwindcss from "@tailwindcss/vite";
 
 const env = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 
-// Static by default; routes that need draft content (Sanity Presentation) opt in
-// with `export const prerender = false`.
+// Rendered on request and cached at the CDN (see src/middleware.ts): a publish shows up
+// within about a minute with no rebuild, and edit mode (signed token from the dashboard)
+// bypasses the cache and reads draft content.
 export default defineConfig({
   site: env.PUBLIC_SITE_URL ?? "http://localhost:4321",
-  output: "static",
+  output: "server",
   adapter: vercel(),
   integrations: [
     react(),
