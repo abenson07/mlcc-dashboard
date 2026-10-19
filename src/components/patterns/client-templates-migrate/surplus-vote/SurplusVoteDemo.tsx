@@ -12,6 +12,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import type { SurplusVoteItem } from "@/lib/surplus-vote/items";
 import { SurplusVoteRanker } from "./SurplusVoteRanker";
 import { SurplusVoteResults } from "./SurplusVoteResults";
+import { SurplusVoteSubmitted } from "./SurplusVoteSubmitted";
 
 type SurplusVoteView = "vote" | "results";
 
@@ -20,15 +21,10 @@ const VIEW_TABS: { key: SurplusVoteView; label: string }[] = [
   { key: "results", label: "Results" },
 ];
 
-function arraysEqual(a: string[], b: string[]): boolean {
-  return a.length === b.length && a.every((id, index) => id === b[index]);
-}
-
 function SurplusVoteDemoInner() {
   const [view, setView] = useState<SurplusVoteView>("vote");
   const {
     orderedItems,
-    myRanking,
     ballotCount,
     results,
     loading,
@@ -46,17 +42,10 @@ function SurplusVoteDemoInner() {
     setDraft(orderedItems);
   }, [orderedItems]);
 
-  const dirty =
-    !hasSaved ||
-    !arraysEqual(
-      draft.map((item) => item.id),
-      myRanking ?? [],
-    );
-
   async function handleSave() {
     try {
       await saveRanking(draft.map((item) => item.id));
-      toast.success("Ranking saved");
+      toast.success("Vote submitted");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn’t save ranking");
     }
@@ -68,7 +57,7 @@ function SurplusVoteDemoInner() {
     }
     try {
       await resetRanking();
-      toast.success("Vote reset — rank the cards again and save when ready");
+      toast.success("Vote reset — rank the cards again and submit when ready");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn’t reset vote");
     }
@@ -106,16 +95,20 @@ function SurplusVoteDemoInner() {
               <Text color="secondary">Couldn&apos;t load saved rankings: {error}</Text>
             ) : null}
             {view === "vote" ? (
-              <SurplusVoteRanker
-                items={draft}
-                onReorder={setDraft}
-                onSave={() => void handleSave()}
-                onReset={() => void handleReset()}
-                saving={saving}
-                resetting={resetting}
-                dirty={dirty}
-                hasSaved={hasSaved}
-              />
+              hasSaved ? (
+                <SurplusVoteSubmitted
+                  onReset={() => void handleReset()}
+                  onViewResults={() => setView("results")}
+                  resetting={resetting}
+                />
+              ) : (
+                <SurplusVoteRanker
+                  items={draft}
+                  onReorder={setDraft}
+                  onSave={() => void handleSave()}
+                  saving={saving}
+                />
+              )
             ) : (
               <SurplusVoteResults results={results} ballotCount={ballotCount} />
             )}
