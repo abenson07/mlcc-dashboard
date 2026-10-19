@@ -15,7 +15,8 @@ function payloadFromBallots(
   return {
     myRanking,
     ballotCount: allRankings.length,
-    results: scoreBallots(allRankings, SURPLUS_VOTE_ITEMS),
+    // Results stay hidden until the caller has submitted their own ballot.
+    results: myRanking ? scoreBallots(allRankings, SURPLUS_VOTE_ITEMS) : [],
   };
 }
 
