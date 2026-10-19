@@ -28,11 +28,7 @@ type SurplusVoteRankerProps = {
   items: SurplusVoteItem[];
   onReorder: (next: SurplusVoteItem[]) => void;
   onSave: () => void;
-  onReset: () => void;
   saving: boolean;
-  resetting: boolean;
-  dirty: boolean;
-  hasSaved: boolean;
 };
 
 function SortableCard({ item, rank }: { item: SurplusVoteItem; rank: number }) {
@@ -126,11 +122,7 @@ export function SurplusVoteRanker({
   items,
   onReorder,
   onSave,
-  onReset,
   saving,
-  resetting,
-  dirty,
-  hasSaved,
 }: SurplusVoteRankerProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -173,18 +165,10 @@ export function SurplusVoteRanker({
           </Text>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          {hasSaved ? (
-            <Button
-              label={resetting ? "Resetting…" : "Reset my vote"}
-              variant="secondary"
-              disabled={resetting || saving}
-              onClick={onReset}
-            />
-          ) : null}
           <Button
-            label={saving ? "Saving…" : hasSaved && !dirty ? "Saved" : "Save ranking"}
+            label={saving ? "Submitting…" : "Submit vote"}
             variant="primary"
-            disabled={saving || resetting || (!dirty && hasSaved)}
+            disabled={saving}
             onClick={onSave}
           />
         </div>
