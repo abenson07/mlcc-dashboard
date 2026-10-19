@@ -12,6 +12,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import type { SurplusVoteItem } from "@/lib/surplus-vote/items";
 import { SurplusVoteRanker } from "./SurplusVoteRanker";
 import { SurplusVoteResults } from "./SurplusVoteResults";
+import { SurplusVoteResultsLocked } from "./SurplusVoteResultsLocked";
 import { SurplusVoteSubmitted } from "./SurplusVoteSubmitted";
 
 type SurplusVoteView = "vote" | "results";
@@ -109,8 +110,10 @@ function SurplusVoteDemoInner() {
                   saving={saving}
                 />
               )
-            ) : (
+            ) : hasSaved ? (
               <SurplusVoteResults results={results} ballotCount={ballotCount} />
+            ) : (
+              <SurplusVoteResultsLocked onVote={() => setView("vote")} />
             )}
           </div>
         )}

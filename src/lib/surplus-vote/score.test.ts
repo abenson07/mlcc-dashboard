@@ -3,6 +3,7 @@ import { SURPLUS_VOTE_ITEM_COUNT, SURPLUS_VOTE_ITEM_IDS } from "./items";
 import {
   isCompleteRanking,
   orderItemsByRanking,
+  ordinal,
   pointsForRank,
   scoreBallots,
 } from "./score";
@@ -50,5 +51,27 @@ describe("surplus vote scoring", () => {
     const reversed = [...SURPLUS_VOTE_ITEM_IDS].reverse();
     const ordered = orderItemsByRanking(reversed);
     expect(ordered.map((item) => item.id)).toEqual(reversed);
+  });
+
+  it("gives tied items the same rank and skips the next rank", () => {
+    const [a, b, c, d] = SURPLUS_VOTE_ITEM_IDS;
+    const rest = SURPLUS_VOTE_ITEM_IDS.slice(4);
+    // a and b swap places across two ballots, so they tie for first; c and d follow.
+    const results = scoreBallots([
+      [a, b, c, d, ...rest],
+      [b, a, c, d, ...rest],
+    ]);
+    expect(results.slice(0, 4).map((row) => [row.rank, row.tied])).toEqual([
+      [1, true],
+      [1, true],
+      [3, false],
+      [4, false],
+    ]);
+  });
+
+  it("formats ordinals", () => {
+    expect([1, 2, 3, 4, 11, 12, 13, 21, 22].map(ordinal)).toEqual([
+      "1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd",
+    ]);
   });
 });
