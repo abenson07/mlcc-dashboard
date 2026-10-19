@@ -8,6 +8,10 @@ export type SurplusVoteResult = SurplusVoteItem & {
   points: number;
   /** 1-based average rank across ballots (1 = everyone's top pick). Null with no ballots. */
   averageRank: number | null;
+  /** Standard competition rank: equal points share a rank and the next rank skips (1, 2, 2, 4). */
+  rank: number;
+  /** True when another item has the same points and therefore the same rank. */
+  tied: boolean;
 };
 
 export function isCompleteRanking(
@@ -46,13 +50,25 @@ export function scoreBallots(
     });
   }
 
-  return items
+  const sorted = items
     .map((item) => ({
       ...item,
       points: points.get(item.id) ?? 0,
       averageRank: validBallotCount > 0 ? (rankSum.get(item.id) ?? 0) / validBallotCount : null,
     }))
     .sort((a, b) => b.points - a.points || a.title.localeCompare(b.title));
+
+  return sorted.map((item) => {
+    const firstWithPoints = sorted.findIndex((other) => other.points === item.points);
+    const tied = sorted.filter((other) => other.points === item.points).length > 1;
+    return { ...item, rank: firstWithPoints + 1, tied };
+  });
+}
+
+export function ordinal(n: number): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  return `${n}${({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;
 }
 
 export function orderItemsByRanking(
