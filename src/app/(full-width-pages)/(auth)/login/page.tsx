@@ -9,15 +9,29 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function SignIn() {
+export default async function SignIn({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string | string[] }>;
+}) {
+  const { next: rawNext } = await searchParams;
+  const nextParam = Array.isArray(rawNext) ? rawNext[0] : rawNext;
+  const next =
+    nextParam &&
+    /^\/admin(\/|\?|$)/.test(nextParam) &&
+    !nextParam.startsWith("//") &&
+    !nextParam.includes("\\")
+      ? nextParam
+      : "/admin";
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/admin");
+    redirect(next);
   }
 
-  return <AccountSection />;
+  return <AccountSection next={next} />;
 }
