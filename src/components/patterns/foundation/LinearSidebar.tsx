@@ -13,7 +13,6 @@ import {
   HelpCircle,
   Inbox,
   ListChecks,
-  ListOrdered,
   Mail,
   Megaphone,
   Newspaper,
@@ -124,12 +123,6 @@ const group2Items: DemoItem[] = [
     label: "Invoicing",
     icon: <CreditCard size={16} strokeWidth={1.75} />,
     path: "/invoices",
-  },
-  {
-    id: "surplus-vote",
-    label: "Surplus Vote",
-    icon: <ListOrdered size={16} strokeWidth={1.75} />,
-    path: "/surplus-vote",
   },
 ];
 
