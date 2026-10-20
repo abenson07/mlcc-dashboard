@@ -12,6 +12,15 @@ function normalizeEmail(raw: FormDataEntryValue | null): string | null {
   return email.length > 0 ? email : null;
 }
 
+// Only allow same-site /admin paths to avoid open redirects.
+function sanitizeNext(raw: unknown): string {
+  if (typeof raw !== "string") return "/admin";
+  if (!/^\/admin(\/|\?|$)/.test(raw) || raw.startsWith("//") || raw.includes("\\")) {
+    return "/admin";
+  }
+  return raw;
+}
+
 function authNotConfigured(): boolean {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
@@ -113,5 +122,5 @@ export async function verifyLoginCode(
     return { error: error.message };
   }
 
-  redirect("/admin");
+  redirect(sanitizeNext(formData.get("next")));
 }

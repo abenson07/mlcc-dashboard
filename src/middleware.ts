@@ -47,7 +47,20 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Remember where the visitor was headed so login can send them back.
+  if (!user && (pathname === "/admin" || pathname.startsWith("/admin/"))) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    supabaseResponse.cookies
+      .getAll()
+      .forEach((c) => redirectResponse.cookies.set(c));
+    return redirectResponse;
+  }
 
   return supabaseResponse;
 }

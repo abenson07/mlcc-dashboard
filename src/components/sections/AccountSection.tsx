@@ -61,7 +61,7 @@ function ResendButton({ disabled }: { disabled: boolean }) {
   );
 }
 
-export function AccountSection() {
+export function AccountSection({ next = "/admin" }: { next?: string }) {
   const leftRef = React.useRef<HTMLDivElement>(null);
   const rightRef = React.useRef<HTMLDivElement>(null);
   const [leftVisible, setLeftVisible] = React.useState(false);
@@ -227,6 +227,7 @@ export function AccountSection() {
                       <div className="flex flex-col gap-8 max-md:gap-6">
                         <form action={verifyAction}>
                           <input type="hidden" name="email" value={email} />
+                          <input type="hidden" name="next" value={next} />
                           <div className="flex flex-col gap-6 max-md:gap-5">
                             {verifyState?.error && (
                               <p className="text-sm text-error-500">
