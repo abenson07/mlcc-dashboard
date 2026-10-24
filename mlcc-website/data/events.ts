@@ -3,10 +3,12 @@ import {
   type PublishedEventRow,
 } from "./mergePublishedEvents";
 
+export type EventDetailListItem = string | { text: string; href: string };
+
 export type EventDetailBlock =
   | { kind: "heading"; text: string; size?: "h5" | "h6" }
   | { kind: "paragraph"; text: string; linkText?: string; href?: string }
-  | { kind: "list"; items: string[] }
+  | { kind: "list"; items: EventDetailListItem[] }
   | { kind: "video"; youtubeId: string; title: string }
   | { kind: "image"; src: string; alt: string; caption?: string };
 
@@ -148,13 +150,23 @@ const HALLOWEEN_PARADE_DETAIL: EventDetailContent = {
     {
       kind: "list",
       items: [
-        "The Perkins School",
-        "Ace Hardware",
-        "Math ’n’ Stuff",
-        "Cloud City Coffee",
-        "Macrina Bakery",
-        "Javasti",
-        "Chevron",
+        { text: "The Perkins School", href: "https://www.theperkinsschool.org/" },
+        {
+          text: "Ace Hardware",
+          href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Ace%20Hardware%20Seattle",
+        },
+        {
+          text: "Math ’n’ Stuff",
+          href: "https://www.google.com/maps/search/?api=1&query=Math%20n%20Stuff%20Seattle",
+        },
+        { text: "Cloud City Coffee", href: "https://www.cloudcitycoffee.com/" },
+        { text: "Macrina Bakery", href: "https://macrinabakery.com/maple-leaf-cafe" },
+        { text: "Javasti", href: "https://javasti.com/" },
+        {
+          text: "Chevron",
+          href: "https://www.google.com/maps/search/?api=1&query=Chevron%205th%20Ave%20NE%20Maple%20Leaf%20Seattle",
+        },
+        { text: "RUG Little League", href: "https://www.rugll.org/" },
         "And a few more friendly businesses along the way",
       ],
     },
