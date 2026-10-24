@@ -70,11 +70,24 @@ function renderEventBody(blocks: EventDetailBlock[]) {
         if (block.kind === "list") {
           return (
             <ul key={index} className="mb-4 list-disc pl-6" role="list">
-              {block.items.map((item) => (
-                <li key={item} className="text-base leading-6">
-                  {item}
-                </li>
-              ))}
+              {block.items.map((item) =>
+                typeof item === "string" ? (
+                  <li key={item} className="text-base leading-6">
+                    {item}
+                  </li>
+                ) : (
+                  <li key={item.text} className="text-base leading-6">
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sparkles-navy underline decoration-1 underline-offset-2 hover:no-underline"
+                    >
+                      {item.text}
+                    </a>
+                  </li>
+                ),
+              )}
             </ul>
           );
         }
