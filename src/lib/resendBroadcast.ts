@@ -68,6 +68,21 @@ export function getResendMarketingSegmentId(): string | undefined {
   return id || undefined;
 }
 
+export type EmailAudience = "all" | "donors" | "volunteers";
+
+/**
+ * Segment for an audience. "all" is the main marketing segment; the others come from
+ * optional env vars and return undefined when not configured so callers can say so.
+ */
+export function getResendAudienceSegmentId(audience: EmailAudience): string | undefined {
+  if (audience === "all") return getResendMarketingSegmentId();
+  const raw =
+    audience === "donors"
+      ? process.env.RESEND_SEGMENT_DONORS
+      : process.env.RESEND_SEGMENT_VOLUNTEERS;
+  return raw?.trim() || undefined;
+}
+
 export type ResendBroadcastStatus =
   | "draft"
   | "scheduled"
