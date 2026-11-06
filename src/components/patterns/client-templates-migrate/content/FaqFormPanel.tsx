@@ -11,12 +11,22 @@ import type { Faq } from "./types";
 export type FaqFormPanelProps = {
   faq: Faq;
   isNew?: boolean;
-  onSave: (faq: Faq) => void;
+  onSave: (faq: Faq) => void | Promise<void>;
   onClose: () => void;
 };
 
 export function FaqFormPanel({ faq, isNew = false, onSave, onClose }: FaqFormPanelProps) {
   const [draft, setDraft] = useState<Faq>(faq);
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await onSave(draft);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   function togglePage(slug: string, isChecked: boolean) {
     setDraft((d) => ({
@@ -89,7 +99,12 @@ export function FaqFormPanel({ faq, isNew = false, onSave, onClose }: FaqFormPan
 
       <HStack gap={2} justify="end">
         <Button label="Close" variant="secondary" onClick={onClose} />
-        <Button label={isNew ? "Create FAQ" : "Save"} variant="primary" onClick={() => onSave(draft)} />
+        <Button
+          label={saving ? "Saving…" : isNew ? "Create FAQ" : "Save"}
+          variant="primary"
+          disabled={saving}
+          onClick={() => void save()}
+        />
       </HStack>
     </div>
   );

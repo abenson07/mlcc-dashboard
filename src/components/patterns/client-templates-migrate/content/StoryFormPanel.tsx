@@ -13,12 +13,22 @@ import type { Story } from "./types";
 export type StoryFormPanelProps = {
   story: Story;
   isNew?: boolean;
-  onSave: (story: Story) => void;
+  onSave: (story: Story) => void | Promise<void>;
   onClose: () => void;
 };
 
 export function StoryFormPanel({ story, isNew = false, onSave, onClose }: StoryFormPanelProps) {
   const [draft, setDraft] = useState<Story>(story);
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await onSave(draft);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   function togglePublished() {
     setDraft((d) =>
@@ -156,7 +166,12 @@ export function StoryFormPanel({ story, isNew = false, onSave, onClose }: StoryF
 
       <HStack gap={2} justify="end">
         <Button label="Close" variant="secondary" onClick={onClose} />
-        <Button label={isNew ? "Create story" : "Save"} variant="primary" onClick={() => onSave(draft)} />
+        <Button
+          label={saving ? "Saving…" : isNew ? "Create story" : "Save"}
+          variant="primary"
+          disabled={saving}
+          onClick={() => void save()}
+        />
       </HStack>
     </div>
   );

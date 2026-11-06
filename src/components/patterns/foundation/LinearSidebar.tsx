@@ -240,7 +240,11 @@ function MigrateCreateModals({
       status: story.status === "Published" ? "published" : "draft",
       body: story.body || "",
     });
-    if (created) router.push(hrefFor(`/content?view=stories&selected=${created.id}`));
+    if (!created) {
+      toast.error("Couldn't create the story. Please try again.");
+      return;
+    }
+    router.push(hrefFor(`/content?view=stories&selected=${created.id}`));
   }
 
   async function handleCreateEvent(event: Omit<EventSummary, "id">) {

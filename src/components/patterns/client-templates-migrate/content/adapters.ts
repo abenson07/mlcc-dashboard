@@ -39,9 +39,12 @@ export function contentStatusToStoryStatus(status: ContentStatus): StoryStatus {
   return status === "Published" ? "published" : "draft";
 }
 
-/** Today's date as `YYYY-MM-DD`, for stamping `publish_date` when a story is marked Published. */
+/** Today's local date as `YYYY-MM-DD`, for stamping `publish_date`. `toISOString()` is UTC, so evenings would land on tomorrow. */
 export function todayISODate(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 export function toFaq(row: FaqWithPages): Faq {

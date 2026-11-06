@@ -7,6 +7,7 @@ import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Checkbox } from "@/components/patterns/primitives/Checkbox";
 import { parseSponsorAmount } from "@/lib/sponsorship/addSponsor";
+import { saveErrorMessage } from "@/lib/saveErrorMessage";
 import { validateEmail } from "@/lib/validation";
 import type { BusinessMemberRow, BusinessRow, SponsorRow, SponsorshipLevel } from "./types";
 import { localIsoDate, BUSINESS_MEMBERSHIP_ANNUAL_DUES, BUSINESS_MEMBERSHIP_TIER } from "./adapters";
@@ -144,7 +145,7 @@ export function AddBusinessModal({
       }
       onClose();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setError(saveErrorMessage(e, { fallback: "Something went wrong. Please try again." }));
     } finally {
       setBusy(false);
     }
