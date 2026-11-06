@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { Text } from "@/components/patterns/primitives/Text";
 import { availableTopics, type ContentStatus, type Story } from "@/data/mocks/content";
 
 export type NewStoryModalProps = {
@@ -33,16 +34,21 @@ export function NewStoryModal({ isOpen, onClose, onCreate }: NewStoryModalProps)
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [status, setStatus] = useState<ContentStatus>("Draft");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
     setTitle("");
     setAuthor("");
     setStatus("Draft");
+    setError(null);
   }, [isOpen]);
 
   function handleSubmit() {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setError("Add a title.");
+      return;
+    }
     onCreate?.({
       title: title.trim(),
       author: author.trim(),
@@ -71,6 +77,7 @@ export function NewStoryModal({ isOpen, onClose, onCreate }: NewStoryModalProps)
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <TextInput label="Title" value={title} onChange={setTitle} />
         <TextInput label="Author" value={author} onChange={setAuthor} />
+        {error ? <Text size="sm" color="accent">{error}</Text> : null}
 
         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <span style={fieldLabelStyle}>Status</span>

@@ -4,17 +4,24 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { Text } from "@/components/patterns/primitives/Text";
+import { DUPLICATE_PERSON_EMAIL, saveErrorMessage } from "@/lib/saveErrorMessage";
+import { validateEmail } from "@/lib/validation";
+import { localIsoDate } from "@/components/patterns/client-templates-migrate/businesses/adapters";
 import type { MemberRow, MembershipType, NeighborRow, VolunteerRow } from "./types";
 
 export type PeopleView = "members" | "neighbors" | "volunteers";
+
+export type NewMemberInput = Omit<MemberRow, "id"> & { startDate: string };
+export type NewNeighborInput = Omit<NeighborRow, "id"> & { joinedOn: string | null };
 
 export type AddPersonModalProps = {
   isOpen: boolean;
   view: PeopleView;
   onClose: () => void;
-  onAddMember: (row: Omit<MemberRow, "id">) => void;
-  onAddNeighbor: (row: Omit<NeighborRow, "id">) => void;
-  onAddVolunteer: (row: Omit<VolunteerRow, "id">) => void;
+  onAddMember: (row: NewMemberInput) => void | Promise<void>;
+  onAddNeighbor: (row: NewNeighborInput) => void | Promise<void>;
+  onAddVolunteer: (row: Omit<VolunteerRow, "id">) => void | Promise<void>;
 };
 
 const MEMBERSHIP_TYPES: Exclude<MembershipType, "no-tier">[] = ["household", "individual", "senior", "student"];
@@ -68,6 +75,8 @@ export function AddPersonModal({
   const [interestArea, setInterestArea] = useState("");
   const [hasVolunteeredBefore, setHasVolunteeredBefore] = useState(false);
   const [date, setDate] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -78,35 +87,59 @@ export function AddPersonModal({
     setInterestArea("");
     setHasVolunteeredBefore(false);
     setDate("");
+    setError(null);
   }, [isOpen, view]);
 
-  function handleSubmit() {
-    if (!name.trim() || !email.trim()) return;
+  async function handleSubmit() {
+    if (!name.trim() || !email.trim()) {
+      setError("Enter a name and email.");
+      return;
+    }
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
     const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-    if (view === "members") {
-      onAddMember({
-        name: name.trim(),
-        email: email.trim(),
-        membershipType,
-        memberSince: date ? formatDate(date) : today,
-      });
-    } else if (view === "neighbors") {
-      onAddNeighbor({
-        name: name.trim(),
-        email: email.trim(),
-        address: address.trim(),
-        joinedDate: date ? formatDate(date) : today,
-      });
-    } else {
-      onAddVolunteer({
-        name: name.trim(),
-        email: email.trim(),
-        interestArea: interestArea.trim(),
-        hasVolunteeredBefore,
-      });
+    setBusy(true);
+    setError(null);
+    try {
+      if (view === "members") {
+        await onAddMember({
+          name: name.trim(),
+          email: email.trim(),
+          membershipType,
+          memberSince: date ? formatDate(date) : today,
+          startDate: date || localIsoDate(),
+        });
+      } else if (view === "neighbors") {
+        await onAddNeighbor({
+          name: name.trim(),
+          email: email.trim(),
+          address: address.trim(),
+          joinedDate: date ? formatDate(date) : today,
+          joinedOn: date || null,
+        });
+      } else {
+        await onAddVolunteer({
+          name: name.trim(),
+          email: email.trim(),
+          interestArea: interestArea.trim(),
+          hasVolunteeredBefore,
+        });
+      }
+      onClose();
+    } catch (e) {
+      setError(
+        saveErrorMessage(e, {
+          fallback: "Couldn't save. Please try again.",
+          duplicate: DUPLICATE_PERSON_EMAIL,
+        }),
+      );
+    } finally {
+      setBusy(false);
     }
-    onClose();
   }
 
   return (
@@ -117,7 +150,12 @@ export function AddPersonModal({
       footer={
         <>
           <Button label="Cancel" variant="secondary" onClick={onClose} />
-          <Button label={TITLE[view]} variant="primary" onClick={handleSubmit} />
+          <Button
+            label={busy ? "Saving…" : TITLE[view]}
+            variant="primary"
+            disabled={busy}
+            onClick={() => void handleSubmit()}
+          />
         </>
       }
     >
@@ -184,6 +222,8 @@ export function AddPersonModal({
             </label>
           </>
         ) : null}
+
+        {error ? <Text size="sm" color="accent">{error}</Text> : null}
       </div>
     </Modal>
   );

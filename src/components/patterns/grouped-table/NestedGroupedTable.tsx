@@ -78,20 +78,24 @@ export function NestedGroupedTable<T extends Record<string, unknown>>({
         )}
         <div style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
           {titleActions}
-          <IconButton
-            label="Filter"
-            variant="ghost"
-            size="sm"
-            icon={<ListFilter size={14} strokeWidth={2} />}
-            onClick={onFilterClick}
-          />
-          <IconButton
-            label="Add"
-            variant="ghost"
-            size="sm"
-            icon={<Plus size={14} strokeWidth={2} />}
-            onClick={onAddClick}
-          />
+          {onFilterClick ? (
+            <IconButton
+              label="Filter"
+              variant="ghost"
+              size="sm"
+              icon={<ListFilter size={14} strokeWidth={2} />}
+              onClick={onFilterClick}
+            />
+          ) : null}
+          {onAddClick ? (
+            <IconButton
+              label="Add"
+              variant="ghost"
+              size="sm"
+              icon={<Plus size={14} strokeWidth={2} />}
+              onClick={onAddClick}
+            />
+          ) : null}
         </div>
       </div>
 

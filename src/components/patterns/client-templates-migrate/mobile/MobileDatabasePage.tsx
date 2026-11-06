@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
-import { useBusinesses, usePeople, type BusinessWithDetails, type PersonWithMembership } from "hooks";
+import { useBusinesses, useDemoGuard, usePeople, type BusinessWithDetails, type PersonWithMembership } from "hooks";
 import { MobilePersonSheet, MobileBusinessSheet } from "./MobileDetailSheets";
 import { MobileQuickAddPerson } from "./MobileQuickActions";
 import {
@@ -60,18 +60,40 @@ export function MobileDatabasePage() {
   }, [search, membersOnly, tab]);
 
   const peopleEnabled = tab !== "businesses";
-  const { people, loading: peopleLoading, error: peopleError, refetch } = usePeople({
+  const { people: peopleRaw, loading: peopleLoading, error: peopleError, refetch } = usePeople({
     autoFetch: peopleEnabled,
     filters: peopleFilters,
   });
 
-  const { businesses, loading: bizLoading, error: bizError, refetch: refetchBusinesses } = useBusinesses({
+  const { businesses: businessesRaw, loading: bizLoading, error: bizError, refetch: refetchBusinesses } = useBusinesses({
     autoFetch: tab === "businesses",
     filters: {
       search: search.trim() || undefined,
       isMember: membersOnly ? true : undefined,
     },
   });
+
+  // Demo writes live in localStorage, so merge them in and apply the same filters as the live query.
+  const { enabled: demo, store } = useDemoGuard();
+  const query = search.trim().toLowerCase();
+  const people = useMemo(() => {
+    if (!demo) return peopleRaw;
+    return store.merge<PersonWithMembership>("people", peopleRaw).filter((p) => {
+      if (query && !p.full_name.toLowerCase().includes(query)) return false;
+      if (membersOnly && !p.membership_id) return false;
+      if (tab === "volunteers" && !p.roles?.some((role) => role.toLowerCase() === "volunteer")) return false;
+      return true;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- store.version signals a localStorage change
+  }, [demo, peopleRaw, store.version, query, membersOnly, tab]);
+  const businesses = useMemo(() => {
+    if (!demo) return businessesRaw;
+    return store.merge<BusinessWithDetails>("businesses", businessesRaw).filter((b) => {
+      if (query && !(b.business_name ?? "").toLowerCase().includes(query)) return false;
+      return !membersOnly || Boolean(b.is_member);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- store.version signals a localStorage change
+  }, [demo, businessesRaw, store.version, query, membersOnly]);
 
   useEffect(() => {
     if (!initialId) return;

@@ -132,6 +132,13 @@ function ContentDemoInner() {
   }
 
   function startCreate() {
+    if (view === "banners" && !demo) {
+      // Say so now, rather than after someone has filled in a form that can't save.
+      toast.message(
+        "Site banners are generated from upcoming events, Leaflet stories, and volunteer opportunities.",
+      );
+      return;
+    }
     setIsCreatingNew(true);
     if (view === "stories") setEditingStory(emptyStory(currentUser));
     else if (view === "faqs") setEditingFaq(emptyFaq());
@@ -139,6 +146,10 @@ function ContentDemoInner() {
   }
 
   async function handleSaveStory(updated: Story) {
+    if (!updated.title.trim()) {
+      toast.error("Add a title before saving.");
+      return;
+    }
     if (demo) {
       const id = updated.id || `story-${Date.now().toString(36)}`;
       store.upsert("stories", { ...updated, id });
@@ -157,15 +168,19 @@ function ContentDemoInner() {
       cover_image_url: updated.imageUrl ?? null,
       publish_date: status === "published" ? updated.publishDate || todayISODate() : updated.publishDate ?? null,
     };
-    if (!updated.id) {
-      await createStory(payload);
-    } else {
-      await updateStory(updated.id, payload);
+    const saved = updated.id ? await updateStory(updated.id, payload) : await createStory(payload);
+    if (!saved) {
+      toast.error("Couldn't save the story. Your draft is still here, so please try again.");
+      return;
     }
     closeDetail();
   }
 
   async function handleSaveFaq(updated: Faq) {
+    if (!updated.question.trim() || !updated.answer.trim()) {
+      toast.error("Add a question and an answer before saving.");
+      return;
+    }
     if (demo) {
       const id = updated.id || `faq-${Date.now().toString(36)}`;
       store.upsert("faqs", { ...updated, id });
@@ -173,20 +188,21 @@ function ContentDemoInner() {
       closeDetail();
       return;
     }
-    if (!updated.id) {
-      const created = await createFaq({ question: updated.question, answer: updated.answer });
-      if (created) {
-        await Promise.all(updated.pages.map((slug) => togglePage(created.id, slug, true)));
-      }
-    } else {
-      await updateFaq(updated.id, { question: updated.question, answer: updated.answer });
-      const before = editingFaq?.pages ?? [];
-      const added = updated.pages.filter((slug) => !before.includes(slug));
-      const removed = before.filter((slug) => !updated.pages.includes(slug));
-      await Promise.all([
-        ...added.map((slug) => togglePage(updated.id, slug, true)),
-        ...removed.map((slug) => togglePage(updated.id, slug, false)),
-      ]);
+    const fields = { question: updated.question, answer: updated.answer };
+    const saved = updated.id ? await updateFaq(updated.id, fields) : await createFaq(fields);
+    if (!saved) {
+      toast.error("Couldn't save the FAQ. Your draft is still here, so please try again.");
+      return;
+    }
+    const before = editingFaq?.pages ?? [];
+    const added = updated.pages.filter((slug) => !before.includes(slug));
+    const removed = before.filter((slug) => !updated.pages.includes(slug));
+    const pageResults = await Promise.all([
+      ...added.map((slug) => togglePage(saved.id, slug, true)),
+      ...removed.map((slug) => togglePage(saved.id, slug, false)),
+    ]);
+    if (pageResults.includes(false)) {
+      toast.warning("FAQ saved, but some of its pages didn't update. Open it to check them.");
     }
     closeDetail();
   }

@@ -139,7 +139,8 @@ export function useFaqs(options: UseFaqsOptions = {}): UseFaqsReturn {
   const create = async (data: FaqsInsert): Promise<Faqs | null> => {
     try {
       return await createMutation.mutateAsync(data);
-    } catch {
+    } catch (error) {
+      console.error("Save failed:", error);
       return null;
     }
   };
@@ -147,7 +148,8 @@ export function useFaqs(options: UseFaqsOptions = {}): UseFaqsReturn {
   const update = async (id: string, data: FaqsUpdate): Promise<Faqs | null> => {
     try {
       return await updateMutation.mutateAsync({ id, data });
-    } catch {
+    } catch (error) {
+      console.error("Save failed:", error);
       return null;
     }
   };

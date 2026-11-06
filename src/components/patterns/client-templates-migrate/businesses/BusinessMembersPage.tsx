@@ -72,10 +72,11 @@ function buildColumns(onSelect?: (row: BusinessMemberRow) => void): TableColumn<
 export type BusinessMembersPageProps = {
   data?: BusinessMemberRow[];
   onSelect?: (row: BusinessMemberRow) => void;
+  onAdd?: () => void;
 };
 
 /** Business memberships grouped by status — transactions-style chrome. */
-export function BusinessMembersPage({ data = [], onSelect }: BusinessMembersPageProps) {
+export function BusinessMembersPage({ data = [], onSelect, onAdd }: BusinessMembersPageProps) {
   const columns = useMemo(() => buildColumns(onSelect), [onSelect]);
 
   const activeMembers = useMemo(() => data.filter((row) => row.status === "Active"), [data]);
@@ -121,6 +122,7 @@ export function BusinessMembersPage({ data = [], onSelect }: BusinessMembersPage
         groupBy={(row) => row.status}
         groupOrder={GROUP_ORDER}
         getGroupMeta={(key) => ({ label: GROUP_LABEL[key as BusinessMembershipStatus] ?? key })}
+        onAddClick={onAdd}
       />
     </div>
   );

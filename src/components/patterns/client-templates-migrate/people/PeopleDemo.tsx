@@ -28,7 +28,8 @@ import { VolunteersTable } from "./VolunteersTable";
 import { MemberDetailPanel } from "./MemberDetailPanel";
 import { NeighborDetailPanel } from "./NeighborDetailPanel";
 import { VolunteerDetailPanel } from "./VolunteerDetailPanel";
-import { AddPersonModal } from "./AddPersonModal";
+import { AddPersonModal, type NewMemberInput, type NewNeighborInput } from "./AddPersonModal";
+import { createWithMembership } from "@/lib/memberships/createWithMembership";
 import { EditPersonModal } from "./EditPersonModal";
 import type { MemberRow, NeighborRow, VolunteerRow } from "./types";
 import type { PeopleUpdate, MembershipsUpdate } from "@/types/database";
@@ -81,7 +82,15 @@ function PeopleDemoInner() {
     () => ({ ...hookFiltersForView(view), search: search || undefined }),
     [view, search]
   );
-  const { people: peopleRaw, loading, error, create, update, refetch } = usePeople({ filters });
+  const {
+    people: peopleRaw,
+    loading,
+    error,
+    create,
+    update,
+    delete: deletePerson,
+    refetch,
+  } = usePeople({ filters });
   const { create: createMembership, update: updateMembership } = useMemberships();
   const { enabled: demo, overlay, store } = useDemoGuard();
 
@@ -263,11 +272,11 @@ function PeopleDemoInner() {
     setSelection(null);
   }
 
-  async function handleAddMember(row: Omit<MemberRow, "id">) {
+  async function handleAddMember(row: NewMemberInput) {
+    const start = row.startDate;
     if (demo) {
       const id = newDemoId("person");
       const membershipId = newDemoId("membership");
-      const start = new Date().toISOString().slice(0, 10);
       overlay.upsert("people", {
         id,
         full_name: row.name,
@@ -287,36 +296,43 @@ function PeopleDemoInner() {
       toast.success("Member added — demo mode, saved locally only");
       return;
     }
-    const membership = await createMembership({
-      tier: toMembershipTier(row.membershipType),
-      status: "Active",
-      start_date: new Date().toISOString().slice(0, 10),
-    });
-    await create({
-      full_name: row.name,
-      email: row.email,
-      membership_id: membership.id,
+    await createWithMembership({
+      createOwner: () => create({ full_name: row.name, email: row.email }),
+      createMembership: () =>
+        createMembership({
+          tier: toMembershipTier(row.membershipType),
+          status: "Active",
+          start_date: start,
+        }),
+      link: (personId, membershipId) => update(personId, { membership_id: membershipId }),
+      removeOwner: (personId) => deletePerson(personId),
     });
     await refetch();
   }
 
-  async function handleAddNeighbor(row: Omit<NeighborRow, "id">) {
+  async function handleAddNeighbor(row: NewNeighborInput) {
+    const createdAt = row.joinedOn ? new Date(`${row.joinedOn}T00:00:00`).toISOString() : null;
     if (demo) {
       overlay.upsert("people", {
         id: newDemoId("person"),
         full_name: row.name,
         email: row.email,
-        address: row.address,
+        address: row.address || null,
         membership_id: null,
         roles: [],
         tags: [],
-        created_at: new Date().toISOString(),
+        created_at: createdAt ?? new Date().toISOString(),
         membership: null,
       });
       toast.success("Neighbor added — demo mode, saved locally only");
       return;
     }
-    await create({ full_name: row.name, email: row.email, address: row.address });
+    await create({
+      full_name: row.name,
+      email: row.email,
+      address: row.address || null,
+      ...(createdAt ? { created_at: createdAt } : {}),
+    });
     await refetch();
   }
 

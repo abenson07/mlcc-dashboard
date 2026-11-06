@@ -181,6 +181,7 @@ export function BudgetPage({
           groupBy={(row) => row.status}
           groupOrder={groupOrder}
           getGroupMeta={(key) => ({ color: groupColors[key], label: key })}
+          onAddClick={onAddSponsor}
         />
       )}
     </ClassContentPage>
