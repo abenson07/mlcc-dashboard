@@ -76,10 +76,11 @@ function buildColumns(onSelect?: (row: SponsorRow) => void): TableColumn<Sponsor
 export type SponsorsPageProps = {
   data?: SponsorRow[];
   onSelect?: (row: SponsorRow) => void;
+  onAdd?: () => void;
 };
 
 /** Past sponsors grouped by sponsorship level — same layout as Members. */
-export function SponsorsPage({ data = [], onSelect }: SponsorsPageProps) {
+export function SponsorsPage({ data = [], onSelect, onAdd }: SponsorsPageProps) {
   const columns = useMemo(() => buildColumns(onSelect), [onSelect]);
 
   const totalSponsors = data.length;
@@ -122,6 +123,7 @@ export function SponsorsPage({ data = [], onSelect }: SponsorsPageProps) {
         groupBy={(row) => row.sponsorshipLevel}
         groupOrder={GROUP_ORDER}
         getGroupMeta={(key) => ({ label: GROUP_LABEL[key] })}
+        onAddClick={onAdd}
       />
     </div>
   );

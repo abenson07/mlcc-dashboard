@@ -8,6 +8,9 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { Checkbox } from "@/components/patterns/primitives/Checkbox";
 import { useBusinesses, useDemoGuard, usePeople } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
+import { newDemoId } from "@/lib/demo/demoStore";
+import { canCreateBusinessFromSearch } from "@/lib/sponsorship/addSponsor";
+import { validateEmail } from "@/lib/validation";
 import type { VolunteerAskWithSignups } from "hooks";
 import type { DemoVolunteerAsk } from "@/data/mocks/events";
 
@@ -268,6 +271,8 @@ export function AssignVolunteerModal({ isOpen, asks, onClose, onSubmit }: Assign
 export type AddSponsorModalProps = {
   isOpen: boolean;
   levels: Array<{ id: string; name: string; price?: string }>;
+  /** Past or completed event: sponsors can't be added, so say so before anything is written. */
+  readOnly?: boolean;
   onClose: () => void;
   onSubmit: (payload: {
     businessId: string | null;
@@ -279,11 +284,21 @@ export type AddSponsorModalProps = {
   }) => Promise<void>;
 };
 
-export function AddSponsorModal({ isOpen, levels, onClose, onSubmit }: AddSponsorModalProps) {
-  const { businesses } = useBusinesses({ autoFetch: isOpen });
+export function AddSponsorModal({
+  isOpen,
+  levels,
+  readOnly = false,
+  onClose,
+  onSubmit,
+}: AddSponsorModalProps) {
+  const { businesses, loading, create } = useBusinesses({ autoFetch: isOpen });
+  const { enabled: demo, overlay } = useDemoGuard();
   const [search, setSearch] = useState("");
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState("");
+  const [creatingBusiness, setCreatingBusiness] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [levelId, setLevelId] = useState("");
   const [alreadyPaid, setAlreadyPaid] = useState(false);
   const [inKind, setInKind] = useState(false);
@@ -304,12 +319,55 @@ export function AddSponsorModal({ isOpen, levels, onClose, onSubmit }: AddSponso
     setSearch("");
     setBusinessId(null);
     setBusinessName("");
-    setLevelId(levels[0]?.id ?? "");
+    setCreatingBusiness(false);
+    setContactName("");
+    setContactEmail("");
     setAlreadyPaid(false);
     setInKind(false);
     setDonationAmount("");
     setError(null);
+  }, [isOpen]);
+
+  // Separate from the reset above: `levels` can change identity while the form is
+  // open, and that shouldn't wipe what has been typed.
+  useEffect(() => {
+    if (!isOpen) return;
+    setLevelId((current) =>
+      levels.some((l) => l.id === current) ? current : (levels[0]?.id ?? ""),
+    );
   }, [isOpen, levels]);
+
+  const canOfferNewBusiness =
+    !loading &&
+    !businessId &&
+    canCreateBusinessFromSearch(
+      search,
+      (businesses ?? []).map((b) => b.business_name),
+    );
+
+  /** Creates the business once; the id stays in state so retrying the sponsorship can't duplicate it. */
+  async function createNewBusiness(name: string): Promise<string> {
+    const contact = {
+      contact_name: contactName.trim() || null,
+      email: contactEmail.trim() || null,
+    };
+    if (demo) {
+      const id = newDemoId("biz");
+      overlay.upsert("businesses", {
+        id,
+        business_name: name,
+        ...contact,
+        is_member: false,
+        is_past_sponsor: false,
+        sponsorships: [],
+        membership: null,
+      });
+      return id;
+    }
+    const business = await create({ business_name: name, ...contact });
+    if (!business) throw new Error("Couldn't create the business. Please try again.");
+    return business.id;
+  }
 
   const primaryLabel = inKind
     ? "Add donation"
@@ -329,15 +387,25 @@ export function AddSponsorModal({ isOpen, levels, onClose, onSubmit }: AddSponso
           <Button
             label={busy ? "Working…" : primaryLabel}
             variant="primary"
-            disabled={busy || !businessName.trim() || (!inKind && !levelId)}
+            disabled={busy || readOnly || !businessName.trim() || (!inKind && !levelId)}
             onClick={() => {
               void (async () => {
                 setBusy(true);
                 setError(null);
                 try {
+                  const name = businessName.trim();
+                  let id = businessId;
+                  if (creatingBusiness && !id) {
+                    const emailError = validateEmail(contactEmail);
+                    if (emailError) throw new Error(emailError);
+                    id = await createNewBusiness(name);
+                    setBusinessId(id);
+                    setSearch(name);
+                    setCreatingBusiness(false);
+                  }
                   await onSubmit({
-                    businessId,
-                    businessName: businessName.trim(),
+                    businessId: id,
+                    businessName: name,
                     levelId,
                     alreadyPaid,
                     inKind,
@@ -356,28 +424,75 @@ export function AddSponsorModal({ isOpen, levels, onClose, onSubmit }: AddSponso
       }
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <TextInput label="Search businesses" value={search} onChange={setSearch} />
-        {matches.map((b) => (
-          <button
-            key={b.id}
-            type="button"
-            onClick={() => {
-              setBusinessId(b.id);
-              setBusinessName(b.business_name ?? "");
-              setSearch(b.business_name ?? "");
-            }}
-            style={{
-              all: "unset",
-              cursor: "pointer",
-              padding: 8,
-              borderRadius: 6,
-              background:
-                businessId === b.id ? "var(--linear-color-sidebar-item-selected)" : "transparent",
-            }}
-          >
-            <Text>{b.business_name}</Text>
-          </button>
-        ))}
+        {readOnly ? (
+          <Text size="sm" color="accent">
+            This event has ended, so sponsors can no longer be added.
+          </Text>
+        ) : null}
+        {creatingBusiness ? (
+          <>
+            <TextInput label="Business name" value={businessName} onChange={setBusinessName} />
+            <TextInput label="Contact name" value={contactName} onChange={setContactName} />
+            <TextInput label="Contact email" value={contactEmail} onChange={setContactEmail} />
+            <button
+              type="button"
+              onClick={() => {
+                setCreatingBusiness(false);
+                setBusinessName("");
+                setContactName("");
+                setContactEmail("");
+              }}
+              style={{ all: "unset", cursor: "pointer", color: "var(--linear-color-accent)", fontSize: 13 }}
+            >
+              Choose an existing business instead
+            </button>
+          </>
+        ) : (
+          <>
+            <TextInput
+              label="Search businesses"
+              value={search}
+              onChange={(next) => {
+                setSearch(next);
+                setBusinessId(null);
+                setBusinessName("");
+              }}
+            />
+            {matches.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => {
+                  setBusinessId(b.id);
+                  setBusinessName(b.business_name ?? "");
+                  setSearch(b.business_name ?? "");
+                }}
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  padding: 8,
+                  borderRadius: 6,
+                  background:
+                    businessId === b.id ? "var(--linear-color-sidebar-item-selected)" : "transparent",
+                }}
+              >
+                <Text>{b.business_name}</Text>
+              </button>
+            ))}
+            {canOfferNewBusiness ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setCreatingBusiness(true);
+                  setBusinessName(search.trim());
+                }}
+                style={{ all: "unset", cursor: "pointer", color: "var(--linear-color-accent)", fontSize: 13 }}
+              >
+                Create “{search.trim()}” as a new business
+              </button>
+            ) : null}
+          </>
+        )}
         <Checkbox
           label="This is an in-kind donation."
           value={inKind}
@@ -403,6 +518,11 @@ export function AddSponsorModal({ isOpen, levels, onClose, onSubmit }: AddSponso
                 ))}
               </select>
             </label>
+            {levels.length === 0 ? (
+              <Text size="sm" color="secondary">
+                This event has no sponsorship levels yet. Set them up under Edit sponsorships first.
+              </Text>
+            ) : null}
             <Checkbox
               label="Already paid by cash or check"
               value={alreadyPaid}

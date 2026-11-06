@@ -194,6 +194,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
     sponsorshipTierSeeds,
     sponsorshipTiers,
     refetchAll,
+    readOnly,
   } = useEventContext();
   const initialView = searchParams.get("view");
   const [view, setView] = useState<EventDetailView>(
@@ -627,6 +628,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
       <AddSponsorModal
         isOpen={modal === "sponsor"}
         levels={levelsForModal}
+        readOnly={readOnly}
         onClose={() => setModal(null)}
         onSubmit={async (payload) => {
           await guard(

@@ -4,18 +4,28 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { Text } from "@/components/patterns/primitives/Text";
+import { Checkbox } from "@/components/patterns/primitives/Checkbox";
+import { parseSponsorAmount } from "@/lib/sponsorship/addSponsor";
+import { validateEmail } from "@/lib/validation";
 import type { BusinessMemberRow, BusinessRow, SponsorRow, SponsorshipLevel } from "./types";
 import { localIsoDate, BUSINESS_MEMBERSHIP_ANNUAL_DUES, BUSINESS_MEMBERSHIP_TIER } from "./adapters";
 
 export type BusinessesView = "members" | "sponsors" | "all";
 
+export type NewSponsorInput = Omit<SponsorRow, "id"> & {
+  contactName: string;
+  email: string;
+  alreadyPaid: boolean;
+};
+
 export type AddBusinessModalProps = {
   isOpen: boolean;
   view: BusinessesView;
   onClose: () => void;
-  onAddMember: (row: Omit<BusinessMemberRow, "id">) => void;
-  onAddSponsor: (row: Omit<SponsorRow, "id">) => void;
-  onAddBusiness: (row: Omit<BusinessRow, "id">) => void;
+  onAddMember: (row: Omit<BusinessMemberRow, "id">) => void | Promise<void>;
+  onAddSponsor: (row: NewSponsorInput) => void | Promise<void>;
+  onAddBusiness: (row: Omit<BusinessRow, "id">) => void | Promise<void>;
 };
 
 const LEVELS: SponsorshipLevel[] = ["platinum", "gold", "silver", "bronze"];
@@ -67,6 +77,10 @@ export function AddBusinessModal({
   const [category, setCategory] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [alreadyPaid, setAlreadyPaid] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -80,39 +94,60 @@ export function AddBusinessModal({
     setCategory("");
     setContactName("");
     setPhone("");
+    setEmail("");
+    setAlreadyPaid(false);
+    setError(null);
   }, [isOpen, view]);
 
-  function handleSubmit() {
-    if (!businessName.trim()) return;
+  async function handleSubmit() {
+    if (!businessName.trim()) {
+      setError("Enter a business name.");
+      return;
+    }
     const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-    if (view === "members") {
-      const renewal = renewalDate || localIsoDate();
-      onAddMember({
-        businessName: businessName.trim(),
-        tier: BUSINESS_MEMBERSHIP_TIER,
-        renewalDate: renewal,
-        status: "Active",
-        memberSince: renewal,
-        annualDues: Number(annualDues) || BUSINESS_MEMBERSHIP_ANNUAL_DUES,
-      });
-    } else if (view === "sponsors") {
-      onAddSponsor({
-        businessName: businessName.trim(),
-        sponsorshipLevel,
-        amount: Number(amount) || 0,
-        lastSponsoredYear: Number(lastSponsoredYear) || CURRENT_YEAR,
-        sponsorSince: sponsorSince ? formatDate(sponsorSince) : today,
-      });
-    } else {
-      onAddBusiness({
-        businessName: businessName.trim(),
-        category: category.trim(),
-        contactName: contactName.trim(),
-        phone: phone.trim(),
-      });
+    setBusy(true);
+    setError(null);
+    try {
+      if (view === "members") {
+        const renewal = renewalDate || localIsoDate();
+        await onAddMember({
+          businessName: businessName.trim(),
+          tier: BUSINESS_MEMBERSHIP_TIER,
+          renewalDate: renewal,
+          status: "Active",
+          memberSince: renewal,
+          annualDues: Number(annualDues) || BUSINESS_MEMBERSHIP_ANNUAL_DUES,
+        });
+      } else if (view === "sponsors") {
+        const parsedAmount = parseSponsorAmount(amount);
+        if (parsedAmount === null) throw new Error("Enter an amount greater than $0.");
+        const emailError = validateEmail(email);
+        if (emailError) throw new Error(emailError);
+        await onAddSponsor({
+          businessName: businessName.trim(),
+          sponsorshipLevel,
+          amount: parsedAmount,
+          lastSponsoredYear: Number(lastSponsoredYear) || CURRENT_YEAR,
+          sponsorSince: sponsorSince ? formatDate(sponsorSince) : today,
+          contactName: contactName.trim(),
+          email: email.trim(),
+          alreadyPaid,
+        });
+      } else {
+        await onAddBusiness({
+          businessName: businessName.trim(),
+          category: category.trim(),
+          contactName: contactName.trim(),
+          phone: phone.trim(),
+        });
+      }
+      onClose();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+    } finally {
+      setBusy(false);
     }
-    onClose();
   }
 
   return (
@@ -123,7 +158,12 @@ export function AddBusinessModal({
       footer={
         <>
           <Button label="Cancel" variant="secondary" onClick={onClose} />
-          <Button label={TITLE[view]} variant="primary" onClick={handleSubmit} />
+          <Button
+            label={busy ? "Saving…" : TITLE[view]}
+            variant="primary"
+            disabled={busy}
+            onClick={() => void handleSubmit()}
+          />
         </>
       }
     >
@@ -178,6 +218,9 @@ export function AddBusinessModal({
                 style={selectStyle}
               />
             </label>
+            <TextInput label="Contact name" value={contactName} onChange={setContactName} />
+            <TextInput label="Contact email" value={email} onChange={setEmail} />
+            <Checkbox label="Already paid" value={alreadyPaid} onChange={setAlreadyPaid} />
           </>
         ) : null}
 
@@ -188,6 +231,8 @@ export function AddBusinessModal({
             <TextInput label="Phone" value={phone} onChange={setPhone} />
           </>
         ) : null}
+
+        {error ? <Text size="sm" color="accent">{error}</Text> : null}
       </div>
     </Modal>
   );

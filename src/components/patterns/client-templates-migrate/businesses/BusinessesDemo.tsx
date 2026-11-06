@@ -24,8 +24,9 @@ import { AllBusinessesTable } from "./AllBusinessesTable";
 import { BusinessMemberDetailPanel } from "./BusinessMemberDetailPanel";
 import { BusinessSponsorDetailPanel } from "./BusinessSponsorDetailPanel";
 import { BusinessDetailPanel } from "./BusinessDetailPanel";
-import { AddBusinessModal } from "./AddBusinessModal";
+import { AddBusinessModal, type NewSponsorInput } from "./AddBusinessModal";
 import { EditBusinessModal } from "./EditBusinessModal";
+import { sponsorshipPaymentFields } from "@/lib/sponsorship/addSponsor";
 import type { BusinessMemberRow, BusinessRow, SponsorRow } from "./types";
 import {
   BUSINESS_MEMBERSHIP_ANNUAL_DUES,
@@ -101,7 +102,15 @@ function BusinessesDemoInner() {
     () => ({ ...hookFiltersForView(view), search: search || undefined }),
     [view, search]
   );
-  const { businesses: businessesRaw, loading, error, create, update, refetch } = useBusinesses({ filters });
+  const {
+    businesses: businessesRaw,
+    loading,
+    error,
+    create,
+    update,
+    delete: deleteBusiness,
+    refetch,
+  } = useBusinesses({ filters });
   const { create: createMembership, update: updateMembership } = useBusinessMemberships();
   const { enabled: demo, overlay, store } = useDemoGuard();
 
@@ -225,12 +234,13 @@ function BusinessesDemoInner() {
       toast.success("Business added — demo mode, saved locally only");
       return;
     }
-    await create({
+    const business = await create({
       business_name: row.businessName,
       contact_name: row.contactName,
       phone: row.phone,
       category: row.category || null,
     });
+    if (!business) throw new Error("Couldn't create the business. Please try again.");
     await refetch();
   }
 
@@ -278,13 +288,19 @@ function BusinessesDemoInner() {
     }
   }
 
-  async function handleAddSponsor(row: Omit<SponsorRow, "id">) {
+  async function handleAddSponsor(row: NewSponsorInput) {
+    const contact = {
+      contact_name: row.contactName || null,
+      email: row.email || null,
+    };
+    const payment = sponsorshipPaymentFields(row.alreadyPaid, localIsoDate());
+
     if (demo) {
       const id = newDemoId("biz");
-      const paid = new Date().toISOString().slice(0, 10);
       overlay.upsert("businesses", {
         id,
         business_name: row.businessName,
+        ...contact,
         is_member: false,
         is_past_sponsor: true,
         sponsorships: [
@@ -292,8 +308,7 @@ function BusinessesDemoInner() {
             id: newDemoId("spon"),
             business_id: id,
             amount: row.amount,
-            status: "paid",
-            paid_date: paid,
+            ...payment,
           },
         ],
         membership: null,
@@ -301,15 +316,22 @@ function BusinessesDemoInner() {
       toast.success("Sponsor added — demo mode, saved locally only");
       return;
     }
-    const business = await create({ business_name: row.businessName });
-    if (business && supabaseClient) {
-      await supabaseClient.from("sponsorships").insert({
-        business_id: business.id,
-        amount: row.amount,
-        status: "paid",
-        paid_date: new Date().toISOString().slice(0, 10),
-      });
-      await update(business.id, { is_past_sponsor: true });
+    if (!supabaseClient) throw new Error("Supabase client is not initialized");
+    const business = await create({
+      business_name: row.businessName,
+      ...contact,
+      is_past_sponsor: true,
+    });
+    if (!business) throw new Error("Couldn't create the business. Please try again.");
+    const { error: insertError } = await supabaseClient.from("sponsorships").insert({
+      business_id: business.id,
+      amount: row.amount,
+      ...payment,
+    });
+    if (insertError) {
+      // Remove the row just created so retrying the still-open form can't duplicate it.
+      await deleteBusiness(business.id);
+      throw new Error(`Couldn't save the sponsorship: ${insertError.message}`);
     }
     await refetch();
   }
@@ -320,11 +342,16 @@ function BusinessesDemoInner() {
     view === "all" ? (
       <AllBusinessesTable data={allBusinesses} onSelect={(row) => setSelection({ kind: "business", row })} />
     ) : view === "sponsors" ? (
-      <SponsorsPage data={sponsors} onSelect={(row) => setSelection({ kind: "sponsor", row })} />
+      <SponsorsPage
+        data={sponsors}
+        onSelect={(row) => setSelection({ kind: "sponsor", row })}
+        onAdd={() => setIsAddOpen(true)}
+      />
     ) : (
       <BusinessMembersPage
         data={businessMembers}
         onSelect={(row) => setSelection({ kind: "businessMember", row })}
+        onAdd={() => setIsAddOpen(true)}
       />
     );
 
