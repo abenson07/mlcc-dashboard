@@ -27,6 +27,7 @@ import { BusinessDetailPanel } from "./BusinessDetailPanel";
 import { AddBusinessModal, type NewSponsorInput } from "./AddBusinessModal";
 import { EditBusinessModal } from "./EditBusinessModal";
 import { sponsorshipPaymentFields } from "@/lib/sponsorship/addSponsor";
+import { createWithMembership } from "@/lib/memberships/createWithMembership";
 import type { BusinessMemberRow, BusinessRow, SponsorRow } from "./types";
 import {
   BUSINESS_MEMBERSHIP_ANNUAL_DUES,
@@ -223,8 +224,8 @@ function BusinessesDemoInner() {
       overlay.upsert("businesses", {
         id: newDemoId("biz"),
         business_name: row.businessName,
-        contact_name: row.contactName,
-        phone: row.phone,
+        contact_name: row.contactName || null,
+        phone: row.phone || null,
         category: row.category || null,
         is_member: false,
         is_past_sponsor: false,
@@ -236,8 +237,8 @@ function BusinessesDemoInner() {
     }
     const business = await create({
       business_name: row.businessName,
-      contact_name: row.contactName,
-      phone: row.phone,
+      contact_name: row.contactName || null,
+      phone: row.phone || null,
       category: row.category || null,
     });
     if (!business) throw new Error("Couldn't create the business. Please try again.");
@@ -271,21 +272,26 @@ function BusinessesDemoInner() {
       toast.success("Member added — demo mode, saved locally only");
       return;
     }
-    try {
-      const business = await create({ business_name: row.businessName });
-      if (!business) throw new Error("Could not create business.");
-      const membership = await createMembership({
-        status: "Active",
-        last_renewal: renewal,
-        tier: BUSINESS_MEMBERSHIP_TIER,
-        annual_dues: annualDues,
-      });
-      const linked = await update(business.id, { membership_id: membership.id, is_member: true });
-      if (!linked) throw new Error("Membership was created but could not be linked to the business.");
-      await refetch();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to add member");
-    }
+    await createWithMembership({
+      createOwner: async () => {
+        const business = await create({ business_name: row.businessName });
+        if (!business) throw new Error("Couldn't create the business. Please try again.");
+        return business;
+      },
+      createMembership: () =>
+        createMembership({
+          status: "Active",
+          last_renewal: renewal,
+          tier: BUSINESS_MEMBERSHIP_TIER,
+          annual_dues: annualDues,
+        }),
+      link: async (businessId, membershipId) => {
+        const linked = await update(businessId, { membership_id: membershipId, is_member: true });
+        if (!linked) throw new Error("Couldn't link the membership to the business. Please try again.");
+      },
+      removeOwner: (businessId) => deleteBusiness(businessId),
+    });
+    await refetch();
   }
 
   async function handleAddSponsor(row: NewSponsorInput) {

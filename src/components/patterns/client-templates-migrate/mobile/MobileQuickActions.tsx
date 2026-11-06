@@ -2,12 +2,18 @@
 
 import { useState } from "react";
 import type { PersonWithMembership, BusinessWithDetails } from "hooks";
-import { useBusinesses, useBusinessMemberships, useMemberships, usePeople } from "hooks";
+import { useBusinesses, useBusinessMemberships, useDemoGuard, useMemberships, usePeople } from "hooks";
+import { toast } from "sonner";
+import { newDemoId } from "@/lib/demo/demoStore";
+import { createWithMembership } from "@/lib/memberships/createWithMembership";
+import { DUPLICATE_PERSON_EMAIL, saveErrorMessage } from "@/lib/saveErrorMessage";
+import { validateEmail } from "@/lib/validation";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { toMembershipTier } from "@/lib/memberships/status";
 import {
   BUSINESS_MEMBERSHIP_ANNUAL_DUES,
   BUSINESS_MEMBERSHIP_TIER,
+  localIsoDate,
 } from "@/components/patterns/client-templates-migrate/businesses/adapters";
 import { MobileBottomSheet } from "./MobileBottomSheet";
 import {
@@ -24,8 +30,9 @@ export type MobileQuickAddPersonProps = {
 };
 
 export function MobileQuickAddPerson({ open, onClose, onCreated }: MobileQuickAddPersonProps) {
-  const { create } = usePeople({ autoFetch: false });
+  const { create, update, delete: deletePerson } = usePeople({ autoFetch: false });
   const { create: createMembership } = useMemberships();
+  const { enabled: demo, overlay } = useDemoGuard();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -49,32 +56,58 @@ export function MobileQuickAddPerson({ open, onClose, onCreated }: MobileQuickAd
       setError("Name is required.");
       return;
     }
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+    const personFields = {
+      full_name: fullName,
+      email: email.trim() || null,
+      phone: phone.trim() || null,
+    };
+    const membershipFields = {
+      tier: toMembershipTier(tier),
+      status: "Active" as const,
+      start_date: localIsoDate(),
+      payment_method: "cash",
+      customer_email: email.trim() || null,
+    };
     setBusy(true);
     setError(null);
     try {
-      let membershipId: string | null = null;
-      if (makeMember) {
-        const membership = await createMembership({
-          tier: toMembershipTier(tier),
-          status: "Active",
-          start_date: new Date().toISOString().slice(0, 10),
-          payment_method: "cash",
-          customer_email: email.trim() || null,
+      let personId: string;
+      if (demo) {
+        personId = newDemoId("person");
+        const membershipId = makeMember ? newDemoId("membership") : null;
+        overlay.upsert("people", {
+          id: personId,
+          ...personFields,
+          membership_id: membershipId,
+          roles: [],
+          tags: [],
+          created_at: new Date().toISOString(),
+          membership: membershipId ? { id: membershipId, ...membershipFields } : null,
         });
-        membershipId = membership.id;
+        toast.success("Person added — demo mode, saved locally only");
+      } else if (makeMember) {
+        const person = await createWithMembership({
+          createOwner: () => create(personFields),
+          createMembership: () => createMembership(membershipFields),
+          link: (id, membershipId) => update(id, { membership_id: membershipId }),
+          removeOwner: (id) => deletePerson(id),
+        });
+        personId = person.id;
+      } else {
+        personId = (await create(personFields)).id;
       }
-      const person = await create({
-        full_name: fullName,
-        email: email.trim() || null,
-        phone: phone.trim() || null,
-        membership_id: membershipId,
-      });
-      if (!person) throw new Error("Could not create person.");
       reset();
       onClose();
-      onCreated?.(person.id);
+      onCreated?.(personId);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not add person.");
+      setError(
+        saveErrorMessage(e, { fallback: "Could not add person.", duplicate: DUPLICATE_PERSON_EMAIL }),
+      );
     } finally {
       setBusy(false);
     }
@@ -157,27 +190,40 @@ export function MobileLogCashMembership({
 }: MobileLogCashMembershipProps) {
   const { update } = usePeople({ autoFetch: false });
   const { create: createMembership } = useMemberships();
+  const { enabled: demo, overlay } = useDemoGuard();
   const [tier, setTier] = useState("individual");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
     if (!person) return;
+    const fields = {
+      tier: toMembershipTier(tier),
+      status: "Active" as const,
+      start_date: localIsoDate(),
+      payment_method: "cash",
+      customer_email: person.email,
+    };
     setBusy(true);
     setError(null);
     try {
-      const membership = await createMembership({
-        tier: toMembershipTier(tier),
-        status: "Active",
-        start_date: new Date().toISOString().slice(0, 10),
-        payment_method: "cash",
-        customer_email: person.email,
-      });
+      if (demo) {
+        const membershipId = newDemoId("membership");
+        overlay.patch("people", person.id, {
+          membership_id: membershipId,
+          membership: { id: membershipId, ...fields },
+        });
+        toast.success("Membership logged — demo mode, saved locally only");
+        onClose();
+        onDone?.();
+        return;
+      }
+      const membership = await createMembership(fields);
       await update(person.id, { membership_id: membership.id });
       onClose();
       onDone?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not log membership.");
+      setError(saveErrorMessage(e, { fallback: "Could not log membership." }));
     } finally {
       setBusy(false);
     }
@@ -269,6 +315,7 @@ export function MobileStartBusinessMembership({
 }: MobileStartBusinessMembershipProps) {
   const { update } = useBusinesses({ autoFetch: false });
   const { create: createMembership } = useBusinessMemberships();
+  const { enabled: demo, overlay } = useDemoGuard();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -277,20 +324,31 @@ export function MobileStartBusinessMembership({
     setBusy(true);
     setError(null);
     try {
-      const today = new Date();
-      const lastRenewal = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-      const membership = await createMembership({
-        status: "Active",
-        last_renewal: lastRenewal,
+      const fields = {
+        status: "Active" as const,
+        last_renewal: localIsoDate(),
         tier: BUSINESS_MEMBERSHIP_TIER,
         annual_dues: BUSINESS_MEMBERSHIP_ANNUAL_DUES,
-      });
+      };
+      if (demo) {
+        const membershipId = newDemoId("biz-mem");
+        overlay.patch("businesses", business.id, {
+          is_member: true,
+          membership_id: membershipId,
+          membership: { id: membershipId, ...fields },
+        });
+        toast.success("Membership started — demo mode, saved locally only");
+        onClose();
+        onDone?.();
+        return;
+      }
+      const membership = await createMembership(fields);
       const linked = await update(business.id, { membership_id: membership.id, is_member: true });
       if (!linked) throw new Error("Membership was created but could not be linked to the business.");
       onClose();
       onDone?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start membership.");
+      setError(saveErrorMessage(e, { fallback: "Could not start membership." }));
     } finally {
       setBusy(false);
     }

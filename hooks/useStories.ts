@@ -103,7 +103,8 @@ export function useStories(options: UseStoriesOptions = {}): UseStoriesReturn {
   const create = async (data: StoriesInsert): Promise<Stories | null> => {
     try {
       return await createMutation.mutateAsync(data);
-    } catch {
+    } catch (error) {
+      console.error("Save failed:", error);
       return null;
     }
   };
@@ -111,7 +112,8 @@ export function useStories(options: UseStoriesOptions = {}): UseStoriesReturn {
   const update = async (id: string, data: StoriesUpdate): Promise<Stories | null> => {
     try {
       return await updateMutation.mutateAsync({ id, data });
-    } catch {
+    } catch (error) {
+      console.error("Save failed:", error);
       return null;
     }
   };
