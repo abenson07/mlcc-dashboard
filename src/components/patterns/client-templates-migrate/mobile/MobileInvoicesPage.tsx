@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { STRIPE_INVOICES_QUERY_KEY, useEvents, useStripeInvoices, useDemoGuard } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
+import { parseDollarAmount } from "@/lib/sponsorship/addSponsor";
+import { validateEmail } from "@/lib/validation";
 import {
   formatDueDate,
   formatUsd,
@@ -310,6 +312,9 @@ function MobileCreateInvoice({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // A ref, not state: `disabled` only applies after a re-render, and this sends a real invoice.
+  const sending = useRef(false);
+
   function reset() {
     setEmail("");
     setName("");
@@ -321,19 +326,27 @@ function MobileCreateInvoice({
   }
 
   async function submit() {
-    const cents = Math.round(parseFloat(amount) * 100);
+    if (sending.current) return;
     if (!email.trim()) {
       setError("Email is required.");
       return;
     }
-    if (!Number.isFinite(cents) || cents <= 0) {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+    const dollars = parseDollarAmount(amount);
+    if (dollars === null) {
       setError("Enter a valid amount.");
       return;
     }
+    const cents = Math.round(dollars * 100);
     if (!eventId) {
       setError("Select an event (required for Stripe invoices).");
       return;
     }
+    sending.current = true;
     setBusy(true);
     setError(null);
     if (demo) {
@@ -349,6 +362,7 @@ function MobileCreateInvoice({
       } catch (e) {
         setError(e instanceof Error ? e.message : "Could not send demo invoice email.");
       } finally {
+        sending.current = false;
         setBusy(false);
       }
       return;
@@ -378,6 +392,7 @@ function MobileCreateInvoice({
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not create invoice.");
     } finally {
+      sending.current = false;
       setBusy(false);
     }
   }

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ListFilter, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { pixel, proportional, type TableColumn } from "@/components/patterns/primitives/table";
 import { NestedGroupedTable } from "@/components/patterns/grouped-table/NestedGroupedTable";
 import { EmptyStateCard, RowClickCell } from "@/components/patterns/client-templates/shared";
@@ -306,12 +306,6 @@ export function CommitteeEventsPage({
             {opts.title}
           </h2>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
-            <IconButton
-              label="Filter"
-              variant="ghost"
-              size="sm"
-              icon={<ListFilter size={14} strokeWidth={2} />}
-            />
             <IconButton
               label="Add"
               variant="ghost"

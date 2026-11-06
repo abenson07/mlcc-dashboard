@@ -6,6 +6,7 @@ import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Text } from "@/components/patterns/primitives/Text";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { saveErrorMessage } from "@/lib/saveErrorMessage";
 
 const MAX_RESULTS = 8;
 
@@ -26,6 +27,7 @@ export function AddRouteModal({
 }: AddRouteModalProps) {
   const [search, setSearch] = useState("");
   const [selecting, setSelecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const candidates = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -37,10 +39,13 @@ export function AddRouteModal({
 
   async function handleSelect(delivery: DeliveryWithRelations) {
     setSelecting(true);
+    setError(null);
     try {
       await onSelect(delivery);
       setSearch("");
       onClose();
+    } catch (e) {
+      setError(saveErrorMessage(e, { fallback: "Couldn't add the route. Please try again." }));
     } finally {
       setSelecting(false);
     }
@@ -100,6 +105,7 @@ export function AddRouteModal({
             ))}
           </div>
         )}
+        {error ? <Text size="sm" color="accent">{error}</Text> : null}
       </div>
     </Modal>
   );

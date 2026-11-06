@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 import { useEvents } from "hooks";
+import { useDemoModeOptional } from "@/components/patterns/foundation/DemoModeContext";
+import { newDemoId, upsertDemoEntity } from "@/lib/demo/demoStore";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
 import { LinearSidebar } from "@/components/patterns/foundation/LinearSidebar";
@@ -21,6 +24,7 @@ export function EventsDemo() {
   const router = useRouter();
   const isMobile = useIsMobileAdmin();
   const { create } = useEvents();
+  const { enabled: demo } = useDemoModeOptional();
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   if (isMobile) {
@@ -32,6 +36,20 @@ export function EventsDemo() {
   }
 
   async function handleCreateEvent(event: Omit<EventSummary, "id">) {
+    if (demo) {
+      const id = newDemoId("evt");
+      upsertDemoEntity("events", {
+        id,
+        title: event.title,
+        date: event.date,
+        location: event.location,
+        committee: event.committee,
+        description: event.description,
+      });
+      toast.success("Event created — demo mode, saved locally only");
+      router.push(`/admin/events/${id}`);
+      return;
+    }
     const startsAt = event.date ? new Date(`${event.date}T00:00:00`).toISOString() : new Date().toISOString();
     const created = await create({
       name: event.title,
