@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { Download, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { saveErrorMessage } from "@/lib/saveErrorMessage";
 import {
   useAllSponsorships,
   useCommSettings,
@@ -530,7 +531,9 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         await createLeafletTaskMutation({ title, offset_days: offset, description: null });
       },
       { action: "Task added" },
-    );
+    ).catch((e: unknown) => {
+      toast.error(saveErrorMessage(e, { fallback: "Couldn't add the task. Please try again." }));
+    });
   }
 
   function removeTask(id: string) {

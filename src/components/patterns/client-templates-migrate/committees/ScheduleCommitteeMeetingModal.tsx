@@ -104,6 +104,7 @@ export function ScheduleCommitteeMeetingModal({
           <Button
             label={submitting ? "Scheduling…" : "Schedule"}
             variant="primary"
+            disabled={submitting}
             onClick={() => {
               void handleSubmit();
             }}

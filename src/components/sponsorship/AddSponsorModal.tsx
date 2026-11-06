@@ -10,6 +10,11 @@ import { useBusinesses } from "hooks";
 import type { SponsorshipTierSeed } from "@/lib/sponsorship/tierPlaceholders";
 import { defaultSponsorshipTierSeeds } from "@/lib/sponsorship/tierPlaceholders";
 import type { SponsorshipsInsert } from "@/types/database";
+import { canCreateBusinessFromSearch, parseDollarAmount } from "@/lib/sponsorship/addSponsor";
+import { saveErrorMessage } from "@/lib/saveErrorMessage";
+import { validateEmail } from "@/lib/validation";
+import { localIsoDate } from "@/components/patterns/client-templates-migrate/businesses/adapters";
+import { useCreateSponsorBusiness } from "./useCreateSponsorBusiness";
 
 type AddSponsorModalProps = {
   isOpen: boolean;
@@ -26,7 +31,16 @@ export default function AddSponsorModal({
   onSubmit,
   tierOptions,
 }: AddSponsorModalProps) {
-  const tiers = tierOptions?.length ? tierOptions : defaultSponsorshipTierSeeds();
+  // Memoized: a new array each render re-ran the reset below and wiped the chosen level and amount.
+  const tiers = useMemo(
+    () => (tierOptions?.length ? tierOptions : defaultSponsorshipTierSeeds()),
+    [tierOptions],
+  );
+  const createSponsorBusiness = useCreateSponsorBusiness();
+  const [creatingBusiness, setCreatingBusiness] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [search, setSearch] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [businessId, setBusinessId] = useState("");
@@ -83,6 +97,10 @@ export default function AddSponsorModal({
   const reset = () => {
     setSearch("");
     setBusinessId("");
+    setCreatingBusiness(false);
+    setNewName("");
+    setContactName("");
+    setContactEmail("");
     setTier(tiers[0]?.name ?? "Gold");
     setAmount(String(tiers[0]?.amount ?? 1000));
     setStatus("pledged");
@@ -103,31 +121,45 @@ export default function AddSponsorModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessId) {
-      setError("Select a business.");
+    if (!businessId && !(creatingBusiness && newName.trim())) {
+      setError(creatingBusiness ? "Enter a business name." : "Select a business.");
       return;
     }
-    const parsedAmount = Number(amount);
-    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+    const parsedAmount = parseDollarAmount(amount);
+    if (parsedAmount === null) {
       setError("Enter a valid amount.");
+      return;
+    }
+    const emailError = creatingBusiness ? validateEmail(contactEmail) : null;
+    if (emailError) {
+      setError(emailError);
       return;
     }
 
     setSubmitting(true);
     setError(null);
     try {
+      let id = businessId;
+      if (!id) {
+        // The id stays in state so retrying the sponsorship can't duplicate the business.
+        id = await createSponsorBusiness(newName.trim(), { contactName, email: contactEmail });
+        setBusinessId(id);
+        setSearch(newName.trim());
+        setCreatingBusiness(false);
+      }
       await onSubmit({
-        business_id: businessId,
+        business_id: id,
         description: tier,
         amount: parsedAmount,
         status,
+        paid_date: status === "paid" ? localIsoDate() : null,
         memo: memo.trim() || null,
         quantity: 1,
       });
       reset();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add sponsor.");
+      setError(saveErrorMessage(err, { fallback: "Failed to add sponsor." }));
     } finally {
       setSubmitting(false);
     }
@@ -151,8 +183,18 @@ export default function AddSponsorModal({
             <input
               type="text"
               autoComplete="off"
-              value={businessId ? (selectedBusiness?.business_name ?? "") : search}
+              value={
+                creatingBusiness
+                  ? newName
+                  : businessId
+                    ? (selectedBusiness?.business_name ?? search)
+                    : search
+              }
               onChange={(e) => {
+                if (creatingBusiness) {
+                  setNewName(e.target.value);
+                  return;
+                }
                 setSearch(e.target.value);
                 setBusinessId("");
                 setShowDropdown(true);
@@ -161,15 +203,11 @@ export default function AddSponsorModal({
               placeholder="Search businesses…"
               className={`mt-2 ${inputRing}`}
             />
-            {showDropdown && canSearch && (
+            {showDropdown && canSearch && !creatingBusiness && (
               <ul className="absolute top-full z-50 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-900">
                 {loading ? (
                   <li className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                     Searching…
-                  </li>
-                ) : businesses.length === 0 ? (
-                  <li className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-                    No matching businesses.
                   </li>
                 ) : (
                   businesses.map((b) => (
@@ -196,9 +234,54 @@ export default function AddSponsorModal({
                     </li>
                   ))
                 )}
+                {!loading &&
+                canCreateBusinessFromSearch(
+                  search,
+                  businesses.map((b) => b.business_name),
+                ) ? (
+                  <li role="presentation">
+                    <button
+                      type="button"
+                      className="w-full px-3 py-2 text-left text-sm font-medium text-blue-600 hover:bg-gray-50 dark:text-blue-400 dark:hover:bg-gray-800"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setCreatingBusiness(true);
+                        setNewName(search.trim());
+                        setShowDropdown(false);
+                      }}
+                    >
+                      Create &ldquo;{search.trim()}&rdquo; as a new business
+                    </button>
+                  </li>
+                ) : null}
               </ul>
             )}
           </div>
+
+          {creatingBusiness ? (
+            <>
+              <div>
+                <Label>Contact name (optional)</Label>
+                <Input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+              </div>
+              <div>
+                <Label>Contact email (optional)</Label>
+                <Input type="text" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+              </div>
+              <button
+                type="button"
+                className="self-start text-sm text-blue-600 dark:text-blue-400"
+                onClick={() => {
+                  setCreatingBusiness(false);
+                  setNewName("");
+                  setContactName("");
+                  setContactEmail("");
+                }}
+              >
+                Choose an existing business instead
+              </button>
+            </>
+          ) : null}
 
           <div>
             <Label>Sponsorship level</Label>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
@@ -8,9 +8,10 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { Checkbox } from "@/components/patterns/primitives/Checkbox";
 import { useBusinesses, useDemoGuard, usePeople } from "hooks";
 import { getApiBase } from "@/lib/apiBase";
-import { newDemoId } from "@/lib/demo/demoStore";
-import { canCreateBusinessFromSearch } from "@/lib/sponsorship/addSponsor";
+import { canCreateBusinessFromSearch, parseDollarAmount } from "@/lib/sponsorship/addSponsor";
+import { saveErrorMessage } from "@/lib/saveErrorMessage";
 import { validateEmail } from "@/lib/validation";
+import { useCreateSponsorBusiness } from "@/components/sponsorship/useCreateSponsorBusiness";
 import type { VolunteerAskWithSignups } from "hooks";
 import type { DemoVolunteerAsk } from "@/data/mocks/events";
 
@@ -86,7 +87,7 @@ export function AddEventTaskModal({
                   });
                   onClose();
                 } catch (e) {
-                  setError(e instanceof Error ? e.message : "Failed");
+                  setError(saveErrorMessage(e, { fallback: "Couldn't save. Please try again." }));
                 } finally {
                   setBusy(false);
                 }
@@ -168,6 +169,11 @@ export function AssignVolunteerModal({ isOpen, asks, onClose, onSubmit }: Assign
             disabled={busy || (!selectedId && !(createPerson && name.trim() && email.trim()))}
             onClick={() => {
               void (async () => {
+                const emailError = validateEmail(email);
+                if (emailError) {
+                  setError(emailError);
+                  return;
+                }
                 setBusy(true);
                 setError(null);
                 try {
@@ -180,7 +186,7 @@ export function AssignVolunteerModal({ isOpen, asks, onClose, onSubmit }: Assign
                   });
                   onClose();
                 } catch (e) {
-                  setError(e instanceof Error ? e.message : "Failed");
+                  setError(saveErrorMessage(e, { fallback: "Couldn't save. Please try again." }));
                 } finally {
                   setBusy(false);
                 }
@@ -291,8 +297,8 @@ export function AddSponsorModal({
   onClose,
   onSubmit,
 }: AddSponsorModalProps) {
-  const { businesses, loading, create } = useBusinesses({ autoFetch: isOpen });
-  const { enabled: demo, overlay } = useDemoGuard();
+  const { businesses, loading } = useBusinesses({ autoFetch: isOpen });
+  const createSponsorBusiness = useCreateSponsorBusiness();
   const [search, setSearch] = useState("");
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState("");
@@ -345,35 +351,8 @@ export function AddSponsorModal({
       (businesses ?? []).map((b) => b.business_name),
     );
 
-  /** Creates the business once; the id stays in state so retrying the sponsorship can't duplicate it. */
-  async function createNewBusiness(name: string): Promise<string> {
-    const contact = {
-      contact_name: contactName.trim() || null,
-      email: contactEmail.trim() || null,
-    };
-    if (demo) {
-      const id = newDemoId("biz");
-      overlay.upsert("businesses", {
-        id,
-        business_name: name,
-        ...contact,
-        is_member: false,
-        is_past_sponsor: false,
-        sponsorships: [],
-        membership: null,
-      });
-      return id;
-    }
-    const business = await create({ business_name: name, ...contact });
-    if (!business) throw new Error("Couldn't create the business. Please try again.");
-    return business.id;
-  }
-
-  const primaryLabel = inKind
-    ? "Add donation"
-    : alreadyPaid
-      ? "Add sponsor"
-      : "Send invoice";
+  // Adding a sponsor only records it. Invoices are sent separately from Invoices.
+  const primaryLabel = inKind ? "Add donation" : "Add sponsor";
 
   return (
     <Modal
@@ -393,12 +372,16 @@ export function AddSponsorModal({
                 setBusy(true);
                 setError(null);
                 try {
+                  if (inKind && parseDollarAmount(donationAmount) === null) {
+                    throw new Error("Enter a donation amount greater than $0.");
+                  }
                   const name = businessName.trim();
                   let id = businessId;
                   if (creatingBusiness && !id) {
                     const emailError = validateEmail(contactEmail);
                     if (emailError) throw new Error(emailError);
-                    id = await createNewBusiness(name);
+                    // The id stays in state so retrying the sponsorship can't duplicate the business.
+                    id = await createSponsorBusiness(name, { contactName, email: contactEmail });
                     setBusinessId(id);
                     setSearch(name);
                     setCreatingBusiness(false);
@@ -413,7 +396,7 @@ export function AddSponsorModal({
                   });
                   onClose();
                 } catch (e) {
-                  setError(e instanceof Error ? e.message : "Failed");
+                  setError(saveErrorMessage(e, { fallback: "Couldn't save. Please try again." }));
                 } finally {
                   setBusy(false);
                 }
@@ -555,6 +538,8 @@ export function EventCreateInvoiceModal({
   onCreated,
 }: EventCreateInvoiceModalProps) {
   const { enabled: demo, sendDemoEmail } = useDemoGuard();
+  // A ref, not state: `disabled` only applies after a re-render, and this sends a real invoice.
+  const sending = useRef(false);
   const { businesses } = useBusinesses({ autoFetch: isOpen });
   const [search, setSearch] = useState("");
   const [email, setEmail] = useState("");
@@ -594,11 +579,19 @@ export function EventCreateInvoiceModal({
             disabled={busy}
             onClick={() => {
               void (async () => {
-                const cents = Math.round(parseFloat(amount) * 100);
-                if (!email.trim() || !Number.isFinite(cents) || cents <= 0) {
+                if (sending.current) return;
+                const dollars = parseDollarAmount(amount);
+                if (!email.trim() || dollars === null) {
                   setError("Business email and amount are required.");
                   return;
                 }
+                const emailError = validateEmail(email);
+                if (emailError) {
+                  setError(emailError);
+                  return;
+                }
+                const cents = Math.round(dollars * 100);
+                sending.current = true;
                 setBusy(true);
                 setError(null);
                 try {
@@ -609,15 +602,15 @@ export function EventCreateInvoiceModal({
                       context: email,
                     });
                   } else {
-                    const res = await fetch(`${getApiBase()}/api/stripe/invoices`, {
+                    const res = await fetch(`${getApiBase()}/api/stripe/invoices/issue`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
                         email: email.trim(),
                         name: name.trim() || undefined,
-                        amount_cents: cents,
-                        description: "Event invoice",
-                        event_id: eventId,
+                        category: "event",
+                        eventId,
+                        lineItems: [{ description: "Event invoice", amountCents: cents }],
                       }),
                     });
                     const body = (await res.json()) as { error?: string };
@@ -626,8 +619,9 @@ export function EventCreateInvoiceModal({
                   await onCreated();
                   onClose();
                 } catch (e) {
-                  setError(e instanceof Error ? e.message : "Failed");
+                  setError(saveErrorMessage(e, { fallback: "Couldn't save. Please try again." }));
                 } finally {
+                  sending.current = false;
                   setBusy(false);
                 }
               })();
@@ -708,8 +702,9 @@ export function EditBudgetAmountModal({
             disabled={busy}
             onClick={() => {
               void (async () => {
-                const cents = Math.round(parseFloat(amount) * 100);
-                if (!Number.isFinite(cents) || cents < 0) return;
+                const dollars = Number(amount.replace(/[$,\s]/g, ""));
+                if (!amount.trim() || !Number.isFinite(dollars) || dollars < 0) return;
+                const cents = Math.round(dollars * 100);
                 setBusy(true);
                 try {
                   await onSubmit(cents);

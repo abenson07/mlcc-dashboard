@@ -111,10 +111,12 @@ export function InvoicingDemo({ navigation }: InvoicingDemoProps = {}) {
   async function guardedCreateSponsorship(...args: Parameters<typeof createSponsorship>) {
     if (demo) {
       const { newDemoId, upsertDemoEntity } = await import("@/lib/demo/demoStore");
-      const [payload] = args;
+      const [{ eventId, leafletId, payload }] = args;
       upsertDemoEntity("sponsorships", {
         id: newDemoId("spon"),
-        ...(payload as Record<string, unknown>),
+        event_id: eventId ?? null,
+        leaflet_id: leafletId ?? null,
+        ...payload,
       });
       toast.success("Sponsorship created — demo mode, saved locally only");
       return null;

@@ -176,6 +176,7 @@ export function CreateVolunteerAskModal({
           <Button
             label={submitting ? "Saving…" : isEdit ? "Save" : "Create"}
             variant="primary"
+            disabled={submitting}
             onClick={() => {
               if (!submitting) void handleSubmit();
             }}

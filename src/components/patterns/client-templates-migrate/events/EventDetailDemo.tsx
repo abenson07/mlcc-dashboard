@@ -29,6 +29,9 @@ import { COMMITTEE_LABELS } from "schemas/committee_meetings";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import { useDemoGuard, useFavorites } from "hooks";
+import { DUPLICATE_PERSON_EMAIL, saveErrorMessage } from "@/lib/saveErrorMessage";
+import { parseDollarAmount, sponsorshipPaymentFields } from "@/lib/sponsorship/addSponsor";
+import { localIsoDate } from "@/components/patterns/client-templates-migrate/businesses/adapters";
 import { EventDraftBanner } from "./EventDraftBanner";
 import { EventOverviewPage } from "./EventOverviewPage";
 import { VolunteersPage } from "./VolunteersPage";
@@ -337,6 +340,26 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
     toast.success("Task added — demo mode, saved locally only");
   }
 
+  /** Inline Add task row: local on demo events, a real task otherwise. */
+  function addTask({ title, dueDate }: { title: string; dueDate: string }) {
+    if (mocks) {
+      addTaskLocal({ title, dueDate });
+      return;
+    }
+    void guard(
+      async () => {
+        await createTask({
+          title,
+          offset_days: daysOffsetFromAnchor(dueDate, event?.anchorDate ?? null),
+          description: null,
+        });
+      },
+      { action: "Task added" },
+    ).catch((e: unknown) => {
+      toast.error(saveErrorMessage(e, { fallback: "Couldn't add the task. Please try again." }));
+    });
+  }
+
   function removeTask(id: string) {
     if (mocks) {
       void guard(async () => undefined, {
@@ -410,7 +433,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         <EventTasksPage
           tasks={tasks}
           onToggleTask={toggleTask}
-          onAddTask={addTaskLocal}
+          onAddTask={addTask}
           onRemoveTask={removeTask}
         />
       )
@@ -561,10 +584,14 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
         asks={asksForModal}
         onClose={() => setModal(null)}
         onSubmit={async (payload) => {
+          if (asksForModal.length === 0) {
+            throw new Error("This event has no volunteer asks yet. Add one first, then assign volunteers.");
+          }
           await guard(
             async () => {
               if (!supabaseClient) throw new Error("Not connected");
               let personId = payload.personId;
+              let createdPersonId: string | null = null;
               if (payload.createPerson || !personId) {
                 const { data, error } = await supabaseClient
                   .from("people")
@@ -574,21 +601,32 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
                   })
                   .select("id")
                   .single();
-                if (error) throw error;
+                if (error) {
+                  throw new Error(saveErrorMessage(error, {
+                    fallback: "Couldn't add the person.",
+                    duplicate: DUPLICATE_PERSON_EMAIL,
+                  }));
+                }
                 personId = data.id;
+                createdPersonId = data.id;
               }
-              const askIds = payload.askIds.length
-                ? payload.askIds
-                : asksForModal[0]
-                  ? [asksForModal[0].id]
-                  : [];
+              const askIds = payload.askIds.length ? payload.askIds : [asksForModal[0].id];
               for (const askId of askIds) {
                 const { error } = await supabaseClient.from("volunteers").insert({
                   volunteer_ask_id: askId,
                   person_id: personId,
                   status: "accepted",
                 });
-                if (error) throw error;
+                if (error) {
+                  // Remove the person just created so retrying can't hit a duplicate email.
+                  if (createdPersonId) {
+                    await supabaseClient.from("people").delete().eq("id", createdPersonId);
+                  }
+                  throw new Error(saveErrorMessage(error, {
+                    fallback: "Couldn't assign the volunteer.",
+                    duplicate: "This person is already signed up for that ask.",
+                  }));
+                }
               }
               await refetchAll();
             },
@@ -634,13 +672,12 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
           await guard(
             async () => {
               if (payload.inKind) {
-                const cents = Math.round(parseFloat(payload.donationAmount || "0") * 100);
                 await createSponsorship({
                   business_id: payload.businessId,
                   description: "In-kind donation",
-                  amount: Number.isFinite(cents) ? cents / 100 : 0,
+                  amount: parseDollarAmount(payload.donationAmount) ?? 0,
                   quantity: 1,
-                  status: "paid",
+                  ...sponsorshipPaymentFields(true, localIsoDate()),
                   memo: `In-kind — ${payload.businessName}`,
                 });
               } else {
@@ -656,7 +693,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
                   description: level?.name ?? "Sponsorship",
                   amount: amountFromPrice,
                   quantity: 1,
-                  status: payload.alreadyPaid ? "paid" : "pledged",
+                  ...sponsorshipPaymentFields(payload.alreadyPaid, localIsoDate()),
                   memo: payload.alreadyPaid ? "Paid by cash or check" : null,
                 });
                 if (!payload.alreadyPaid && payload.businessId) {
@@ -671,7 +708,7 @@ export function EventDetailDemo({ navigation }: EventDetailDemoProps = {}) {
                 const level =
                   levelsForModal.find((l) => l.id === payload.levelId) ?? levelsForModal[0];
                 const amount = payload.inKind
-                  ? Number.parseFloat(payload.donationAmount || "0") || 0
+                  ? parseDollarAmount(payload.donationAmount) ?? 0
                   : Number(String(level?.price ?? "0").replace(/[^0-9.]/g, "")) || 0;
                 persistDemoSponsors([
                   ...demoSponsors,

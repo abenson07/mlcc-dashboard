@@ -6,7 +6,7 @@ import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Checkbox } from "@/components/patterns/primitives/Checkbox";
-import { parseSponsorAmount } from "@/lib/sponsorship/addSponsor";
+import { parseDollarAmount } from "@/lib/sponsorship/addSponsor";
 import { saveErrorMessage } from "@/lib/saveErrorMessage";
 import { validateEmail } from "@/lib/validation";
 import type { BusinessMemberRow, BusinessRow, SponsorRow, SponsorshipLevel } from "./types";
@@ -121,7 +121,7 @@ export function AddBusinessModal({
           annualDues: Number(annualDues) || BUSINESS_MEMBERSHIP_ANNUAL_DUES,
         });
       } else if (view === "sponsors") {
-        const parsedAmount = parseSponsorAmount(amount);
+        const parsedAmount = parseDollarAmount(amount);
         if (parsedAmount === null) throw new Error("Enter an amount greater than $0.");
         const emailError = validateEmail(email);
         if (emailError) throw new Error(emailError);

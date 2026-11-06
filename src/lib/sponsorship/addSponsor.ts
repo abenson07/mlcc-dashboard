@@ -1,7 +1,10 @@
 import type { SponsorshipStatus } from "schemas/sponsorships";
 
-/** Parses a typed amount like "$1,000"; null unless it is a positive number. */
-export function parseSponsorAmount(raw: string): number | null {
+/**
+ * Parses a typed amount like "$1,000"; null unless it is a positive number.
+ * Never use `parseFloat` for this: `parseFloat("1,000")` is 1, which would send a $1 invoice.
+ */
+export function parseDollarAmount(raw: string): number | null {
   const cleaned = raw.replace(/[$,\s]/g, "");
   if (!cleaned) return null;
   const amount = Number(cleaned);

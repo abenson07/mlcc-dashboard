@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { Text } from "@/components/patterns/primitives/Text";
+import { saveErrorMessage } from "@/lib/saveErrorMessage";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
 import type { EventSummary } from "@/data/mocks/events";
 
 export type NewEventModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onCreate?: (event: Omit<EventSummary, "id">) => void;
+  onCreate?: (event: Omit<EventSummary, "id">) => void | Promise<void>;
   /** Prefill / lock committee when creating from a committee page. */
   defaultCommittee?: CommitteeSlug;
   committeeLocked?: boolean;
@@ -45,6 +47,8 @@ export function NewEventModal({
   const [location, setLocation] = useState("");
   const [committee, setCommittee] = useState<CommitteeSlug>(defaultCommittee);
   const [description, setDescription] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -53,18 +57,30 @@ export function NewEventModal({
     setLocation("");
     setCommittee(defaultCommittee);
     setDescription("");
+    setError(null);
   }, [isOpen, defaultCommittee]);
 
-  function handleSubmit() {
-    if (!title.trim() || !date) return;
-    onCreate?.({
-      title: title.trim(),
-      date,
-      location: location.trim(),
-      committee,
-      description: description.trim(),
-    });
-    onClose();
+  async function handleSubmit() {
+    if (!title.trim() || !date) {
+      setError("Enter a title and date.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await onCreate?.({
+        title: title.trim(),
+        date,
+        location: location.trim(),
+        committee,
+        description: description.trim(),
+      });
+      onClose();
+    } catch (e) {
+      setError(saveErrorMessage(e, { fallback: "Couldn't create the event. Please try again." }));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -75,7 +91,12 @@ export function NewEventModal({
       footer={
         <>
           <Button label="Cancel" variant="secondary" onClick={onClose} />
-          <Button label="Create event" variant="primary" onClick={handleSubmit} />
+          <Button
+            label={busy ? "Creating…" : "Create event"}
+            variant="primary"
+            disabled={busy}
+            onClick={() => void handleSubmit()}
+          />
         </>
       }
     >
@@ -121,6 +142,7 @@ export function NewEventModal({
           multiline
           rows={3}
         />
+        {error ? <Text size="sm" color="accent">{error}</Text> : null}
       </div>
     </Modal>
   );

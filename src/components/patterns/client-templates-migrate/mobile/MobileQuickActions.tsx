@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { newDemoId } from "@/lib/demo/demoStore";
 import { createWithMembership } from "@/lib/memberships/createWithMembership";
 import { DUPLICATE_PERSON_EMAIL, saveErrorMessage } from "@/lib/saveErrorMessage";
+import { parseDollarAmount } from "@/lib/sponsorship/addSponsor";
 import { validateEmail } from "@/lib/validation";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { toMembershipTier } from "@/lib/memberships/status";
@@ -265,11 +266,12 @@ export function MobileLogDonation({ open, personName, onClose }: MobileLogDonati
   const [message, setMessage] = useState<string | null>(null);
 
   function submit() {
-    const cents = Math.round(parseFloat(amount) * 100);
-    if (!Number.isFinite(cents) || cents <= 0) {
+    const dollars = parseDollarAmount(amount);
+    if (dollars === null) {
       setMessage("Enter a valid amount.");
       return;
     }
+    const cents = Math.round(dollars * 100);
     setMessage(
       `Logged $${(cents / 100).toFixed(2)} cash donation${personName ? ` for ${personName}` : ""}${note.trim() ? ` — ${note.trim()}` : ""}. Cash donation API not connected yet.`,
     );

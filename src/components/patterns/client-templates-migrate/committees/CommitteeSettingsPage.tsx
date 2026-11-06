@@ -429,10 +429,14 @@ export function CommitteeSettingsPage({
                           id: p.id,
                           name: p.full_name,
                           email: p.email ?? "",
-                        }).then(() => {
-                          setSearch("");
-                          setAdding(false);
-                        });
+                        })
+                          .then(() => {
+                            setSearch("");
+                            setAdding(false);
+                          })
+                          .catch((e: unknown) => {
+                            toast.error(e instanceof Error ? e.message : "Failed to add member");
+                          });
                       }}
                       style={{
                         all: "unset",

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
+import { Text } from "@/components/patterns/primitives/Text";
 import { COMMITTEE_LABELS, type CommitteeSlug } from "schemas/committee_meetings";
 import type { EventSummary } from "@/data/mocks/events";
 
@@ -44,6 +45,7 @@ export function NewEventModal({
   const [location, setLocation] = useState("");
   const [committee, setCommittee] = useState<CommitteeSlug>(defaultCommittee);
   const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -52,10 +54,14 @@ export function NewEventModal({
     setLocation("");
     setCommittee(defaultCommittee);
     setDescription("");
+    setError(null);
   }, [isOpen, defaultCommittee]);
 
   function handleSubmit() {
-    if (!title.trim() || !date) return;
+    if (!title.trim() || !date) {
+      setError("Enter a title and date.");
+      return;
+    }
     onCreate?.({
       title: title.trim(),
       date,
@@ -120,6 +126,7 @@ export function NewEventModal({
           multiline
           rows={3}
         />
+        {error ? <Text size="sm" color="accent">{error}</Text> : null}
       </div>
     </Modal>
   );

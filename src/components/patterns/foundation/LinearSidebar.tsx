@@ -263,18 +263,22 @@ function MigrateCreateModals({
       return;
     }
     const startsAt = event.date ? new Date(`${event.date}T00:00:00`).toISOString() : new Date().toISOString();
-    const created = await createEvent({
-      name: event.title,
-      starts_at: startsAt,
-      committee: event.committee,
-      field_data: {
-        location: event.location,
-        description: event.description,
+    try {
+      const created = await createEvent({
+        name: event.title,
+        starts_at: startsAt,
         committee: event.committee,
-        kind: "council",
-      },
-    });
-    if (created) router.push(hrefFor(`/events/${created.id}`));
+        field_data: {
+          location: event.location,
+          description: event.description,
+          committee: event.committee,
+          kind: "council",
+        },
+      });
+      if (created) router.push(hrefFor(`/events/${created.id}`));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't create the event. Please try again.");
+    }
   }
 
   async function handleCreateLeaflet(draft: NewLeafletDraft) {

@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEvents, useDemoGuard } from "hooks";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { Text } from "@/components/patterns/primitives/Text";
 import { getApiBase } from "@/lib/apiBase";
+import { parseDollarAmount } from "@/lib/sponsorship/addSponsor";
+import { validateEmail } from "@/lib/validation";
 
 const fieldLabelStyle = { fontSize: 12, color: "var(--linear-color-ink-subtle)" } as const;
 const selectStyle = {
@@ -37,6 +39,8 @@ export function CreateInvoiceModal({ isOpen, onClose, onCreated }: CreateInvoice
   const [description, setDescription] = useState("Invoice");
   const [memo, setMemo] = useState("");
   const [eventId, setEventId] = useState("");
+  // A ref, not state: `disabled` only applies after a re-render, and this sends a real invoice.
+  const sending = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,19 +56,27 @@ export function CreateInvoiceModal({ isOpen, onClose, onCreated }: CreateInvoice
   }, [isOpen]);
 
   async function handleSubmit() {
-    const cents = Math.round(parseFloat(amount) * 100);
+    if (sending.current) return;
     if (!email.trim()) {
       setError("Email is required.");
       return;
     }
-    if (!Number.isFinite(cents) || cents <= 0) {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+    const dollars = parseDollarAmount(amount);
+    if (dollars === null) {
       setError("Enter a valid amount.");
       return;
     }
+    const cents = Math.round(dollars * 100);
     if (!eventId) {
       setError("Select an event (required for Stripe invoices).");
       return;
     }
+    sending.current = true;
     setBusy(true);
     setError(null);
     if (demo) {
@@ -79,6 +91,7 @@ export function CreateInvoiceModal({ isOpen, onClose, onCreated }: CreateInvoice
       } catch (e) {
         setError(e instanceof Error ? e.message : "Could not send demo invoice email.");
       } finally {
+        sending.current = false;
         setBusy(false);
       }
       return;
@@ -108,6 +121,7 @@ export function CreateInvoiceModal({ isOpen, onClose, onCreated }: CreateInvoice
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not create invoice.");
     } finally {
+      sending.current = false;
       setBusy(false);
     }
   }
@@ -124,6 +138,7 @@ export function CreateInvoiceModal({ isOpen, onClose, onCreated }: CreateInvoice
           <Button
             label={busy ? "Sending…" : "Create & send"}
             variant="primary"
+            disabled={busy}
             onClick={() => {
               void handleSubmit();
             }}

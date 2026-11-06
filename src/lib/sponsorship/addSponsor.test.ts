@@ -1,20 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
   canCreateBusinessFromSearch,
-  parseSponsorAmount,
+  parseDollarAmount,
   sponsorshipPaymentFields,
 } from "./addSponsor";
 
-describe("parseSponsorAmount", () => {
+describe("parseDollarAmount", () => {
   it("accepts plain and formatted amounts", () => {
-    expect(parseSponsorAmount("500")).toBe(500);
-    expect(parseSponsorAmount("$1,000")).toBe(1000);
-    expect(parseSponsorAmount(" 250.50 ")).toBe(250.5);
+    expect(parseDollarAmount("500")).toBe(500);
+    expect(parseDollarAmount("$1,000")).toBe(1000);
+    expect(parseDollarAmount("1,000")).toBe(1000);
+    expect(parseDollarAmount(" 250.50 ")).toBe(250.5);
   });
 
   it("rejects blank, zero, negative and non-numeric amounts", () => {
     for (const raw of ["", "   ", "0", "-5", "abc"]) {
-      expect(parseSponsorAmount(raw)).toBeNull();
+      expect(parseDollarAmount(raw)).toBeNull();
     }
   });
 });
