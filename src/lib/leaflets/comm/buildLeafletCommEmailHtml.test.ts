@@ -26,6 +26,7 @@ describe("buildLeafletCommEmailHtml", () => {
       expect(html).toContain("Hi Holly,");
       expect(html).toContain("Winter 2026 Leaflet");
       expect(html).toContain("1st: 85th to 92nd (80 leaflets)");
+      expect(html).toContain("Please let us know if you can still do these deliveries.");
     },
   );
 
@@ -33,11 +34,13 @@ describe("buildLeafletCommEmailHtml", () => {
     const html = build("pre_distribution_reminder");
     expect(html).toContain(ACTION_URL);
     expect(html).toContain("View your routes");
+    expect(html).not.toContain("Please let us know if you can still do these deliveries.");
   });
 
   it("completion email keeps its Mark delivered link", () => {
     const html = build("delivery_complete_prompt", "complete");
     expect(html).toContain(ACTION_URL);
     expect(html).toContain("Mark delivered");
+    expect(html).not.toContain("Please let us know if you can still do these deliveries.");
   });
 });

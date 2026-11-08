@@ -326,6 +326,11 @@ export function LeafletCommStepsModal({
             {copy.routesHeading}
           </Text>
           <VariableChip label="Routes" tooltip={tooltipFor("routes")} />
+          {copy.closing ? (
+            <Text size="sm" color="secondary">
+              {copy.closing}
+            </Text>
+          ) : null}
           {copy.actionLabel ? (
             <>
               <div>
