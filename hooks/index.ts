@@ -44,6 +44,7 @@ export { useEventQrCodes, type EventQrCodeRow } from "./useEventQrCodes";
 export { useDashboard } from "./useDashboard";
 export { useLeaflets, LEAFLETS_QUERY_KEY } from "./useLeaflets";
 export { useDeliveries, type DeliveryWithRelations } from "./useDeliveries";
+export { useLeafletCommSends } from "./useLeafletCommSends";
 export { useTasks, taskDueDate } from "./useTasks";
 export { useCommSettings } from "./useCommSettings";
 export { useLeafletSponsorships } from "./useLeafletSponsorships";

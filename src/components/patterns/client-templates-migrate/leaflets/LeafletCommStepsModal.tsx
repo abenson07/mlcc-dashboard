@@ -11,6 +11,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 import { DetailSelectField } from "@/components/patterns/foundation/detail/DetailSelectField";
 import { getApiBase } from "@/lib/apiBase";
 import { isUnconfirmedOnlyStep } from "@/lib/leaflets/comm/commSchedule";
+import { formatSendDate } from "@/lib/leaflets/comm/commSends";
 import {
   actionUrlTooltip,
   firstNameFromFullName,
@@ -33,6 +34,8 @@ export type LeafletCommStepsModalProps = {
   recipientCountByStep: Record<string, number>;
   /** When set, send only to this deliverer via the resend route. */
   personId?: string | null;
+  /** For a one-person send: newest send time (ISO) per template for that deliverer. */
+  personSends?: Record<string, string>;
   onSent?: (stepKey: string) => void | Promise<void>;
 };
 
@@ -146,6 +149,7 @@ export function LeafletCommStepsModal({
   deliverers,
   recipientCountByStep,
   personId = null,
+  personSends,
   onSent,
 }: LeafletCommStepsModalProps) {
   const { enabled: demo, sendDemoEmail } = useDemoGuard();
@@ -167,9 +171,11 @@ export function LeafletCommStepsModal({
   }, [isOpen]);
 
   const selected = stages.find((s) => s.stepKey === stepKey) ?? null;
-  const alreadySent = selected?.state === "completed";
   const copy = leafletCommCopy(stepKey ?? "");
   const singlePerson = Boolean(personId);
+  // A one-person send is judged by what this deliverer was sent, not the edition-wide flag.
+  const personSentAt = singlePerson && stepKey ? personSends?.[stepKey] : undefined;
+  const alreadySent = singlePerson ? Boolean(personSentAt) : selected?.state === "completed";
   const recipientCount = singlePerson ? 1 : (stepKey ? (recipientCountByStep[stepKey] ?? 0) : 0);
   const recipientNoun = recipientCount === 1 ? "deliverer" : "deliverers";
   const audienceNote = !singlePerson && isUnconfirmedOnlyStep(stepKey ?? "")
@@ -247,11 +253,15 @@ export function LeafletCommStepsModal({
     void sendNow();
   }
 
-  const statusLabel = alreadySent
-    ? selected?.sentDate
-      ? `Sent ${selected.sentDate}`
-      : "Sent"
-    : "Not sent";
+  const statusLabel = singlePerson
+    ? personSentAt
+      ? `Sent ${formatSendDate(personSentAt)}`
+      : "Not sent"
+    : alreadySent
+      ? selected?.sentDate
+        ? `Sent ${selected.sentDate}`
+        : "Sent"
+      : "Not sent";
 
   return (
     <Modal
