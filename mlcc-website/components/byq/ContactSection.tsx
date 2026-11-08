@@ -163,6 +163,8 @@ export function ContactSection({ title = "Contact" }: { title?: string }) {
   const [submitHovered, setSubmitHovered] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [message, setMessage] = React.useState("");
+  const [website, setWebsite] = React.useState("");
+  const startedAtRef = React.useRef<number>(Date.now());
   const [status, setStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -172,13 +174,14 @@ export function ContactSection({ title = "Contact" }: { title?: string }) {
       const response = await fetch(`${getApiBase()}/api/public/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, message }),
+        body: JSON.stringify({ email, message, website, startedAt: startedAtRef.current }),
       });
 
       if (!response.ok) throw new Error("Request failed");
       setStatus("success");
       setEmail("");
       setMessage("");
+      startedAtRef.current = Date.now();
     } catch {
       setStatus("error");
     }
@@ -283,6 +286,20 @@ export function ContactSection({ title = "Contact" }: { title?: string }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="mb-10 flex flex-col gap-3">
+                  {/* Honeypot: hidden from people, bots fill it in. */}
+                  <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+                    <label>
+                      Website
+                      <input
+                        type="text"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                      />
+                    </label>
+                  </div>
                   <input
                     className={inputClassName}
                     type="email"
