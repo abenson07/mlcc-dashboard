@@ -13,6 +13,8 @@ export type LeafletCommCopy = {
   heading: string;
   /** Null when the email goes out without an action link (confirmation emails). */
   actionLabel: string | null;
+  /** Closing line shown after the route list; null when the email has none. */
+  closing: string | null;
   greeting: LeafletCommSegment[];
   intro: LeafletCommSegment[];
   routesHeading: string;
@@ -22,6 +24,9 @@ export type LeafletCommCopy = {
 const FIRST_NAME: LeafletCommSegment = { type: "var", key: "firstName", label: "First name" };
 const TITLE: LeafletCommSegment = { type: "var", key: "leafletTitle", label: "Leaflet title" };
 const DATE: LeafletCommSegment = { type: "var", key: "distributionDate", label: "Distribution date" };
+
+/** Closing line on the confirmation emails, which go out without an action link. */
+export const CONFIRMATION_CLOSING = "Please let us know if you can still do these deliveries.";
 
 const PASTE_LINK = "If the button doesn’t work, copy and paste this link:";
 
@@ -36,6 +41,7 @@ export function leafletCommCopy(stepKey: string): LeafletCommCopy {
     return {
       heading: "We still need you to confirm",
       actionLabel: null,
+      closing: CONFIRMATION_CLOSING,
       greeting,
       intro: [
         { type: "text", text: "We haven’t heard back yet. Please confirm your routes for the " },
@@ -53,6 +59,7 @@ export function leafletCommCopy(stepKey: string): LeafletCommCopy {
     return {
       heading: "Distribution is coming up",
       actionLabel: "View your routes",
+      closing: null,
       greeting,
       intro: [
         { type: "text", text: "The " },
@@ -73,6 +80,7 @@ export function leafletCommCopy(stepKey: string): LeafletCommCopy {
     return {
       heading: "Report delivery complete",
       actionLabel: "Mark delivered",
+      closing: null,
       greeting,
       intro: [
         { type: "text", text: "Thanks for helping deliver the " },
@@ -89,6 +97,7 @@ export function leafletCommCopy(stepKey: string): LeafletCommCopy {
   return {
     heading: "Confirm your delivery routes",
     actionLabel: null,
+    closing: CONFIRMATION_CLOSING,
     greeting,
     intro: [
       { type: "text", text: "You’re scheduled to help deliver the " },

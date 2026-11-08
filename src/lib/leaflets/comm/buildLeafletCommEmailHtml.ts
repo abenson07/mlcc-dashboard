@@ -1,3 +1,5 @@
+import { CONFIRMATION_CLOSING } from "./leafletCommTemplate";
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -62,7 +64,7 @@ export function buildLeafletCommEmailHtml(params: {
                 ${intro}
               </p>
               <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#71717a;">Your route${params.routeLines.length === 1 ? "" : "s"}</p>
-              <ul style="margin:0 0 ${showAction ? 24 : 0}px;padding:12px 14px 12px 28px;background:#fafafa;border:1px solid #e4e4e7;border-radius:8px;font-size:14px;line-height:1.5;color:#3f3f46;">
+              <ul style="margin:0 0 ${showAction ? 24 : 16}px;padding:12px 14px 12px 28px;background:#fafafa;border:1px solid #e4e4e7;border-radius:8px;font-size:14px;line-height:1.5;color:#3f3f46;">
                 ${routesHtml}
               </ul>
               ${showAction ? `<table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 20px;">
@@ -75,7 +77,7 @@ export function buildLeafletCommEmailHtml(params: {
               <p style="margin:0;font-size:13px;line-height:1.6;color:#71717a;">
                 If the button doesn&rsquo;t work, copy and paste this link:<br />
                 <a href="${escapeHtml(params.actionUrl)}" style="color:#5E6AD2;word-break:break-all;">${escapeHtml(params.actionUrl)}</a>
-              </p>` : ""}
+              </p>` : `<p style="margin:0;font-size:15px;line-height:1.6;color:#52525b;">${escapeHtml(CONFIRMATION_CLOSING)}</p>`}
             </td>
           </tr>
         </table>
