@@ -16,6 +16,8 @@ export type DropdownProps = {
   placement?: LayerPlacement;
   alignment?: LayerAlignment;
   width?: number | string;
+  /** Portal the menu so clipping ancestors (e.g. table cells) cannot cut it off. */
+  portal?: boolean;
 };
 
 /**
@@ -31,6 +33,7 @@ export function Dropdown({
   placement = "below",
   alignment = "start",
   width = 174,
+  portal = false,
 }: DropdownProps) {
   return (
     <Popover
@@ -41,6 +44,7 @@ export function Dropdown({
       isOpen={open}
       onOpenChange={onOpenChange}
       hasCloseButton={false}
+      portal={portal}
       style={{
         padding: 0,
         background: "transparent",

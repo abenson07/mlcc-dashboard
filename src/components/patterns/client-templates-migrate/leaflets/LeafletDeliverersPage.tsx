@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ChevronDown, Filter, Mail, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useDeliveries, useDemoGuard } from "hooks";
@@ -8,6 +8,7 @@ import { pixel, proportional, type TableColumn } from "@/components/patterns/pri
 import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { IconButton } from "@/components/patterns/shared/IconButton";
+import { RowClickCell } from "@/components/patterns/client-templates/shared";
 import { sampleDeliverers, type LeafletDelivererRow } from "@/data/mocks/leaflets";
 import { DEMO_STORE_EVENT, listDemoScoped } from "@/lib/demo/demoStore";
 import { deliveriesToDelivererRows } from "./adapters";
@@ -55,6 +56,7 @@ function StatusCell({
   return (
     <Dropdown
       label={`Change status for ${deliverer.name}`}
+      portal
       open={open}
       onOpenChange={setOpen}
       placement="below"
@@ -103,13 +105,48 @@ function StatusCell({
 export type LeafletDeliverersPageProps = {
   leafletId: string;
   demo: boolean;
+  onSelectDeliverer?: (deliverer: LeafletDelivererRow) => void;
   onEmailDeliverer?: (deliverer: LeafletDelivererRow) => void;
 };
+
+/** Cell wrapper that opens the row's details on click but lets inner controls handle their own clicks. */
+function RowClickArea({
+  onClick,
+  align = "start",
+  children,
+}: {
+  onClick?: () => void;
+  align?: "start" | "end";
+  children: ReactNode;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: align === "end" ? "flex-end" : "flex-start",
+        width: "100%",
+        height: "100%",
+        cursor: onClick ? "pointer" : "default",
+      }}
+    >
+      <div onClick={(event) => event.stopPropagation()} style={{ display: "inline-flex" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 /**
  * Deliverers list: name, email, status (editable) and a per-person email action.
  */
-export function LeafletDeliverersPage({ leafletId, demo, onEmailDeliverer }: LeafletDeliverersPageProps) {
+export function LeafletDeliverersPage({
+  leafletId,
+  demo,
+  onSelectDeliverer,
+  onEmailDeliverer,
+}: LeafletDeliverersPageProps) {
   const { enabled: demoGuard } = useDemoGuard();
   const isDemo = demo || demoGuard;
   const { deliveries, update, refetch } = useDeliveries(leafletId, { enabled: !isDemo && Boolean(leafletId) });
@@ -174,7 +211,9 @@ export function LeafletDeliverersPage({ leafletId, demo, onEmailDeliverer }: Lea
       header: "Name",
       width: proportional(1, { minWidth: 160 }),
       renderCell: (row) => (
-        <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{row.name}</span>
+        <RowClickCell onClick={onSelectDeliverer ? () => onSelectDeliverer(row) : undefined}>
+          <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{row.name}</span>
+        </RowClickCell>
       ),
     },
     {
@@ -182,21 +221,27 @@ export function LeafletDeliverersPage({ leafletId, demo, onEmailDeliverer }: Lea
       header: "Email",
       width: proportional(1.2, { minWidth: 180 }),
       renderCell: (row) => (
-        <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.email || "No email on file"}</span>
+        <RowClickCell onClick={onSelectDeliverer ? () => onSelectDeliverer(row) : undefined}>
+          <span style={{ color: "var(--linear-color-ink-subtle)" }}>{row.email || "No email on file"}</span>
+        </RowClickCell>
       ),
     },
     {
       key: "status",
       header: "Status",
       width: pixel(150),
-      renderCell: (row) => <StatusCell deliverer={row} onChange={(d, a, l) => void changeStatus(d, a, l)} />,
+      renderCell: (row) => (
+        <RowClickArea onClick={onSelectDeliverer ? () => onSelectDeliverer(row) : undefined}>
+          <StatusCell deliverer={row} onChange={(d, a, l) => void changeStatus(d, a, l)} />
+        </RowClickArea>
+      ),
     },
     {
       key: "actions",
       header: "",
       width: pixel(48),
       renderCell: (row) => (
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <RowClickArea align="end" onClick={onSelectDeliverer ? () => onSelectDeliverer(row) : undefined}>
           <IconButton
             label={`Email ${row.name}`}
             variant="ghost"
@@ -204,7 +249,7 @@ export function LeafletDeliverersPage({ leafletId, demo, onEmailDeliverer }: Lea
             icon={<Mail size={15} strokeWidth={1.75} />}
             onClick={() => onEmailDeliverer?.(row)}
           />
-        </div>
+        </RowClickArea>
       ),
     },
   ];

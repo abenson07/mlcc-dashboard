@@ -18,6 +18,7 @@ import { buildCommStages, commRecipientCount } from "@/components/leaflet/leafle
 import { LeafletDeliverersPage } from "./LeafletDeliverersPage";
 import { LeafletRoutesPage } from "./LeafletRoutesPage";
 import { RouteDetailPanel } from "./RouteDetailPanel";
+import { DelivererPersonPanel } from "./DelivererPersonPanel";
 import { LeafletDetailsPanel } from "./LeafletDetailsPanel";
 import { LeafletCommStepsModal } from "./LeafletCommStepsModal";
 import { demoDeliveriesForComm, leafletRowForComm } from "./demoLeafletComm";
@@ -115,6 +116,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const { deliveries, refetch: refetchDeliveries } = useDeliveries(leafletId, { enabled: !demo && Boolean(leafletId) });
   const [view, setView] = useState<LeafletDetailView>("deliverers");
   const [selectedRoute, setSelectedRoute] = useState<LeafletRouteRow | null>(null);
+  const [selectedDelivererId, setSelectedDelivererId] = useState<string | null>(null);
   const [demoRoutes, setDemoRoutes] = useState<LeafletRouteRow[]>([]);
   const [demoDeliverers, setDemoDeliverers] = useState<LeafletDelivererRow[]>([]);
   const [emailOpen, setEmailOpen] = useState(false);
@@ -230,6 +232,25 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     ? ((demo ? demoRoutes : routeRows).find((row) => row.id === selectedRoute.id) ?? selectedRoute)
     : null;
 
+  const resolvedDeliverer = selectedDelivererId
+    ? ((demo ? demoDeliverers : liveDeliverers).find((row) => row.id === selectedDelivererId) ?? null)
+    : null;
+
+  function selectRoute(row: LeafletRouteRow) {
+    setSelectedDelivererId(null);
+    setSelectedRoute(row);
+  }
+
+  function selectDeliverer(row: LeafletDelivererRow) {
+    setSelectedRoute(null);
+    setSelectedDelivererId(row.id);
+  }
+
+  function closeSidePanel() {
+    setSelectedRoute(null);
+    setSelectedDelivererId(null);
+  }
+
   async function handleCommSent(stepKey: string) {
     if (demo) {
       patchDemoEntity("leaflets", leafletId || leaflet.id, {
@@ -245,7 +266,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
 
   function changeView(next: LeafletDetailView) {
     setView(next);
-    setSelectedRoute(null);
+    closeSidePanel();
   }
 
   const body =
@@ -253,6 +274,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
       <LeafletDeliverersPage
         leafletId={leafletId || leaflet.id}
         demo={demo}
+        onSelectDeliverer={selectDeliverer}
         onEmailDeliverer={(row) => openEmailModal(row.id)}
       />
     ) : view === "settings" ? (
@@ -271,7 +293,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         key={view}
         leafletId={leafletId || leaflet.id}
         demo={demo}
-        onSelectRoute={setSelectedRoute}
+        onSelectRoute={selectRoute}
         lockedStatus={view === "open-routes" ? "unassigned" : undefined}
       />
     );
@@ -281,11 +303,20 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
       <FoundationLayout
         navigation={navigation ?? <LinearSidebar />}
         contentMaxWidth={view === "settings" ? undefined : 1200}
-        isSideContentVisible={resolvedRoute != null}
+        isSideContentVisible={resolvedRoute != null || resolvedDeliverer != null}
         sideContent={
           resolvedRoute ? (
-            <OutlinedPanel onClose={() => setSelectedRoute(null)}>
+            <OutlinedPanel onClose={closeSidePanel}>
               <RouteDetailPanel route={resolvedRoute} leafletId={leafletId || leaflet.id} demo={demo} />
+            </OutlinedPanel>
+          ) : resolvedDeliverer ? (
+            <OutlinedPanel onClose={closeSidePanel}>
+              <DelivererPersonPanel
+                deliverer={resolvedDeliverer}
+                leafletId={leafletId || leaflet.id}
+                demo={demo}
+                onEmail={() => openEmailModal(resolvedDeliverer.id)}
+              />
             </OutlinedPanel>
           ) : null
         }
