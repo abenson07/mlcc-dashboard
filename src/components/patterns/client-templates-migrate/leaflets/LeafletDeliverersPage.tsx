@@ -11,6 +11,7 @@ import { IconButton } from "@/components/patterns/shared/IconButton";
 import { RowClickCell } from "@/components/patterns/client-templates/shared";
 import { sampleDeliverers, type LeafletDelivererRow } from "@/data/mocks/leaflets";
 import { DEMO_STORE_EVENT, listDemoScoped } from "@/lib/demo/demoStore";
+import { summarizePersonSends, type CommSend } from "@/lib/leaflets/comm/commSends";
 import { deliveriesToDelivererRows } from "./adapters";
 import {
   applyLeafletDeliveryStatus,
@@ -107,6 +108,10 @@ export type LeafletDeliverersPageProps = {
   demo: boolean;
   onSelectDeliverer?: (deliverer: LeafletDelivererRow) => void;
   onEmailDeliverer?: (deliverer: LeafletDelivererRow) => void;
+  /** Logged emails for this leaflet, shown in the Emailed column. */
+  sends?: CommSend[];
+  /** Template names by step key, for the Emailed column. */
+  stepLabels?: Record<string, string>;
 };
 
 /** Cell wrapper that opens the row's details on click but lets inner controls handle their own clicks. */
@@ -146,6 +151,8 @@ export function LeafletDeliverersPage({
   demo,
   onSelectDeliverer,
   onEmailDeliverer,
+  sends = [],
+  stepLabels = {},
 }: LeafletDeliverersPageProps) {
   const { enabled: demoGuard } = useDemoGuard();
   const isDemo = demo || demoGuard;
@@ -235,6 +242,21 @@ export function LeafletDeliverersPage({
           <StatusCell deliverer={row} onChange={(d, a, l) => void changeStatus(d, a, l)} />
         </RowClickArea>
       ),
+    },
+    {
+      key: "emailed",
+      header: "Emailed",
+      width: proportional(1, { minWidth: 150 }),
+      renderCell: (row) => {
+        const summary = summarizePersonSends(sends, row.id, stepLabels);
+        return (
+          <RowClickCell onClick={onSelectDeliverer ? () => onSelectDeliverer(row) : undefined}>
+            <span title={summary?.title} style={{ color: "var(--linear-color-ink-subtle)" }}>
+              {summary?.text ?? "—"}
+            </span>
+          </RowClickCell>
+        );
+      },
     },
     {
       key: "actions",

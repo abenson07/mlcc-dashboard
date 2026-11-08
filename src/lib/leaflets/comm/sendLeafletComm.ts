@@ -4,6 +4,7 @@ import { getResend, getResendFromEmail } from "@/lib/resend";
 import { buildRespondUrl, type RespondMode } from "@/lib/leaflets/signRespondUrl";
 import { buildLeafletCommEmailHtml } from "@/lib/leaflets/comm/buildLeafletCommEmailHtml";
 import { isUnconfirmedOnlyStep } from "@/lib/leaflets/comm/commSchedule";
+import { isMissingTableError } from "@/lib/leaflets/comm/commSends";
 
 type DeliveryRow = Deliveries & {
   routes?: Routes | null;
@@ -33,6 +34,18 @@ function commSubject(stepKey: string, leafletTitle: string) {
     return `Report delivery complete — ${leafletTitle}`;
   }
   return `Confirm your routes — ${leafletTitle}`;
+}
+
+/** Records who was emailed which template. Best effort: the email is already out, so never throw. */
+export async function logCommSends(
+  supabase: SupabaseClient,
+  rows: { leaflet_id: string; person_id: string; step_key: string; sent_at: string }[],
+) {
+  if (rows.length === 0) return;
+  const { error } = await supabase.from("leaflet_comm_sends").insert(rows);
+  if (error && !isMissingTableError(error)) {
+    console.error("Failed to log leaflet comm sends:", error.message);
+  }
 }
 
 function formatDate(iso: string) {
@@ -175,6 +188,7 @@ export async function sendLeafletComm(params: {
   const deliveries = await loadDeliveries(params.supabase, params.leafletId);
   const now = new Date().toISOString();
   let sent = 0;
+  const sentRows: { leaflet_id: string; person_id: string; step_key: string; sent_at: string }[] = [];
 
   const groups = groupByPerson(
     deliveries.filter((d) => {
@@ -197,6 +211,12 @@ export async function sendLeafletComm(params: {
     if (!didSend) continue;
 
     sent++;
+    sentRows.push({
+      leaflet_id: params.leafletId,
+      person_id: person.id,
+      step_key: params.stepKey,
+      sent_at: now,
+    });
 
     if (deliveryColumn) {
       const ids = personDeliveries.map((d) => d.id);
@@ -215,6 +235,8 @@ export async function sendLeafletComm(params: {
       .eq("id", params.leafletId);
     if (error) throw new Error(error.message);
   }
+
+  await logCommSends(params.supabase, sentRows);
 
   return { sent, stepKey: params.stepKey };
 }
@@ -254,6 +276,15 @@ export async function resendLeafletCommToPerson(params: {
     stepKey,
   });
   if (!didSend) throw new Error("Deliverer has no email address");
+
+  await logCommSends(params.supabase, [
+    {
+      leaflet_id: params.leafletId,
+      person_id: params.personId,
+      step_key: stepKey,
+      sent_at: new Date().toISOString(),
+    },
+  ]);
 
   return { sent: 1, stepKey, personId: params.personId };
 }

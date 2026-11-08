@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { Mail } from "lucide-react";
-import { useCommSettings, useDeliveries, useDemoGuard, useFavorites, useLeaflets } from "hooks";
+import {
+  useCommSettings,
+  useDeliveries,
+  useDemoGuard,
+  useFavorites,
+  useLeafletCommSends,
+  useLeaflets,
+} from "hooks";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
@@ -24,6 +31,7 @@ import { LeafletCommStepsModal } from "./LeafletCommStepsModal";
 import { demoDeliveriesForComm, leafletRowForComm } from "./demoLeafletComm";
 import { DEMO_STORE_EVENT, listDemoScoped, patchDemoEntity } from "@/lib/demo/demoStore";
 import { leafletCommSettingsFromDefs, snapshotCommSchedule } from "@/lib/leaflets/comm/commSchedule";
+import { latestSendPerStep, type CommSend } from "@/lib/leaflets/comm/commSends";
 import { deliveriesToDelivererRows, deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
   sampleDeliverers,
@@ -121,6 +129,10 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const [demoDeliverers, setDemoDeliverers] = useState<LeafletDelivererRow[]>([]);
   const [emailOpen, setEmailOpen] = useState(false);
   const [emailPersonId, setEmailPersonId] = useState<string | null>(null);
+  // Demo mode keeps its send history in page state only (resets on reload).
+  const [demoSends, setDemoSends] = useState<CommSend[]>([]);
+  const { sends: liveSends, refetch: refetchSends } = useLeafletCommSends(leafletId, { enabled: !demo });
+  const sends = demo ? demoSends : liveSends;
 
   useEffect(() => {
     if (!demo) {
@@ -251,8 +263,25 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     setSelectedDelivererId(null);
   }
 
+  const stepLabels = useMemo(
+    () => Object.fromEntries(commStages.filter((s) => s.stepKey).map((s) => [s.stepKey as string, s.name])),
+    [commStages],
+  );
+
+  const personSendsForModal = useMemo(
+    () => (emailPersonId ? latestSendPerStep(sends, emailPersonId) : undefined),
+    [sends, emailPersonId],
+  );
+
   async function handleCommSent(stepKey: string) {
     if (demo) {
+      const sentAt = new Date().toISOString();
+      const recipients = emailPersonId ? [emailPersonId] : demoDeliverers.map((d) => d.id);
+      setDemoSends((prev) => [
+        ...recipients.map((person_id) => ({ person_id, step_key: stepKey, sent_at: sentAt })),
+        ...prev,
+      ]);
+      if (emailPersonId) return;
       patchDemoEntity("leaflets", leafletId || leaflet.id, {
         commSent: {
           ...(demoLeafletRecord?.commSent ?? {}),
@@ -261,7 +290,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
       });
       return;
     }
-    await Promise.all([refetchLeaflets(), refetchDeliveries()]);
+    await Promise.all([refetchLeaflets(), refetchDeliveries(), refetchSends()]);
   }
 
   function changeView(next: LeafletDetailView) {
@@ -276,6 +305,8 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         demo={demo}
         onSelectDeliverer={selectDeliverer}
         onEmailDeliverer={(row) => openEmailModal(row.id)}
+        sends={sends}
+        stepLabels={stepLabels}
       />
     ) : view === "settings" ? (
       <div style={{ height: "100%", minHeight: 0, overflow: "auto", boxSizing: "border-box" }}>
@@ -381,6 +412,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         deliverers={demo ? demoDeliverers : liveDeliverers}
         recipientCountByStep={recipientCountByStep}
         personId={emailPersonId}
+        personSends={personSendsForModal}
         onSent={handleCommSent}
       />
     </div>
