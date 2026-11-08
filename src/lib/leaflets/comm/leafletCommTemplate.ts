@@ -11,7 +11,8 @@ export type LeafletCommSegment =
 
 export type LeafletCommCopy = {
   heading: string;
-  actionLabel: string;
+  /** Null when the email goes out without an action link (confirmation emails). */
+  actionLabel: string | null;
   greeting: LeafletCommSegment[];
   intro: LeafletCommSegment[];
   routesHeading: string;
@@ -34,7 +35,7 @@ export function leafletCommCopy(stepKey: string): LeafletCommCopy {
   if (stepKey === "confirmation_followup") {
     return {
       heading: "We still need you to confirm",
-      actionLabel: "Confirm or respond",
+      actionLabel: null,
       greeting,
       intro: [
         { type: "text", text: "We haven’t heard back yet. Please confirm your routes for the " },
@@ -87,7 +88,7 @@ export function leafletCommCopy(stepKey: string): LeafletCommCopy {
 
   return {
     heading: "Confirm your delivery routes",
-    actionLabel: "Confirm or respond",
+    actionLabel: null,
     greeting,
     intro: [
       { type: "text", text: "You’re scheduled to help deliver the " },
@@ -118,5 +119,5 @@ export function formatLeafletCommDate(iso: string): string {
 
 export function actionUrlTooltip(personName: string): string {
   const first = firstNameFromFullName(personName);
-  return `Unique confirm link for ${first}`;
+  return `Unique link for ${first}`;
 }

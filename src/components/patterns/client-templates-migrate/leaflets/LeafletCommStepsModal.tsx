@@ -326,16 +326,20 @@ export function LeafletCommStepsModal({
             {copy.routesHeading}
           </Text>
           <VariableChip label="Routes" tooltip={tooltipFor("routes")} />
-          <div>
-            <VariableChip label="Confirm link" tooltip={tooltipFor("actionUrl")} />
-            <span style={{ marginLeft: 8, fontSize: 13, color: "var(--linear-color-ink-subtle)" }}>
-              {copy.actionLabel}
-            </span>
-          </div>
-          <Text size="sm" color="secondary">
-            {copy.pasteLinkLead}
-          </Text>
-          <VariableChip label="Confirm link" tooltip={tooltipFor("actionUrl")} />
+          {copy.actionLabel ? (
+            <>
+              <div>
+                <VariableChip label="Action link" tooltip={tooltipFor("actionUrl")} />
+                <span style={{ marginLeft: 8, fontSize: 13, color: "var(--linear-color-ink-subtle)" }}>
+                  {copy.actionLabel}
+                </span>
+              </div>
+              <Text size="sm" color="secondary">
+                {copy.pasteLinkLead}
+              </Text>
+              <VariableChip label="Action link" tooltip={tooltipFor("actionUrl")} />
+            </>
+          ) : null}
         </div>
 
         {error ? (
