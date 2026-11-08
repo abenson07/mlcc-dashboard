@@ -8,7 +8,7 @@ import type {
 import { sampleDeliverers } from "@/data/mocks/leaflets";
 import { sampleAllRouteRows } from "./adapters";
 
-export type LeafletDeliveryStatusAction = "confirm" | "skip" | "remove";
+export type LeafletDeliveryStatusAction = "confirm" | "invite" | "decline" | "skip" | "remove";
 
 export function leafletDeliveryStatusPatch(
   action: LeafletDeliveryStatusAction,
@@ -16,6 +16,12 @@ export function leafletDeliveryStatusPatch(
   const now = new Date().toISOString();
   if (action === "confirm") {
     return { response: "confirmed", is_skipped: false, responded_at: now };
+  }
+  if (action === "invite") {
+    return { response: "pending", is_skipped: false };
+  }
+  if (action === "decline") {
+    return { response: "rejected", is_skipped: false, responded_at: now };
   }
   if (action === "skip") {
     return { is_skipped: true, response: "needs_cover", responded_at: now };
@@ -55,6 +61,9 @@ export function applyStatusToRouteRow(
       initials: personName ? initialsFromName(personName) : row.initials,
     };
   }
+  if (action === "invite" || action === "decline") {
+    return { ...row, response: action === "invite" ? "pending" : "rejected" };
+  }
   if (action === "skip") {
     const personName = row.personName ?? null;
     return {
@@ -89,6 +98,12 @@ export function applyStatusToDelivererRows(
               if (!deliveryIds.has(r.deliveryId ?? r.id)) return r;
               if (action === "confirm") {
                 return { ...r, isSkipped: false, response: "confirmed" as const };
+              }
+              if (action === "invite") {
+                return { ...r, isSkipped: false, response: "pending" as const };
+              }
+              if (action === "decline") {
+                return { ...r, isSkipped: false, response: "rejected" as const };
               }
               return { ...r, isSkipped: true, response: "needs_cover" as const };
             });
