@@ -2,23 +2,8 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import { Download, Mail } from "lucide-react";
-import { toast } from "sonner";
-import { saveErrorMessage } from "@/lib/saveErrorMessage";
-import {
-  useAllSponsorships,
-  useCommSettings,
-  useDeliveries,
-  useDemoGuard,
-  useFavorites,
-  useLeaflets,
-  usePeople,
-  useSponsorshipItemOfferings,
-  useStories,
-  useStripeInvoices,
-  useTasks,
-  type SponsorshipWithParent,
-} from "hooks";
+import { Mail } from "lucide-react";
+import { useCommSettings, useDeliveries, useDemoGuard, useFavorites, useLeaflets } from "hooks";
 import { normalizeRoute } from "@/lib/favorites/normalizeRoute";
 import { FoundationLayout } from "@/components/patterns/foundation/FoundationLayout";
 import { CanvasHeader } from "@/components/patterns/foundation/CanvasHeader";
@@ -29,144 +14,28 @@ import { ViewTabs } from "@/components/patterns/foundation/ViewTabs";
 import { Badge } from "@/components/patterns/primitives/Badge";
 import { Button } from "@/components/patterns/primitives/Button";
 import { OutlinedPanel } from "@/components/patterns/client-templates/shared";
-import { getApiBase } from "@/lib/apiBase";
-import { buildEventBudget } from "@/lib/events/eventData";
-import { mapTasksForUi, buildCommStages, commRecipientCount } from "@/components/leaflet/leafletData";
-import type { Task } from "@/components/leaflet/types";
-import type { StripeInvoiceTableRow } from "@/components/billing/InvoicesListTable";
-import { LeafletOverviewPage } from "./LeafletOverviewPage";
+import { buildCommStages, commRecipientCount } from "@/components/leaflet/leafletData";
 import { LeafletDeliverersPage } from "./LeafletDeliverersPage";
 import { LeafletRoutesPage } from "./LeafletRoutesPage";
-import { LeafletSponsorshipsPage } from "./LeafletSponsorshipsPage";
-import { LeafletSchedulePage } from "./LeafletSchedulePage";
 import { RouteDetailPanel } from "./RouteDetailPanel";
-import { LeafletInvoiceDetailPanel } from "./LeafletInvoiceDetailPanel";
-import { StoryDetailPanel } from "./StoryDetailPanel";
-import { DelivererPersonPanel } from "./DelivererPersonPanel";
-import { LeafletCommStepsModal } from "./LeafletCommStepsModal";
 import { LeafletDetailsPanel } from "./LeafletDetailsPanel";
-import { LeafletQrMenu } from "./LeafletQrMenu";
-import { LeafletListsMenu } from "./LeafletListsMenu";
+import { LeafletCommStepsModal } from "./LeafletCommStepsModal";
 import { demoDeliveriesForComm, leafletRowForComm } from "./demoLeafletComm";
-import { DEMO_STORE_EVENT, listDemoScoped, patchDemoEntity, writeDemoScoped } from "@/lib/demo/demoStore";
+import { DEMO_STORE_EVENT, listDemoScoped, patchDemoEntity } from "@/lib/demo/demoStore";
 import { leafletCommSettingsFromDefs, snapshotCommSchedule } from "@/lib/leaflets/comm/commSchedule";
 import { deliveriesToDelivererRows, deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
-  leafletTaskGroupForDueDate,
-  formatLeafletTaskDueLabel,
   sampleDeliverers,
   sampleLeafletDetail,
-  sampleLeafletTasks,
   sampleLeaflets,
-  type LeafletBudgetSummary,
   type LeafletDelivererRow,
   type LeafletDetail,
   type LeafletRouteRow,
-  type LeafletSponsorRow,
-  type LeafletSponsorshipInvoiceRow,
   type LeafletStatus,
-  type LeafletStoryRow,
   type LeafletSummary,
-  type LeafletTaskGroupLabel,
-  type LeafletTaskRow,
 } from "@/data/mocks/leaflets";
 
-const LEAFLET_TASK_GROUP_MAP: Record<string, LeafletTaskGroupLabel> = {
-  "Past due": "Past due",
-  "Six months out": "60 days out",
-  "90 days out": "60 days out",
-  "60 days out": "60 days out",
-  "30 days out": "30 days out",
-  "2 weeks out": "2 weeks out",
-  "Week of event": "Week of distribution",
-  "Day of event": "Day of distribution",
-};
-
-/** Live `useTasks` shares the event/leaflet schedule shape — remap into this page's `LeafletTaskRow` shape. */
-function toLeafletTaskRow(task: Task): LeafletTaskRow {
-  return {
-    id: task.id,
-    title: task.title,
-    group: LEAFLET_TASK_GROUP_MAP[task.group] ?? "Past due",
-    dueLabel: task.dueLabel,
-    isComplete: task.is_complete,
-    isOverdue: Boolean(task.isOverdue),
-  };
-}
-
-function leafletDaysOffsetFromAnchor(dueDate: string, anchorDate: string | null): number {
-  if (!anchorDate) return 0;
-  const due = new Date(`${dueDate}T12:00:00`);
-  const anchor = new Date(`${anchorDate}T12:00:00`);
-  return Math.round((due.getTime() - anchor.getTime()) / (1000 * 60 * 60 * 24));
-}
-
-function toLeafletInvoiceRow(
-  inv: StripeInvoiceTableRow,
-  sponsorships: SponsorshipWithParent[],
-  itemNameById: Map<string, string>,
-): LeafletSponsorshipInvoiceRow {
-  const sponsorship = inv.sponsorship_id ? sponsorships.find((s) => s.id === inv.sponsorship_id) : undefined;
-  const level =
-    (sponsorship?.sponsorship_item_id && itemNameById.get(sponsorship.sponsorship_item_id)) || "—";
-  return {
-    id: inv.id,
-    invoiceNumber: inv.number ?? inv.id.slice(-8),
-    business: inv.customer_email ?? "—",
-    level,
-    amount: `$${(inv.amount_due / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
-    dueDate: inv.due_date
-      ? new Date(inv.due_date * 1000).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })
-      : "—",
-    status: inv.status === "paid" ? "Paid" : inv.status === "uncollectible" ? "Overdue" : "Pending",
-  };
-}
-
-function toLeafletSponsorRow(s: SponsorshipWithParent): LeafletSponsorRow {
-  const business = s.businesses as { business_name: string | null } | null | undefined;
-  return {
-    id: s.id,
-    name: business?.business_name ?? "—",
-    tier: s.description ?? "—",
-    status: s.status === "paid" ? "Confirmed" : "Pending",
-  };
-}
-
-function toLeafletStoryRow(row: {
-  id: string;
-  title: string;
-  author?: string | null;
-  author_id?: string | null;
-  status: string;
-  publish_date: string | null;
-}, authorNameById: Map<string, string>): LeafletStoryRow {
-  const date = row.publish_date
-    ? new Date(`${row.publish_date}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    : "—";
-  const authorFromPerson = row.author_id ? authorNameById.get(row.author_id) : undefined;
-  return {
-    id: row.id,
-    title: row.title,
-    author: authorFromPerson || row.author || "—",
-    type: "—",
-    date,
-    time: "—",
-    status: row.status === "published" ? "Published" : "Draft",
-  };
-}
-
-type LeafletDetailView = "overview" | "details" | "deliverers" | "routes" | "sponsorships" | "schedule";
-
-type Selection =
-  | { kind: "route"; row: LeafletRouteRow }
-  | { kind: "invoice"; row: LeafletSponsorshipInvoiceRow }
-  | { kind: "story"; row: LeafletStoryRow }
-  | { kind: "person"; row: LeafletDelivererRow }
-  | null;
+type LeafletDetailView = "deliverers" | "routes" | "open-routes" | "settings";
 
 function statusLabel(status: LeafletStatus): string {
   if (status === "active") return "Active";
@@ -236,7 +105,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { enabled: demoMode } = useDemoModeOptional();
-  const { enabled: demoGuard, guard, store } = useDemoGuard();
+  const { enabled: demoGuard, store } = useDemoGuard();
   const demo = demoMode || demoGuard;
   const { leaflets, refetch: refetchLeaflets } = useLeaflets();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -244,9 +113,8 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname,
   );
   const { deliveries, refetch: refetchDeliveries } = useDeliveries(leafletId, { enabled: !demo && Boolean(leafletId) });
-  const [view, setView] = useState<LeafletDetailView>("overview");
-  const [selection, setSelection] = useState<Selection>(null);
-  const [demoTasks, setDemoTasks] = useState<LeafletTaskRow[]>([]);
+  const [view, setView] = useState<LeafletDetailView>("deliverers");
+  const [selectedRoute, setSelectedRoute] = useState<LeafletRouteRow | null>(null);
   const [demoRoutes, setDemoRoutes] = useState<LeafletRouteRow[]>([]);
   const [demoDeliverers, setDemoDeliverers] = useState<LeafletDelivererRow[]>([]);
   const [emailOpen, setEmailOpen] = useState(false);
@@ -254,14 +122,12 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
 
   useEffect(() => {
     if (!demo) {
-      setDemoTasks([]);
       setDemoRoutes([]);
       setDemoDeliverers([]);
       return;
     }
     const scopeKey = leafletId || "default";
     const load = () => {
-      setDemoTasks(listDemoScoped<LeafletTaskRow>("leafletTasks", scopeKey) ?? sampleLeafletTasks);
       setDemoRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
       setDemoDeliverers(
         listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
@@ -271,16 +137,6 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     window.addEventListener(DEMO_STORE_EVENT, load);
     return () => window.removeEventListener(DEMO_STORE_EVENT, load);
   }, [demo, leafletId]);
-
-  function persistDemoTasks(next: LeafletTaskRow[]) {
-    setDemoTasks(next);
-    writeDemoScoped("leafletTasks", leafletId || "default", next);
-  }
-
-  const liveLeafletRow = useMemo(
-    () => leaflets.find((row) => row.id === leafletId),
-    [leaflets, leafletId],
-  );
 
   const leaflet = useMemo(() => {
     if (!demo) return liveLeafletDetail(leafletId, leaflets);
@@ -309,67 +165,6 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demo, leafletId, leaflets, store.version]);
 
-  const {
-    tasks: leafletTaskRows,
-    toggleComplete: toggleLeafletTaskComplete,
-    createTask: createLeafletTaskMutation,
-    remove: removeLeafletTaskMutation,
-  } = useTasks({
-    context: "leaflet",
-    contextId: !demo && leafletId ? leafletId : null,
-    anchorDate: leaflet.distributionDate || null,
-  });
-
-  const liveTasks = useMemo(
-    () => mapTasksForUi(leafletTaskRows, leaflet.distributionDate || null).map(toLeafletTaskRow),
-    [leafletTaskRows, leaflet.distributionDate],
-  );
-  const tasks = demo ? demoTasks : liveTasks;
-
-  const { sponsorships: allSponsorships } = useAllSponsorships();
-  const leafletSponsorships = useMemo(
-    () => allSponsorships.filter((s) => s.leaflet_id === leafletId),
-    [allSponsorships, leafletId],
-  );
-
-  const { levels: offeringLevels } = useSponsorshipItemOfferings({ leafletId: demo ? null : leafletId });
-  const itemNameById = useMemo(
-    () => new Map(offeringLevels.map((l) => [l.itemId, l.name])),
-    [offeringLevels],
-  );
-
-  const { invoices: allStripeInvoices, refetch: refetchStripeInvoices } = useStripeInvoices();
-  const leafletInvoiceRows = useMemo(
-    () =>
-      allStripeInvoices
-        .filter((inv) => inv.leaflet_id === leafletId)
-        .map((inv) => toLeafletInvoiceRow(inv, allSponsorships, itemNameById)),
-    [allStripeInvoices, leafletId, allSponsorships, itemNameById],
-  );
-
-  const leafletRawRow = useMemo(() => leaflets.find((l) => l.id === leafletId), [leaflets, leafletId]);
-  const budget = useMemo(() => {
-    const raised = leafletSponsorships
-      .filter((s) => s.status === "paid")
-      .reduce((sum, s) => sum + (s.amount ?? 0), 0);
-    const pledged = leafletSponsorships
-      .filter((s) => s.status === "pledged")
-      .reduce((sum, s) => sum + (s.amount ?? 0), 0);
-    return buildEventBudget(
-      leafletSponsorships,
-      raised,
-      pledged,
-      (leafletRawRow as { sponsorship_goal_cents?: number | null } | undefined)?.sponsorship_goal_cents,
-    );
-  }, [leafletSponsorships, leafletRawRow]);
-  const budgetSummary: LeafletBudgetSummary = {
-    totalBudget: budget.goal,
-    received: budget.raised,
-    pending: budget.pledged,
-  };
-
-  const sponsorRows = useMemo(() => leafletSponsorships.map(toLeafletSponsorRow), [leafletSponsorships]);
-
   const { settings: liveCommSettings } = useCommSettings("leaflet");
   const fallbackCommSettings = useMemo(() => leafletCommSettingsFromDefs(), []);
   const commSettings = demo
@@ -384,11 +179,13 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demo, leafletId, store.version]);
 
+  const leafletRawRow = useMemo(() => leaflets.find((l) => l.id === leafletId), [leaflets, leafletId]);
+
   const commLeafletRow = useMemo(() => {
     if (demo) {
       const schedule =
         demoLeafletRecord?.comm_schedule ??
-        snapshotCommSchedule(commSettings, leaflet.distributionDate);
+        (leaflet.distributionDate ? snapshotCommSchedule(commSettings, leaflet.distributionDate) : undefined);
       return leafletRowForComm({
         id: leaflet.id,
         title: leaflet.title,
@@ -426,31 +223,12 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     setEmailOpen(true);
   }
 
-  const { stories: leafletStoryRows } = useStories({ filters: { leafletId: leafletId || null } });
-  const { people } = usePeople({ autoFetch: !demo });
-  const authorNameById = useMemo(() => new Map(people.map((p) => [p.id, p.full_name])), [people]);
-  const storyRows = useMemo(
-    () => leafletStoryRows.map((row) => toLeafletStoryRow(row, authorNameById)),
-    [leafletStoryRows, authorNameById],
-  );
-
   const routeRows = useMemo(() => deliveriesToRouteRows(deliveries), [deliveries]);
   const liveDeliverers = useMemo(() => deliveriesToDelivererRows(deliveries), [deliveries]);
-  const openRouteRows = useMemo(() => routeRows.filter((r) => r.status === "unassigned"), [routeRows]);
-  const skippedRouteRows = useMemo(() => routeRows.filter((r) => r.status === "skipped"), [routeRows]);
 
-  const resolvedRoute =
-    selection?.kind === "route"
-      ? (demo
-          ? demoRoutes.find((row) => row.id === selection.row.id)
-          : routeRows.find((row) => row.id === selection.row.id)) ?? selection.row
-      : null;
-  const resolvedDeliverer =
-    selection?.kind === "person"
-      ? (demo
-          ? demoDeliverers.find((row) => row.id === selection.row.id)
-          : liveDeliverers.find((row) => row.id === selection.row.id)) ?? null
-      : null;
+  const resolvedRoute = selectedRoute
+    ? ((demo ? demoRoutes : routeRows).find((row) => row.id === selectedRoute.id) ?? selectedRoute)
+    : null;
 
   async function handleCommSent(stepKey: string) {
     if (demo) {
@@ -467,121 +245,18 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
 
   function changeView(next: LeafletDetailView) {
     setView(next);
-    setSelection(null);
+    setSelectedRoute(null);
   }
-
-  function selectRoute(row: LeafletRouteRow) {
-    setSelection({ kind: "route", row });
-  }
-
-  function selectInvoice(row: LeafletSponsorshipInvoiceRow) {
-    setSelection({ kind: "invoice", row });
-  }
-
-  function selectStory(row: LeafletStoryRow) {
-    setSelection({ kind: "story", row });
-  }
-
-  function selectDeliverer(row: LeafletDelivererRow) {
-    setSelection({ kind: "person", row });
-  }
-
-  function toggleTask(id: string) {
-    if (demo) {
-      void guard(async () => undefined, {
-        action: "Task updated",
-        local: () =>
-          persistDemoTasks(
-            demoTasks.map((task) =>
-              task.id === id ? { ...task, isComplete: !task.isComplete } : task,
-            ),
-          ),
-      });
-      return;
-    }
-    const row = leafletTaskRows.find((t) => t.id === id);
-    if (!row) return;
-    void guard(() => toggleLeafletTaskComplete(row), { action: "Task updated" });
-  }
-
-  function addTask({ title, dueDate }: { title: string; dueDate: string }) {
-    if (demo) {
-      const group = leafletTaskGroupForDueDate(dueDate);
-      const isOverdue = group === "Past due";
-      void guard(async () => undefined, {
-        action: "Task added",
-        local: () =>
-          persistDemoTasks([
-            ...demoTasks,
-            {
-              id: `lf-task-${Date.now()}`,
-              title,
-              group,
-              dueLabel: formatLeafletTaskDueLabel(dueDate, isOverdue),
-              isComplete: false,
-              isOverdue,
-            },
-          ]),
-      });
-      return;
-    }
-    void guard(
-      async () => {
-        const offset = leafletDaysOffsetFromAnchor(dueDate, leaflet.distributionDate || null);
-        await createLeafletTaskMutation({ title, offset_days: offset, description: null });
-      },
-      { action: "Task added" },
-    ).catch((e: unknown) => {
-      toast.error(saveErrorMessage(e, { fallback: "Couldn't add the task. Please try again." }));
-    });
-  }
-
-  function removeTask(id: string) {
-    if (demo) {
-      void guard(async () => undefined, {
-        action: "Task removed",
-        local: () => persistDemoTasks(demoTasks.filter((task) => task.id !== id)),
-      });
-      return;
-    }
-    void guard(() => removeLeafletTaskMutation(id), { action: "Task removed" });
-  }
-
-  function downloadTopSheets() {
-    const id = leaflet.id || leafletId;
-    if (!id || id.startsWith("lf-")) {
-      if (demo) {
-        toast.success("Top sheets download — demo mode (no real file)");
-        return;
-      }
-      toast.error("Leaflet id required to download top sheets");
-      return;
-    }
-    window.open(
-      `${getApiBase()}/api/leaflets/${encodeURIComponent(id)}/deliveries/cover-sheets`,
-      "_blank",
-    );
-  }
-
-  useEffect(() => {
-    if (selection?.kind !== "person") return;
-    if (demo && demoDeliverers.length === 0) return;
-    if (!resolvedDeliverer) setSelection(null);
-  }, [demo, demoDeliverers.length, resolvedDeliverer, selection?.kind]);
-
-  const sideContentVisible =
-    selection != null && (selection.kind !== "person" || resolvedDeliverer != null);
 
   const body =
-    view === "details" ? (
-      <div
-        style={{
-          height: "100%",
-          minHeight: 0,
-          overflow: "auto",
-          boxSizing: "border-box",
-        }}
-      >
+    view === "deliverers" ? (
+      <LeafletDeliverersPage
+        leafletId={leafletId || leaflet.id}
+        demo={demo}
+        onEmailDeliverer={(row) => openEmailModal(row.id)}
+      />
+    ) : view === "settings" ? (
+      <div style={{ height: "100%", minHeight: 0, overflow: "auto", boxSizing: "border-box" }}>
         <LeafletDetailsPanel
           leafletId={leafletId || leaflet.id}
           title={leaflet.title}
@@ -591,55 +266,13 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
           commSettings={commSettings}
         />
       </div>
-    ) : view === "deliverers" ? (
-      <LeafletDeliverersPage
-        leafletId={leafletId || leaflet.id}
-        demo={demo}
-        onSelectDeliverer={selectDeliverer}
-        onEmailDeliverer={(row) => openEmailModal(row.id)}
-      />
-    ) : view === "routes" ? (
-      <LeafletRoutesPage
-        leafletId={leafletId || leaflet.id}
-        demo={demo}
-        onSelectRoute={selectRoute}
-      />
-    ) : view === "sponsorships" ? (
-      <LeafletSponsorshipsPage
-        onSelectInvoice={selectInvoice}
-        invoices={demo ? undefined : leafletInvoiceRows}
-        budgetSummary={demo ? undefined : budgetSummary}
-        leafletId={demo ? null : leafletId || leaflet.id}
-      />
-    ) : view === "schedule" ? (
-      <LeafletSchedulePage
-        tasks={tasks}
-        onToggleTask={toggleTask}
-        onAddTask={addTask}
-        onRemoveTask={removeTask}
-      />
     ) : (
-      <LeafletOverviewPage
-        leaflet={leaflet}
-        tasks={tasks}
-        onToggleTask={toggleTask}
-        onSeeAllTasks={() => changeView("schedule")}
-        onSeeAllOpenRoutes={() => changeView("routes")}
-        onViewSponsorships={() => changeView("sponsorships")}
-        onSelectOpenRoute={selectRoute}
-        onSelectSkippedRoute={selectRoute}
-        onSelectSponsor={() => changeView("sponsorships")}
-        onSelectStory={selectStory}
-        budgetSummary={demo ? undefined : budgetSummary}
-        openRoutes={demo ? undefined : openRouteRows}
-        skippedRoutes={demo ? undefined : skippedRouteRows}
-        sponsors={demo ? undefined : sponsorRows}
-        stories={demo ? undefined : storyRows}
-        onSendReminder={() => openEmailModal()}
-        nextStepTitle="Deliverer emails"
-        nextStepDescription="Choose a template to send. Hover a chip to see a sample deliverer’s value."
-        nextStepSendLabel="Send"
-        showNextStepSend
+      <LeafletRoutesPage
+        key={view}
+        leafletId={leafletId || leaflet.id}
+        demo={demo}
+        onSelectRoute={setSelectedRoute}
+        lockedStatus={view === "open-routes" ? "unassigned" : undefined}
       />
     );
 
@@ -647,29 +280,12 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     <div style={{ height: "100%" }}>
       <FoundationLayout
         navigation={navigation ?? <LinearSidebar />}
-        contentMaxWidth={view === "details" ? undefined : 1200}
-        isSideContentVisible={sideContentVisible}
+        contentMaxWidth={view === "settings" ? undefined : 1200}
+        isSideContentVisible={resolvedRoute != null}
         sideContent={
-          selection ? (
-            <OutlinedPanel onClose={() => setSelection(null)}>
-              {selection.kind === "route" && resolvedRoute ? (
-                <RouteDetailPanel
-                  route={resolvedRoute}
-                  leafletId={leafletId || leaflet.id}
-                  demo={demo}
-                />
-              ) : selection.kind === "invoice" ? (
-                <LeafletInvoiceDetailPanel invoice={selection.row} onPaid={refetchStripeInvoices} />
-              ) : selection.kind === "person" && resolvedDeliverer ? (
-                <DelivererPersonPanel
-                  deliverer={resolvedDeliverer}
-                  leafletId={leafletId || leaflet.id}
-                  demo={demo}
-                  onEmail={() => openEmailModal(resolvedDeliverer.id)}
-                />
-              ) : selection.kind === "story" ? (
-                <StoryDetailPanel story={selection.row} />
-              ) : null}
+          resolvedRoute ? (
+            <OutlinedPanel onClose={() => setSelectedRoute(null)}>
+              <RouteDetailPanel route={resolvedRoute} leafletId={leafletId || leaflet.id} demo={demo} />
             </OutlinedPanel>
           ) : null
         }
@@ -683,44 +299,16 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
               onFavoriteClick: () =>
                 void toggleFavorite({ name: leaflet.title, route: currentRoute }),
               endContent: (
-                <>
-                  <LeafletListsMenu demo={demo} />
-                  <LeafletQrMenu
-                    demo={demo}
-                    membershipQrCodeId={liveLeafletRow?.membership_qr_code_id ?? null}
-                    openRoutesQrCodeId={liveLeafletRow?.open_routes_qr_code_id ?? null}
-                  />
-                  {view === "deliverers" ? (
-                    <>
-                      <Button
-                        label="Download Top Sheets"
-                        variant="secondary"
-                        icon={<Download size={14} strokeWidth={1.75} />}
-                        onClick={downloadTopSheets}
-                      />
-                      <Button
-                        label="Email deliverers"
-                        variant="secondary"
-                        icon={<Mail size={14} strokeWidth={1.75} />}
-                        onClick={() => openEmailModal()}
-                      />
-                    </>
-                  ) : null}
-                </>
+                <Button
+                  label="Email deliverers"
+                  variant="secondary"
+                  icon={<Mail size={14} strokeWidth={1.75} />}
+                  onClick={() => openEmailModal()}
+                />
               ),
             }}
             controls={
               <ViewTabs aria-label="Leaflet views">
-                <ViewTab
-                  label="Overview"
-                  selected={view === "overview"}
-                  onClick={() => changeView("overview")}
-                />
-                <ViewTab
-                  label="Settings"
-                  selected={view === "details"}
-                  onClick={() => changeView("details")}
-                />
                 <ViewTab
                   label="Deliverers"
                   selected={view === "deliverers"}
@@ -732,14 +320,14 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
                   onClick={() => changeView("routes")}
                 />
                 <ViewTab
-                  label="Sponsorships"
-                  selected={view === "sponsorships"}
-                  onClick={() => changeView("sponsorships")}
+                  label="Open Routes"
+                  selected={view === "open-routes"}
+                  onClick={() => changeView("open-routes")}
                 />
                 <ViewTab
-                  label="Tasks"
-                  selected={view === "schedule"}
-                  onClick={() => changeView("schedule")}
+                  label="Settings"
+                  selected={view === "settings"}
+                  onClick={() => changeView("settings")}
                 />
               </ViewTabs>
             }

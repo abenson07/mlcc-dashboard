@@ -121,6 +121,8 @@ export type LeafletRoutesPageProps = {
   leafletId: string;
   demo: boolean;
   onSelectRoute?: (row: LeafletRouteRow) => void;
+  /** Show only routes with this status and hide the summary cards (e.g. the Open Routes tab). */
+  lockedStatus?: LeafletRouteStatus;
 };
 
 function RouteActionsCell({
@@ -186,7 +188,7 @@ function RouteActionsCell({
 /**
  * Mixed-content Routes page — summary cards + grouped table (max-width shell).
  */
-export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRoutesPageProps) {
+export function LeafletRoutesPage({ leafletId, demo, onSelectRoute, lockedStatus }: LeafletRoutesPageProps) {
   const { enabled: demoGuard } = useDemoGuard();
   const isDemo = demo || demoGuard;
   const { deliveries, update, refetch } = useDeliveries(leafletId, {
@@ -199,7 +201,8 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
   const [removeRow, setRemoveRow] = useState<LeafletRouteRow | null>(null);
   const [assignTarget, setAssignTarget] = useState<AssignDelivererTarget | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<LeafletRouteStatus | null>(null);
+  const [pickedStatus, setStatusFilter] = useState<LeafletRouteStatus | null>(null);
+  const statusFilter = lockedStatus ?? pickedStatus;
 
   useEffect(() => {
     if (!isDemo) return;
@@ -370,6 +373,7 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
         .grouped-table-row:hover .leaflet-route-row-actions,
         .leaflet-route-row-actions:focus-within { opacity: 1; }
       `}</style>
+      {lockedStatus ? null : (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
         <SummaryCard
           title="Assigned Routes"
@@ -393,6 +397,7 @@ export function LeafletRoutesPage({ leafletId, demo, onSelectRoute }: LeafletRou
           onClick={() => toggleStatusFilter("skipped")}
         />
       </div>
+      )}
 
       <div style={{ marginInline: -8, minHeight: 0 }}>
         <GroupedTable
