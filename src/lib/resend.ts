@@ -18,6 +18,11 @@ export function getResendFromEmail(): string | undefined {
   return from || undefined;
 }
 
+/** `Name <address>` for the inbox "From" line; leaves addresses that already carry a name alone. */
+export function withDisplayName(address: string, name: string): string {
+  return address.includes("<") ? address : `${name} <${address}>`;
+}
+
 /** Shared client when the API key is set; otherwise null. */
 export function getResend(): Resend | null {
   const key = getResendApiKey();

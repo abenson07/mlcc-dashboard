@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CommSettings, Deliveries, Leaflets, People, Routes } from "@/types/database";
-import { getResend, getResendFromEmail } from "@/lib/resend";
+import { getResend, getResendFromEmail, withDisplayName } from "@/lib/resend";
 import { buildRespondUrl, type RespondMode } from "@/lib/leaflets/signRespondUrl";
 import { buildLeafletCommEmailHtml } from "@/lib/leaflets/comm/buildLeafletCommEmailHtml";
 import { isUnconfirmedOnlyStep } from "@/lib/leaflets/comm/commSchedule";
@@ -28,9 +28,16 @@ function commModeForStep(stepKey: string): RespondMode {
   return COMPLETION_COMM_STEPS.has(stepKey) ? "complete" : "confirm";
 }
 
-function commSubject(stepKey: string, leafletTitle: string) {
+const LEAFLET_COMM_FROM_NAME = "Maple Leaf Community Council";
+
+const CONFIRMATION_COMM_STEPS = new Set(["initial_confirmation", "confirmation_followup"]);
+
+export function commSubject(stepKey: string, leafletTitle: string) {
   if (COMPLETION_COMM_STEPS.has(stepKey)) {
     return `Report delivery complete — ${leafletTitle}`;
+  }
+  if (CONFIRMATION_COMM_STEPS.has(stepKey)) {
+    return `Confirm your ${leafletTitle} Routes`;
   }
   return `Confirm your routes — ${leafletTitle}`;
 }
@@ -103,7 +110,7 @@ async function sendDelivererEmail(params: {
   if (!resend || !from) throw new Error("Resend is not configured");
 
   const { error } = await resend.emails.send({
-    from,
+    from: withDisplayName(from, LEAFLET_COMM_FROM_NAME),
     to: params.to,
     subject: params.subject,
     html: params.html,
