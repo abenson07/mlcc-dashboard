@@ -57,7 +57,6 @@ function StatusCell({
   return (
     <Dropdown
       label={`Change status for ${deliverer.name}`}
-      portal
       open={open}
       onOpenChange={setOpen}
       placement="below"

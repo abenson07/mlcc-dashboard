@@ -16,7 +16,7 @@ export type DropdownProps = {
   placement?: LayerPlacement;
   alignment?: LayerAlignment;
   width?: number | string;
-  /** Portal the menu so clipping ancestors (e.g. table cells) cannot cut it off. */
+  /** Rendered in a fixed layer so table cells and scroll areas can't clip it. On by default. */
   portal?: boolean;
 };
 
@@ -33,7 +33,7 @@ export function Dropdown({
   placement = "below",
   alignment = "start",
   width = 174,
-  portal = false,
+  portal = true,
 }: DropdownProps) {
   return (
     <Popover
