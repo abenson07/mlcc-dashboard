@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import {
   computePopoverPosition,
+  resolvePopoverWidth,
   type PopoverAlignment,
   type PopoverPlacement,
 } from "./popoverPosition";
@@ -68,12 +69,16 @@ export function Popover({
   const containerRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [triggerWidth, setTriggerWidth] = useState<number | null>(null);
+  // Percent widths (e.g. "100%") follow the trigger, not the window.
+  const surfaceWidth = resolvePopoverWidth(width, triggerWidth);
 
   const place = useCallback(() => {
     const trigger = containerRef.current;
     const surface = surfaceRef.current;
     if (!trigger || !surface) return;
     const t = trigger.getBoundingClientRect();
+    setTriggerWidth(t.width);
     const s = surface.getBoundingClientRect();
     const next = computePopoverPosition({
       trigger: t,
@@ -121,7 +126,7 @@ export function Popover({
       window.removeEventListener("resize", place);
       setPos(null);
     };
-  }, [open, portal, place]);
+  }, [open, portal, place, surfaceWidth]);
 
   return (
     <div ref={containerRef} style={{ position: "relative", display: "inline-flex" }}>
@@ -135,7 +140,7 @@ export function Popover({
               style={{
                 position: "fixed",
                 zIndex: 400,
-                width,
+                width: surfaceWidth,
                 top: pos?.top ?? 0,
                 left: pos?.left ?? 0,
                 visibility: pos ? "visible" : "hidden",

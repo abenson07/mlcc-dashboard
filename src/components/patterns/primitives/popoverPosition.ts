@@ -4,6 +4,23 @@ export type PopoverPlacement = "below" | "above";
 export type PopoverAlignment = "start" | "end" | "center";
 
 /**
+ * Width for a fixed-position popover surface. A percentage means "that much of
+ * the trigger's width" (as it did when the menu sat inside its container), not
+ * a share of the whole window. Numbers and other CSS values pass through.
+ */
+export function resolvePopoverWidth(
+  width: number | string | undefined,
+  triggerWidth: number | null,
+): number | string | undefined {
+  if (typeof width === "string" && width.trim().endsWith("%")) {
+    if (triggerWidth === null) return undefined;
+    const pct = parseFloat(width);
+    return Number.isFinite(pct) ? (triggerWidth * pct) / 100 : undefined;
+  }
+  return width;
+}
+
+/**
  * Where to put a fixed-position popover surface so it stays on screen:
  * flips to the other side of the trigger when it doesn't fit (and the other
  * side has more room), and is clamped inside the viewport horizontally.

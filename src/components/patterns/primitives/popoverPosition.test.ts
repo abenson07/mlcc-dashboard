@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computePopoverPosition } from "./popoverPosition";
+import { computePopoverPosition, resolvePopoverWidth } from "./popoverPosition";
 
 const viewport = { width: 1000, height: 700 };
 const surface = { width: 174, height: 120 };
@@ -38,5 +38,22 @@ describe("computePopoverPosition", () => {
     expect(nearRight.left).toBe(1000 - 174 - 8);
     const nearLeft = computePopoverPosition({ trigger: trigger(100, 2), surface, viewport, placement: "below", alignment: "end" });
     expect(nearLeft.left).toBe(8);
+  });
+});
+
+describe("resolvePopoverWidth", () => {
+  it("makes a percentage follow the trigger, not the window", () => {
+    expect(resolvePopoverWidth("100%", 320)).toBe(320);
+    expect(resolvePopoverWidth("50%", 320)).toBe(160);
+  });
+
+  it("waits (undefined) for the trigger width before resolving a percentage", () => {
+    expect(resolvePopoverWidth("100%", null)).toBeUndefined();
+  });
+
+  it("passes numbers and other CSS values through", () => {
+    expect(resolvePopoverWidth(174, 320)).toBe(174);
+    expect(resolvePopoverWidth("max-content", 320)).toBe("max-content");
+    expect(resolvePopoverWidth(undefined, 320)).toBeUndefined();
   });
 });
