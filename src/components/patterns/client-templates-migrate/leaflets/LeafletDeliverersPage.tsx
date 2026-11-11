@@ -235,6 +235,20 @@ export function LeafletDeliverersPage({
     lastToggledId.current = row.id;
   }
 
+  // "All" means every row currently shown, so a filter or search narrows it.
+  const allSelected = filtered.length > 0 && filtered.every((d) => selectedIds.has(d.id));
+
+  function toggleAll(next: boolean) {
+    setSelectedIds((prev) => {
+      const out = new Set(prev);
+      for (const d of filtered) {
+        if (next) out.add(d.id);
+        else out.delete(d.id);
+      }
+      return out;
+    });
+  }
+
   function clearSelection() {
     const previous = new Set(selectedIds);
     setSelectedIds(new Set());
@@ -311,7 +325,16 @@ export function LeafletDeliverersPage({
   const columns: TableColumn<LeafletDelivererRow>[] = [
     {
       key: "select",
-      header: "",
+      header: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+          <Checkbox
+            label={allSelected ? "Deselect all deliverers" : "Select all deliverers"}
+            isLabelHidden
+            value={allSelected}
+            onChange={toggleAll}
+          />
+        </div>
+      ),
       width: pixel(36),
       renderCell: (row) => (
         <div
