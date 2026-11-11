@@ -129,6 +129,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
   const [demoDeliverers, setDemoDeliverers] = useState<LeafletDelivererRow[]>([]);
   const [emailOpen, setEmailOpen] = useState(false);
   const [emailPersonId, setEmailPersonId] = useState<string | null>(null);
+  const [emailPersonIds, setEmailPersonIds] = useState<string[] | null>(null);
   // Demo mode keeps its send history in page state only (resets on reload).
   const [demoSends, setDemoSends] = useState<CommSend[]>([]);
   const { sends: liveSends, refetch: refetchSends } = useLeafletCommSends(leafletId, { enabled: !demo });
@@ -232,8 +233,9 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     return out;
   }, [commStages, commDeliveries]);
 
-  function openEmailModal(personId?: string) {
+  function openEmailModal(personId?: string, personIds?: string[]) {
     setEmailPersonId(personId ?? null);
+    setEmailPersonIds(personIds ?? null);
     setEmailOpen(true);
   }
 
@@ -273,15 +275,17 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     [sends, emailPersonId],
   );
 
-  async function handleCommSent(stepKey: string) {
+  async function handleCommSent(stepKey: string, recipientIds?: string[]) {
     if (demo) {
       const sentAt = new Date().toISOString();
-      const recipients = emailPersonId ? [emailPersonId] : demoDeliverers.map((d) => d.id);
+      const recipients =
+        recipientIds ?? (emailPersonId ? [emailPersonId] : demoDeliverers.map((d) => d.id));
       setDemoSends((prev) => [
         ...recipients.map((person_id) => ({ person_id, step_key: stepKey, sent_at: sentAt })),
         ...prev,
       ]);
-      if (emailPersonId) return;
+      // Only an edition-wide send marks the step as sent for the leaflet.
+      if (emailPersonId || recipientIds) return;
       patchDemoEntity("leaflets", leafletId || leaflet.id, {
         commSent: {
           ...(demoLeafletRecord?.commSent ?? {}),
@@ -305,6 +309,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         demo={demo}
         onSelectDeliverer={selectDeliverer}
         onEmailDeliverer={(row) => openEmailModal(row.id)}
+        onEmailDeliverers={(rows) => openEmailModal(undefined, rows.map((r) => r.id))}
         sends={sends}
         stepLabels={stepLabels}
       />
@@ -404,6 +409,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         onClose={() => {
           setEmailOpen(false);
           setEmailPersonId(null);
+          setEmailPersonIds(null);
         }}
         leafletId={leafletId || leaflet.id}
         leafletTitle={leaflet.title}
@@ -413,6 +419,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
         recipientCountByStep={recipientCountByStep}
         personId={emailPersonId}
         personSends={personSendsForModal}
+        personIds={emailPersonIds}
         onSent={handleCommSent}
       />
     </div>

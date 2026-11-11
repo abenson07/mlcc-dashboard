@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, Filter, Mail, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useDeliveries, useDemoGuard } from "hooks";
@@ -8,11 +8,14 @@ import { pixel, proportional, type TableColumn } from "@/components/patterns/pri
 import { GroupedTable } from "@/components/patterns/grouped-table/GroupedTable";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { IconButton } from "@/components/patterns/shared/IconButton";
+import { Checkbox } from "@/components/patterns/primitives/Checkbox";
 import { RowClickCell } from "@/components/patterns/client-templates/shared";
-import { sampleDeliverers, type LeafletDelivererRow } from "@/data/mocks/leaflets";
-import { DEMO_STORE_EVENT, listDemoScoped } from "@/lib/demo/demoStore";
+import { sampleDeliverers, type LeafletDelivererRow, type LeafletRouteRow } from "@/data/mocks/leaflets";
+import { DEMO_STORE_EVENT, listDemoScoped, writeDemoScoped } from "@/lib/demo/demoStore";
+import type { DeliveriesUpdate } from "@/types/database";
 import { summarizePersonSends, type CommSend } from "@/lib/leaflets/comm/commSends";
-import { deliveriesToDelivererRows } from "./adapters";
+import { deliveriesToDelivererRows, sampleAllRouteRows } from "./adapters";
+import { DeliverersBulkBar } from "./DeliverersBulkBar";
 import {
   applyLeafletDeliveryStatus,
   deliveryIdsForDeliverer,
@@ -102,11 +105,25 @@ function StatusCell({
   );
 }
 
+/** What a status change overwrote, so Undo can put it back exactly. */
+type StatusSnapshot =
+  | { kind: "demo"; routes: LeafletRouteRow[]; deliverers: LeafletDelivererRow[] }
+  | { kind: "live"; rows: { id: string; patch: DeliveriesUpdate }[] };
+
+/** Undo toasts stay up longer than sonner's 4s default. */
+const UNDO_TOAST_MS = 8000;
+
+function plural(count: number, one: string, many: string): string {
+  return `${count} ${count === 1 ? one : many}`;
+}
+
 export type LeafletDeliverersPageProps = {
   leafletId: string;
   demo: boolean;
   onSelectDeliverer?: (deliverer: LeafletDelivererRow) => void;
   onEmailDeliverer?: (deliverer: LeafletDelivererRow) => void;
+  /** Bulk email for the rows picked with the checkboxes. */
+  onEmailDeliverers?: (deliverers: LeafletDelivererRow[]) => void;
   /** Logged emails for this leaflet, shown in the Emailed column. */
   sends?: CommSend[];
   /** Template names by step key, for the Emailed column. */
@@ -150,6 +167,7 @@ export function LeafletDeliverersPage({
   demo,
   onSelectDeliverer,
   onEmailDeliverer,
+  onEmailDeliverers,
   sends = [],
   stepLabels = {},
 }: LeafletDeliverersPageProps) {
@@ -189,22 +207,101 @@ export function LeafletDeliverersPage({
     });
   }, [deliverers, query, statusFilter]);
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const lastToggledId = useRef<string | null>(null);
+  // Rows can leave (filter, removal); only act on selected rows that still exist.
+  const selectedRows = useMemo(
+    () => deliverers.filter((d) => selectedIds.has(d.id)),
+    [deliverers, selectedIds],
+  );
+
+  function toggleRow(row: LeafletDelivererRow, next: boolean, range: boolean) {
+    // Read the anchor now: the updater runs after lastToggledId is overwritten below.
+    const anchor = lastToggledId.current;
+    setSelectedIds((prev) => {
+      const out = new Set(prev);
+      const from = anchor ? filtered.findIndex((d) => d.id === anchor) : -1;
+      const to = filtered.findIndex((d) => d.id === row.id);
+      if (range && from !== -1 && to !== -1) {
+        const [a, b] = from < to ? [from, to] : [to, from];
+        for (const d of filtered.slice(a, b + 1)) {
+          if (next) out.add(d.id);
+          else out.delete(d.id);
+        }
+      } else if (next) out.add(row.id);
+      else out.delete(row.id);
+      return out;
+    });
+    lastToggledId.current = row.id;
+  }
+
+  function clearSelection() {
+    const previous = new Set(selectedIds);
+    setSelectedIds(new Set());
+    toast(`Cleared ${plural(previous.size, "selection", "selections")}`, {
+      duration: UNDO_TOAST_MS,
+      action: { label: "Undo", onClick: () => setSelectedIds(previous) },
+    });
+  }
+
   const activeFilterLabel =
     STATUS_FILTER_OPTIONS.find((option) => option.value === statusFilter)?.label ?? "All statuses";
 
-  async function changeStatus(
-    deliverer: LeafletDelivererRow,
+  function snapshotStatus(ids: string[]): StatusSnapshot {
+    if (isDemo) {
+      return {
+        kind: "demo",
+        routes: listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows(),
+        deliverers: listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
+      };
+    }
+    const wanted = new Set(ids);
+    return {
+      kind: "live",
+      rows: deliveries
+        .filter((d) => wanted.has(d.id))
+        .map((d) => ({
+          id: d.id,
+          patch: { response: d.response, is_skipped: d.is_skipped, responded_at: d.responded_at },
+        })),
+    };
+  }
+
+  async function restoreStatus(snapshot: StatusSnapshot) {
+    if (snapshot.kind === "demo") {
+      writeDemoScoped("leafletRoutes", scopeKey, snapshot.routes);
+      writeDemoScoped("leafletDeliverers", scopeKey, snapshot.deliverers);
+      return;
+    }
+    await Promise.all(snapshot.rows.map((row) => update(row.id, row.patch)));
+    await refetch();
+  }
+
+  async function setStatusFor(
+    targets: LeafletDelivererRow[],
     action: LeafletDeliveryStatusAction,
     label: string,
   ) {
-    const ids = deliveryIdsForDeliverer(deliverer);
+    const ids = targets.flatMap(deliveryIdsForDeliverer);
     if (ids.length === 0) return;
+    const who = targets.length === 1 ? targets[0]!.name : plural(targets.length, "deliverer", "deliverers");
+    const snapshot = snapshotStatus(ids);
     try {
       await applyLeafletDeliveryStatus({ isDemo, scopeKey, deliveryIds: ids, action, update, refetch });
       toast.success(
-        isDemo
-          ? `${deliverer.name} set to ${label} — demo mode, saved locally only`
-          : `${deliverer.name} set to ${label}`,
+        isDemo ? `${who} set to ${label} — demo mode, saved locally only` : `${who} set to ${label}`,
+        {
+          duration: UNDO_TOAST_MS,
+          action: {
+            label: "Undo",
+            onClick: () => {
+              restoreStatus(snapshot).then(
+                () => toast(`Restored status for ${who}`),
+                (e: unknown) => toast.error(e instanceof Error ? e.message : "Failed to undo"),
+              );
+            },
+          },
+        },
       );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to update status");
@@ -212,6 +309,31 @@ export function LeafletDeliverersPage({
   }
 
   const columns: TableColumn<LeafletDelivererRow>[] = [
+    {
+      key: "select",
+      header: "",
+      width: pixel(36),
+      renderCell: (row) => (
+        <div
+          onClickCapture={(event) => {
+            // Shift-click extends the selection from the last toggled row.
+            if (event.shiftKey) {
+              event.preventDefault();
+              event.stopPropagation();
+              toggleRow(row, !selectedIds.has(row.id), true);
+            }
+          }}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}
+        >
+          <Checkbox
+            label={`Select ${row.name}`}
+            isLabelHidden
+            value={selectedIds.has(row.id)}
+            onChange={(next) => toggleRow(row, next, false)}
+          />
+        </div>
+      ),
+    },
     {
       key: "name",
       header: "Name",
@@ -238,7 +360,7 @@ export function LeafletDeliverersPage({
       width: pixel(150),
       renderCell: (row) => (
         <RowClickArea onClick={onSelectDeliverer ? () => onSelectDeliverer(row) : undefined}>
-          <StatusCell deliverer={row} onChange={(d, a, l) => void changeStatus(d, a, l)} />
+          <StatusCell deliverer={row} onChange={(d, a, l) => void setStatusFor([d], a, l)} />
         </RowClickArea>
       ),
     },
@@ -282,6 +404,7 @@ export function LeafletDeliverersPage({
         display: "flex",
         flexDirection: "column",
         gap: 16,
+        minHeight: "100%",
         padding: "20px 8px",
       }}
     >
@@ -367,6 +490,17 @@ export function LeafletDeliverersPage({
           <GroupedTable data={filtered} columns={columns} getRowKey={(row) => row.id} listChrome hasHover />
         </div>
       )}
+
+      <DeliverersBulkBar
+        selected={selectedRows}
+        statusOptions={STATUS_OPTIONS}
+        onSetStatus={(status) => {
+          const option = STATUS_OPTIONS.find((o) => o.value === status);
+          if (option) void setStatusFor(selectedRows, option.action, option.label);
+        }}
+        onEmail={() => onEmailDeliverers?.(selectedRows)}
+        onClear={clearSelection}
+      />
     </div>
   );
 }

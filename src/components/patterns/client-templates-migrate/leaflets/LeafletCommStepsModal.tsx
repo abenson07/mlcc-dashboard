@@ -36,8 +36,17 @@ export type LeafletCommStepsModalProps = {
   personId?: string | null;
   /** For a one-person send: newest send time (ISO) per template for that deliverer. */
   personSends?: Record<string, string>;
-  onSent?: (stepKey: string) => void | Promise<void>;
+  /**
+   * When set, send only to these deliverers (a bulk selection). The send is
+   * held for a few seconds behind an Undo toast before anything goes out.
+   */
+  personIds?: string[] | null;
+  /** `recipientIds` is set for a bulk selection send. */
+  onSent?: (stepKey: string, recipientIds?: string[]) => void | Promise<void>;
 };
+
+/** How long a bulk send waits for Undo before emails go out. */
+const UNDO_SEND_DELAY_MS = 5000;
 
 function pickSamplePerson(
   deliverers: LeafletDelivererRow[],
@@ -150,6 +159,7 @@ export function LeafletCommStepsModal({
   recipientCountByStep,
   personId = null,
   personSends,
+  personIds = null,
   onSent,
 }: LeafletCommStepsModalProps) {
   const { enabled: demo, sendDemoEmail } = useDemoGuard();
@@ -162,7 +172,7 @@ export function LeafletCommStepsModal({
   useEffect(() => {
     if (!isOpen) return;
     setStepKey(defaultStepKey(stages));
-    setSamplePerson(pickSamplePerson(deliverers, personId));
+    setSamplePerson(pickSamplePerson(deliverers, personId ?? personIds?.[0]));
     setConfirmResend(false);
     setError(null);
     setSending(false);
@@ -173,12 +183,21 @@ export function LeafletCommStepsModal({
   const selected = stages.find((s) => s.stepKey === stepKey) ?? null;
   const copy = leafletCommCopy(stepKey ?? "");
   const singlePerson = Boolean(personId);
+  const groupRecipients = useMemo(
+    () => (personIds && !singlePerson ? deliverers.filter((d) => personIds.includes(d.id)) : null),
+    [personIds, singlePerson, deliverers],
+  );
+  const isGroup = groupRecipients != null;
   // A one-person send is judged by what this deliverer was sent, not the edition-wide flag.
   const personSentAt = singlePerson && stepKey ? personSends?.[stepKey] : undefined;
-  const alreadySent = singlePerson ? Boolean(personSentAt) : selected?.state === "completed";
-  const recipientCount = singlePerson ? 1 : (stepKey ? (recipientCountByStep[stepKey] ?? 0) : 0);
+  const alreadySent = isGroup ? false : singlePerson ? Boolean(personSentAt) : selected?.state === "completed";
+  const recipientCount = isGroup
+    ? groupRecipients.length
+    : singlePerson
+      ? 1
+      : (stepKey ? (recipientCountByStep[stepKey] ?? 0) : 0);
   const recipientNoun = recipientCount === 1 ? "deliverer" : "deliverers";
-  const audienceNote = !singlePerson && isUnconfirmedOnlyStep(stepKey ?? "")
+  const audienceNote = !singlePerson && !isGroup && isUnconfirmedOnlyStep(stepKey ?? "")
     ? " who have not confirmed"
     : "";
 
@@ -245,7 +264,78 @@ export function LeafletCommStepsModal({
     }
   }
 
+  /** Bulk send: close now, wait behind an Undo toast, then send one by one. */
+  function sendToGroup() {
+    if (!stepKey || !groupRecipients || groupRecipients.length === 0) return;
+    const key = stepKey;
+    const recipients = groupRecipients;
+    const stageName = selected?.name ?? "email";
+    const who = `${recipients.length} ${recipients.length === 1 ? "deliverer" : "deliverers"}`;
+    let cancelled = false;
+    const toastId = toast(`Sending "${stageName}" to ${who}…`, {
+      duration: UNDO_SEND_DELAY_MS,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          cancelled = true;
+          toast(`Cancelled — nothing was sent to ${who}`);
+        },
+      },
+    });
+    onClose();
+
+    window.setTimeout(() => {
+      if (cancelled) return;
+      toast.dismiss(toastId);
+      void (async () => {
+        try {
+          if (demo) {
+            await sendDemoEmail({
+              subject: `${stageName} — ${leafletTitle}`,
+              text: `Demo send of "${stageName}" for ${leafletTitle}.`,
+              context: recipients.map((r) => r.name).join(", "),
+            });
+            await onSent?.(key, recipients.map((r) => r.id));
+            return;
+          }
+          const results = await Promise.allSettled(
+            recipients.map(async (r) => {
+              const res = await fetch(
+                `${getApiBase()}/api/leaflets/${encodeURIComponent(leafletId)}/comm/resend`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ personId: r.id, stepKey: key }),
+                },
+              );
+              const data = (await res.json()) as { error?: string };
+              if (!res.ok) throw new Error(`${r.name}: ${data.error ?? "Failed to send"}`);
+              return r.id;
+            }),
+          );
+          const sentIds = results.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []));
+          const failures = results.flatMap((r) =>
+            r.status === "rejected" ? [r.reason instanceof Error ? r.reason.message : "Failed to send"] : [],
+          );
+          if (sentIds.length > 0) {
+            toast.success(`Sent to ${sentIds.length} ${sentIds.length === 1 ? "deliverer" : "deliverers"}`);
+          }
+          if (failures.length > 0) {
+            toast.error(`${failures.length} not sent`, { description: failures.join("\n") });
+          }
+          await onSent?.(key, sentIds);
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "Failed to send");
+        }
+      })();
+    }, UNDO_SEND_DELAY_MS);
+  }
+
   function handleSendClick() {
+    if (isGroup) {
+      sendToGroup();
+      return;
+    }
     if (alreadySent && !confirmResend) {
       setConfirmResend(true);
       return;
@@ -253,7 +343,9 @@ export function LeafletCommStepsModal({
     void sendNow();
   }
 
-  const statusLabel = singlePerson
+  const statusLabel = isGroup
+    ? `${recipientCount} selected`
+    : singlePerson
     ? personSentAt
       ? `Sent ${formatSendDate(personSentAt)}`
       : "Not sent"
@@ -267,7 +359,13 @@ export function LeafletCommStepsModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={singlePerson ? `Email ${samplePerson?.name ?? "deliverer"}` : "Deliverer emails"}
+      title={
+        singlePerson
+          ? `Email ${samplePerson?.name ?? "deliverer"}`
+          : isGroup
+            ? `Email ${recipientCount} ${recipientNoun}`
+            : "Deliverer emails"
+      }
       width={640}
       footer={
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
@@ -311,6 +409,39 @@ export function LeafletCommStepsModal({
             ? `Already sent this edition. Send again to ${recipientCount} ${recipientNoun}${audienceNote}?`
             : `This sends to ${recipientCount} ${recipientNoun}${audienceNote}.`}
         </Text>
+
+        {groupRecipients ? (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              maxHeight: 112,
+              overflow: "auto",
+            }}
+          >
+            {groupRecipients.map((r) => (
+              <span
+                key={r.id}
+                title={r.name}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  height: 24,
+                  paddingInline: 8,
+                  borderRadius: 999,
+                  background: "var(--linear-color-sidebar-item-selected)",
+                  boxShadow: "inset 0 0 0 1px var(--linear-color-hairline)",
+                  fontSize: 12,
+                  color: r.email.trim() ? "var(--linear-color-ink)" : "var(--linear-color-ink-subtle)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {r.email.trim() || `${r.name} — no email`}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         <div
           key={stepKey ?? "none"}
