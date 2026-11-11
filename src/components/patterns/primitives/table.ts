@@ -17,7 +17,7 @@ export function proportional(
 
 export type TableColumn<T> = {
   key: string;
-  header: string;
+  header: ReactNode;
   width: TableColumnWidth;
   renderCell: (row: T) => ReactNode;
 };
