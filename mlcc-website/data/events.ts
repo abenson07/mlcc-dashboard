@@ -56,8 +56,8 @@ const EVENT_IMAGES = {
   nightOut: "/images/events/night-out.jpeg",
   emergencyHub: "/images/one-seattle/reservoir-park.jpg",
   audiobookWalk: "/images/one-seattle/reservoir-park.jpg",
-  // Placeholder until Woven sends a photo of their studio.
-  wovenYoga: "/images/community-photos/love-your-neighbor.webp",
+  // Stock photo (Vitaly Gariev on Unsplash, Unsplash License) until Woven sends one of their studio.
+  wovenYoga: "/images/events/woven-yoga.jpg",
 } as const;
 
 const EVENT_TIMEZONE = "America/Los_Angeles";
