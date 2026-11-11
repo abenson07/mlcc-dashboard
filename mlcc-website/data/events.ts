@@ -55,6 +55,9 @@ const EVENT_IMAGES = {
   fallMeeting: "/images/community-photos/community-meeting-a.webp",
   nightOut: "/images/events/night-out.jpeg",
   emergencyHub: "/images/one-seattle/reservoir-park.jpg",
+  audiobookWalk: "/images/one-seattle/reservoir-park.jpg",
+  // Placeholder until Woven sends a photo of their studio.
+  wovenYoga: "/images/community-photos/love-your-neighbor.webp",
 } as const;
 
 const EVENT_TIMEZONE = "America/Los_Angeles";
@@ -516,7 +519,9 @@ export async function getMergedEvents(): Promise<Event[]> {
     fetchPublishedEventRows(),
     fetchUnpublishedEventSlugs(),
   ]);
-  return mergeStaticWithPublished(events, published, unpublishedSlugs);
+  return mergeStaticWithPublished(events, published, unpublishedSlugs).sort(
+    (a, b) => new Date(a.dateIso).getTime() - new Date(b.dateIso).getTime(),
+  );
 }
 
 export async function getMergedUpcomingEvents(): Promise<Event[]> {
@@ -527,6 +532,66 @@ export async function getMergedEvent(slug: string): Promise<Event | undefined> {
   const merged = await getMergedEvents();
   return merged.find((item) => item.slug === slug);
 }
+
+const AUDIOBOOK_WALK_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "The Audiobook Walk is a walking cousin of Silent Book Club. Bring your headphones and whatever you're listening to, and we'll take an easy, unhurried loop around Maple Leaf Reservoir Park together.",
+    },
+    {
+      kind: "heading",
+      text: "What to expect",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "Meet at the park and head out at a relaxed pace",
+        "Listen to your own audiobook or podcast as we walk, for about an hour",
+        "Stick around after if you'd like to chat about what you're listening to",
+        "Free, no RSVP, and dogs and strollers are welcome",
+      ],
+    },
+    {
+      kind: "paragraph",
+      text: "Dress for the weather and bring a charged phone and headphones. If it's pouring, we'll still go, just a little faster.",
+    },
+  ],
+};
+
+const WOVEN_YOGA_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "We're teaming up with Woven Yoga, our neighbors on Roosevelt, for an evening class that's open to every level and every body. It's pay what you can, so cost is never the reason to miss out.",
+    },
+    {
+      kind: "heading",
+      text: "What to expect",
+      size: "h5",
+    },
+    {
+      kind: "list",
+      items: [
+        "A welcoming class led by the Woven team, with no experience needed",
+        "Pay what you can, whatever that looks like for you",
+        "Bring a mat if you have one, and wear something comfortable",
+        "A good excuse to meet neighbors somewhere other than the sidewalk",
+      ],
+    },
+  ],
+};
+
+const SILENT_BOOK_CLUB_GREEN_LAKE_DETAIL: EventDetailContent = {
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "We're taking Silent Book Club on a little field trip to the Green Lake Branch of the Seattle Public Library. Same easy format as always, just a different room full of books and a different day than our usual third Sunday.",
+    },
+    ...SILENT_BOOK_CLUB_DETAIL.blocks,
+  ],
+};
 
 export const events: Event[] = [
   event({
@@ -703,7 +768,7 @@ export const events: Event[] = [
     slug: "november-silent-book-club",
     title: "November Silent Book Club",
     dateIso: "2026-11-15T23:00:00.000Z",
-    shortDescription: "Cozy rainy-season reading with neighbors. Third Sunday at Watershed.",
+    shortDescription: "Settle in with a book and some neighbors on a rainy third Sunday at Watershed",
     locationName: "Watershed Pub",
     category: "Book Club",
     image: EVENT_IMAGES.silentBookClub,
@@ -714,12 +779,69 @@ export const events: Event[] = [
     slug: "december-silent-book-club",
     title: "December Silent Book Club",
     dateIso: "2026-12-20T23:00:00.000Z",
-    shortDescription: "A quiet read with neighbors before the holiday rush. Third Sunday.",
+    shortDescription: "Sneak in a quiet read with neighbors before the holiday rush picks up",
     locationName: "Watershed Pub",
     category: "Book Club",
     image: EVENT_IMAGES.silentBookClub,
     href: "https://www.google.com/maps/search/?api=1&query=Watershed%20Pub%20Seattle",
     detail: SILENT_BOOK_CLUB_DETAIL,
+  }),
+  event({
+    slug: "audiobook-walk-november",
+    title: "Audiobook Walk",
+    dateIso: "2026-11-27T18:00:00.000Z",
+    shortDescription: "Pop in your headphones and walk off those leftovers around the reservoir",
+    locationName: "Maple Leaf Reservoir Park",
+    category: "Book Club",
+    image: EVENT_IMAGES.audiobookWalk,
+    href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Reservoir%20Park%20Seattle",
+    detail: AUDIOBOOK_WALK_DETAIL,
+  }),
+  event({
+    slug: "woven-yoga-collab",
+    title: "Woven Yoga Collab",
+    dateIso: "2026-12-03T03:30:00.000Z",
+    shortDescription: "Join neighbors for a pay-what-you-can evening class at Woven on Roosevelt",
+    locationName: "Woven Yoga",
+    category: "Community",
+    image: EVENT_IMAGES.wovenYoga,
+    href: "https://www.google.com/maps/search/?api=1&query=Woven%20Yoga%208815%20Roosevelt%20Way%20NE%20Seattle",
+    mapQuery: "8815 Roosevelt Way NE, Seattle, WA 98115",
+    detail: WOVEN_YOGA_DETAIL,
+  }),
+  event({
+    slug: "audiobook-walk-december",
+    title: "December Audiobook Walk",
+    dateIso: "2026-12-12T18:00:00.000Z",
+    shortDescription: "Bundle up and bring a good listen for a crisp morning lap around the park",
+    locationName: "Maple Leaf Reservoir Park",
+    category: "Book Club",
+    image: EVENT_IMAGES.audiobookWalk,
+    href: "https://www.google.com/maps/search/?api=1&query=Maple%20Leaf%20Reservoir%20Park%20Seattle",
+    detail: AUDIOBOOK_WALK_DETAIL,
+  }),
+  event({
+    slug: "january-silent-book-club",
+    title: "January Silent Book Club",
+    dateIso: "2027-01-17T23:00:00.000Z",
+    shortDescription: "Ease into the new year with a quiet afternoon of reading at Watershed",
+    locationName: "Watershed Pub",
+    category: "Book Club",
+    image: EVENT_IMAGES.silentBookClub,
+    href: "https://www.google.com/maps/search/?api=1&query=Watershed%20Pub%20Seattle",
+    detail: SILENT_BOOK_CLUB_DETAIL,
+  }),
+  event({
+    slug: "silent-book-club-green-lake-library",
+    title: "Silent Book Club at Green Lake Library",
+    dateIso: "2027-01-31T21:00:00.000Z",
+    shortDescription: "Bring a book to the Green Lake library for a quiet winter afternoon of reading",
+    locationName: "Green Lake Branch, Seattle Public Library",
+    category: "Book Club",
+    image: EVENT_IMAGES.silentBookClub,
+    href: "https://www.google.com/maps/search/?api=1&query=Green%20Lake%20Branch%20Seattle%20Public%20Library",
+    mapQuery: "Green Lake Branch, Seattle Public Library, Seattle, WA",
+    detail: SILENT_BOOK_CLUB_GREEN_LAKE_DETAIL,
   }),
 ];
 

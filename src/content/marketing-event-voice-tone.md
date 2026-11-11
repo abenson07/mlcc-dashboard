@@ -224,6 +224,8 @@ Most communications should follow:
 - **Length:** Aim for about **72 characters** (stay roughly **65–78**). This line appears under the title in listings and must read cleanly on one line on most screens.
 - **Job:** One crisp beat: time pattern, place, or who it’s for — **not** a paragraph. Avoid repeating the full title if the title already states the program name and month or year.
 - **Voice:** Neighborly, plain language, invitation not command. No em dash habit, no hard sell.
+- **One flowing sentence, not clipped fragments.** Write the teaser the way a neighbor would say it out loud. Do **not** use the stacked-fragment pattern of two or three short clauses each ending in a period (e.g., *"Headphones in, leftovers walked off. A slow loop around the reservoir."* or *"A gentle reset. Third Sunday at Watershed."*). That rhythm reads as AI-written. Prefer a single natural sentence with a verb that invites (e.g., *"Pop in your headphones and walk off those leftovers around the reservoir"*). No trailing period is needed on card teasers.
+- **Length wins ties.** If the natural sentence runs long, trim words rather than splitting it into fragments to save space.
 
 **Headlines & openers**
 
@@ -247,6 +249,7 @@ Derive month, season, and year from the **confirmed schedule** in the brief or f
 - **Month in the title:** Keep using the month in the public title (see above), e.g., *September Silent Book Club*.
 - **Fresh angles every month:** Avoid recycling the same hook as last month or the AI default. Take a **seasonal or monthly** angle: weather in Seattle, school-year rhythm, holidays, or one light line of wordplay. Examples of the *kind* of angle (adapt, don’t paste): stepping out of **August** heat into a cool hour of reading; **fall** wordplay like “fall into a good chapter”; **December** coziness before the holiday rush; **January** as a gentle reset; **spring** as lighter evenings and getting outside later. Stay **one notch** below “marketing campaign”: neighborly, specific, skimmable.
 - **Guardrails:** Still plain-spoken MLCC voice: welcoming, low-pressure, inclusive. No guilt trips, no hard sell. One seasonal line is plenty; the rest should be concrete: what happens, when, where, who it’s for.
+- **Off-schedule editions:** Sometimes Silent Book Club meets somewhere other than Watershed or on a day other than the third Sunday (e.g., a library or the park). Treat it as a normal Silent Book Club in tone and format, but do **not** say "third Sunday" or "Watershed" for that edition. Name the actual venue, and in the title use the venue rather than the month if a regular same-month edition also exists (e.g., *Silent Book Club at Green Lake Library*), so neighbors can tell the two apart.
 - **Short description on cards:** For Silent Book Club listings, the **teaser line** should still hit the **~72 character** card guideline (see **Short descriptions** above). The title already carries the month; the teaser can lean on third Sunday, Watershed, or one seasonal hook — not all three every time.
 
 ### 7. Language guidelines
