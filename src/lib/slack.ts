@@ -29,6 +29,19 @@ export async function postToSlack(text: string, committeeName?: string): Promise
   await postToChannel(channel, text);
 }
 
+/**
+ * Shared channel for every committee-join and volunteer signup. Override with
+ * SLACK_CHANNEL_VOLUNTEER_INTEREST; the default is the live channel ID.
+ */
+const DEFAULT_VOLUNTEER_INTEREST_CHANNEL = "C0CHRDASC2J";
+
+export async function postVolunteerInterestToSlack(text: string): Promise<void> {
+  const channel =
+    process.env.SLACK_CHANNEL_VOLUNTEER_INTEREST?.trim() || DEFAULT_VOLUNTEER_INTEREST_CHANNEL;
+
+  await postToChannel(channel, text);
+}
+
 export async function postContactToSlack(text: string): Promise<void> {
   const channel = process.env.SLACK_CHANNEL_CONTACT;
   if (!channel) return;

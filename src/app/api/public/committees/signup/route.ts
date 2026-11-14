@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { corsPreflightResponse, withCors } from "@/lib/stripe/cors";
-import { postToSlack } from "@/lib/slack";
+import { postVolunteerInterestToSlack } from "@/lib/slack";
+import { buildVolunteerInterestMessage } from "@/lib/committees/volunteerInterestMessage";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { committeeSlugFromName } from "@/lib/committees/committeeSlug";
 import {
@@ -14,13 +15,6 @@ import {
 import type { CommitteeInterestSource, CommitteeSlug } from "@/types/database";
 
 type SignupSource = "join-card" | "meeting-signup" | "zoning-workshop" | "volunteer-opportunity";
-
-const SOURCE_LABELS: Record<SignupSource, string> = {
-  "join-card": "Join the committee",
-  "meeting-signup": "Meeting RSVP",
-  "zoning-workshop": "Would like to attend a zoning workshop",
-  "volunteer-opportunity": "Volunteer opportunity",
-};
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -75,27 +69,20 @@ export async function POST(request: NextRequest) {
 
   const trimmedName = name.trim();
   const trimmedContact = contact.trim();
-  const isVolunteerOpportunity = source === "volunteer-opportunity";
-  const sourceLabel = isSignupSource(source) ? SOURCE_LABELS[source] : "Committee page";
-  const roleLine =
-    typeof opportunityTitle === "string" && opportunityTitle.trim()
-      ? `*Role:* ${opportunityTitle.trim()}\n`
-      : "";
-  const committeeLine =
-    typeof committeeName === "string" && committeeName.trim()
-      ? `*Committee:* ${committeeName.trim()}\n`
-      : isVolunteerOpportunity
-        ? `*Committee:* Steering\n`
-        : "";
 
-  const headline = isVolunteerOpportunity
-    ? `:wave: New volunteer interest (${sourceLabel})\n`
-    : `:wave: New committee signup (${sourceLabel})\n`;
-
-  const text =
-    headline + roleLine + committeeLine + `*Name:* ${trimmedName}\n` + `*Contact:* ${trimmedContact}`;
-
-  await postToSlack(text, typeof committeeName === "string" ? committeeName.trim() : undefined);
+  // All committee / volunteer interest goes to one shared channel, so the message
+  // spells out the signup type and the committee / role it is for.
+  await postVolunteerInterestToSlack(
+    buildVolunteerInterestMessage({
+      source,
+      name: trimmedName,
+      contact: trimmedContact,
+      committeeName: typeof committeeName === "string" ? committeeName : null,
+      opportunityTitle: typeof opportunityTitle === "string" ? opportunityTitle : null,
+    }),
+  ).catch((error) => {
+    console.error("[committees/signup] slack failed", error);
+  });
 
   let committee: CommitteeSlug = committeeSlugFromName(
     typeof committeeName === "string" ? committeeName : undefined,

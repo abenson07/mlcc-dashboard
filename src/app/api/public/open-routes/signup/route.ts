@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { corsPreflightResponse, withCors } from "@/lib/stripe/cors";
-import { postToSlack } from "@/lib/slack";
+import { postToSlack, postVolunteerInterestToSlack } from "@/lib/slack";
+import { escapeSlack } from "@/lib/committees/volunteerInterestMessage";
 import { claimOpenRoute } from "@/lib/leaflets/claimOpenRoute";
 import { sendOpenRouteSignupEmail } from "@/lib/leaflets/sendOpenRouteSignupEmail";
 
@@ -45,14 +46,19 @@ export async function POST(request: NextRequest) {
   }
 
   const slackText =
-    `:mailbox: New Leaflet route signup\n` +
-    `*Route:* ${result.routeName}\n` +
-    `*Leaflet:* ${result.leafletTitle}\n` +
-    `*Name:* ${String(name).trim()}\n` +
-    `*Email:* ${String(email).trim()}\n` +
-    `*Address:* ${String(address).trim()}`;
+    `:mailbox: *Signed up for a specific volunteer role:* Leaflet delivery route\n` +
+    `*Committee:* Leaflet\n` +
+    `*Route:* ${escapeSlack(result.routeName)}\n` +
+    `*Leaflet:* ${escapeSlack(result.leafletTitle)}\n` +
+    `*Name:* ${escapeSlack(String(name).trim())}\n` +
+    `*Email:* ${escapeSlack(String(email).trim())}\n` +
+    `*Address:* ${escapeSlack(String(address).trim())}`;
 
-  await postToSlack(slackText, "Newsletter").catch((error) => {
+  // Post to the shared volunteer-interest channel and, for now, the Newsletter channel too.
+  await Promise.all([
+    postVolunteerInterestToSlack(slackText),
+    postToSlack(slackText, "Newsletter"),
+  ]).catch((error) => {
     console.error("[open-routes/signup] slack failed", error);
   });
 

@@ -25,8 +25,6 @@ export type VolunteerOpportunity = {
   filters: VolunteerFilter[];
   image: string;
   committee?: CommitteeListingSlug;
-  /** When set, Slack routing uses this instead of `committee`. `"steering"` → SLACK_CHANNEL_STEERING fallback. */
-  notifySlackAs?: CommitteeListingSlug | "steering";
   detail?: VolunteerDetailContent;
 };
 
@@ -48,7 +46,6 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
     filters: ["communication", "online"],
     image:
       "/images/community-photos/community-meeting-a.webp",
-    notifySlackAs: "steering",
     detail: {
       backLabel: "All volunteer opportunities",
       blocks: [
@@ -168,7 +165,6 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
     image:
       "/images/community-photos/photo-jun-11-2025.jpg",
     committee: "communications",
-    notifySlackAs: "steering",
     detail: {
       backLabel: "All volunteer opportunities",
       blocks: [
@@ -220,7 +216,6 @@ export const volunteerOpportunities: VolunteerOpportunity[] = [
     timeCommitment: "3 hours per month",
     filters: ["planning", "communication"],
     image: "/images/community-photos/community-meeting-d.webp",
-    notifySlackAs: "steering",
     detail: {
       backLabel: "All volunteer opportunities",
       blocks: [
@@ -1022,12 +1017,10 @@ export function getVolunteerOpportunity(slug: string): VolunteerOpportunity | un
   return volunteerOpportunities.find((opportunity) => opportunity.slug === slug);
 }
 
-/** Slack channel key for `postToSlack`, or `undefined` to fall back to Steering. */
-export function getVolunteerSlackCommitteeName(
-  opportunity: VolunteerOpportunity,
-): string | undefined {
-  const target = opportunity.notifySlackAs ?? opportunity.committee;
-  if (!target || target === "steering") return undefined;
+/** Committee display name for an opportunity (shown in the Slack signup message), if it has one. */
+export function getVolunteerCommitteeName(opportunity: VolunteerOpportunity): string | undefined {
+  const target = opportunity.committee;
+  if (!target) return undefined;
   return COMMITTEE_CONTENT[target].title;
 }
 
