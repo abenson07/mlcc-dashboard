@@ -4,7 +4,7 @@ import { CmsPage6Section } from "@marketing/components/byq/CmsPage6Section";
 import { CtaSection } from "@marketing/components/byq/CtaSection";
 import {
   getVolunteerOpportunity,
-  getVolunteerSlackCommitteeName,
+  getVolunteerCommitteeName,
   volunteerOpportunities,
 } from "@marketing/data/volunteers";
 
@@ -45,7 +45,7 @@ export default async function VolunteerOpportunityPage({ params }: PageProps) {
         detail={opportunity.detail}
         signupIdPrefix={opportunity.slug}
         currentSlug={opportunity.slug}
-        committeeName={getVolunteerSlackCommitteeName(opportunity)}
+        committeeName={getVolunteerCommitteeName(opportunity)}
       />
       <CtaSection />
     </main>
