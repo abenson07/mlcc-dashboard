@@ -167,15 +167,17 @@ export type LeafletRouteRow = {
   personId?: string | null;
   personName?: string | null;
   response?: "pending" | "confirmed" | "needs_cover" | "rejected";
+  leafletCount?: number;
+  routeType?: string | null;
 };
 
 /** Routes with no primary deliverer assigned — pulled from `routes` where `primary_deliverer_id is null`. */
 export const sampleOpenRoutes: LeafletRouteRow[] = [
-  { id: "2a4257a9-9fbd-4845-91e5-db35888df2fb", name: "Cloud City Coffee", initials: "—", detail: "50 addresses", status: "unassigned" },
-  { id: "77b321b4-ba1a-499c-b319-207adccd22e1", name: "20th: 88th to 92nd", initials: "—", detail: "45 addresses", status: "unassigned" },
-  { id: "36992fdf-f1c0-4ece-98e4-0c599c252aa8", name: "Hive Apartments", initials: "—", detail: "45 addresses", status: "unassigned" },
-  { id: "8d5f5b9b-8d12-499b-8a01-5def7a9821cd", name: "5th: 78th to 81th", initials: "—", detail: "40 addresses", status: "unassigned" },
-  { id: "6f2e6e64-2591-4bc8-8337-f2877014dc24", name: "Cambridge Court Condos", initials: "—", detail: "40 addresses", status: "unassigned" },
+  { id: "2a4257a9-9fbd-4845-91e5-db35888df2fb", name: "Cloud City Coffee", initials: "—", detail: "50 addresses", status: "unassigned", leafletCount: 50 },
+  { id: "77b321b4-ba1a-499c-b319-207adccd22e1", name: "20th: 88th to 92nd", initials: "—", detail: "45 addresses", status: "unassigned", leafletCount: 45 },
+  { id: "36992fdf-f1c0-4ece-98e4-0c599c252aa8", name: "Hive Apartments", initials: "—", detail: "45 addresses", status: "unassigned", leafletCount: 45 },
+  { id: "8d5f5b9b-8d12-499b-8a01-5def7a9821cd", name: "5th: 78th to 81th", initials: "—", detail: "40 addresses", status: "unassigned", leafletCount: 40 },
+  { id: "6f2e6e64-2591-4bc8-8337-f2877014dc24", name: "Cambridge Court Condos", initials: "—", detail: "40 addresses", status: "unassigned", leafletCount: 40 },
 ];
 
 /** Routes a deliverer dropped that need a substitute — none reported yet. */

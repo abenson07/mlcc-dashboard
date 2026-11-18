@@ -95,6 +95,8 @@ export function deliveriesToRouteRows(deliveries: DeliveryWithRelations[]): Leaf
       personId: d.person_id,
       personName: d.people?.full_name ?? null,
       response: d.response,
+      leafletCount: d.leaflet_count ?? 0,
+      routeType: d.routes?.route_type ?? null,
     };
   });
 }
@@ -112,6 +114,8 @@ export function sampleAllRouteRows(): LeafletRouteRow[] {
       personId: d.id,
       personName: d.name,
       response: route.response ?? (d.status === "Confirmed" ? "confirmed" : "pending"),
+      leafletCount: route.leafletCount,
+      routeType: route.routeType,
     })),
   );
   return [...assigned, ...sampleOpenRoutes, ...sampleSkippedRoutes];

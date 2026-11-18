@@ -105,6 +105,8 @@ export type AssignScopeConfirmModalProps = {
   personName: string;
   routeLabel: string;
   submitting?: boolean;
+  previousDelivererName?: string | null;
+  error?: string | null;
   onThisRouteOnly: () => void | Promise<void>;
   onPermanent: () => void | Promise<void>;
   onCancel: () => void;
@@ -115,6 +117,8 @@ export function AssignScopeConfirmModal({
   personName,
   routeLabel,
   submitting = false,
+  previousDelivererName,
+  error,
   onThisRouteOnly,
   onPermanent,
   onCancel,
@@ -122,7 +126,7 @@ export function AssignScopeConfirmModal({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onCancel}
+      onClose={() => { if (!submitting) onCancel(); }}
       title="Make this the default?"
       footer={
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap" }}>
@@ -152,6 +156,13 @@ export function AssignScopeConfirmModal({
         <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{routeLabel}</span>.
         Update permanently also updates the route&apos;s default deliverer for future leaflets.
       </Text>
+      {previousDelivererName ? (
+        <Text size="sm" color="secondary">
+          This route is currently assigned to {previousDelivererName}. Continuing will move it
+          to {personName} for this issue.
+        </Text>
+      ) : null}
+      {error ? <div role="alert"><Text size="sm" color="accent">{error}</Text></div> : null}
     </Modal>
   );
 }

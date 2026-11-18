@@ -193,10 +193,15 @@ function applyAssignToDelivererRows(
   person: AssignDelivererPerson,
 ): LeafletDelivererRow[] {
   const deliveryId = row.id;
+  const previousRoute = deliverers
+    .flatMap((deliverer) => deliverer.routes)
+    .find((route) => (route.deliveryId ?? route.id) === deliveryId);
   const routeEntry: LeafletDelivererRouteRow = {
+    ...previousRoute,
     id: row.routeId ?? row.id,
     name: row.name,
-    leafletCount: 0,
+    leafletCount: previousRoute?.leafletCount ?? row.leafletCount ?? 0,
+    routeType: previousRoute?.routeType ?? row.routeType ?? null,
     deliveryId: row.id,
     routeId: row.routeId ?? row.id,
     isSkipped: false,

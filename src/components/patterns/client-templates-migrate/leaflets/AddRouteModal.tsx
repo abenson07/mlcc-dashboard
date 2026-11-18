@@ -1,111 +1,128 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { DeliveryWithRelations } from "hooks";
+import { useRef, useState } from "react";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Text } from "@/components/patterns/primitives/Text";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
 import { saveErrorMessage } from "@/lib/saveErrorMessage";
-
-const MAX_RESULTS = 8;
+import type { LeafletRouteRow } from "@/data/mocks/leaflets";
+import type { AssignDelivererPerson, AssignDelivererScope } from "./leafletDeliveryStatus";
+import { AssignScopeConfirmModal } from "./LeafletRouteActionModals";
+import { routeAssignmentCandidates } from "./routeAssignmentCandidates";
 
 export type AddRouteModalProps = {
-  isOpen: boolean;
-  delivererName: string;
-  openDeliveries: DeliveryWithRelations[];
+  deliverer: AssignDelivererPerson;
+  routes: LeafletRouteRow[];
+  loading?: boolean;
+  loadError?: string | null;
   onClose: () => void;
-  onSelect: (delivery: DeliveryWithRelations) => void | Promise<void>;
+  onAssign: (route: LeafletRouteRow, scope: AssignDelivererScope) => Promise<void>;
 };
 
 export function AddRouteModal({
-  isOpen,
-  delivererName,
-  openDeliveries,
+  deliverer,
+  routes,
+  loading = false,
+  loadError,
   onClose,
-  onSelect,
+  onAssign,
 }: AddRouteModalProps) {
   const [search, setSearch] = useState("");
-  const [selecting, setSelecting] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const busy = useRef(false);
+  const selected = routes.find((route) => route.id === selectedId);
+  const candidates = routeAssignmentCandidates(routes, deliverer.id, search);
 
-  const candidates = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const filtered = q
-      ? openDeliveries.filter((d) => (d.routes?.route_name ?? "").toLowerCase().includes(q))
-      : openDeliveries;
-    return filtered.slice(0, MAX_RESULTS);
-  }, [openDeliveries, search]);
-
-  async function handleSelect(delivery: DeliveryWithRelations) {
-    setSelecting(true);
+  async function assign(scope: AssignDelivererScope) {
+    if (!selected || busy.current) return;
+    busy.current = true;
+    setSubmitting(true);
     setError(null);
     try {
-      await onSelect(delivery);
-      setSearch("");
+      await onAssign(selected, scope);
       onClose();
     } catch (e) {
-      setError(saveErrorMessage(e, { fallback: "Couldn't add the route. Please try again." }));
+      setError(saveErrorMessage(e, { fallback: "Couldn't assign the route. Please try again." }));
     } finally {
-      setSelecting(false);
+      busy.current = false;
+      setSubmitting(false);
     }
+  }
+
+  if (selected) {
+    return (
+      <AssignScopeConfirmModal
+        isOpen
+        personName={deliverer.name}
+        routeLabel={selected.name}
+        previousDelivererName={selected.personId ? selected.personName ?? "another deliverer" : null}
+        submitting={submitting}
+        error={error}
+        onCancel={() => {
+          if (busy.current) return;
+          setSelectedId(null);
+          setError(null);
+        }}
+        onThisRouteOnly={() => assign("this-route")}
+        onPermanent={() => assign("permanent")}
+      />
+    );
   }
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen
       onClose={onClose}
-      title={`Add route for ${delivererName}`}
+      title={`Add route for ${deliverer.name}`}
       width={420}
-      footer={
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button label="Cancel" variant="ghost" onClick={onClose} />
-        </div>
-      }
+      footer={<Button label="Cancel" variant="ghost" onClick={onClose} />}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <TextInput label="Search open routes" value={search} onChange={setSearch} />
-        {openDeliveries.length === 0 ? (
-          <Text size="sm" color="secondary">
-            No open routes available.
-          </Text>
+        <TextInput label="Search all routes" value={search} onChange={setSearch} autoFocus />
+        <Text size="sm" color="secondary">
+          Showing open routes. Search to include routes assigned to other deliverers.
+        </Text>
+        {loadError ? (
+          <div role="alert"><Text size="sm" color="accent">{loadError}</Text></div>
+        ) : loading ? (
+          <Text size="sm" color="secondary">Loading routes…</Text>
         ) : candidates.length === 0 ? (
           <Text size="sm" color="secondary">
-            No matching routes.
+            {search.trim() ? "No matching routes." : "No open routes. Search to reassign an existing route."}
           </Text>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {candidates.map((d) => (
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 320, overflowY: "auto" }}>
+            {candidates.map((route) => (
               <button
-                key={d.id}
+                key={route.id}
                 type="button"
-                disabled={selecting}
-                onClick={() => {
-                  void handleSelect(d);
-                }}
+                onClick={() => setSelectedId(route.id)}
                 style={{
-                  all: "unset",
                   boxSizing: "border-box",
-                  cursor: selecting ? "default" : "pointer",
+                  cursor: "pointer",
                   padding: "10px 12px",
                   borderRadius: 6,
                   border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+                  background: "var(--linear-color-canvas)",
                   color: "var(--linear-color-ink)",
+                  fontFamily: "inherit",
                   fontSize: 13,
+                  textAlign: "left",
                 }}
               >
-                {d.routes?.route_name ?? "—"}
-                {d.routes?.route_type ? (
-                  <span style={{ color: "var(--linear-color-ink-subtle)" }}>
-                    {" "}
-                    · {d.routes.route_type}
-                  </span>
-                ) : null}
+                {route.name}
+                <span style={{ display: "block", color: "var(--linear-color-ink-subtle)", fontSize: 12 }}>
+                  {route.personId
+                    ? `Assigned to ${route.personName ?? "another deliverer"}${route.status === "skipped" ? " · needs cover" : ""}`
+                    : "Open route"}
+                </span>
               </button>
             ))}
           </div>
         )}
-        {error ? <Text size="sm" color="accent">{error}</Text> : null}
       </div>
     </Modal>
   );
