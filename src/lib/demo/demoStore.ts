@@ -166,12 +166,21 @@ export function patchDemoEntity(
   id: string,
   patch: Record<string, unknown>,
 ): DemoStore {
+  return patchDemoEntities(kind, [{ id, patch }]);
+}
+
+export function patchDemoEntities(
+  kind: DemoCollectionKind,
+  changes: { id: string; patch: Record<string, unknown> }[],
+): DemoStore {
   const store = readDemoStore();
   const bucket = store.buckets[kind];
-  if (bucket.entities[id]) {
-    bucket.entities[id] = { ...bucket.entities[id], ...patch };
-  } else {
-    bucket.patches[id] = { ...bucket.patches[id], ...patch };
+  for (const { id, patch } of changes) {
+    if (bucket.entities[id]) {
+      bucket.entities[id] = { ...bucket.entities[id], ...patch };
+    } else {
+      bucket.patches[id] = { ...bucket.patches[id], ...patch };
+    }
   }
   writeDemoStore(store);
   return store;

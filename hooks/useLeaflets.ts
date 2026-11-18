@@ -55,9 +55,11 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
   });
 
   const activateMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, expectedActiveId }: { id: string; expectedActiveId: string | null }) => {
       const res = await fetch(`${getApiBase()}/api/leaflets/${id}/activate`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expectedActiveId }),
       });
       const data = (await res.json()) as { error?: string; leaflet?: Leaflets };
       if (!res.ok) throw new Error(data.error ?? "Failed to activate");
@@ -69,8 +71,9 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
   });
 
   const closeMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`${getApiBase()}/api/leaflets/${id}/close`, {
+    mutationFn: async ({ id, activateNext }: { id: string; activateNext?: boolean }) => {
+      const query = activateNext === undefined ? "" : `?activateNext=${activateNext}`;
+      const res = await fetch(`${getApiBase()}/api/leaflets/${id}/close${query}`, {
         method: "POST",
       });
       const data = (await res.json()) as { error?: string; closed?: Leaflets };
@@ -115,8 +118,10 @@ export function useLeaflets(options: { autoFetch?: boolean } = {}) {
         tierOverrides?: { name: string; amount: number; quantity: number }[];
       },
     ) => createMutation.mutateAsync(input),
-    activate: (id: string) => activateMutation.mutateAsync(id),
-    close: (id: string) => closeMutation.mutateAsync(id),
+    activate: (id: string, options?: { expectedActiveId: string | null }) =>
+      activateMutation.mutateAsync({ id, expectedActiveId: options?.expectedActiveId ?? null }),
+    close: (id: string, options?: { activateNext?: boolean }) =>
+      closeMutation.mutateAsync({ id, activateNext: options?.activateNext }),
     update: (id: string, patch: LeafletsUpdate) => updateMutation.mutateAsync({ id, patch }),
   };
 }
