@@ -17,6 +17,7 @@ import {
   snapshotCommSchedule,
 } from "@/lib/leaflets/comm/commSchedule";
 import { LeafletsListPage } from "./LeafletsListPage";
+import { LeafletStatusGuide } from "./LeafletStatusGuide";
 import { NewLeafletModal, type NewLeafletDraft } from "./NewLeafletModal";
 
 export function LeafletsDemo() {
@@ -76,10 +77,13 @@ export function LeafletsDemo() {
             minHeight: 0,
             overflow: "auto",
             boxSizing: "border-box",
-            padding: "32px 24px 64px",
+            padding: "32px 24px 0",
           }}
         >
-          <LeafletsListPage onCreateClick={() => setIsAddOpen(true)} />
+          <div style={{ minHeight: "100%", display: "flex", flexDirection: "column", gap: 24 }}>
+            <LeafletsListPage onCreateClick={() => setIsAddOpen(true)} />
+            <LeafletStatusGuide />
+          </div>
         </div>
       </FoundationLayout>
 
