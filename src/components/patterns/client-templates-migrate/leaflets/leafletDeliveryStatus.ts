@@ -7,6 +7,7 @@ import type {
 } from "@/data/mocks/leaflets";
 import { sampleDeliverers } from "@/data/mocks/leaflets";
 import { sampleAllRouteRows } from "./adapters";
+import { withDemoContacts } from "./delivererPeople";
 
 export type LeafletDeliveryStatusAction = "confirm" | "invite" | "decline" | "skip" | "remove";
 
@@ -245,7 +246,7 @@ export function applyDemoLeafletDelivererAssign(
     listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers;
 
   const routes = currentRoutes.map((r) => (r.id === row.id ? applyAssignToRouteRow(r, person) : r));
-  const deliverers = applyAssignToDelivererRows(currentDeliverers, row, person);
+  const deliverers = withDemoContacts(applyAssignToDelivererRows(currentDeliverers, row, person));
 
   writeDemoScoped("leafletRoutes", scopeKey, routes);
   writeDemoScoped("leafletDeliverers", scopeKey, deliverers);

@@ -164,6 +164,8 @@ export function usePeople(options: UsePeopleOptions = {}): UsePeopleReturn {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["people"] });
+      queryClient.invalidateQueries({ queryKey: ["deliveries"] });
+      queryClient.invalidateQueries({ queryKey: ["routes"] });
     },
   });
 

@@ -16,6 +16,7 @@ import type { DeliveriesUpdate } from "@/types/database";
 import { summarizePersonSends, type CommSend } from "@/lib/leaflets/comm/commSends";
 import { deliveriesToDelivererRows, sampleAllRouteRows } from "./adapters";
 import { DeliverersBulkBar } from "./DeliverersBulkBar";
+import { withDemoContacts } from "./delivererPeople";
 import {
   applyLeafletDeliveryStatus,
   deliveryIdsForDeliverer,
@@ -184,7 +185,7 @@ export function LeafletDeliverersPage({
     if (!isDemo) return;
     const load = () => {
       setLocalDeliverers(
-        listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
+        withDemoContacts(listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers),
       );
     };
     load();

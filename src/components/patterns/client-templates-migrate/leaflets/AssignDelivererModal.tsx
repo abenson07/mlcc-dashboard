@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { usePeople } from "hooks";
+import { useEffect, useRef, useState } from "react";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+import { useDemoGuard, usePeople } from "hooks";
 import { Modal } from "@/components/patterns/shared/Modal";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Text } from "@/components/patterns/primitives/Text";
 import { TextInput } from "@/components/patterns/primitives/TextInput";
-import { sampleDeliverers, type LeafletRouteRow } from "@/data/mocks/leaflets";
+import type { LeafletRouteRow } from "@/data/mocks/leaflets";
+import { DUPLICATE_PERSON_EMAIL, saveErrorMessage } from "@/lib/saveErrorMessage";
+import {
+  createDelivererPerson,
+  demoDelivererPeople,
+  type NewDelivererInput,
+} from "./delivererPeople";
 import type { AssignDelivererPerson, AssignDelivererScope } from "./leafletDeliveryStatus";
 import { AssignScopeConfirmModal } from "./LeafletRouteActionModals";
 
@@ -103,89 +111,184 @@ export function AssignDelivererModal({
   onSelect,
 }: AssignDelivererModalProps) {
   const [search, setSearch] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState<NewDelivererInput>({
+    name: "",
+    email: "",
+    address: "",
+    phone: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const [error, setError] = useState<string | null>(null);
+  const { enabled: demoGuard } = useDemoGuard();
+  const isDemo = demo || demoGuard;
   const trimmed = search.trim();
 
-  const { people, loading } = usePeople({
-    autoFetch: !demo,
+  const { people, loading, error: peopleError, create } = usePeople({
+    autoFetch: !isDemo && isOpen,
   });
 
   useEffect(() => {
-    if (!isOpen) setSearch("");
+    if (!isOpen) {
+      setSearch("");
+      setCreating(false);
+      setError(null);
+      setDraft({ name: "", email: "", address: "", phone: "" });
+    }
   }, [isOpen]);
 
-  const candidates = useMemo((): AssignDelivererPerson[] => {
-    const source: AssignDelivererPerson[] = demo
-      ? sampleDeliverers.map((d) => ({ id: d.id, name: d.name, email: d.email }))
-      : people.map((p) => ({ id: p.id, name: p.full_name, email: p.email }));
-    const q = trimmed.toLowerCase();
-    return source
-      .filter((p) => p.id !== excludePersonId)
-      .filter((p) => {
-        if (!q) return true;
-        return (
-          p.name.toLowerCase().includes(q) || (p.email ?? "").toLowerCase().includes(q)
-        );
-      })
-      .slice(0, MAX_RESULTS);
-  }, [demo, excludePersonId, people, trimmed]);
+  const source: AssignDelivererPerson[] = (isDemo ? demoDelivererPeople() : people).map(
+    (p) => ({ id: p.id, name: p.full_name, email: p.email }),
+  );
+  const q = trimmed.toLowerCase();
+  const candidates = source
+    .filter((p) => p.id !== excludePersonId)
+    .filter(
+      (p) => !q || p.name.toLowerCase().includes(q) || (p.email ?? "").toLowerCase().includes(q),
+    )
+    .slice(0, MAX_RESULTS);
+
+  async function handleCreate() {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
+    setError(null);
+    try {
+      const person = await createDelivererPerson(draft, { demo: isDemo, create });
+      toast.success(
+        isDemo ? "Deliverer created — demo mode, saved locally only" : "Deliverer created",
+      );
+      onSelect({ id: person.id, name: person.full_name, email: person.email });
+    } catch (e) {
+      setError(
+        saveErrorMessage(e, {
+          fallback: "Couldn't create deliverer. Please try again.",
+          duplicate: DUPLICATE_PERSON_EMAIL,
+        }),
+      );
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
+    }
+  }
+
+  function close() {
+    if (!savingRef.current) onClose();
+  }
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
-      title={title}
+      onClose={close}
+      title={creating ? "Create new deliverer" : title}
       width={420}
       footer={
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button label="Cancel" variant="ghost" onClick={onClose} />
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+          <Button
+            label={creating ? "Back" : "Cancel"}
+            variant="ghost"
+            disabled={saving}
+            onClick={creating ? () => { setCreating(false); setError(null); } : close}
+          />
+          {creating ? (
+            <Button
+              label={saving ? "Creating…" : "Create deliverer"}
+              variant="primary"
+              disabled={saving}
+              onClick={() => void handleCreate()}
+            />
+          ) : null}
         </div>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <Text size="sm" color="secondary">
-          Choose a deliverer for{" "}
-          <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{routeLabel}</span>.
-        </Text>
-        <TextInput
-          label="Search people"
-          value={search}
-          onChange={setSearch}
-          autoFocus
-          placeholder="Name or email"
-        />
-        {loading && !demo && people.length === 0 ? (
+      {creating ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <Text size="sm" color="secondary">
-            Loading people…
+            Create a person, then choose how to assign them. No email will be sent.
           </Text>
-        ) : candidates.length === 0 && !loading ? (
-          <Text size="sm" color="secondary">
-            No matching people.
-          </Text>
-        ) : (
-          <div
-            role="listbox"
-            aria-label="People"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              maxHeight: 280,
-              overflow: "auto",
-              padding: 4,
-              borderRadius: 8,
-              border: "var(--linear-border-width) solid var(--linear-color-hairline)",
-              background: "var(--linear-color-canvas)",
-            }}
+          <fieldset
+            disabled={saving}
+            style={{ border: 0, padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}
           >
-            {candidates.map((person) => (
-              <PersonPickRow
-                key={person.id}
-                person={person}
-                onSelect={() => onSelect(person)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+            <TextInput
+              label="Name (required)"
+              value={draft.name}
+              onChange={(name) => setDraft((prev) => ({ ...prev, name }))}
+              autoFocus
+            />
+            <TextInput
+              label="Email (required)"
+              value={draft.email}
+              onChange={(email) => setDraft((prev) => ({ ...prev, email }))}
+            />
+            <TextInput
+              label="Address (optional)"
+              value={draft.address}
+              onChange={(address) => setDraft((prev) => ({ ...prev, address }))}
+            />
+            <TextInput
+              label="Phone (optional)"
+              value={draft.phone}
+              onChange={(phone) => setDraft((prev) => ({ ...prev, phone }))}
+            />
+          </fieldset>
+          {error ? <div role="alert"><Text size="sm" color="accent">{error}</Text></div> : null}
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <Text size="sm" color="secondary">
+            Choose a deliverer for{" "}
+            <span style={{ color: "var(--linear-color-ink)", fontWeight: 500 }}>{routeLabel}</span>.
+          </Text>
+          <TextInput
+            label="Search people"
+            value={search}
+            onChange={setSearch}
+            autoFocus
+            placeholder="Name or email"
+          />
+          <Button
+            label="Create new deliverer"
+            icon={<Plus size={14} />}
+            onClick={() => setCreating(true)}
+          />
+          {peopleError && !isDemo ? (
+            <div role="alert"><Text size="sm" color="accent">{peopleError}</Text></div>
+          ) : loading && !isDemo && people.length === 0 ? (
+            <Text size="sm" color="secondary">
+              Loading people…
+            </Text>
+          ) : candidates.length === 0 && !loading ? (
+            <Text size="sm" color="secondary">
+              No matching people.
+            </Text>
+          ) : (
+            <div
+              role="listbox"
+              aria-label="People"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                maxHeight: 280,
+                overflow: "auto",
+                padding: 4,
+                borderRadius: 8,
+                border: "var(--linear-border-width) solid var(--linear-color-hairline)",
+                background: "var(--linear-color-canvas)",
+              }}
+            >
+              {candidates.map((person) => (
+                <PersonPickRow
+                  key={person.id}
+                  person={person}
+                  onSelect={() => onSelect(person)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </Modal>
   );
 }
