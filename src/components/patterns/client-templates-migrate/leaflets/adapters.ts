@@ -8,6 +8,7 @@ import type {
   LeafletSummary,
 } from "@/data/mocks/leaflets";
 import { sampleDeliverers, sampleOpenRoutes, sampleSkippedRoutes } from "@/data/mocks/leaflets";
+import { personContact } from "./delivererPeople";
 
 export function toLeafletSummary(row: Leaflets): LeafletSummary {
   return {
@@ -42,9 +43,7 @@ export function deliveriesToDelivererRows(deliveries: DeliveryWithRelations[]): 
       const person = rows[0]!.people!;
       return {
         id: personId,
-        name: person.full_name,
-        email: person.email ?? "",
-        address: person.address ?? "Address not on file",
+        ...personContact(person),
         status: responseToStatus(rows.map((r) => r.response)),
         routes: rows.map(
           (r): LeafletDelivererRouteRow => ({

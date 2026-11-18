@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MapPin, MoreHorizontal } from "lucide-react";
+import { Mail, MapPin, MoreHorizontal, Phone } from "lucide-react";
 import { toast } from "sonner";
-import { useDeliveries, useDemoGuard } from "hooks";
+import { useDeliveries, useDemoGuard, usePeople } from "hooks";
 import { SideContentSection, SideContentField } from "@/components/patterns/foundation/side-content";
+import { EditableContactField } from "./EditableContactField";
+import { updateDelivererContact, type DelivererContactField } from "./delivererPeople";
 import { Text } from "@/components/patterns/primitives/Text";
 import { Button } from "@/components/patterns/primitives/Button";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
@@ -34,6 +36,7 @@ export function DelivererPersonPanel({
 }: DelivererPersonPanelProps) {
   const { enabled: demoGuard } = useDemoGuard();
   const isDemo = demo || demoGuard;
+  const { update: updatePerson } = usePeople({ autoFetch: false });
   const scopeKey = leafletId || "default";
   const { update, refetch } = useDeliveries(leafletId, {
     enabled: !isDemo && Boolean(leafletId),
@@ -119,6 +122,11 @@ export function DelivererPersonPanel({
 
   const allIds = deliveryIdsForDeliverer(deliverer);
 
+  async function saveContact(field: DelivererContactField, value: string) {
+    await updateDelivererContact(deliverer.id, field, value, { demo: isDemo, update: updatePerson });
+    if (!isDemo) await refetch();
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20, padding: "8px 4px" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
@@ -185,13 +193,23 @@ export function DelivererPersonPanel({
         </Dropdown>
       </div>
       <SideContentSection title="Contact">
-        <SideContentField
+        <EditableContactField
           icon={<Mail size={16} strokeWidth={1.75} />}
-          label={deliverer.email || "—"}
+          label="Email"
+          value={deliverer.email}
+          onCommit={(value) => saveContact("email", value)}
         />
-        <SideContentField
+        <EditableContactField
           icon={<MapPin size={16} strokeWidth={1.75} />}
-          label={deliverer.address || "—"}
+          label="Address"
+          value={deliverer.address}
+          onCommit={(value) => saveContact("address", value)}
+        />
+        <EditableContactField
+          icon={<Phone size={16} strokeWidth={1.75} />}
+          label="Phone"
+          value={deliverer.phone ?? ""}
+          onCommit={(value) => saveContact("phone", value)}
         />
       </SideContentSection>
       <SideContentSection title="Routes on this leaflet">

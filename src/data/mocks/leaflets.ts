@@ -198,6 +198,7 @@ export type LeafletDelivererRow = {
   name: string;
   email: string;
   address: string;
+  phone?: string;
   status: "Confirmed" | "Invited" | "Declined";
   routes: LeafletDelivererRouteRow[];
 };

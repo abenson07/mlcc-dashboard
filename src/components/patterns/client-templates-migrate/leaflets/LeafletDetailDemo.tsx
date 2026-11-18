@@ -33,6 +33,7 @@ import { DEMO_STORE_EVENT, listDemoScoped, patchDemoEntity } from "@/lib/demo/de
 import { leafletCommSettingsFromDefs, snapshotCommSchedule } from "@/lib/leaflets/comm/commSchedule";
 import { latestSendPerStep, type CommSend } from "@/lib/leaflets/comm/commSends";
 import { deliveriesToDelivererRows, deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
+import { withDemoContacts } from "./delivererPeople";
 import {
   sampleDeliverers,
   sampleLeafletDetail,
@@ -145,7 +146,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
     const load = () => {
       setDemoRoutes(listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows());
       setDemoDeliverers(
-        listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers,
+        withDemoContacts(listDemoScoped<LeafletDelivererRow>("leafletDeliverers", scopeKey) ?? sampleDeliverers),
       );
     };
     load();
@@ -348,6 +349,7 @@ export function LeafletDetailDemo({ navigation }: LeafletDetailDemoProps = {}) {
           ) : resolvedDeliverer ? (
             <OutlinedPanel onClose={closeSidePanel}>
               <DelivererPersonPanel
+                key={resolvedDeliverer.id}
                 deliverer={resolvedDeliverer}
                 leafletId={leafletId || leaflet.id}
                 demo={demo}
