@@ -6,6 +6,7 @@ import { Text } from "@/components/patterns/primitives/Text";
 
 export type SideContentSectionProps = {
   title: string;
+  action?: ReactNode;
   children: ReactNode;
 };
 
@@ -14,15 +15,19 @@ export type SideContentSectionProps = {
  */
 export function SideContentSection({
   title,
+  action,
   children,
 }: SideContentSectionProps) {
   return (
     <List
       density="compact"
       header={
-        <Text type="label" color="secondary">
-          {title}
-        </Text>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <Text type="label" color="secondary">
+            {title}
+          </Text>
+          {action}
+        </div>
       }
     >
       {children}

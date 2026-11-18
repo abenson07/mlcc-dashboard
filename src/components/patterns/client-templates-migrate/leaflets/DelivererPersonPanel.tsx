@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MapPin, MoreHorizontal, Phone } from "lucide-react";
+import { Mail, MapPin, MoreHorizontal, Phone, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useDeliveries, useDemoGuard, usePeople } from "hooks";
+import { useDeliveries, useDemoGuard, usePeople, useRoutes } from "hooks";
 import { SideContentSection, SideContentField } from "@/components/patterns/foundation/side-content";
 import { EditableContactField } from "./EditableContactField";
 import { updateDelivererContact, type DelivererContactField } from "./delivererPeople";
@@ -12,13 +12,19 @@ import { Button } from "@/components/patterns/primitives/Button";
 import { Dropdown, DropdownItem } from "@/components/patterns/shared/dropdown";
 import { IconButton } from "@/components/patterns/shared/IconButton";
 import type { LeafletDelivererRouteRow, LeafletDelivererRow } from "@/data/mocks/leaflets";
+import { listDemoScoped } from "@/lib/demo/demoStore";
+import type { LeafletRouteRow } from "@/data/mocks/leaflets";
+import { AddRouteModal } from "./AddRouteModal";
+import { deliveriesToRouteRows, sampleAllRouteRows } from "./adapters";
 import {
   RemoveRoutesConfirmModal,
   SkipRouteConfirmModal,
 } from "./LeafletRouteActionModals";
 import {
   applyLeafletDeliveryStatus,
+  applyLeafletDelivererAssign,
   deliveryIdsForDeliverer,
+  type AssignDelivererScope,
 } from "./leafletDeliveryStatus";
 
 export type DelivererPersonPanelProps = {
@@ -38,9 +44,11 @@ export function DelivererPersonPanel({
   const isDemo = demo || demoGuard;
   const { update: updatePerson } = usePeople({ autoFetch: false });
   const scopeKey = leafletId || "default";
-  const { update, refetch } = useDeliveries(leafletId, {
+  const { deliveries, loading, error: deliveriesError, update, refetch } = useDeliveries(leafletId, {
     enabled: !isDemo && Boolean(leafletId),
   });
+  const { update: updateRoute } = useRoutes({ autoFetch: false });
+  const [addRouteOpen, setAddRouteOpen] = useState(false);
   const [skipTarget, setSkipTarget] = useState<{ label: string; deliveryIds: string[] } | null>(
     null,
   );
@@ -121,6 +129,29 @@ export function DelivererPersonPanel({
   }
 
   const allIds = deliveryIdsForDeliverer(deliverer);
+  const routeRows = isDemo
+    ? listDemoScoped<LeafletRouteRow>("leafletRoutes", scopeKey) ?? sampleAllRouteRows()
+    : deliveriesToRouteRows(deliveries);
+
+  async function assignRoute(row: LeafletRouteRow, scope: AssignDelivererScope) {
+    await applyLeafletDelivererAssign({
+      isDemo,
+      scopeKey,
+      row,
+      person: { id: deliverer.id, name: deliverer.name, email: deliverer.email || null },
+      scope,
+      updateDelivery: update,
+      updateRoute,
+      refetch,
+    });
+    toast.success(
+      isDemo
+        ? `${row.name} assigned — demo mode, saved locally only`
+        : scope === "permanent"
+          ? `${deliverer.name} set as the default deliverer for ${row.name}`
+          : `${row.name} assigned to ${deliverer.name} for this issue`,
+    );
+  }
 
   async function saveContact(field: DelivererContactField, value: string) {
     await updateDelivererContact(deliverer.id, field, value, { demo: isDemo, update: updatePerson });
@@ -212,7 +243,18 @@ export function DelivererPersonPanel({
           onCommit={(value) => saveContact("phone", value)}
         />
       </SideContentSection>
-      <SideContentSection title="Routes on this leaflet">
+      <SideContentSection
+        title="Routes on this leaflet"
+        action={
+          <IconButton
+            label="Add route"
+            variant="ghost"
+            size="sm"
+            icon={<Plus size={16} strokeWidth={1.75} />}
+            onClick={() => setAddRouteOpen(true)}
+          />
+        }
+      >
         {deliverer.routes.map((route) => (
           <DelivererRouteRow
             key={route.id}
@@ -253,6 +295,16 @@ export function DelivererPersonPanel({
           }}
         />
       </div>
+      {addRouteOpen ? (
+        <AddRouteModal
+          deliverer={{ id: deliverer.id, name: deliverer.name, email: deliverer.email || null }}
+          routes={routeRows}
+          loading={!isDemo && loading}
+          loadError={isDemo ? null : deliveriesError}
+          onClose={() => setAddRouteOpen(false)}
+          onAssign={assignRoute}
+        />
+      ) : null}
       <SkipRouteConfirmModal
         isOpen={skipTarget != null}
         routeLabel={skipTarget?.label ?? ""}
